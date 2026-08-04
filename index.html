@@ -515,15 +515,15 @@
           <tr><th>Service</th><th style="text-align:right;">Starting Price</th></tr>
         </thead>
         <tbody>
-          <tr><td>Diagnostic Fee</td><td class="amt">$2,500</td></tr>
+          <tr><td>Diagnostic Fee</td><td class="amt">$1,500</td></tr>
           <tr><td>Virus / Malware Removal</td><td class="amt">$3,000</td></tr>
-          <tr><td>Operating System Reinstall</td><td class="amt">$5,000</td></tr>
+          <tr><td>Operating System Reinstall</td><td class="amt">$4,500</td></tr>
           <tr><td>Software / Application Troubleshooting</td><td class="amt">$2,000</td></tr>
           <tr><td>Remote Access Support (per session)</td><td class="amt">$2,000</td></tr>
           <tr><td>Hardware Repair Labor (per hour)</td><td class="amt">$2,500</td></tr>
           <tr><td>Data Backup / Recovery</td><td class="amt">$3,500</td></tr>
-          <tr><td>Pickup Service</td><td class="amt">$1,500</td></tr>
-          <tr><td>Drop-off / Delivery Service</td><td class="amt">$1,500</td></tr>
+          <tr><td>Pickup Service</td><td class="amt">$1,000</td></tr>
+          <tr><td>Drop-off / Delivery Service</td><td class="amt">$1,000</td></tr>
         </tbody>
       </table>
       <p class="price-note">Prices shown are starting rates and may vary with issue complexity or parts required. You'll always get a quote before work begins.</p>
@@ -545,20 +545,20 @@
           <p>One remote support session to fix an application or operating system issue.</p>
           <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
             <input type="hidden" name="cmd" value="_xclick">
-            <input type="hidden" name="business" value="ajstyleg@gmail.com">
+            <input type="hidden" name="business" value="youremail@example.com">
             <input type="hidden" name="item_name" value="StylesPC — Remote Access Support Session">
             <input type="hidden" name="amount" value="2000">
-            <input type="hidden" name="currency_code" value="JMD">
+            <input type="hidden" name="currency_code" value="USD">
             <button type="submit" class="btn btn-amber">Pay for Remote Session</button>
           </form>
         </div>
         <div class="pay-card">
           <h3>Pickup / Drop-off Service</h3>
-          <div class="amt">$1,500</div>
+          <div class="amt">$1,000</div>
           <p>Have your device collected from or delivered back to your address.</p>
           <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
             <input type="hidden" name="cmd" value="_xclick">
-            <input type="hidden" name="business" value="ajstyleg@gmail.com">
+            <input type="hidden" name="business" value="youremail@example.com">
             <input type="hidden" name="item_name" value="StylesPC — Pickup or Drop-off Service">
             <input type="hidden" name="amount" value="1000">
             <input type="hidden" name="currency_code" value="USD">
@@ -580,13 +580,13 @@
           <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
         </div>
         <div class="contact-info">
-          <div class="info-row"><span class="k">Email</span><span>ajstyleg@gmail.com</span></div>
-          <div class="info-row"><span class="k">Phone</span><span>(1876)334-1156</span></div>
+          <div class="info-row"><span class="k">Email</span><span>[your email]</span></div>
+          <div class="info-row"><span class="k">Phone</span><span>[your phone]</span></div>
           <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
           <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop-off within local area</span></div>
         </div>
       </div>
-      <form class="book" id="bookForm">
+      <form class="book" id="bookForm" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
         <div class="field-row">
           <div class="field">
             <label for="name">Full name</label>
@@ -616,8 +616,9 @@
           <label for="issue">Describe the issue</label>
           <textarea id="issue" name="issue" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Send Booking Request</button>
-        <p class="form-note">This opens your email app with the details filled in, addressed to StylesPC.</p>
+        <input type="hidden" name="_subject" value="New Repair Booking Request — StylesPC">
+        <button type="submit" class="btn btn-primary" id="bookSubmitBtn">Send Booking Request</button>
+        <p class="form-note">Your request goes straight to StylesPC — no email app required.</p>
         <p id="formStatus" role="status"></p>
       </form>
     </div>
@@ -632,7 +633,7 @@
       <p>Computer &amp; laptop repair — pickup, drop-off &amp; remote support.</p>
     </div>
     <div>
-      <p> Email: ajstyleg@gmail.com · Phone: (1876)334-1156</p>
+      <p>[your email] · [your phone]</p>
     </div>
   </div>
   <div class="wrap">
@@ -643,25 +644,38 @@
 <script>
   document.getElementById('bookForm').addEventListener('submit', function(e){
     e.preventDefault();
-    var name = document.getElementById('name').value;
-    var contact = document.getElementById('contactMethod').value;
-    var device = document.getElementById('device').value;
-    var serviceType = document.getElementById('serviceType').value;
-    var issue = document.getElementById('issue').value;
-
-    var subject = encodeURIComponent('Repair Request — ' + device);
-    var body = encodeURIComponent(
-      'Name: ' + name + '\n' +
-      'Contact: ' + contact + '\n' +
-      'Device: ' + device + '\n' +
-      'Preferred service: ' + serviceType + '\n' +
-      'Issue:\n' + issue
-    );
-    window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-
+    var form = e.target;
     var status = document.getElementById('formStatus');
-    status.textContent = 'Opening your email app to send this request…';
-    status.classList.add('ok');
+    var btn = document.getElementById('bookSubmitBtn');
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+    status.classList.remove('ok', 'err');
+    status.textContent = '';
+
+    fetch(form.action, {
+      method: 'POST',
+      body: new FormData(form),
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(function(response){
+      if (response.ok) {
+        status.textContent = "Thanks — your request has been sent. We'll get back to you shortly.";
+        status.classList.add('ok');
+        form.reset();
+      } else {
+        status.textContent = "Something went wrong sending your request. Please try again or contact us directly.";
+        status.classList.add('err');
+      }
+    })
+    .catch(function(){
+      status.textContent = "Something went wrong sending your request. Please check your connection and try again.";
+      status.classList.add('err');
+    })
+    .finally(function(){
+      btn.disabled = false;
+      btn.textContent = 'Send Booking Request';
+    });
   });
 </script>
 
