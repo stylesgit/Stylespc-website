@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StylesPC — Computer &amp; Laptop Repair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EFE7;
+    --paper-2:#EAE3D3;
+    --ink:#1F2421;
+    --ink-soft:#4A4F49;
+    --teal:#2F6F63;
+    --teal-dark:#204b43;
+    --amber:#C97A2B;
+    --rule:#C9C2B2;
+    --white:#FFFDF8;
+    --radius:2px;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--ink);
+    margin:0 0 .4em 0;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+  :focus-visible{outline:3px solid var(--amber); outline-offset:2px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  header.site{
+    position:sticky; top:0; z-index:40;
+    background:rgba(243,239,231,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--rule);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk'; font-weight:700; font-size:1.25rem;
+    text-decoration:none;
+  }
+  .brand .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 0 3px rgba(47,111,99,0.18);
+  }
+  .navlinks{display:flex; gap:28px; list-style:none; margin:0; padding:0;}
+  .navlinks a{
+    text-decoration:none; font-size:.92rem; font-weight:500; color:var(--ink-soft);
+    border-bottom:2px solid transparent; padding-bottom:2px;
+    transition:color .15s, border-color .15s;
+  }
+  .navlinks a:hover{color:var(--ink); border-color:var(--amber);}
+  .nav-cta{
+    background:var(--ink); color:var(--white); text-decoration:none;
+    padding:10px 18px; border-radius:var(--radius); font-weight:600; font-size:.88rem;
+    font-family:'IBM Plex Mono'; letter-spacing:.02em;
+  }
+  .navtoggle{display:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:76px 0 96px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:56px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono'; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--teal-dark); background:rgba(47,111,99,0.09);
+    padding:6px 12px; border-radius:20px; margin-bottom:22px;
+  }
+  .eyebrow::before{content:"●"; color:var(--teal); font-size:.6rem;}
+  .hero h1{
+    font-size:clamp(2.3rem, 4.2vw, 3.4rem);
+    line-height:1.05;
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--teal-dark);
+    background:linear-gradient(transparent 62%, rgba(201,122,43,0.28) 0);
+  }
+  .hero p.lead{
+    font-size:1.08rem; color:var(--ink-soft); max-width:46ch; margin:18px 0 30px;
+  }
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:13px 22px; border-radius:var(--radius); font-weight:600; font-size:.95rem;
+    text-decoration:none; border:1px solid transparent; cursor:pointer;
+    font-family:'IBM Plex Sans';
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--teal); color:var(--white);}
+  .btn-primary:hover{background:var(--teal-dark); box-shadow:0 8px 20px rgba(47,111,99,.25);}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--ink);}
+  .btn-ghost:hover{background:var(--ink); color:var(--white);}
+  .btn-amber{background:var(--amber); color:var(--white);}
+  .btn-amber:hover{background:#a9631e; box-shadow:0 8px 20px rgba(201,122,43,.28);}
+
+  /* ---------- SIGNATURE: SERVICE TAG TICKET ---------- */
+  .ticket-wrap{display:flex; justify-content:center;}
+  .ticket{
+    background:var(--white);
+    width:100%; max-width:360px;
+    border:1.5px solid var(--ink);
+    border-radius:10px;
+    padding:26px 24px 22px;
+    position:relative;
+    box-shadow:10px 12px 0 rgba(31,36,33,0.08);
+    animation:stampIn .55s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  @keyframes stampIn{
+    0%{opacity:0; transform:scale(.92) rotate(-3deg);}
+    100%{opacity:1; transform:scale(1) rotate(-1.2deg);}
+  }
+  .ticket::before, .ticket::after{
+    content:""; position:absolute; width:22px; height:22px;
+    background:var(--paper); border:1.5px solid var(--ink); border-radius:50%;
+    top:50%; transform:translateY(-50%);
+  }
+  .ticket::before{left:-11px;}
+  .ticket::after{right:-11px;}
+  .ticket-perf{
+    border-top:2px dashed var(--rule);
+    margin:16px 0;
+  }
+  .ticket-row{display:flex; justify-content:space-between; margin:9px 0; font-size:.86rem;}
+  .ticket-row .k{color:var(--ink-soft);}
+  .ticket-row .v{font-family:'IBM Plex Mono'; font-weight:600;}
+  .ticket-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .ticket-id{font-family:'IBM Plex Mono'; font-size:.78rem; color:var(--ink-soft);}
+  .ticket-title{font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;}
+  .status-pill{
+    display:inline-block; font-family:'IBM Plex Mono'; font-size:.72rem; font-weight:600;
+    letter-spacing:.04em; padding:4px 10px; border-radius:20px;
+    background:rgba(47,111,99,0.12); color:var(--teal-dark);
+    border:1px solid rgba(47,111,99,0.35);
+  }
+  .stamp{
+    position:absolute; bottom:18px; right:20px;
+    font-family:'Space Grotesk'; font-weight:700; font-size:.85rem;
+    color:var(--amber); border:2px solid var(--amber); border-radius:6px;
+    padding:4px 10px; transform:rotate(-8deg); opacity:.9;
+    letter-spacing:.05em;
+  }
+
+  /* ---------- SECTION SHELLS ---------- */
+  section{padding:88px 0;}
+  section.alt{background:var(--paper-2); border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .section-head .eyebrow{margin-bottom:14px;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem);}
+  .section-head p{color:var(--ink-soft); font-size:1.02rem;}
+
+  /* ---------- SERVICES ---------- */
+  .services-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:20px;
+  }
+  .service-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px;
+    padding:26px 22px; transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .service-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(31,36,33,.08);}
+  .service-icon{
+    width:42px; height:42px; border-radius:8px; background:rgba(47,111,99,.1);
+    display:flex; align-items:center; justify-content:center; margin-bottom:16px;
+    color:var(--teal-dark);
+  }
+  .service-card h3{font-size:1.05rem; margin-bottom:8px;}
+  .service-card p{font-size:.9rem; color:var(--ink-soft); margin:0;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    position:relative;
+  }
+  .step{position:relative; padding:0 20px 0 0;}
+  .step:not(:last-child)::after{
+    content:""; position:absolute; top:22px; right:-2px; width:calc(100% - 44px);
+    border-top:1px dashed var(--rule);
+  }
+  .step-num{
+    font-family:'IBM Plex Mono'; font-weight:600; font-size:.85rem;
+    width:44px; height:44px; border-radius:50%; border:1.5px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; background:var(--white);
+    margin-bottom:16px; position:relative; z-index:1;
+  }
+  .step h3{font-size:1rem; margin-bottom:6px;}
+  .step p{font-size:.87rem; color:var(--ink-soft);}
+
+  /* ---------- WORK / PORTFOLIO ---------- */
+  .work-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .work-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  }
+  .work-thumb{
+    height:150px; display:flex; align-items:center; justify-content:center;
+    background:
+      repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px),
+      var(--paper-2);
+    border-bottom:1px solid var(--rule);
+    color:var(--teal-dark);
+  }
+  .work-body{padding:18px 20px;}
+  .work-body .tag{
+    font-family:'IBM Plex Mono'; font-size:.7rem; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--amber); display:block; margin-bottom:6px;
+  }
+  .work-body h3{font-size:1rem; margin-bottom:6px;}
+  .work-body p{font-size:.87rem; color:var(--ink-soft); margin:0;}
+
+  /* ---------- PRICING ---------- */
+  .price-table{
+    width:100%; border-collapse:collapse; background:var(--white);
+    border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  }
+  .price-table th, .price-table td{
+    text-align:left; padding:14px 20px; border-bottom:1px solid var(--rule); font-size:.92rem;
+  }
+  .price-table th{
+    font-family:'IBM Plex Mono'; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-soft); background:var(--paper-2);
+  }
+  .price-table td.amt{font-family:'IBM Plex Mono'; font-weight:600; text-align:right;}
+  .price-table tr:last-child td{border-bottom:none;}
+  .price-note{font-size:.82rem; color:var(--ink-soft); margin-top:14px;}
+
+  /* ---------- PAY ONLINE ---------- */
+  .pay-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:20px;}
+  .pay-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:26px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .pay-card h3{font-size:1.05rem; margin:0;}
+  .pay-card .amt{font-family:'IBM Plex Mono'; font-size:1.4rem; font-weight:600;}
+  .pay-card p{font-size:.88rem; color:var(--ink-soft); margin:0;}
+  .pay-note{
+    margin-top:22px; font-size:.82rem; color:var(--ink-soft);
+    background:rgba(201,122,43,0.08); border:1px dashed var(--amber);
+    padding:14px 16px; border-radius:6px;
+  }
+
+  /* ---------- CONTACT / BOOKING ---------- */
+  .contact-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:start;
+  }
+  form.book{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:30px;
+    display:grid; gap:16px;
+  }
+  .field{display:grid; gap:6px;}
+  .field label{font-size:.82rem; font-weight:600; color:var(--ink-soft);}
+  .field input, .field select, .field textarea{
+    font-family:'IBM Plex Sans'; font-size:.94rem; padding:11px 12px;
+    border:1px solid var(--rule); border-radius:4px; background:var(--paper);
+    color:var(--ink); width:100%;
+  }
+  .field textarea{resize:vertical; min-height:90px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .form-note{font-size:.8rem; color:var(--ink-soft);}
+  #formStatus{font-size:.88rem; font-weight:600;}
+  #formStatus.ok{color:var(--teal-dark);}
+
+  .contact-info h3{font-size:1.15rem; margin-bottom:10px;}
+  .info-row{display:flex; gap:12px; margin-bottom:16px; font-size:.92rem;}
+  .info-row .k{font-family:'IBM Plex Mono'; color:var(--ink-soft); min-width:88px; font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; padding-top:2px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--ink); color:#DAD6CB; padding:44px 0 30px;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;
+  }
+  footer .brand{color:#fff;}
+  footer .brand .dot{background:var(--amber); box-shadow:0 0 0 3px rgba(201,122,43,.22);}
+  footer p{font-size:.85rem; color:#A9A499; margin:6px 0 0;}
+  footer .fine{
+    width:100%; border-top:1px solid #33372F; margin-top:30px; padding-top:18px;
+    font-size:.78rem; color:#8b8779; text-align:center;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .navlinks{display:none;}
+    .hero .wrap{grid-template-columns:1fr;}
+    .ticket-wrap{margin-top:10px;}
+    .services-grid{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:repeat(2,1fr); row-gap:32px;}
+    .step:nth-child(2)::after{display:none;}
+    .work-grid{grid-template-columns:repeat(2,1fr);}
+    .pay-grid{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    .services-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr;}
+    .step::after{display:none;}
+    .work-grid{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav class="wrap">
+    <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
+    <ul class="navlinks">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#work">Our Work</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#pay">Pay Online</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Book a Repair</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Home-based repair shop · Pickup &amp; drop-off</span>
+        <h1>Your computer's <em>next repair ticket</em> starts here.</h1>
+        <p class="lead">StylesPC collects, diagnoses, and repairs computers and laptops — with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
+        <div class="hero-ctas">
+          <a href="#contact" class="btn btn-primary">Book a Repair</a>
+          <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
+        </div>
+      </div>
+      <div class="ticket-wrap">
+        <div class="ticket">
+          <div class="ticket-top">
+            <div>
+              <div class="ticket-title">Service Tag</div>
+              <div class="ticket-id">#SPC-0148</div>
+            </div>
+            <span class="status-pill">IN PROGRESS</span>
+          </div>
+          <div class="ticket-perf"></div>
+          <div class="ticket-row"><span class="k">Device</span><span class="v">Laptop — 14"</span></div>
+          <div class="ticket-row"><span class="k">Issue</span><span class="v">Won't boot</span></div>
+          <div class="ticket-row"><span class="k">Intake</span><span class="v">Pickup</span></div>
+          <div class="ticket-row"><span class="k">Return</span><span class="v">Drop-off</span></div>
+          <div class="ticket-perf"></div>
+          <div class="ticket-row"><span class="k">Technician</span><span class="v">StylesPC</span></div>
+          <div class="stamp">REPAIRED</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SERVICES ================= -->
+  <section id="services" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">What I do</span>
+        <h2>Repair services, in-shop or from wherever you are</h2>
+        <p>Every device gets a service tag, tracked from intake to return.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h3>Full Diagnosis &amp; Repair</h3>
+          <p>Hardware faults, slow performance, boot failures, and everything in between — diagnosed and fixed at the shop.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17l-4-4 4-4M15 7l4 4-4 4"/></svg>
+          </div>
+          <h3>Remote Access Support</h3>
+          <p>Application errors, operating system issues, and software troubleshooting — fixed live over a remote session.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l3-7h12l3 7v6a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M3 12h18"/></svg>
+          </div>
+          <h3>Pickup Service</h3>
+          <p>Can't get away? I'll collect your device from your address and bring it in for repair.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 8h-3V4H4v13h2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/><path d="M4 13h13v4H8"/></svg>
+          </div>
+          <h3>Drop-off / Delivery</h3>
+          <p>Once your repair's complete, get your device delivered straight back to you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Process</span>
+        <h2>From drop-off to delivery</h2>
+        <p>Four steps, start to finish — you can follow your service tag the whole way.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Request service</h3>
+          <p>Fill out the booking form with your device and issue. You'll get a service tag number.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Send it in</h3>
+          <p>Book a pickup, drop it off yourself, or start a remote session for software/OS issues.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Diagnose &amp; repair</h3>
+          <p>Your device is assessed, repaired, and tested against the reported issue.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Pay &amp; get it back</h3>
+          <p>Pay online, then pick up or arrange drop-off delivery back to you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OUR WORK ================= -->
+  <section id="work" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Our work</span>
+        <h2>Recent tickets, closed out</h2>
+        <p>A sample of the kind of repairs that come through the shop.</p>
+      </div>
+      <div class="work-grid">
+        <div class="work-card">
+          <div class="work-thumb">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/></svg>
+          </div>
+          <div class="work-body">
+            <span class="tag">Hardware</span>
+            <h3>Laptop Screen Replacement</h3>
+            <p>Cracked display swapped and tested — back to full brightness and color.</p>
+          </div>
+        </div>
+        <div class="work-card">
+          <div class="work-thumb">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v6M12 15v6M4.2 6.2l4.2 4.2M15.6 13.6l4.2 4.2M3 12h6M15 12h6M4.2 17.8l4.2-4.2M15.6 10.4l4.2-4.2"/></svg>
+          </div>
+          <div class="work-body">
+            <span class="tag">Software</span>
+            <h3>Virus Removal &amp; Cleanup</h3>
+            <p>Malware removed, startup programs trimmed, and system performance restored.</p>
+          </div>
+        </div>
+        <div class="work-card">
+          <div class="work-thumb">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H4z"/><path d="M9 20h6M12 16v4"/><path d="M8 9l2 2 -2 2M13 13h3"/></svg>
+          </div>
+          <div class="work-body">
+            <span class="tag">OS Reinstall</span>
+            <h3>Fresh OS Install &amp; Data Recovery</h3>
+            <p>Corrupted operating system replaced with a clean install, files recovered first.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PRICING ================= -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Rates</span>
+        <h2>Standard service pricing</h2>
+        <p>The same rates used on your service tag and invoice — final cost depends on the issue.</p>
+      </div>
+      <table class="price-table">
+        <thead>
+          <tr><th>Service</th><th style="text-align:right;">Starting Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Diagnostic Fee</td><td class="amt">$1,500</td></tr>
+          <tr><td>Virus / Malware Removal</td><td class="amt">$3,000</td></tr>
+          <tr><td>Operating System Reinstall</td><td class="amt">$4,500</td></tr>
+          <tr><td>Software / Application Troubleshooting</td><td class="amt">$2,000</td></tr>
+          <tr><td>Remote Access Support (per session)</td><td class="amt">$2,000</td></tr>
+          <tr><td>Hardware Repair Labor (per hour)</td><td class="amt">$2,500</td></tr>
+          <tr><td>Data Backup / Recovery</td><td class="amt">$3,500</td></tr>
+          <tr><td>Pickup Service</td><td class="amt">$1,000</td></tr>
+          <tr><td>Drop-off / Delivery Service</td><td class="amt">$1,000</td></tr>
+        </tbody>
+      </table>
+      <p class="price-note">Prices shown are starting rates and may vary with issue complexity or parts required. You'll always get a quote before work begins.</p>
+    </div>
+  </section>
+
+  <!-- ================= PAY ONLINE ================= -->
+  <section id="pay" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Pay online</span>
+        <h2>Pay for a service</h2>
+        <p>Cover a remote session or a pickup/drop-off ahead of time — or settle up after your repair is done.</p>
+      </div>
+      <div class="pay-grid">
+        <div class="pay-card">
+          <h3>Remote Access Session</h3>
+          <div class="amt">$2,000</div>
+          <p>One remote support session to fix an application or operating system issue.</p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+            <input type="hidden" name="cmd" value="_xclick">
+            <input type="hidden" name="business" value="youremail@example.com">
+            <input type="hidden" name="item_name" value="StylesPC — Remote Access Support Session">
+            <input type="hidden" name="amount" value="2000">
+            <input type="hidden" name="currency_code" value="USD">
+            <button type="submit" class="btn btn-amber">Pay for Remote Session</button>
+          </form>
+        </div>
+        <div class="pay-card">
+          <h3>Pickup / Drop-off Service</h3>
+          <div class="amt">$1,000</div>
+          <p>Have your device collected from or delivered back to your address.</p>
+          <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+            <input type="hidden" name="cmd" value="_xclick">
+            <input type="hidden" name="business" value="youremail@example.com">
+            <input type="hidden" name="item_name" value="StylesPC — Pickup or Drop-off Service">
+            <input type="hidden" name="amount" value="1000">
+            <input type="hidden" name="currency_code" value="USD">
+            <button type="submit" class="btn btn-amber">Pay for Pickup/Drop-off</button>
+          </form>
+        </div>
+      </div>
+      <p class="pay-note">These buttons use PayPal's hosted checkout — replace <code>youremail@example.com</code> in the page's code with your own PayPal business email before publishing, and adjust the currency code if needed. No backend server required.</p>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT / BOOKING ================= -->
+  <section id="contact">
+    <div class="wrap contact-grid">
+      <div>
+        <div class="section-head" style="margin-bottom:28px;">
+          <span class="eyebrow">Get started</span>
+          <h2>Book a repair</h2>
+          <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
+        </div>
+        <div class="contact-info">
+          <div class="info-row"><span class="k">Email</span><span>[your email]</span></div>
+          <div class="info-row"><span class="k">Phone</span><span>[your phone]</span></div>
+          <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
+          <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop-off within local area</span></div>
+        </div>
+      </div>
+      <form class="book" id="bookForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="field">
+            <label for="contactMethod">Phone or email</label>
+            <input type="text" id="contactMethod" name="contactMethod" required>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="device">Device type</label>
+            <input type="text" id="device" name="device" placeholder="e.g. Dell laptop" required>
+          </div>
+          <div class="field">
+            <label for="serviceType">Preferred service</label>
+            <select id="serviceType" name="serviceType" required>
+              <option value="">Choose one</option>
+              <option>Drop-off (I'll bring it in)</option>
+              <option>Pickup (collect from my address)</option>
+              <option>Remote Access Support</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="issue">Describe the issue</label>
+          <textarea id="issue" name="issue" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Booking Request</button>
+        <p class="form-note">This opens your email app with the details filled in, addressed to StylesPC.</p>
+        <p id="formStatus" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
+      <p>Computer &amp; laptop repair — pickup, drop-off &amp; remote support.</p>
+    </div>
+    <div>
+      <p>[your email] · [your phone]</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis-first guarantee.</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('bookForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name = document.getElementById('name').value;
+    var contact = document.getElementById('contactMethod').value;
+    var device = document.getElementById('device').value;
+    var serviceType = document.getElementById('serviceType').value;
+    var issue = document.getElementById('issue').value;
+
+    var subject = encodeURIComponent('Repair Request — ' + device);
+    var body = encodeURIComponent(
+      'Name: ' + name + '\n' +
+      'Contact: ' + contact + '\n' +
+      'Device: ' + device + '\n' +
+      'Preferred service: ' + serviceType + '\n' +
+      'Issue:\n' + issue
+    );
+    window.location.href = 'mailto:[your email]?subject=' + subject + '&body=' + body;
+
+    var status = document.getElementById('formStatus');
+    status.textContent = 'Opening your email app to send this request…';
+    status.classList.add('ok');
+  });
+</script>
+
+</body>
+</html>
