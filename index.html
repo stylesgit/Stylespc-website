@@ -240,6 +240,15 @@
   }
   .work-body h3{font-size:1rem; margin-bottom:6px;}
   .work-body p{font-size:.87rem; color:var(--ink-soft); margin:0;}
+  .work-thumb-pair{display:flex; height:150px; border-bottom:1px solid var(--rule);}
+  .work-thumb-half{position:relative; width:50%; overflow:hidden; background:var(--paper-2);}
+  .work-thumb-half:first-child{border-right:1px solid var(--rule);}
+  .work-thumb-half img{width:100%; height:100%; object-fit:cover; display:block;}
+  .thumb-label{
+    position:absolute; bottom:6px; left:6px; font-family:'IBM Plex Mono'; font-size:.65rem;
+    text-transform:uppercase; letter-spacing:.04em; background:rgba(31,36,33,0.75); color:#fff;
+    padding:2px 8px; border-radius:10px;
+  }
 
   /* ---------- PRICING ---------- */
   .price-table{
@@ -273,8 +282,6 @@
   }
 
   /* ---------- CUSTOM BUILD ---------- */
-  .group-heading{font-size:1.05rem; margin:0 0 16px; color:var(--teal-dark); font-family:'Space Grotesk';}
-  .build-grid-solo{max-width:340px; margin-bottom:36px;}
   .build-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:20px;}
   .build-card{
     background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
@@ -385,7 +392,8 @@
       <li><a href="#services">Services</a></li>
       <li><a href="#how">How It Works</a></li>
       <li><a href="#work">Our Work</a></li>
-      <li><a href="#custom-build">Refurbished</a></li>
+      <li><a href="#custom-build">Custom Build</a></li>
+      <li><a href="#refurbished">Refurbished</a></li>
       <li><a href="#pricing">Pricing</a></li>
       <li><a href="#pay">Pay Online</a></li>
     </ul>
@@ -513,6 +521,23 @@
       </div>
       <div class="work-grid">
         <div class="work-card">
+          <div class="work-thumb-pair">
+            <div class="work-thumb-half">
+              <img src="images/hinge-before.jpg" alt="Broken laptop hinge before repair" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+              <span class="thumb-label">Before</span>
+            </div>
+            <div class="work-thumb-half">
+              <img src="images/hinge-after.jpg" alt="Laptop hinge after repair" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+              <span class="thumb-label">After</span>
+            </div>
+          </div>
+          <div class="work-body">
+            <span class="tag">Hardware</span>
+            <h3>Laptop Hinge Repair</h3>
+            <p>Broken or loose hinge repaired — screen opens and holds position smoothly again.</p>
+          </div>
+        </div>
+        <div class="work-card">
           <div class="work-thumb">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/></svg>
           </div>
@@ -550,13 +575,12 @@
   <section id="custom-build">
     <div class="wrap">
       <div class="section-head">
-        <span class="eyebrow">Machines</span>
-        <h2>Custom builds &amp; refurbished machines</h2>
-        <p>Gaming machines are built new to your spec. Everything else below is refurbished — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up on WhatsApp.</p>
+        <span class="eyebrow">Custom built</span>
+        <h2>Custom Built machines</h2>
+        <p>Built new to your spec and budget — the photo on each card is an example. Send your details and StylesPC will follow up on WhatsApp.</p>
       </div>
 
-      <h3 class="group-heading">Custom Built</h3>
-      <div class="build-grid-solo">
+      <div class="build-grid">
         <div class="build-card">
           <div class="build-thumb">
             <img src="images/gaming-machine.jpg" alt="Gaming machine example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
@@ -565,34 +589,13 @@
           <p>Built new to your spec and budget — example shown.</p>
           <button type="button" class="btn btn-primary build-btn" data-build="gaming">I'm Interested</button>
         </div>
-      </div>
-
-      <h3 class="group-heading">Refurbished Machines</h3>
-      <div class="build-grid">
-        <div class="build-card">
-          <div class="build-thumb">
-            <img src="images/wfh-desktop.jpg" alt="Work from home desktop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-          </div>
-          <h3>Work From Home — Desktop</h3>
-          <p>Refurbished, available now — example shown.</p>
-          <button type="button" class="btn btn-primary build-btn" data-build="wfh-desktop">I'm Interested</button>
-        </div>
-
-        <div class="build-card">
-          <div class="build-thumb">
-            <img src="images/wfh-laptop.jpg" alt="Work from home laptop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-          </div>
-          <h3>Work From Home — Laptop</h3>
-          <p>Refurbished — currently none in stock, built to order — example shown.</p>
-          <button type="button" class="btn btn-primary build-btn" data-build="wfh-laptop">I'm Interested</button>
-        </div>
 
         <div class="build-card">
           <div class="build-thumb">
             <img src="images/regular-computer.jpg" alt="Regular computer example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
           </div>
           <h3>Regular Computer</h3>
-          <p>Refurbished, everyday machine — example shown.</p>
+          <p>Built new for everyday browsing, school work, and general home use — example shown.</p>
           <button type="button" class="btn btn-primary build-btn" data-build="regular">I'm Interested</button>
         </div>
       </div>
@@ -611,6 +614,56 @@
           </div>
           <button type="submit" class="btn btn-amber" id="buildSubmitBtn">Continue on WhatsApp</button>
           <p id="buildFormStatus" role="status"></p>
+        </form>
+      </div>
+
+      <p class="pay-note">Want to swap in real photos? Just send them to me in chat and tell me which category each is for — I'll prep the file names for you, so all you have to do is drag them into the <code>images</code> folder on GitHub.</p>
+    </div>
+  </section>
+
+  <!-- ================= REFURBISHED ================= -->
+  <section id="refurbished" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Refurbished</span>
+        <h2>Refurbished machines</h2>
+        <p>Pre-owned, refurbished machines — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up on WhatsApp.</p>
+      </div>
+
+      <div class="build-grid">
+        <div class="build-card">
+          <div class="build-thumb">
+            <img src="images/wfh-desktop.jpg" alt="Work from home desktop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <h3>Work From Home — Desktop</h3>
+          <p>Refurbished, available now — example shown.</p>
+          <button type="button" class="btn btn-primary build-btn" data-build="wfh-desktop">I'm Interested</button>
+        </div>
+
+        <div class="build-card">
+          <div class="build-thumb">
+            <img src="images/wfh-laptop.jpg" alt="Work from home laptop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <h3>Work From Home — Laptop</h3>
+          <p>Refurbished — currently none in stock, built to order — example shown.</p>
+          <button type="button" class="btn btn-primary build-btn" data-build="wfh-laptop">I'm Interested</button>
+        </div>
+      </div>
+
+      <div id="refurbPanel" class="method-panel" hidden>
+        <h3 id="refurbPanelTitle">I'm Interested</h3>
+        <form id="refurbForm" class="mini-form">
+          <div class="field">
+            <label for="refurbName">Full name</label>
+            <input type="text" id="refurbName" name="refurbName" required>
+          </div>
+          <div class="field">
+            <label for="refurbPhone">Phone / WhatsApp number</label>
+            <input type="tel" id="refurbPhone" name="refurbPhone" placeholder="18763341156" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+            <span class="field-hint">Digits only, with country code — e.g. <strong>18763341156</strong></span>
+          </div>
+          <button type="submit" class="btn btn-amber" id="refurbSubmitBtn">Continue on WhatsApp</button>
+          <p id="refurbFormStatus" role="status"></p>
         </form>
       </div>
 
@@ -764,15 +817,13 @@
 </footer>
 
 <script>
-  // Custom Built / Refurbished machine category selector
+  // Custom Built machine category selector
   (function(){
     var buildLabels = {
-      gaming: { name: 'Gaming Machine', kind: 'custom' },
-      'wfh-desktop': { name: 'Work From Home Desktop', kind: 'refurbished' },
-      'wfh-laptop': { name: 'Work From Home Laptop', kind: 'refurbished' },
-      regular: { name: 'Regular Computer', kind: 'refurbished' }
+      gaming: 'Gaming Machine',
+      regular: 'Regular Computer'
     };
-    var buildButtons = document.querySelectorAll('.build-btn');
+    var buildButtons = document.querySelectorAll('#custom-build .build-btn');
     var buildPanel = document.getElementById('buildPanel');
     var buildPanelTitle = document.getElementById('buildPanelTitle');
     var currentBuild = null;
@@ -780,7 +831,7 @@
     buildButtons.forEach(function(btn){
       btn.addEventListener('click', function(){
         currentBuild = btn.getAttribute('data-build');
-        buildPanelTitle.textContent = "I'm Interested — " + buildLabels[currentBuild].name;
+        buildPanelTitle.textContent = "I'm Interested — " + buildLabels[currentBuild];
         buildPanel.hidden = false;
         buildPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
@@ -817,15 +868,75 @@
         return;
       }
 
-      var info = buildLabels[currentBuild];
-      var descPhrase = info.kind === 'custom'
-        ? 'a custom-built ' + info.name
-        : 'this refurbished ' + info.name + ' machine';
+      var storeWhatsApp = '18763341156';
+      var message =
+        'Hey, my name is ' + name + '. ' +
+        'I am interested in a custom-built ' + buildLabels[currentBuild] + '. ' +
+        'My number is ' + digits + '. Please send me more information.';
+
+      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+
+      status.textContent = 'Opening WhatsApp…';
+      status.classList.add('ok');
+      window.open(waUrl, '_blank');
+    });
+  })();
+
+  // Refurbished machine category selector
+  (function(){
+    var refurbLabels = {
+      'wfh-desktop': 'Work From Home Desktop',
+      'wfh-laptop': 'Work From Home Laptop'
+    };
+    var refurbButtons = document.querySelectorAll('#refurbished .build-btn');
+    var refurbPanel = document.getElementById('refurbPanel');
+    var refurbPanelTitle = document.getElementById('refurbPanelTitle');
+    var currentRefurb = null;
+
+    refurbButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        currentRefurb = btn.getAttribute('data-build');
+        refurbPanelTitle.textContent = "I'm Interested — " + refurbLabels[currentRefurb];
+        refurbPanel.hidden = false;
+        refurbPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    var refurbForm = document.getElementById('refurbForm');
+    var refurbPhoneInput = document.getElementById('refurbPhone');
+
+    refurbPhoneInput.addEventListener('input', function(){
+      refurbPhoneInput.value = refurbPhoneInput.value.replace(/\D/g, '').slice(0, 11);
+    });
+
+    refurbForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var status = document.getElementById('refurbFormStatus');
+      var name = document.getElementById('refurbName').value.trim();
+      var digits = refurbPhoneInput.value.replace(/\D/g, '');
+
+      status.classList.remove('ok', 'err');
+
+      if (!name) {
+        status.textContent = 'Please enter your name.';
+        status.classList.add('err');
+        return;
+      }
+      if (digits.length !== 11) {
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18763341156.';
+        status.classList.add('err');
+        return;
+      }
+      if (!currentRefurb) {
+        status.textContent = 'Please choose a category above first.';
+        status.classList.add('err');
+        return;
+      }
 
       var storeWhatsApp = '18763341156';
       var message =
         'Hey, my name is ' + name + '. ' +
-        'I am interested in ' + descPhrase + '. ' +
+        'I am interested in this refurbished ' + refurbLabels[currentRefurb] + ' machine. ' +
         'My number is ' + digits + '. Please send me more information.';
 
       var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
