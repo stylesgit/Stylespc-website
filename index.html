@@ -250,6 +250,27 @@
     padding:2px 8px; border-radius:10px;
   }
 
+  /* ---------- IMAGE GALLERY ---------- */
+  .gallery{position:relative; height:150px; border-bottom:1px solid var(--rule); background:var(--paper-2); overflow:hidden;}
+  .gallery-viewport{position:relative; width:100%; height:100%;}
+  .gallery-img{width:100%; height:100%; object-fit:cover; display:block;}
+  .gallery-empty{display:flex; align-items:center; justify-content:center; width:100%; height:100%;
+    background:repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px), var(--paper-2);}
+  .gallery-empty::after{content:"Add photo"; font-family:'IBM Plex Mono'; font-size:.75rem; color:var(--teal-dark);}
+  .gallery-label{display:block;}
+  .gallery-nav{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    width:28px; height:28px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,253,248,0.85); color:var(--ink); font-size:1.1rem; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gallery-nav:hover{background:var(--white);}
+  .gallery-prev{left:8px;}
+  .gallery-next{right:8px;}
+  .gallery-dots{position:absolute; bottom:6px; right:8px; display:flex; gap:5px; z-index:2;}
+  .gallery-dot{width:6px; height:6px; border-radius:50%; background:rgba(31,36,33,0.3); cursor:pointer; border:none; padding:0;}
+  .gallery-dot.active{background:var(--white);}
+
   /* ---------- PRICING ---------- */
   .price-table{
     width:100%; border-collapse:collapse; background:var(--white);
@@ -395,6 +416,7 @@
       <li><a href="#custom-build">Custom Build</a></li>
       <li><a href="#refurbished">Refurbished</a></li>
       <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#firestick">Firestick</a></li>
       <li><a href="#pay">Pay Online</a></li>
     </ul>
     <a href="#contact" class="nav-cta">Book a Repair</a>
@@ -521,15 +543,14 @@
       </div>
       <div class="work-grid">
         <div class="work-card">
-          <div class="work-thumb-pair">
-            <div class="work-thumb-half">
-              <img src="images/hinge-before.jpg" alt="Broken laptop hinge before repair" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-              <span class="thumb-label">Before</span>
+          <div class="gallery" data-images="hinge-1.jpg,hinge-2.jpg,hinge-3.jpg,hinge-4.jpg,hinge-5.jpg,hinge-6.jpg,hinge-7.jpg,hinge-8.jpg,hinge-9.jpg,hinge-10.jpg" data-labels="Before,After,Example,Example,Example,Example,Example,Example,Example,Example">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Laptop hinge repair example">
+              <span class="thumb-label gallery-label"></span>
             </div>
-            <div class="work-thumb-half">
-              <img src="images/hinge-after.jpg" alt="Laptop hinge after repair" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-              <span class="thumb-label">After</span>
-            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
           </div>
           <div class="work-body">
             <span class="tag">Hardware</span>
@@ -641,8 +662,14 @@
         </div>
 
         <div class="build-card">
-          <div class="build-thumb">
-            <img src="images/wfh-laptop.jpg" alt="Work from home laptop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          <div class="gallery" data-images="wfh-laptop-1.jpg,wfh-laptop-2.jpg,wfh-laptop-3.jpg,wfh-laptop-4.jpg,wfh-laptop-5.jpg,wfh-laptop-6.jpg,wfh-laptop-7.jpg,wfh-laptop-8.jpg,wfh-laptop-9.jpg,wfh-laptop-10.jpg" data-labels="Example,Example,Example,Example,Example,Example,Example,Example,Example,Example">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Work from home laptop example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
           </div>
           <h3>Work From Home — Laptop</h3>
           <p>Refurbished — currently none in stock, built to order — example shown.</p>
@@ -697,6 +724,32 @@
         </tbody>
       </table>
       <p class="price-note">Prices shown are starting rates and may vary with issue complexity or parts required. You'll always get a quote before work begins.</p>
+    </div>
+  </section>
+
+  <!-- ================= FIRESTICK ================= -->
+  <section id="firestick" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Firestick</span>
+        <h2>Firestick setup &amp; Live TV</h2>
+        <p>Full Firestick setup with Live TV subscription, including local channels.</p>
+      </div>
+      <table class="price-table">
+        <thead>
+          <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Full Setup</td><td class="amt">$2,500</td></tr>
+          <tr><td>Live TV Subscription (incl. local channels) — 1st month, includes app installation &amp; setup</td><td class="amt">$1,500</td></tr>
+          <tr><td>Live TV Subscription — per month after</td><td class="amt">$500</td></tr>
+          <tr><td>Apps Installation (per application)</td><td class="amt">$250</td></tr>
+          <tr><td>Pickup Fee</td><td class="amt">$1,500</td></tr>
+          <tr><td>Drop-off Fee</td><td class="amt">$1,500</td></tr>
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-primary" id="firestickBtn" style="margin-top:22px;">Get Started on WhatsApp</button>
+      <p class="price-note">Prices shown are starting rates and may vary depending on setup requirements.</p>
     </div>
   </section>
 
@@ -817,6 +870,75 @@
 </footer>
 
 <script>
+  // Image galleries (hinge repair, refurbished laptop, etc.)
+  // Reads the data-images list on each .gallery element — empty slots
+  // just show an "Add photo" placeholder until a real photo is uploaded.
+  (function(){
+    var galleries = document.querySelectorAll('.gallery');
+
+    galleries.forEach(function(gallery){
+      var files = (gallery.getAttribute('data-images') || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      var labels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s){ return s.trim(); });
+      if (!files.length) return;
+
+      var viewport = gallery.querySelector('.gallery-viewport');
+      var img = gallery.querySelector('.gallery-img');
+      var labelEl = gallery.querySelector('.gallery-label');
+      var dotsWrap = gallery.querySelector('.gallery-dots');
+      var prevBtn = gallery.querySelector('.gallery-prev');
+      var nextBtn = gallery.querySelector('.gallery-next');
+      var index = 0;
+
+      files.forEach(function(_, i){
+        var dot = document.createElement('button');
+        dot.type = 'button';
+        dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+        dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
+        dot.addEventListener('click', function(){ show(i); });
+        dotsWrap.appendChild(dot);
+      });
+      var dots = dotsWrap.querySelectorAll('.gallery-dot');
+
+      function show(i){
+        index = (i + files.length) % files.length;
+        img.src = 'images/' + files[index];
+        img.alt = labels[index] || '';
+        labelEl.textContent = labels[index] || '';
+        labelEl.style.display = labels[index] ? 'block' : 'none';
+        dots.forEach(function(d, di){ d.classList.toggle('active', di === index); });
+      }
+
+      img.addEventListener('error', function(){
+        if (viewport.querySelector('.gallery-empty')) return;
+        img.style.display = 'none';
+        var empty = document.createElement('div');
+        empty.className = 'gallery-empty';
+        viewport.insertBefore(empty, img);
+      });
+      img.addEventListener('load', function(){
+        var empty = viewport.querySelector('.gallery-empty');
+        if (empty) empty.remove();
+        img.style.display = 'block';
+      });
+
+      prevBtn.addEventListener('click', function(){ show(index - 1); });
+      nextBtn.addEventListener('click', function(){ show(index + 1); });
+
+      show(0);
+    });
+  })();
+
+  // Firestick — Get Started button
+  var firestickBtn = document.getElementById('firestickBtn');
+  if (firestickBtn) {
+    firestickBtn.addEventListener('click', function(){
+      var storeWhatsApp = '18763341156';
+      var message = "Hey, I'm interested in a Firestick full setup with Live TV subscription. Please send me more information.";
+      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+      window.open(waUrl, '_blank');
+    });
+  }
+
   // Custom Built machine category selector
   (function(){
     var buildLabels = {
