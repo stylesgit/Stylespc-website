@@ -609,8 +609,8 @@
           </div>
           <div class="field">
             <label for="buildPhone">Phone / WhatsApp number</label>
-            <input type="tel" id="buildPhone" name="buildPhone" placeholder="18763341156" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
-            <span class="field-hint">Digits only, with country code — e.g. <strong>18763341156</strong></span>
+            <input type="tel" id="buildPhone" name="buildPhone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+            <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
           </div>
           <button type="submit" class="btn btn-amber" id="buildSubmitBtn">Continue on WhatsApp</button>
           <p id="buildFormStatus" role="status"></p>
@@ -659,8 +659,8 @@
           </div>
           <div class="field">
             <label for="refurbPhone">Phone / WhatsApp number</label>
-            <input type="tel" id="refurbPhone" name="refurbPhone" placeholder="18763341156" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
-            <span class="field-hint">Digits only, with country code — e.g. <strong>18763341156</strong></span>
+            <input type="tel" id="refurbPhone" name="refurbPhone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+            <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
           </div>
           <button type="submit" class="btn btn-amber" id="refurbSubmitBtn">Continue on WhatsApp</button>
           <p id="refurbFormStatus" role="status"></p>
@@ -732,8 +732,8 @@
           <form id="bankForm" class="mini-form">
             <div class="field">
               <label for="bankPhone">Phone / WhatsApp number</label>
-              <input type="tel" id="bankPhone" name="phone" placeholder="18763341156" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
-              <span class="field-hint">Digits only, with country code — e.g. <strong>18763341156</strong></span>
+              <input type="tel" id="bankPhone" name="phone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+              <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
             </div>
             <button type="submit" class="btn btn-primary" id="bankSubmitBtn">Continue on WhatsApp</button>
             <p id="bankFormStatus" role="status"></p>
@@ -858,7 +858,7 @@
         return;
       }
       if (digits.length !== 11) {
-        status.textContent = 'Please enter your number with country code, digits only — e.g. 18763341156.';
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
         status.classList.add('err');
         return;
       }
@@ -923,7 +923,7 @@
         return;
       }
       if (digits.length !== 11) {
-        status.textContent = 'Please enter your number with country code, digits only — e.g. 18763341156.';
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
         status.classList.add('err');
         return;
       }
@@ -986,7 +986,7 @@
       status.classList.remove('ok', 'err');
 
       if (digits.length !== 11) {
-        status.textContent = 'Please enter your number with country code, digits only — e.g. 18763341156.';
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
         status.classList.add('err');
         return;
       }
