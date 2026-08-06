@@ -168,6 +168,7 @@
     background:rgba(47,111,99,0.12); color:var(--teal-dark);
     border:1px solid rgba(47,111,99,0.35);
   }
+  .status-pill.amber{background:rgba(201,122,43,0.12); color:#a9631e; border-color:rgba(201,122,43,0.4);}
   .stamp{
     position:absolute; bottom:18px; right:20px;
     font-family:'Space Grotesk'; font-weight:700; font-size:.85rem;
@@ -175,6 +176,8 @@
     padding:4px 10px; transform:rotate(-8deg); opacity:.9;
     letter-spacing:.05em;
   }
+  .stamp[hidden]{display:none;}
+  #heroTicket.cycling{animation:stampIn .55s cubic-bezier(.2,.9,.3,1.2) both;}
 
   /* ---------- SECTION SHELLS ---------- */
   section{padding:88px 0;}
@@ -407,9 +410,10 @@
   .build-thumb img, .gallery-img{cursor:zoom-in;}
   .lightbox-overlay{
     position:fixed; inset:0; background:rgba(20,22,19,0.92); z-index:100;
-    display:flex; align-items:center; justify-content:center; padding:36px;
+    display:none; align-items:center; justify-content:center; padding:36px;
     cursor:zoom-out;
   }
+  .lightbox-overlay:not([hidden]){display:flex;}
   .lightbox-overlay img{
     max-width:100%; max-height:100%; object-fit:contain;
     box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:4px; cursor:default;
@@ -478,22 +482,22 @@
         </div>
       </div>
       <div class="ticket-wrap">
-        <div class="ticket">
+        <div class="ticket" id="heroTicket">
           <div class="ticket-top">
             <div>
               <div class="ticket-title">Service Tag</div>
-              <div class="ticket-id">#SPC-0148</div>
+              <div class="ticket-id" id="ticketId">#SPC-0148</div>
             </div>
-            <span class="status-pill">IN PROGRESS</span>
+            <span class="status-pill" id="ticketStatus">IN PROGRESS</span>
           </div>
           <div class="ticket-perf"></div>
-          <div class="ticket-row"><span class="k">Device</span><span class="v">Laptop — 14"</span></div>
-          <div class="ticket-row"><span class="k">Issue</span><span class="v">Won't boot</span></div>
-          <div class="ticket-row"><span class="k">Intake</span><span class="v">Pickup</span></div>
-          <div class="ticket-row"><span class="k">Return</span><span class="v">Drop-off</span></div>
+          <div class="ticket-row"><span class="k">Device</span><span class="v" id="ticketDevice">Laptop — 14"</span></div>
+          <div class="ticket-row"><span class="k">Issue</span><span class="v" id="ticketIssue">Won't boot</span></div>
+          <div class="ticket-row"><span class="k">Intake</span><span class="v" id="ticketIntake">Pickup</span></div>
+          <div class="ticket-row"><span class="k">Return</span><span class="v" id="ticketReturn">Drop-off</span></div>
           <div class="ticket-perf"></div>
-          <div class="ticket-row"><span class="k">Technician</span><span class="v">StylesPC</span></div>
-          <div class="stamp">REPAIRED</div>
+          <div class="ticket-row"><span class="k">Technician</span><span class="v" id="ticketTech">StylesPC</span></div>
+          <div class="stamp" id="ticketStamp">REPAIRED</div>
         </div>
       </div>
     </div>
@@ -1222,7 +1226,67 @@
     });
   }
 
-  // Lightbox — click any work/gallery photo to view it large
+  // Hero "Service Tag" ticket — cycles through example jobs so the hero
+  // always shows an active-looking ticket. Edit HERO_TICKETS to change
+  // what appears; this is just illustrative content, not live job data.
+  (function(){
+    var el = {
+      wrap: document.getElementById('heroTicket'),
+      id: document.getElementById('ticketId'),
+      status: document.getElementById('ticketStatus'),
+      device: document.getElementById('ticketDevice'),
+      issue: document.getElementById('ticketIssue'),
+      intake: document.getElementById('ticketIntake'),
+      ret: document.getElementById('ticketReturn'),
+      tech: document.getElementById('ticketTech'),
+      stamp: document.getElementById('ticketStamp')
+    };
+    if (!el.wrap) return;
+
+    var HERO_TICKETS = [
+      { id:'#SPC-0148', status:'IN PROGRESS', device:'Laptop — 14"', issue:"Won't boot", intake:'Pickup', ret:'Drop-off', tech:'StylesPC', stamp:null },
+      { id:'#SPC-0149', status:'DIAGNOSING', device:'Desktop — Gaming PC', issue:'Random blue-screen crashes', intake:'Drop-off', ret:'Pickup', tech:'StylesPC', stamp:null },
+      { id:'#SPC-0150', status:'READY', device:'MacBook Pro 13"', issue:'Cracked screen', intake:'Drop-off', ret:'Drop-off', tech:'StylesPC', stamp:'REPAIRED' },
+      { id:'#SPC-0151', status:'READY', device:'Laptop — 15.6"', issue:'Slow performance / virus cleanup', intake:'Pickup', ret:'Pickup', tech:'StylesPC', stamp:'CLEARED' },
+      { id:'#SPC-0152', status:'IN PROGRESS', device:'Desktop — Custom Build', issue:'No display output', intake:'Drop-off', ret:'Drop-off', tech:'StylesPC', stamp:null },
+      { id:'#SPC-0153', status:'READY', device:'Laptop — Hinge repair', issue:'Loose, broken hinge', intake:'Pickup', ret:'Drop-off', tech:'StylesPC', stamp:'REPAIRED' }
+    ];
+
+    var i = 0;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function render(t){
+      el.id.textContent = t.id;
+      el.status.textContent = t.status;
+      el.status.classList.toggle('amber', t.status !== 'READY');
+      el.device.textContent = t.device;
+      el.issue.textContent = t.issue;
+      el.intake.textContent = t.intake;
+      el.ret.textContent = t.ret;
+      el.tech.textContent = t.tech;
+      if (t.stamp){
+        el.stamp.textContent = t.stamp;
+        el.stamp.hidden = false;
+      } else {
+        el.stamp.hidden = true;
+      }
+      if (!reduceMotion){
+        el.wrap.classList.remove('cycling');
+        void el.wrap.offsetWidth; // restart animation
+        el.wrap.classList.add('cycling');
+      }
+    }
+
+    render(HERO_TICKETS[0]);
+    if (!reduceMotion){
+      setInterval(function(){
+        i = (i + 1) % HERO_TICKETS.length;
+        render(HERO_TICKETS[i]);
+      }, 4500);
+    }
+  })();
+
+
   (function(){
     var overlay = document.createElement('div');
     overlay.className = 'lightbox-overlay';
