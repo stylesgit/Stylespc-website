@@ -402,6 +402,46 @@
     .build-grid{grid-template-columns:1fr;}
     .field-row{grid-template-columns:1fr;}
   }
+
+  /* ---------- LIGHTBOX (click any photo to view it large) ---------- */
+  .build-thumb img, .gallery-img{cursor:zoom-in;}
+  .lightbox-overlay{
+    position:fixed; inset:0; background:rgba(20,22,19,0.92); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:36px;
+    cursor:zoom-out;
+  }
+  .lightbox-overlay img{
+    max-width:100%; max-height:100%; object-fit:contain;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:4px; cursor:default;
+  }
+  .lightbox-close{
+    position:absolute; top:18px; right:20px; width:40px; height:40px; border-radius:50%;
+    border:none; background:rgba(255,255,255,.14); color:#fff; font-size:1.3rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lightbox-close:hover{background:rgba(255,255,255,.24);}
+
+  /* ---------- FIRESTICK / LIVE TV EXAMPLES ---------- */
+  .firestick-examples{margin-top:36px;}
+  .firestick-examples h3{font-size:1.1rem; margin-bottom:6px;}
+  .firestick-examples > p{font-size:.92rem; color:var(--ink-soft); margin:0 0 20px;}
+  .firestick-media{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .firestick-shots{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  }
+  .firestick-video{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; aspect-ratio:16/9;
+  }
+  .firestick-video iframe, .firestick-video video{width:100%; height:100%; display:block; border:0;}
+  .firestick-video-empty{
+    display:flex; align-items:center; justify-content:center; width:100%; height:100%;
+    background:repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px), var(--paper-2);
+    font-family:'IBM Plex Mono'; font-size:.78rem; color:var(--teal-dark); text-align:center; padding:0 20px;
+  }
+  @media (max-width:900px){
+    .firestick-media{grid-template-columns:1fr;}
+  }
 </style>
 </head>
 <body>
@@ -754,6 +794,25 @@
       </table>
       <button type="button" class="btn btn-primary" id="firestickBtn" style="margin-top:22px;">Get Started on WhatsApp</button>
       <p class="price-note">Prices shown are starting rates and may vary depending on setup requirements.</p>
+
+      <div class="firestick-examples">
+        <h3>See it in action</h3>
+        <p>A look at the Live TV channel guide and setup on an actual Firestick.</p>
+        <div class="firestick-media">
+          <div class="gallery firestick-shots" data-images="livetv-1.jpg,livetv-2.jpg,livetv-3.jpg,livetv-4.jpg,livetv-5.jpg,livetv-6.jpg" data-labels="Live TV,Live TV,Live TV,Live TV,Live TV,Live TV">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Live TV channel guide example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
+          </div>
+          <div class="firestick-video" id="firestickVideo">
+            <div class="firestick-video-empty">Demo video coming soon</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1162,6 +1221,57 @@
       window.open(waUrl, '_blank');
     });
   }
+
+  // Lightbox — click any work/gallery photo to view it large
+  (function(){
+    var overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = '<button type="button" class="lightbox-close" aria-label="Close">✕</button><img alt="">';
+    document.body.appendChild(overlay);
+    var lbImg = overlay.querySelector('img');
+    var closeBtn = overlay.querySelector('.lightbox-close');
+
+    function openLightbox(src, alt){
+      lbImg.src = src;
+      lbImg.alt = alt || '';
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(){
+      overlay.hidden = true;
+      lbImg.src = '';
+      document.body.style.overflow = '';
+    }
+    overlay.addEventListener('click', function(e){
+      if (e.target === overlay) closeLightbox();
+    });
+    closeBtn.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && !overlay.hidden) closeLightbox();
+    });
+    document.addEventListener('click', function(e){
+      var img = e.target.closest('.build-thumb img, .gallery-img');
+      if (img && img.src) openLightbox(img.src, img.alt);
+    });
+  })();
+
+  // Firestick Live TV demo video.
+  // To go live: either drop an mp4 into images/ and set LOCAL_VIDEO_FILE,
+  // or paste a YouTube embed URL into YOUTUBE_EMBED_URL. Leave both blank
+  // to keep showing the "coming soon" placeholder.
+  (function(){
+    var LOCAL_VIDEO_FILE = ''; // e.g. 'firestick-demo.mp4' (place in images/)
+    var YOUTUBE_EMBED_URL = ''; // e.g. 'https://www.youtube.com/embed/VIDEO_ID'
+    var holder = document.getElementById('firestickVideo');
+    if (!holder) return;
+
+    if (LOCAL_VIDEO_FILE) {
+      holder.innerHTML = '<video controls playsinline src="images/' + LOCAL_VIDEO_FILE + '"></video>';
+    } else if (YOUTUBE_EMBED_URL) {
+      holder.innerHTML = '<iframe src="' + YOUTUBE_EMBED_URL + '" title="Live TV demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    }
+  })();
 
   document.getElementById('bookForm').addEventListener('submit', function(e){
     e.preventDefault();
