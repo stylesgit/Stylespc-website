@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StylesPC — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --paper:#F3EFE7; --paper-2:#EAE3D3; --ink:#1F2421; --ink-soft:#4A4F49;
+    --teal:#2F6F63; --teal-dark:#204b43; --amber:#C97A2B; --rule:#C9C2B2;
+    --white:#FFFDF8; --red:#a3372a; --radius:4px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; line-height:1.5;}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0 0 .3em; letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  button{font-family:inherit; cursor:pointer;}
+  input,select,textarea{font-family:inherit; font-size:.92rem; padding:9px 11px; border:1px solid var(--rule); border-radius:var(--radius); background:var(--white); color:var(--ink); width:100%;}
+  label{font-size:.8rem; font-weight:600; color:var(--ink-soft); display:block; margin-bottom:4px;}
+  .field{margin-bottom:14px;}
+  .btn{display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:var(--radius); font-weight:600; font-size:.86rem; border:1px solid transparent; text-decoration:none;}
+  .btn-primary{background:var(--teal); color:#fff;}
+  .btn-primary:hover{background:var(--teal-dark);}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--rule);}
+  .btn-ghost:hover{border-color:var(--ink);}
+  .btn-amber{background:var(--amber); color:#fff;}
+  .btn-amber:hover{background:#a9631e;}
+  .btn-danger{background:transparent; color:var(--red); border-color:rgba(163,55,42,.4);}
+  .btn-danger:hover{background:rgba(163,55,42,.08);}
+  .btn-sm{padding:5px 10px; font-size:.76rem;}
+  .err{color:var(--red); font-size:.85rem; margin-top:8px;}
+  .hidden{display:none !important;}
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
+  .login-box{background:var(--white); border:1px solid var(--rule); border-radius:8px; padding:32px; width:100%; max-width:360px;}
+  .login-box .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:700; font-size:1.2rem; margin-bottom:22px;}
+  .login-box .dot{width:10px; height:10px; border-radius:50%; background:var(--teal);}
+
+  /* ---------- APP SHELL ---------- */
+  #app{min-height:100vh;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--rule); background:rgba(243,239,231,.92); position:sticky; top:0; z-index:10;}
+  .topbar .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;}
+  .topbar .dot{width:9px; height:9px; border-radius:50%; background:var(--teal);}
+  .tabs{display:flex; gap:6px; padding:16px 24px 0;}
+  .tab-btn{background:transparent; border:none; padding:10px 4px; margin-right:22px; font-weight:600; font-size:.92rem; color:var(--ink-soft); border-bottom:2px solid transparent;}
+  .tab-btn.active{color:var(--ink); border-color:var(--amber);}
+  .wrap{max-width:1080px; margin:0 auto; padding:20px 24px 60px;}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
+  .toolbar select{width:auto;}
+
+  /* ---------- TABLE / CARDS ---------- */
+  .list{display:grid; gap:10px;}
+  .row-card{background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:16px 18px; display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center;}
+  .row-main{display:grid; gap:4px;}
+  .row-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .row-id{font-family:'IBM Plex Mono'; font-size:.78rem; color:var(--ink-soft);}
+  .row-title{font-weight:600;}
+  .row-sub{font-size:.85rem; color:var(--ink-soft);}
+  .pill{font-family:'IBM Plex Mono'; font-size:.68rem; font-weight:600; letter-spacing:.03em; padding:3px 9px; border-radius:20px; text-transform:uppercase;}
+  .pill-teal{background:rgba(47,111,99,.12); color:var(--teal-dark); border:1px solid rgba(47,111,99,.35);}
+  .pill-amber{background:rgba(201,122,43,.12); color:#a9631e; border:1px solid rgba(201,122,43,.4);}
+  .pill-red{background:rgba(163,55,42,.1); color:var(--red); border:1px solid rgba(163,55,42,.35);}
+  .row-actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
+  .empty-state{text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:.92rem;}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{position:fixed; inset:0; background:rgba(20,22,19,.55); z-index:50; display:none; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto;}
+  .modal-overlay:not([hidden]){display:flex;}
+  .modal{background:var(--white); border-radius:8px; padding:28px; width:100%; max-width:440px;}
+  .modal h3{font-size:1.1rem; margin-bottom:18px;}
+  .modal-actions{display:flex; gap:10px; margin-top:18px; justify-content:flex-end;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+
+  /* ---------- RECEIPT ---------- */
+  #receiptModal .receipt-sheet{border:1px dashed var(--rule); border-radius:6px; padding:20px; margin-bottom:18px;}
+  #receiptModal .receipt-row{display:flex; justify-content:space-between; font-size:.88rem; margin:6px 0;}
+  #receiptModal .receipt-row .k{color:var(--ink-soft);}
+  #receiptModal .receipt-total{border-top:1px solid var(--rule); margin-top:10px; padding-top:10px; font-weight:700;}
+
+  @media print{
+    body *{visibility:hidden;}
+    #receiptModal, #receiptModal *{visibility:visible;}
+    #receiptModal{position:fixed; inset:0; background:#fff; padding:40px;}
+    .modal-actions, .lightbox-close{display:none !important;}
+  }
+
+  @media (max-width:640px){
+    .row-card{grid-template-columns:1fr;}
+    .row-actions{justify-content:flex-start;}
+    .field-row{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="brand"><span class="dot"></span>StylesPC Admin</div>
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginEmail">Email</label>
+        <input type="email" id="loginEmail" required autocomplete="username">
+      </div>
+      <div class="field">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Sign in</button>
+      <p id="loginError" class="err" role="status"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ================= APP ================= -->
+<div id="app" class="hidden">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span>StylesPC Admin</div>
+    <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
+  </div>
+  <div class="tabs">
+    <button type="button" class="tab-btn active" data-tab="tickets">Tickets</button>
+    <button type="button" class="tab-btn" data-tab="clients">Clients</button>
+  </div>
+
+  <!-- TICKETS TAB -->
+  <div class="wrap" id="tab-tickets">
+    <div class="toolbar">
+      <select id="statusFilter">
+        <option value="">All statuses</option>
+        <option value="received">Received</option>
+        <option value="diagnosing">Diagnosing</option>
+        <option value="in_progress">In progress</option>
+        <option value="ready">Ready</option>
+        <option value="delivered">Delivered</option>
+        <option value="cancelled">Cancelled</option>
+      </select>
+      <button type="button" class="btn btn-primary" id="newTicketBtn">+ New ticket</button>
+    </div>
+    <div class="list" id="ticketList"></div>
+  </div>
+
+  <!-- CLIENTS TAB -->
+  <div class="wrap hidden" id="tab-clients">
+    <div class="toolbar">
+      <div></div>
+      <button type="button" class="btn btn-primary" id="newClientBtn">+ New client</button>
+    </div>
+    <div class="list" id="clientList"></div>
+  </div>
+</div>
+
+<!-- ================= TICKET MODAL ================= -->
+<div class="modal-overlay" id="ticketModalOverlay" hidden>
+  <div class="modal">
+    <h3 id="ticketModalTitle">New ticket</h3>
+    <form id="ticketForm">
+      <input type="hidden" id="ticketFormId">
+      <div class="field">
+        <label for="ticketClient">Client</label>
+        <select id="ticketClient" required></select>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="ticketDeviceInput">Device</label>
+          <input type="text" id="ticketDeviceInput" placeholder='Laptop — 14"' required>
+        </div>
+        <div class="field">
+          <label for="ticketStatusInput">Status</label>
+          <select id="ticketStatusInput">
+            <option value="received">Received</option>
+            <option value="diagnosing">Diagnosing</option>
+            <option value="in_progress">In progress</option>
+            <option value="ready">Ready</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="ticketIssueInput">Issue</label>
+        <input type="text" id="ticketIssueInput" placeholder="Won't boot" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="ticketIntakeInput">Intake</label>
+          <select id="ticketIntakeInput"><option>Drop-off</option><option>Pickup</option></select>
+        </div>
+        <div class="field">
+          <label for="ticketReturnInput">Return</label>
+          <select id="ticketReturnInput"><option>Drop-off</option><option>Pickup</option></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="ticketAmountInput">Amount ($)</label>
+          <input type="number" step="0.01" id="ticketAmountInput" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label for="ticketPaymentInput">Payment</label>
+          <select id="ticketPaymentInput">
+            <option value="unpaid">Unpaid</option>
+            <option value="partial">Partial</option>
+            <option value="paid">Paid</option>
+          </select>
+        </div>
+      </div>
+      <p id="ticketFormError" class="err"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="ticketCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save ticket</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= CLIENT MODAL ================= -->
+<div class="modal-overlay" id="clientModalOverlay" hidden>
+  <div class="modal">
+    <h3 id="clientModalTitle">New client</h3>
+    <form id="clientForm">
+      <input type="hidden" id="clientFormId">
+      <div class="field">
+        <label for="clientNameInput">Full name</label>
+        <input type="text" id="clientNameInput" required>
+      </div>
+      <div class="field">
+        <label for="clientPhoneInput">Phone / WhatsApp (digits + country code)</label>
+        <input type="tel" id="clientPhoneInput" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{7,15}" required>
+      </div>
+      <div class="field">
+        <label for="clientEmailInput">Email (optional)</label>
+        <input type="email" id="clientEmailInput">
+      </div>
+      <div class="field">
+        <label for="clientNotesInput">Notes (optional)</label>
+        <textarea id="clientNotesInput" rows="2"></textarea>
+      </div>
+      <p id="clientFormError" class="err"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="clientCancelBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save client</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ================= RECEIPT MODAL ================= -->
+<div class="modal-overlay" id="receiptModalOverlay" hidden>
+  <div class="modal" id="receiptModal">
+    <h3>Receipt — <span id="receiptTicketNum"></span></h3>
+    <div class="receipt-sheet">
+      <div class="receipt-row"><span class="k">Client</span><span id="receiptClient"></span></div>
+      <div class="receipt-row"><span class="k">Device</span><span id="receiptDevice"></span></div>
+      <div class="receipt-row"><span class="k">Issue</span><span id="receiptIssue"></span></div>
+      <div class="receipt-row"><span class="k">Status</span><span id="receiptStatus"></span></div>
+      <div class="receipt-row"><span class="k">Payment</span><span id="receiptPayment"></span></div>
+      <div class="receipt-row receipt-total"><span class="k">Amount</span><span id="receiptAmount"></span></div>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="receiptCloseBtn">Close</button>
+      <button type="button" class="btn btn-ghost" id="receiptPrintBtn">Print / Save PDF</button>
+      <button type="button" class="btn btn-amber" id="receiptWhatsAppBtn">Send via WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- CONFIG ----------
+  var SUPABASE_URL = 'https://gtfqasmqbgxjfnwlvxjp.supabase.co';
+  var SUPABASE_KEY = 'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  var STATUS_LABELS = {received:'Received', diagnosing:'Diagnosing', in_progress:'In progress', ready:'Ready', delivered:'Delivered', cancelled:'Cancelled'};
+  var PAYMENT_LABELS = {unpaid:'Unpaid', partial:'Partial', paid:'Paid'};
+
+  var clientsCache = [];
+  var ticketsCache = [];
+
+  // ---------- AUTH ----------
+  var loginScreen = document.getElementById('loginScreen');
+  var appEl = document.getElementById('app');
+
+  sb.auth.onAuthStateChange(function(event, session){
+    if (session){
+      loginScreen.classList.add('hidden');
+      appEl.classList.remove('hidden');
+      loadClients().then(loadTickets);
+    } else {
+      appEl.classList.add('hidden');
+      loginScreen.classList.remove('hidden');
+    }
+  });
+
+  sb.auth.getSession().then(function(res){
+    if (!res.data.session){
+      loginScreen.classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var email = document.getElementById('loginEmail').value.trim();
+    var password = document.getElementById('loginPassword').value;
+    var errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+    sb.auth.signInWithPassword({ email: email, password: password }).then(function(res){
+      if (res.error) errEl.textContent = res.error.message;
+    });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    sb.auth.signOut();
+  });
+
+  // ---------- TABS ----------
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-tickets').classList.toggle('hidden', btn.dataset.tab !== 'tickets');
+      document.getElementById('tab-clients').classList.toggle('hidden', btn.dataset.tab !== 'clients');
+    });
+  });
+
+  // ---------- CLIENTS ----------
+  function loadClients(){
+    return sb.from('clients').select('*').order('created_at', {ascending:false}).then(function(res){
+      if (res.error) { console.error(res.error); return; }
+      clientsCache = res.data || [];
+      renderClientSelect();
+      renderClients();
+    });
+  }
+
+  function renderClientSelect(){
+    var sel = document.getElementById('ticketClient');
+    sel.innerHTML = clientsCache.map(function(c){
+      return '<option value="' + c.id + '">' + escapeHtml(c.name) + ' — ' + escapeHtml(c.phone) + '</option>';
+    }).join('');
+  }
+
+  function renderClients(){
+    var list = document.getElementById('clientList');
+    if (!clientsCache.length){
+      list.innerHTML = '<div class="empty-state">No clients yet. Add your first one with "+ New client".</div>';
+      return;
+    }
+    list.innerHTML = clientsCache.map(function(c){
+      var ticketCount = ticketsCache.filter(function(t){ return t.client_id === c.id; }).length;
+      return (
+        '<div class="row-card">' +
+          '<div class="row-main">' +
+            '<div class="row-top"><span class="row-title">' + escapeHtml(c.name) + '</span></div>' +
+            '<div class="row-sub mono">' + escapeHtml(c.phone) + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
+            (c.notes ? '<div class="row-sub">' + escapeHtml(c.notes) + '</div>' : '') +
+            '<div class="row-sub">' + ticketCount + ' ticket' + (ticketCount === 1 ? '' : 's') + '</div>' +
+          '</div>' +
+          '<div class="row-actions">' +
+            '<button type="button" class="btn btn-amber btn-sm" onclick="messageClient(\'' + c.id + '\')">WhatsApp</button>' +
+            '<button type="button" class="btn btn-ghost btn-sm" onclick="editClient(\'' + c.id + '\')">Edit</button>' +
+            '<button type="button" class="btn btn-danger btn-sm" onclick="deleteClient(\'' + c.id + '\')">Delete</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  window.messageClient = function(id){
+    var c = clientsCache.find(function(x){ return x.id === id; });
+    if (!c) return;
+    var msg = 'Hi ' + c.name + ', this is StylesPC reaching out about your service.';
+    window.open('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(msg), '_blank');
+  };
+
+  window.editClient = function(id){
+    var c = clientsCache.find(function(x){ return x.id === id; });
+    if (!c) return;
+    document.getElementById('clientModalTitle').textContent = 'Edit client';
+    document.getElementById('clientFormId').value = c.id;
+    document.getElementById('clientNameInput').value = c.name;
+    document.getElementById('clientPhoneInput').value = c.phone;
+    document.getElementById('clientEmailInput').value = c.email || '';
+    document.getElementById('clientNotesInput').value = c.notes || '';
+    openModal('clientModalOverlay');
+  };
+
+  window.deleteClient = function(id){
+    if (!confirm('Delete this client? Their tickets will stay but lose the client link.')) return;
+    sb.from('clients').delete().eq('id', id).then(function(res){
+      if (res.error) { alert(res.error.message); return; }
+      loadClients().then(loadTickets);
+    });
+  };
+
+  document.getElementById('newClientBtn').addEventListener('click', function(){
+    document.getElementById('clientModalTitle').textContent = 'New client';
+    document.getElementById('clientForm').reset();
+    document.getElementById('clientFormId').value = '';
+    openModal('clientModalOverlay');
+  });
+  document.getElementById('clientCancelBtn').addEventListener('click', function(){ closeModal('clientModalOverlay'); });
+
+  document.getElementById('clientForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var id = document.getElementById('clientFormId').value;
+    var payload = {
+      name: document.getElementById('clientNameInput').value.trim(),
+      phone: document.getElementById('clientPhoneInput').value.replace(/\D/g,''),
+      email: document.getElementById('clientEmailInput').value.trim() || null,
+      notes: document.getElementById('clientNotesInput').value.trim() || null
+    };
+    var errEl = document.getElementById('clientFormError');
+    errEl.textContent = '';
+    var query = id ? sb.from('clients').update(payload).eq('id', id) : sb.from('clients').insert(payload);
+    query.then(function(res){
+      if (res.error) { errEl.textContent = res.error.message; return; }
+      closeModal('clientModalOverlay');
+      loadClients();
+    });
+  });
+
+  // ---------- TICKETS ----------
+  function loadTickets(){
+    return sb.from('tickets').select('*').order('created_at', {ascending:false}).then(function(res){
+      if (res.error) { console.error(res.error); return; }
+      ticketsCache = res.data || [];
+      renderTickets();
+      renderClients();
+    });
+  }
+
+  function clientName(id){
+    var c = clientsCache.find(function(x){ return x.id === id; });
+    return c ? c.name : '—';
+  }
+
+  function statusPillClass(status){
+    if (status === 'ready' || status === 'delivered') return 'pill-teal';
+    if (status === 'cancelled') return 'pill-red';
+    return 'pill-amber';
+  }
+
+  function renderTickets(){
+    var filter = document.getElementById('statusFilter').value;
+    var list = document.getElementById('ticketList');
+    var rows = ticketsCache.filter(function(t){ return !filter || t.status === filter; });
+    if (!rows.length){
+      list.innerHTML = '<div class="empty-state">No tickets match this filter yet.</div>';
+      return;
+    }
+    list.innerHTML = rows.map(function(t){
+      return (
+        '<div class="row-card">' +
+          '<div class="row-main">' +
+            '<div class="row-top">' +
+              '<span class="row-id mono">' + t.ticket_number + '</span>' +
+              '<span class="pill ' + statusPillClass(t.status) + '">' + STATUS_LABELS[t.status] + '</span>' +
+              '<span class="pill ' + (t.payment_status === 'paid' ? 'pill-teal' : 'pill-amber') + '">' + PAYMENT_LABELS[t.payment_status] + '</span>' +
+            '</div>' +
+            '<div class="row-title">' + escapeHtml(t.device) + ' — ' + escapeHtml(clientName(t.client_id)) + '</div>' +
+            '<div class="row-sub">' + escapeHtml(t.issue) + '</div>' +
+            '<div class="row-sub">' + (t.amount != null ? '$' + Number(t.amount).toFixed(2) : 'No amount set') + ' · ' + t.intake + ' in / ' + t.return_method + ' out</div>' +
+          '</div>' +
+          '<div class="row-actions">' +
+            '<button type="button" class="btn btn-ghost btn-sm" onclick="editTicket(\'' + t.id + '\')">Edit</button>' +
+            '<button type="button" class="btn btn-amber btn-sm" onclick="openReceipt(\'' + t.id + '\')">Receipt</button>' +
+            '<button type="button" class="btn btn-danger btn-sm" onclick="cancelTicket(\'' + t.id + '\')">Cancel</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  document.getElementById('statusFilter').addEventListener('change', renderTickets);
+
+  document.getElementById('newTicketBtn').addEventListener('click', function(){
+    if (!clientsCache.length){
+      alert('Add a client first, then create their ticket.');
+      return;
+    }
+    document.getElementById('ticketModalTitle').textContent = 'New ticket';
+    document.getElementById('ticketForm').reset();
+    document.getElementById('ticketFormId').value = '';
+    renderClientSelect();
+    openModal('ticketModalOverlay');
+  });
+  document.getElementById('ticketCancelBtn').addEventListener('click', function(){ closeModal('ticketModalOverlay'); });
+
+  window.editTicket = function(id){
+    var t = ticketsCache.find(function(x){ return x.id === id; });
+    if (!t) return;
+    document.getElementById('ticketModalTitle').textContent = 'Edit ticket ' + t.ticket_number;
+    document.getElementById('ticketFormId').value = t.id;
+    renderClientSelect();
+    document.getElementById('ticketClient').value = t.client_id;
+    document.getElementById('ticketDeviceInput').value = t.device;
+    document.getElementById('ticketIssueInput').value = t.issue;
+    document.getElementById('ticketStatusInput').value = t.status;
+    document.getElementById('ticketIntakeInput').value = t.intake;
+    document.getElementById('ticketReturnInput').value = t.return_method;
+    document.getElementById('ticketAmountInput').value = t.amount != null ? t.amount : '';
+    document.getElementById('ticketPaymentInput').value = t.payment_status;
+    openModal('ticketModalOverlay');
+  };
+
+  window.cancelTicket = function(id){
+    if (!confirm('Mark this ticket as cancelled?')) return;
+    sb.from('tickets').update({status:'cancelled'}).eq('id', id).then(function(res){
+      if (res.error) { alert(res.error.message); return; }
+      loadTickets();
+    });
+  };
+
+  document.getElementById('ticketForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var id = document.getElementById('ticketFormId').value;
+    var amountVal = document.getElementById('ticketAmountInput').value;
+    var payload = {
+      client_id: document.getElementById('ticketClient').value,
+      device: document.getElementById('ticketDeviceInput').value.trim(),
+      issue: document.getElementById('ticketIssueInput').value.trim(),
+      status: document.getElementById('ticketStatusInput').value,
+      intake: document.getElementById('ticketIntakeInput').value,
+      return_method: document.getElementById('ticketReturnInput').value,
+      amount: amountVal === '' ? null : Number(amountVal),
+      payment_status: document.getElementById('ticketPaymentInput').value
+    };
+    var errEl = document.getElementById('ticketFormError');
+    errEl.textContent = '';
+    var query = id ? sb.from('tickets').update(payload).eq('id', id) : sb.from('tickets').insert(payload);
+    query.then(function(res){
+      if (res.error) { errEl.textContent = res.error.message; return; }
+      closeModal('ticketModalOverlay');
+      loadTickets();
+    });
+  });
+
+  // ---------- RECEIPT ----------
+  var currentReceiptTicket = null;
+
+  window.openReceipt = function(id){
+    var t = ticketsCache.find(function(x){ return x.id === id; });
+    if (!t) return;
+    currentReceiptTicket = t;
+    document.getElementById('receiptTicketNum').textContent = t.ticket_number;
+    document.getElementById('receiptClient').textContent = clientName(t.client_id);
+    document.getElementById('receiptDevice').textContent = t.device;
+    document.getElementById('receiptIssue').textContent = t.issue;
+    document.getElementById('receiptStatus').textContent = STATUS_LABELS[t.status];
+    document.getElementById('receiptPayment').textContent = PAYMENT_LABELS[t.payment_status];
+    document.getElementById('receiptAmount').textContent = t.amount != null ? '$' + Number(t.amount).toFixed(2) : '—';
+    openModal('receiptModalOverlay');
+  };
+
+  document.getElementById('receiptCloseBtn').addEventListener('click', function(){ closeModal('receiptModalOverlay'); });
+  document.getElementById('receiptPrintBtn').addEventListener('click', function(){ window.print(); });
+
+  document.getElementById('receiptWhatsAppBtn').addEventListener('click', function(){
+    if (!currentReceiptTicket) return;
+    var t = currentReceiptTicket;
+    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
+    if (!c) { alert('No phone number on file for this client.'); return; }
+    var msg =
+      'StylesPC — Receipt for ' + t.ticket_number + '\n' +
+      'Device: ' + t.device + '\n' +
+      'Issue: ' + t.issue + '\n' +
+      'Status: ' + STATUS_LABELS[t.status] + '\n' +
+      'Payment: ' + PAYMENT_LABELS[t.payment_status] + '\n' +
+      'Amount: ' + (t.amount != null ? '$' + Number(t.amount).toFixed(2) : 'N/A') + '\n' +
+      'Thank you for choosing StylesPC.';
+    window.open('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(msg), '_blank');
+    // Log this as a receipt record
+    sb.from('receipts').insert({ ticket_id: t.id, amount: t.amount || 0, method: 'whatsapp' });
+  });
+
+  // ---------- MODAL HELPERS ----------
+  function openModal(id){ document.getElementById(id).hidden = false; }
+  function closeModal(id){ document.getElementById(id).hidden = true; }
+  document.querySelectorAll('.modal-overlay').forEach(function(overlay){
+    overlay.addEventListener('click', function(e){
+      if (e.target === overlay) overlay.hidden = true;
+    });
+  });
+
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(m){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
+    });
+  }
+</script>
+</body>
+</html>
