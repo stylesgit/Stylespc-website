@@ -1,1 +1,1376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StylesPC — Computer &amp; Laptop Repair</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3EFE7;
+    --paper-2:#EAE3D3;
+    --ink:#1F2421;
+    --ink-soft:#4A4F49;
+    --teal:#2F6F63;
+    --teal-dark:#204b43;
+    --amber:#C97A2B;
+    --rule:#C9C2B2;
+    --white:#FFFDF8;
+    --radius:2px;
+  }
 
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    color:var(--ink);
+    margin:0 0 .4em 0;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:inherit;}
+  img{max-width:100%;display:block;}
+  :focus-visible{outline:3px solid var(--amber); outline-offset:2px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+  /* ---------- NAV ---------- */
+  header.site{
+    position:sticky; top:0; z-index:40;
+    background:rgba(243,239,231,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--rule);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk'; font-weight:700; font-size:1.25rem;
+    text-decoration:none;
+  }
+  .brand .dot{
+    width:10px; height:10px; border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 0 3px rgba(47,111,99,0.18);
+  }
+  .navlinks{display:flex; gap:28px; list-style:none; margin:0; padding:0;}
+  .navlinks a{
+    text-decoration:none; font-size:.92rem; font-weight:500; color:var(--ink-soft);
+    border-bottom:2px solid transparent; padding-bottom:2px;
+    transition:color .15s, border-color .15s;
+  }
+  .navlinks a:hover{color:var(--ink); border-color:var(--amber);}
+  .nav-cta{
+    background:var(--ink); color:var(--white); text-decoration:none;
+    padding:10px 18px; border-radius:var(--radius); font-weight:600; font-size:.88rem;
+    font-family:'IBM Plex Mono'; letter-spacing:.02em;
+  }
+  .navtoggle{display:none;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:76px 0 96px;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero .wrap{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:56px;
+    align-items:center;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono'; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--teal-dark); background:rgba(47,111,99,0.09);
+    padding:6px 12px; border-radius:20px; margin-bottom:22px;
+  }
+  .eyebrow::before{content:"●"; color:var(--teal); font-size:.6rem;}
+  .hero h1{
+    font-size:clamp(2.3rem, 4.2vw, 3.4rem);
+    line-height:1.05;
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--teal-dark);
+    background:linear-gradient(transparent 62%, rgba(201,122,43,0.28) 0);
+  }
+  .hero p.lead{
+    font-size:1.08rem; color:var(--ink-soft); max-width:46ch; margin:18px 0 30px;
+  }
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    display:inline-flex; align-items:center; gap:8px;
+    padding:13px 22px; border-radius:var(--radius); font-weight:600; font-size:.95rem;
+    text-decoration:none; border:1px solid transparent; cursor:pointer;
+    font-family:'IBM Plex Sans';
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--teal); color:var(--white);}
+  .btn-primary:hover{background:var(--teal-dark); box-shadow:0 8px 20px rgba(47,111,99,.25);}
+  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--ink);}
+  .btn-ghost:hover{background:var(--ink); color:var(--white);}
+  .btn-amber{background:var(--amber); color:var(--white);}
+  .btn-amber:hover{background:#a9631e; box-shadow:0 8px 20px rgba(201,122,43,.28);}
+
+  /* ---------- SIGNATURE: SERVICE TAG TICKET ---------- */
+  .ticket-wrap{display:flex; justify-content:center;}
+  .ticket{
+    background:var(--white);
+    width:100%; max-width:360px;
+    border:1.5px solid var(--ink);
+    border-radius:10px;
+    padding:26px 24px 22px;
+    position:relative;
+    box-shadow:10px 12px 0 rgba(31,36,33,0.08);
+    animation:stampIn .55s cubic-bezier(.2,.9,.3,1.2) both;
+  }
+  @keyframes stampIn{
+    0%{opacity:0; transform:scale(.92) rotate(-3deg);}
+    100%{opacity:1; transform:scale(1) rotate(-1.2deg);}
+  }
+  .ticket::before, .ticket::after{
+    content:""; position:absolute; width:22px; height:22px;
+    background:var(--paper); border:1.5px solid var(--ink); border-radius:50%;
+    top:50%; transform:translateY(-50%);
+  }
+  .ticket::before{left:-11px;}
+  .ticket::after{right:-11px;}
+  .ticket-perf{
+    border-top:2px dashed var(--rule);
+    margin:16px 0;
+  }
+  .ticket-row{display:flex; justify-content:space-between; margin:9px 0; font-size:.86rem;}
+  .ticket-row .k{color:var(--ink-soft);}
+  .ticket-row .v{font-family:'IBM Plex Mono'; font-weight:600;}
+  .ticket-top{display:flex; justify-content:space-between; align-items:flex-start;}
+  .ticket-id{font-family:'IBM Plex Mono'; font-size:.78rem; color:var(--ink-soft);}
+  .ticket-title{font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;}
+  .status-pill{
+    display:inline-block; font-family:'IBM Plex Mono'; font-size:.72rem; font-weight:600;
+    letter-spacing:.04em; padding:4px 10px; border-radius:20px;
+    background:rgba(47,111,99,0.12); color:var(--teal-dark);
+    border:1px solid rgba(47,111,99,0.35);
+  }
+  .status-pill.amber{background:rgba(201,122,43,0.12); color:#a9631e; border-color:rgba(201,122,43,0.4);}
+  .stamp{
+    position:absolute; bottom:18px; right:20px;
+    font-family:'Space Grotesk'; font-weight:700; font-size:.85rem;
+    color:var(--amber); border:2px solid var(--amber); border-radius:6px;
+    padding:4px 10px; transform:rotate(-8deg); opacity:.9;
+    letter-spacing:.05em;
+  }
+  .stamp[hidden]{display:none;}
+  #heroTicket.cycling{animation:stampIn .55s cubic-bezier(.2,.9,.3,1.2) both;}
+
+  /* ---------- SECTION SHELLS ---------- */
+  section{padding:88px 0;}
+  section.alt{background:var(--paper-2); border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);}
+  .section-head{max-width:640px; margin-bottom:48px;}
+  .section-head .eyebrow{margin-bottom:14px;}
+  .section-head h2{font-size:clamp(1.7rem,3vw,2.3rem);}
+  .section-head p{color:var(--ink-soft); font-size:1.02rem;}
+
+  /* ---------- SERVICES ---------- */
+  .services-grid{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:20px;
+  }
+  .service-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px;
+    padding:26px 22px; transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .service-card:hover{transform:translateY(-4px); box-shadow:0 14px 30px rgba(31,36,33,.08);}
+  .service-icon{
+    width:42px; height:42px; border-radius:8px; background:rgba(47,111,99,.1);
+    display:flex; align-items:center; justify-content:center; margin-bottom:16px;
+    color:var(--teal-dark);
+  }
+  .service-card h3{font-size:1.05rem; margin-bottom:8px;}
+  .service-card p{font-size:.9rem; color:var(--ink-soft); margin:0;}
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    position:relative;
+  }
+  .step{position:relative; padding:0 20px 0 0;}
+  .step:not(:last-child)::after{
+    content:""; position:absolute; top:22px; right:-2px; width:calc(100% - 44px);
+    border-top:1px dashed var(--rule);
+  }
+  .step-num{
+    font-family:'IBM Plex Mono'; font-weight:600; font-size:.85rem;
+    width:44px; height:44px; border-radius:50%; border:1.5px solid var(--ink);
+    display:flex; align-items:center; justify-content:center; background:var(--white);
+    margin-bottom:16px; position:relative; z-index:1;
+  }
+  .step h3{font-size:1rem; margin-bottom:6px;}
+  .step p{font-size:.87rem; color:var(--ink-soft);}
+
+  /* ---------- WORK / PORTFOLIO ---------- */
+  .work-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .work-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  }
+  .work-thumb{
+    height:150px; display:flex; align-items:center; justify-content:center;
+    background:
+      repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px),
+      var(--paper-2);
+    border-bottom:1px solid var(--rule);
+    color:var(--teal-dark);
+  }
+  .work-body{padding:18px 20px;}
+  .work-body .tag{
+    font-family:'IBM Plex Mono'; font-size:.7rem; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--amber); display:block; margin-bottom:6px;
+  }
+  .work-body h3{font-size:1rem; margin-bottom:6px;}
+  .work-body p{font-size:.87rem; color:var(--ink-soft); margin:0;}
+  .work-thumb-pair{display:flex; height:150px; border-bottom:1px solid var(--rule);}
+  .work-thumb-half{position:relative; width:50%; overflow:hidden; background:var(--paper-2);}
+  .work-thumb-half:first-child{border-right:1px solid var(--rule);}
+  .work-thumb-half img{width:100%; height:100%; object-fit:cover; display:block;}
+  .thumb-label{
+    position:absolute; bottom:6px; left:6px; font-family:'IBM Plex Mono'; font-size:.65rem;
+    text-transform:uppercase; letter-spacing:.04em; background:rgba(31,36,33,0.75); color:#fff;
+    padding:2px 8px; border-radius:10px;
+  }
+
+  /* ---------- IMAGE GALLERY ---------- */
+  .gallery{position:relative; aspect-ratio:4/3; border-bottom:1px solid var(--rule); background:var(--paper-2); overflow:hidden;}
+  .gallery-viewport{position:relative; width:100%; height:100%;}
+  .gallery-img{width:100%; height:100%; object-fit:contain; display:block;}
+  .gallery-empty{display:flex; align-items:center; justify-content:center; width:100%; height:100%;
+    background:repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px), var(--paper-2);}
+  .gallery-empty::after{content:"Add photo"; font-family:'IBM Plex Mono'; font-size:.75rem; color:var(--teal-dark);}
+  .gallery-label{display:block;}
+  .gallery-nav{
+    position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+    width:28px; height:28px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(255,253,248,0.85); color:var(--ink); font-size:1.1rem; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .gallery-nav:hover{background:var(--white);}
+  .gallery-prev{left:8px;}
+  .gallery-next{right:8px;}
+  .gallery-dots{position:absolute; bottom:6px; right:8px; display:flex; gap:5px; z-index:2;}
+  .gallery-dot{width:6px; height:6px; border-radius:50%; background:rgba(31,36,33,0.3); cursor:pointer; border:none; padding:0;}
+  .gallery-dot.active{background:var(--white);}
+
+  /* ---------- PRICING ---------- */
+  .price-table{
+    width:100%; border-collapse:collapse; background:var(--white);
+    border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  }
+  .price-table th, .price-table td{
+    text-align:left; padding:14px 20px; border-bottom:1px solid var(--rule); font-size:.92rem;
+  }
+  .price-table th{
+    font-family:'IBM Plex Mono'; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--ink-soft); background:var(--paper-2);
+  }
+  .price-table td.amt{font-family:'IBM Plex Mono'; font-weight:600; text-align:right;}
+  .price-table tr:last-child td{border-bottom:none;}
+  .price-note{font-size:.82rem; color:var(--ink-soft); margin-top:14px;}
+
+  /* ---------- PAY ONLINE ---------- */
+  .pay-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:20px;}
+  .pay-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:26px;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .pay-card h3{font-size:1.05rem; margin:0;}
+  .pay-card .amt{font-family:'IBM Plex Mono'; font-size:1.4rem; font-weight:600;}
+  .pay-card p{font-size:.88rem; color:var(--ink-soft); margin:0;}
+  .pay-note{
+    margin-top:22px; font-size:.82rem; color:var(--ink-soft);
+    background:rgba(201,122,43,0.08); border:1px dashed var(--amber);
+    padding:14px 16px; border-radius:6px;
+  }
+
+  /* ---------- CUSTOM BUILD ---------- */
+  .build-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:20px;}
+  .build-card{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+    display:flex; flex-direction:column; padding-bottom:22px;
+  }
+  .build-thumb{overflow:hidden; background:var(--paper-2); border-bottom:1px solid var(--rule);}
+  .build-thumb img{width:100%; height:auto; display:block;}
+  .build-thumb-empty{
+    display:flex; align-items:center; justify-content:center;
+    background:
+      repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px),
+      var(--paper-2);
+  }
+  .build-thumb-empty::after{content:"Add photo"; font-family:'IBM Plex Mono'; font-size:.75rem; color:var(--teal-dark);}
+  .build-card h3{font-size:1.05rem; margin:18px 20px 6px;}
+  .build-card p{font-size:.88rem; color:var(--ink-soft); margin:0 20px 16px; flex-grow:1;}
+  .build-btn{margin:0 20px; align-self:flex-start;}
+
+  /* ---------- PAYMENT METHOD SELECTOR ---------- */
+  .method-select{display:flex; gap:12px; flex-wrap:wrap; margin-bottom:22px;}
+  .method-btn{
+    padding:13px 24px; border-radius:var(--radius); font-weight:600; font-size:.95rem;
+    font-family:'IBM Plex Sans'; cursor:pointer;
+    background:var(--white); color:var(--ink); border:1.5px solid var(--rule);
+    transition:border-color .15s, background .15s, color .15s;
+  }
+  .method-btn:hover{border-color:var(--teal);}
+  .method-btn.active{background:var(--teal); border-color:var(--teal); color:var(--white);}
+  .method-panel{background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:26px; max-width:560px;}
+  .method-panel-inner h3{font-size:1.05rem; margin-bottom:10px;}
+  .method-panel-inner p{font-size:.92rem; color:var(--ink-soft); margin:0 0 6px;}
+  .mini-form{margin-top:16px; display:grid; gap:14px; max-width:340px;}
+  .field-hint{font-size:.78rem; color:var(--ink-soft); margin-top:4px; display:block;}
+  .field input:invalid{border-color:var(--rule);}
+  #bankFormStatus{font-size:.86rem; font-weight:600;}
+  #bankFormStatus.ok{color:var(--teal-dark);}
+  #bankFormStatus.err{color:#a3372a;}
+
+  /* ---------- CONTACT / BOOKING ---------- */
+  .contact-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:52px; align-items:start;
+  }
+  form.book{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:30px;
+    display:grid; gap:16px;
+  }
+  .field{display:grid; gap:6px;}
+  .field label{font-size:.82rem; font-weight:600; color:var(--ink-soft);}
+  .field input, .field select, .field textarea{
+    font-family:'IBM Plex Sans'; font-size:.94rem; padding:11px 12px;
+    border:1px solid var(--rule); border-radius:4px; background:var(--paper);
+    color:var(--ink); width:100%;
+  }
+  .field textarea{resize:vertical; min-height:90px;}
+  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .form-note{font-size:.8rem; color:var(--ink-soft);}
+  #formStatus{font-size:.88rem; font-weight:600;}
+  #formStatus.ok{color:var(--teal-dark);}
+
+  .contact-info h3{font-size:1.15rem; margin-bottom:10px;}
+  .info-row{display:flex; gap:12px; margin-bottom:16px; font-size:.92rem;}
+  .info-row .k{font-family:'IBM Plex Mono'; color:var(--ink-soft); min-width:88px; font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; padding-top:2px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--ink); color:#DAD6CB; padding:44px 0 30px;
+  }
+  footer .wrap{
+    display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:20px;
+  }
+  footer .brand{color:#fff;}
+  footer .brand .dot{background:var(--amber); box-shadow:0 0 0 3px rgba(201,122,43,.22);}
+  footer p{font-size:.85rem; color:#A9A499; margin:6px 0 0;}
+  footer .fine{
+    width:100%; border-top:1px solid #33372F; margin-top:30px; padding-top:18px;
+    font-size:.78rem; color:#8b8779; text-align:center;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width:900px){
+    .navlinks{display:none;}
+    .hero .wrap{grid-template-columns:1fr;}
+    .ticket-wrap{margin-top:10px;}
+    .services-grid{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:repeat(2,1fr); row-gap:32px;}
+    .step:nth-child(2)::after{display:none;}
+    .work-grid{grid-template-columns:repeat(2,1fr);}
+    .build-grid{grid-template-columns:repeat(2,1fr);}
+    .pay-grid{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:560px){
+    .services-grid{grid-template-columns:1fr;}
+    .steps{grid-template-columns:1fr;}
+    .step::after{display:none;}
+    .work-grid{grid-template-columns:1fr;}
+    .build-grid{grid-template-columns:1fr;}
+    .field-row{grid-template-columns:1fr;}
+  }
+
+  /* ---------- LIGHTBOX (click any photo to view it large) ---------- */
+  .build-thumb img, .gallery-img{cursor:zoom-in;}
+  .lightbox-overlay{
+    position:fixed; inset:0; background:rgba(20,22,19,0.92); z-index:100;
+    display:none; align-items:center; justify-content:center; padding:36px;
+    cursor:zoom-out;
+  }
+  .lightbox-overlay:not([hidden]){display:flex;}
+  .lightbox-overlay img{
+    max-width:100%; max-height:100%; object-fit:contain;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); border-radius:4px; cursor:default;
+  }
+  .lightbox-close{
+    position:absolute; top:18px; right:20px; width:40px; height:40px; border-radius:50%;
+    border:none; background:rgba(255,255,255,.14); color:#fff; font-size:1.3rem; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .lightbox-close:hover{background:rgba(255,255,255,.24);}
+
+  /* ---------- FIRESTICK / LIVE TV EXAMPLES ---------- */
+  .firestick-examples{margin-top:36px;}
+  .firestick-examples h3{font-size:1.1rem; margin-bottom:6px;}
+  .firestick-examples > p{font-size:.92rem; color:var(--ink-soft); margin:0 0 20px;}
+  .firestick-media{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .firestick-shots{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+  }
+  .firestick-video{
+    background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden;
+    display:flex; align-items:center; justify-content:center; aspect-ratio:16/9;
+  }
+  .firestick-video iframe, .firestick-video video{width:100%; height:100%; display:block; border:0;}
+  .firestick-video-empty{
+    display:flex; align-items:center; justify-content:center; width:100%; height:100%;
+    background:repeating-linear-gradient(135deg, rgba(47,111,99,.08) 0 12px, transparent 12px 24px), var(--paper-2);
+    font-family:'IBM Plex Mono'; font-size:.78rem; color:var(--teal-dark); text-align:center; padding:0 20px;
+  }
+  @media (max-width:900px){
+    .firestick-media{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <nav class="wrap">
+    <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
+    <ul class="navlinks">
+      <li><a href="#services">Services</a></li>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#work">Our Work</a></li>
+      <li><a href="#custom-build">Custom Build</a></li>
+      <li><a href="#refurbished">Refurbished</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#firestick">Firestick</a></li>
+      <li><a href="#pay">Pay Online</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Book a Repair</a>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <span class="eyebrow">Home-based repair shop · Pickup &amp; drop-off</span>
+        <h1>Your computer's <em>next repair ticket</em> starts here.</h1>
+        <p class="lead">StylesPC collects, diagnoses, and repairs computers and laptops — with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
+        <div class="hero-ctas">
+          <a href="#contact" class="btn btn-primary">Book a Repair</a>
+          <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
+        </div>
+      </div>
+      <div class="ticket-wrap">
+        <div class="ticket" id="heroTicket">
+          <div class="ticket-top">
+            <div>
+              <div class="ticket-title">Service Tag</div>
+              <div class="ticket-id" id="ticketId">#SPC-0148</div>
+            </div>
+            <span class="status-pill" id="ticketStatus">IN PROGRESS</span>
+          </div>
+          <div class="ticket-perf"></div>
+          <div class="ticket-row"><span class="k">Device</span><span class="v" id="ticketDevice">Laptop — 14"</span></div>
+          <div class="ticket-row"><span class="k">Issue</span><span class="v" id="ticketIssue">Won't boot</span></div>
+          <div class="ticket-row"><span class="k">Intake</span><span class="v" id="ticketIntake">Pickup</span></div>
+          <div class="ticket-row"><span class="k">Return</span><span class="v" id="ticketReturn">Drop-off</span></div>
+          <div class="ticket-perf"></div>
+          <div class="ticket-row"><span class="k">Technician</span><span class="v" id="ticketTech">StylesPC</span></div>
+          <div class="stamp" id="ticketStamp">REPAIRED</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SERVICES ================= -->
+  <section id="services" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">What I do</span>
+        <h2>Repair services, in-shop or from wherever you are</h2>
+        <p>Every device gets a service tag, tracked from intake to return.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h3>Full Diagnosis &amp; Repair</h3>
+          <p>Hardware faults, slow performance, boot failures, and everything in between — diagnosed and fixed at the shop.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17l-4-4 4-4M15 7l4 4-4 4"/></svg>
+          </div>
+          <h3>Remote Access Support</h3>
+          <p>Application errors, operating system issues, and software troubleshooting — fixed live over a remote session.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l3-7h12l3 7v6a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M3 12h18"/></svg>
+          </div>
+          <h3>Pickup Service</h3>
+          <p>Can't get away? I'll collect your device from your address and bring it in for repair.</p>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 8h-3V4H4v13h2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/><path d="M4 13h13v4H8"/></svg>
+          </div>
+          <h3>Drop-off / Delivery</h3>
+          <p>Once your repair's complete, get your device delivered straight back to you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Process</span>
+        <h2>From drop-off to delivery</h2>
+        <p>Four steps, start to finish — you can follow your service tag the whole way.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Request service</h3>
+          <p>Fill out the booking form with your device and issue. You'll get a service tag number.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Send it in</h3>
+          <p>Book a pickup, drop it off yourself, or start a remote session for software/OS issues.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Diagnose &amp; repair</h3>
+          <p>Your device is assessed, repaired, and tested against the reported issue.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Pay &amp; get it back</h3>
+          <p>Pay online, then pick up or arrange drop-off delivery back to you.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= OUR WORK ================= -->
+  <section id="work" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Our work</span>
+        <h2>Recent tickets, closed out</h2>
+        <p>A sample of the kind of repairs that come through the shop.</p>
+      </div>
+      <div class="work-grid">
+        <div class="work-card">
+          <div class="gallery" data-images="hinge-before-1.jpg,hinge-before-2.jpg,hinge-before-3.jpg,hinge-before-4.jpg,hinge-before-5.jpg,hinge-before-6.jpg,hinge-before-7.jpg,hinge-before-8.jpg,hinge-before-9.jpg,hinge-before-10.jpg,hinge-after-1.jpg,hinge-after-2.jpg,hinge-after-3.jpg,hinge-after-4.jpg,hinge-after-5.jpg,hinge-after-6.jpg,hinge-after-7.jpg,hinge-after-8.jpg,hinge-after-9.jpg,hinge-after-10.jpg" data-labels="Before,Before,Before,Before,Before,Before,Before,Before,Before,Before,After,After,After,After,After,After,After,After,After,After">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Laptop hinge repair example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
+          </div>
+          <div class="work-body">
+            <span class="tag">Hardware</span>
+            <h3>Laptop Hinge Repair</h3>
+            <p>Broken or loose hinge repaired — screen opens and holds position smoothly again.</p>
+          </div>
+        </div>
+        <div class="work-card">
+          <div class="gallery" data-images="screen-before-1.jpg,screen-before-2.jpg,screen-before-3.jpg,screen-before-4.jpg,screen-before-5.jpg,screen-after-1.jpg,screen-after-2.jpg,screen-after-3.jpg,screen-after-4.jpg,screen-after-5.jpg" data-labels="Before,Before,Before,Before,Before,After,After,After,After,After">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Laptop screen replacement example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
+          </div>
+          <div class="work-body">
+            <span class="tag">Hardware</span>
+            <h3>Laptop Screen Replacement</h3>
+            <p>Cracked display swapped and tested — back to full brightness and color.</p>
+          </div>
+        </div>
+        <div class="work-card">
+          <div class="build-thumb">
+            <img src="images/virus-cleanup.jpg" alt="Virus removal and cleanup example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <div class="work-body">
+            <span class="tag">Software</span>
+            <h3>Virus Removal &amp; Cleanup</h3>
+            <p>Malware removed, startup programs trimmed, and system performance restored.</p>
+          </div>
+        </div>
+        <div class="work-card">
+          <div class="build-thumb">
+            <img src="images/os-install.jpg" alt="Fresh OS install and data recovery example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <div class="work-body">
+            <span class="tag">OS Reinstall</span>
+            <h3>Fresh OS Install &amp; Data Recovery</h3>
+            <p>Corrupted operating system replaced with a clean install, files recovered first.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CUSTOM BUILD ================= -->
+  <section id="custom-build">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Custom built</span>
+        <h2>Custom Built machines</h2>
+        <p>Built new to your spec and budget — the photo on each card is an example. Send your details and StylesPC will follow up on WhatsApp.</p>
+      </div>
+
+      <div class="build-grid">
+        <div class="build-card">
+          <div class="build-thumb">
+            <img src="images/gaming-machine.jpg" alt="Gaming machine example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <h3>Gaming Machine</h3>
+          <p>Built new to your spec and budget — example shown.</p>
+          <button type="button" class="btn btn-primary build-btn" data-build="gaming">I'm Interested</button>
+        </div>
+
+        <div class="build-card">
+          <div class="build-thumb">
+            <img src="images/regular-computer.jpg" alt="Regular computer example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <h3>Regular Computer</h3>
+          <p>Built new for everyday browsing, school work, and general home use — example shown.</p>
+          <button type="button" class="btn btn-primary build-btn" data-build="regular">I'm Interested</button>
+        </div>
+      </div>
+
+      <div id="buildPanel" class="method-panel" hidden>
+        <h3 id="buildPanelTitle">I'm Interested</h3>
+        <form id="buildForm" class="mini-form">
+          <div class="field">
+            <label for="buildName">Full name</label>
+            <input type="text" id="buildName" name="buildName" required>
+          </div>
+          <div class="field">
+            <label for="buildPhone">Phone / WhatsApp number</label>
+            <input type="tel" id="buildPhone" name="buildPhone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+            <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
+          </div>
+          <button type="submit" class="btn btn-amber" id="buildSubmitBtn">Continue on WhatsApp</button>
+          <p id="buildFormStatus" role="status"></p>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= REFURBISHED ================= -->
+  <section id="refurbished" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Refurbished</span>
+        <h2>Refurbished machines</h2>
+        <p>Pre-owned, refurbished machines — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up on WhatsApp.</p>
+      </div>
+
+      <div class="build-grid">
+        <div class="build-card">
+          <div class="build-thumb">
+            <img src="images/wfh-desktop.jpg" alt="Work from home desktop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+          </div>
+          <h3>Work From Home — Desktop</h3>
+          <p>Refurbished, available now — example shown.</p>
+          <button type="button" class="btn btn-primary build-btn" data-build="wfh-desktop">I'm Interested</button>
+        </div>
+
+        <div class="build-card">
+          <div class="gallery" data-images="wfh-laptop-1.jpg,wfh-laptop-2.jpg,wfh-laptop-3.jpg,wfh-laptop-4.jpg,wfh-laptop-5.jpg,wfh-laptop-6.jpg,wfh-laptop-7.jpg,wfh-laptop-8.jpg,wfh-laptop-9.jpg,wfh-laptop-10.jpg" data-labels="Example,Example,Example,Example,Example,Example,Example,Example,Example,Example">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Work from home laptop example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
+          </div>
+          <h3>Work From Home — Laptop</h3>
+          <p>Refurbished — currently none in stock, built to order — example shown.</p>
+          <button type="button" class="btn btn-primary build-btn" data-build="wfh-laptop">I'm Interested</button>
+        </div>
+      </div>
+
+      <div id="refurbPanel" class="method-panel" hidden>
+        <h3 id="refurbPanelTitle">I'm Interested</h3>
+        <form id="refurbForm" class="mini-form">
+          <div class="field">
+            <label for="refurbName">Full name</label>
+            <input type="text" id="refurbName" name="refurbName" required>
+          </div>
+          <div class="field">
+            <label for="refurbPhone">Phone / WhatsApp number</label>
+            <input type="tel" id="refurbPhone" name="refurbPhone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+            <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
+          </div>
+          <button type="submit" class="btn btn-amber" id="refurbSubmitBtn">Continue on WhatsApp</button>
+          <p id="refurbFormStatus" role="status"></p>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= PRICING ================= -->
+  <section id="pricing">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Rates</span>
+        <h2>Standard service pricing</h2>
+        <p>The same rates used on your service tag and invoice — final cost depends on the issue.</p>
+      </div>
+      <table class="price-table">
+        <thead>
+          <tr><th>Service</th><th style="text-align:right;">Starting Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Diagnostic Fee</td><td class="amt">$2,500</td></tr>
+          <tr><td>Virus / Malware Removal</td><td class="amt">$3,000</td></tr>
+          <tr><td>Operating System Reinstall</td><td class="amt">$5,000</td></tr>
+          <tr><td>Software / Application Troubleshooting</td><td class="amt">$2,000</td></tr>
+          <tr><td>Remote Access Support (per session)</td><td class="amt">$2,000</td></tr>
+          <tr><td>Hardware Repair Labor</td><td class="amt">$2,500</td></tr>
+          <tr><td>Data Backup / Recovery</td><td class="amt">$3,500</td></tr>
+          <tr><td>Pickup Service</td><td class="amt">$1,500</td></tr>
+          <tr><td>Misc — Remove Admin Lock-Out / Reset Windows</td><td class="amt">$1,500</td></tr>
+          <tr><td>Drop-off / Delivery Service</td><td class="amt">$1,500</td></tr>
+        </tbody>
+      </table>
+      <p class="price-note">Prices shown are starting rates and may vary with issue complexity or parts required. You'll always get a quote before work begins.</p>
+    </div>
+  </section>
+
+  <!-- ================= FIRESTICK ================= -->
+  <section id="firestick" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Firestick</span>
+        <h2>Firestick setup &amp; Live TV</h2>
+        <p>Full Firestick setup with Live TV subscription, including local channels.</p>
+      </div>
+      <table class="price-table">
+        <thead>
+          <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Full Setup</td><td class="amt">$2,500</td></tr>
+          <tr><td>Live TV Subscription (incl. local channels) — 1st month, includes app installation &amp; setup</td><td class="amt">$1,500</td></tr>
+          <tr><td>Live TV Subscription — per month after</td><td class="amt">$500</td></tr>
+          <tr><td>Apps Installation (per application)</td><td class="amt">$250</td></tr>
+          <tr><td>Pickup Fee</td><td class="amt">$1,500</td></tr>
+          <tr><td>Drop-off Fee</td><td class="amt">$1,500</td></tr>
+        </tbody>
+      </table>
+      <button type="button" class="btn btn-primary" id="firestickBtn" style="margin-top:22px;">Get Started on WhatsApp</button>
+      <p class="price-note">Prices shown are starting rates and may vary depending on setup requirements.</p>
+
+      <div class="firestick-examples">
+        <h3>See it in action</h3>
+        <p>A look at the Live TV channel guide and setup on an actual Firestick.</p>
+        <div class="firestick-media">
+          <div class="gallery firestick-shots" data-images="livetv-1.jpg,livetv-2.jpg,livetv-3.jpg,livetv-4.jpg,livetv-5.jpg,livetv-6.jpg" data-labels="Live TV,Live TV,Live TV,Live TV,Live TV,Live TV">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Live TV channel guide example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
+          </div>
+          <div class="firestick-video" id="firestickVideo">
+            <div class="firestick-video-empty">Demo video coming soon</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PAY ONLINE ================= -->
+  <section id="pay" class="alt">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Pay online</span>
+        <h2>Pay for a service</h2>
+        <p>Cover a remote session or a pickup/drop-off ahead of time — or settle up after your repair is done.</p>
+      </div>
+      <div class="method-select" role="group" aria-label="Choose a payment method">
+        <button type="button" class="method-btn" data-method="cash">Cash</button>
+        <button type="button" class="method-btn" data-method="card">Card</button>
+        <button type="button" class="method-btn" data-method="bank">Bank Transfer</button>
+      </div>
+
+      <div id="methodPanel" class="method-panel" hidden>
+
+        <div id="panel-cash" class="method-panel-inner" hidden>
+          <h3>Pay with Cash</h3>
+          <p>You can pay in cash when your device is picked up, dropped off, or collected from you — no need to pay online ahead of time.</p>
+        </div>
+
+        <div id="panel-card" class="method-panel-inner" hidden>
+          <h3>Pay with Card</h3>
+          <p>Card payments are <strong>temporarily unavailable</strong> — this option is still being set up. In the meantime, please use <strong>Bank Transfer</strong> below.</p>
+        </div>
+
+        <div id="panel-bank" class="method-panel-inner" hidden>
+          <h3>Pay by Bank Transfer</h3>
+          <p>Enter your phone/WhatsApp number below and it'll open WhatsApp so you can send it straight to StylesPC — you'll then be messaged shortly with banking details.</p>
+          <form id="bankForm" class="mini-form">
+            <div class="field">
+              <label for="bankPhone">Phone / WhatsApp number</label>
+              <input type="tel" id="bankPhone" name="phone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
+              <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
+            </div>
+            <button type="submit" class="btn btn-primary" id="bankSubmitBtn">Continue on WhatsApp</button>
+            <p id="bankFormStatus" role="status"></p>
+          </form>
+        </div>
+
+      </div>
+      <p class="pay-note">Online card payments are on the way — for now, choose Cash on collection/delivery, or Bank Transfer to arrange payment directly with StylesPC over WhatsApp.</p>
+    </div>
+  </section>
+
+  <!-- ================= CONTACT / BOOKING ================= -->
+  <section id="contact">
+    <div class="wrap contact-grid">
+      <div>
+        <div class="section-head" style="margin-bottom:28px;">
+          <span class="eyebrow">Get started</span>
+          <h2>Book a repair</h2>
+          <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
+        </div>
+        <div class="contact-info">
+          <div class="info-row"><span class="k">Email</span><span>ajstyleg@gmail.com</span></div>
+          <div class="info-row"><span class="k">Phone</span><span>(876) 334-1156</span></div>
+          <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
+          <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop-off within local area</span></div>
+        </div>
+      </div>
+      <form class="book" id="bookForm">
+        <div class="field-row">
+          <div class="field">
+            <label for="name">Full name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          <div class="field">
+            <label for="contactMethod">Phone or email</label>
+            <input type="text" id="contactMethod" name="contactMethod" required>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="device">Device type</label>
+            <input type="text" id="device" name="device" placeholder="e.g. Dell laptop" required>
+          </div>
+          <div class="field">
+            <label for="serviceType">Preferred service</label>
+            <select id="serviceType" name="serviceType" required>
+              <option value="">Choose one</option>
+              <option>Drop-off (I'll bring it in)</option>
+              <option>Pickup (collect from my address)</option>
+              <option>Remote Access Support</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="issue">Describe the issue</label>
+          <textarea id="issue" name="issue" required></textarea>
+        </div>
+        <input type="hidden" name="_subject" value="New Repair Booking Request — StylesPC">
+        <button type="submit" class="btn btn-primary" id="bookSubmitBtn">Continue on WhatsApp</button>
+        <p class="form-note">This opens WhatsApp with your details filled in, ready to send straight to StylesPC.</p>
+        <p id="formStatus" role="status"></p>
+      </form>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
+      <p>Computer &amp; laptop repair — pickup, drop-off &amp; remote support.</p>
+    </div>
+    <div>
+      <p>ajstyleg@gmail.com · (876) 334-1156</p>
+    </div>
+  </div>
+  <div class="wrap">
+    <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis-first guarantee.</div>
+  </div>
+</footer>
+
+<script>
+  // Image galleries (hinge repair, refurbished laptop, etc.)
+  // Reads the data-images list on each .gallery element, quietly checks
+  // which of those files actually exist, and only builds dots/nav for
+  // the ones present. Any reserved filename you upload later just starts
+  // showing up automatically — no code changes needed.
+  (function(){
+    var galleries = document.querySelectorAll('.gallery');
+
+    galleries.forEach(function(gallery){
+      var candidateFiles = (gallery.getAttribute('data-images') || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      var candidateLabels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s){ return s.trim(); });
+      if (!candidateFiles.length) return;
+
+      var viewport = gallery.querySelector('.gallery-viewport');
+      var img = gallery.querySelector('.gallery-img');
+      var labelEl = gallery.querySelector('.gallery-label');
+      var dotsWrap = gallery.querySelector('.gallery-dots');
+      var prevBtn = gallery.querySelector('.gallery-prev');
+      var nextBtn = gallery.querySelector('.gallery-next');
+
+      img.style.display = 'none';
+
+      // Quietly probe each candidate file to see if it actually exists,
+      // preserving original order, before building the visible gallery.
+      var checks = candidateFiles.map(function(file){
+        return new Promise(function(resolve){
+          var probe = new Image();
+          probe.onload = function(){ resolve({exists:true, w:probe.naturalWidth, h:probe.naturalHeight}); };
+          probe.onerror = function(){ resolve({exists:false}); };
+          probe.src = 'images/' + file;
+        });
+      });
+
+      Promise.all(checks).then(function(results){
+        var files = [];
+        var labels = [];
+        var dims = [];
+        results.forEach(function(r, i){
+          if (r.exists) {
+            files.push(candidateFiles[i]);
+            labels.push(candidateLabels[i] || '');
+            dims.push({w:r.w, h:r.h});
+          }
+        });
+
+        if (!files.length) {
+          var empty = document.createElement('div');
+          empty.className = 'gallery-empty';
+          viewport.insertBefore(empty, img);
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+          return;
+        }
+
+        var index = 0;
+
+        files.forEach(function(_, i){
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+          dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
+          dot.addEventListener('click', function(){ show(i); });
+          dotsWrap.appendChild(dot);
+        });
+        var dots = dotsWrap.querySelectorAll('.gallery-dot');
+
+        if (files.length < 2) {
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+          dotsWrap.style.display = 'none';
+        }
+
+        function show(i){
+          index = (i + files.length) % files.length;
+          img.src = 'images/' + files[index];
+          img.alt = labels[index] || '';
+          labelEl.textContent = labels[index] || '';
+          labelEl.style.display = labels[index] ? 'block' : 'none';
+          dots.forEach(function(d, di){ d.classList.toggle('active', di === index); });
+          var d = dims[index];
+          if (d && d.w && d.h) {
+            gallery.style.aspectRatio = d.w + ' / ' + d.h;
+          }
+        }
+
+        img.style.display = 'block';
+        prevBtn.addEventListener('click', function(){ show(index - 1); });
+        nextBtn.addEventListener('click', function(){ show(index + 1); });
+
+        show(0);
+      });
+    });
+  })();
+
+  // Firestick — Get Started button
+  var firestickBtn = document.getElementById('firestickBtn');
+  if (firestickBtn) {
+    firestickBtn.addEventListener('click', function(){
+      var storeWhatsApp = '18763341156';
+      var message = "Hey, I'm interested in a Firestick full setup with Live TV subscription. Please send me more information.";
+      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+      window.open(waUrl, '_blank');
+    });
+  }
+
+  // Custom Built machine category selector
+  (function(){
+    var buildLabels = {
+      gaming: 'Gaming Machine',
+      regular: 'Regular Computer'
+    };
+    var buildButtons = document.querySelectorAll('#custom-build .build-btn');
+    var buildPanel = document.getElementById('buildPanel');
+    var buildPanelTitle = document.getElementById('buildPanelTitle');
+    var currentBuild = null;
+
+    buildButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        currentBuild = btn.getAttribute('data-build');
+        buildPanelTitle.textContent = "I'm Interested — " + buildLabels[currentBuild];
+        buildPanel.hidden = false;
+        buildPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    var buildForm = document.getElementById('buildForm');
+    var buildPhoneInput = document.getElementById('buildPhone');
+
+    buildPhoneInput.addEventListener('input', function(){
+      buildPhoneInput.value = buildPhoneInput.value.replace(/\D/g, '').slice(0, 11);
+    });
+
+    buildForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var status = document.getElementById('buildFormStatus');
+      var name = document.getElementById('buildName').value.trim();
+      var digits = buildPhoneInput.value.replace(/\D/g, '');
+
+      status.classList.remove('ok', 'err');
+
+      if (!name) {
+        status.textContent = 'Please enter your name.';
+        status.classList.add('err');
+        return;
+      }
+      if (digits.length !== 11) {
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
+        status.classList.add('err');
+        return;
+      }
+      if (!currentBuild) {
+        status.textContent = 'Please choose a category above first.';
+        status.classList.add('err');
+        return;
+      }
+
+      var storeWhatsApp = '18763341156';
+      var message =
+        'Hey, my name is ' + name + '. ' +
+        'I am interested in a custom-built ' + buildLabels[currentBuild] + '. ' +
+        'My number is ' + digits + '. Please send me more information.';
+
+      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+
+      status.textContent = 'Opening WhatsApp…';
+      status.classList.add('ok');
+      window.open(waUrl, '_blank');
+    });
+  })();
+
+  // Refurbished machine category selector
+  (function(){
+    var refurbLabels = {
+      'wfh-desktop': 'Work From Home Desktop',
+      'wfh-laptop': 'Work From Home Laptop'
+    };
+    var refurbButtons = document.querySelectorAll('#refurbished .build-btn');
+    var refurbPanel = document.getElementById('refurbPanel');
+    var refurbPanelTitle = document.getElementById('refurbPanelTitle');
+    var currentRefurb = null;
+
+    refurbButtons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        currentRefurb = btn.getAttribute('data-build');
+        refurbPanelTitle.textContent = "I'm Interested — " + refurbLabels[currentRefurb];
+        refurbPanel.hidden = false;
+        refurbPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    });
+
+    var refurbForm = document.getElementById('refurbForm');
+    var refurbPhoneInput = document.getElementById('refurbPhone');
+
+    refurbPhoneInput.addEventListener('input', function(){
+      refurbPhoneInput.value = refurbPhoneInput.value.replace(/\D/g, '').slice(0, 11);
+    });
+
+    refurbForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var status = document.getElementById('refurbFormStatus');
+      var name = document.getElementById('refurbName').value.trim();
+      var digits = refurbPhoneInput.value.replace(/\D/g, '');
+
+      status.classList.remove('ok', 'err');
+
+      if (!name) {
+        status.textContent = 'Please enter your name.';
+        status.classList.add('err');
+        return;
+      }
+      if (digits.length !== 11) {
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
+        status.classList.add('err');
+        return;
+      }
+      if (!currentRefurb) {
+        status.textContent = 'Please choose a category above first.';
+        status.classList.add('err');
+        return;
+      }
+
+      var storeWhatsApp = '18763341156';
+      var message =
+        'Hey, my name is ' + name + '. ' +
+        'I am interested in this refurbished ' + refurbLabels[currentRefurb] + ' machine. ' +
+        'My number is ' + digits + '. Please send me more information.';
+
+      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+
+      status.textContent = 'Opening WhatsApp…';
+      status.classList.add('ok');
+      window.open(waUrl, '_blank');
+    });
+  })();
+
+  // Payment method selector
+  (function(){
+    var buttons = document.querySelectorAll('.method-btn');
+    var panel = document.getElementById('methodPanel');
+    var panels = {
+      cash: document.getElementById('panel-cash'),
+      card: document.getElementById('panel-card'),
+      bank: document.getElementById('panel-bank')
+    };
+    buttons.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        buttons.forEach(function(b){ b.classList.remove('active'); });
+        btn.classList.add('active');
+        Object.keys(panels).forEach(function(key){ panels[key].hidden = true; });
+        var method = btn.getAttribute('data-method');
+        panels[method].hidden = false;
+        panel.hidden = false;
+      });
+    });
+  })();
+
+  // Bank transfer — number entry -> open WhatsApp
+  var bankForm = document.getElementById('bankForm');
+  if (bankForm) {
+    var bankPhoneInput = document.getElementById('bankPhone');
+
+    // Keep the field digits-only as the person types
+    bankPhoneInput.addEventListener('input', function(){
+      bankPhoneInput.value = bankPhoneInput.value.replace(/\D/g, '').slice(0, 11);
+    });
+
+    bankForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var status = document.getElementById('bankFormStatus');
+      var digits = bankPhoneInput.value.replace(/\D/g, '');
+
+      status.classList.remove('ok', 'err');
+
+      if (digits.length !== 11) {
+        status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
+        status.classList.add('err');
+        return;
+      }
+
+      var storeWhatsApp = '18763341156';
+      var message = 'Hi StylesPC, I would like to pay by bank transfer. My number is ' + digits + '. Please send me your banking details.';
+      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+
+      status.textContent = 'Opening WhatsApp…';
+      status.classList.add('ok');
+      window.open(waUrl, '_blank');
+    });
+  }
+
+  // Hero "Service Tag" ticket — cycles through example jobs so the hero
+  // always shows an active-looking ticket. Edit HERO_TICKETS to change
+  // what appears; this is just illustrative content, not live job data.
+  (function(){
+    var el = {
+      wrap: document.getElementById('heroTicket'),
+      id: document.getElementById('ticketId'),
+      status: document.getElementById('ticketStatus'),
+      device: document.getElementById('ticketDevice'),
+      issue: document.getElementById('ticketIssue'),
+      intake: document.getElementById('ticketIntake'),
+      ret: document.getElementById('ticketReturn'),
+      tech: document.getElementById('ticketTech'),
+      stamp: document.getElementById('ticketStamp')
+    };
+    if (!el.wrap) return;
+
+    var HERO_TICKETS = [
+      { id:'#SPC-0148', status:'IN PROGRESS', device:'Laptop — 14"', issue:"Won't boot", intake:'Pickup', ret:'Drop-off', tech:'StylesPC', stamp:null },
+      { id:'#SPC-0149', status:'DIAGNOSING', device:'Desktop — Gaming PC', issue:'Random blue-screen crashes', intake:'Drop-off', ret:'Pickup', tech:'StylesPC', stamp:null },
+      { id:'#SPC-0150', status:'READY', device:'MacBook Pro 13"', issue:'Cracked screen', intake:'Drop-off', ret:'Drop-off', tech:'StylesPC', stamp:'REPAIRED' },
+      { id:'#SPC-0151', status:'READY', device:'Laptop — 15.6"', issue:'Slow performance / virus cleanup', intake:'Pickup', ret:'Pickup', tech:'StylesPC', stamp:'CLEARED' },
+      { id:'#SPC-0152', status:'IN PROGRESS', device:'Desktop — Custom Build', issue:'No display output', intake:'Drop-off', ret:'Drop-off', tech:'StylesPC', stamp:null },
+      { id:'#SPC-0153', status:'READY', device:'Laptop — Hinge repair', issue:'Loose, broken hinge', intake:'Pickup', ret:'Drop-off', tech:'StylesPC', stamp:'REPAIRED' }
+    ];
+
+    var i = 0;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function render(t){
+      el.id.textContent = t.id;
+      el.status.textContent = t.status;
+      el.status.classList.toggle('amber', t.status !== 'READY');
+      el.device.textContent = t.device;
+      el.issue.textContent = t.issue;
+      el.intake.textContent = t.intake;
+      el.ret.textContent = t.ret;
+      el.tech.textContent = t.tech;
+      if (t.stamp){
+        el.stamp.textContent = t.stamp;
+        el.stamp.hidden = false;
+      } else {
+        el.stamp.hidden = true;
+      }
+      if (!reduceMotion){
+        el.wrap.classList.remove('cycling');
+        void el.wrap.offsetWidth; // restart animation
+        el.wrap.classList.add('cycling');
+      }
+    }
+
+    render(HERO_TICKETS[0]);
+    if (!reduceMotion){
+      setInterval(function(){
+        i = (i + 1) % HERO_TICKETS.length;
+        render(HERO_TICKETS[i]);
+      }, 4500);
+    }
+  })();
+
+
+  (function(){
+    var overlay = document.createElement('div');
+    overlay.className = 'lightbox-overlay';
+    overlay.hidden = true;
+    overlay.innerHTML = '<button type="button" class="lightbox-close" aria-label="Close">✕</button><img alt="">';
+    document.body.appendChild(overlay);
+    var lbImg = overlay.querySelector('img');
+    var closeBtn = overlay.querySelector('.lightbox-close');
+
+    function openLightbox(src, alt){
+      lbImg.src = src;
+      lbImg.alt = alt || '';
+      overlay.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeLightbox(){
+      overlay.hidden = true;
+      lbImg.src = '';
+      document.body.style.overflow = '';
+    }
+    overlay.addEventListener('click', function(e){
+      if (e.target === overlay) closeLightbox();
+    });
+    closeBtn.addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && !overlay.hidden) closeLightbox();
+    });
+    document.addEventListener('click', function(e){
+      var img = e.target.closest('.build-thumb img, .gallery-img');
+      if (img && img.src) openLightbox(img.src, img.alt);
+    });
+  })();
+
+  // Firestick Live TV demo video.
+  // To go live: either drop an mp4 into images/ and set LOCAL_VIDEO_FILE,
+  // or paste a YouTube embed URL into YOUTUBE_EMBED_URL. Leave both blank
+  // to keep showing the "coming soon" placeholder.
+  (function(){
+    var LOCAL_VIDEO_FILE = ''; // e.g. 'firestick-demo.mp4' (place in images/)
+    var YOUTUBE_EMBED_URL = ''; // e.g. 'https://www.youtube.com/embed/VIDEO_ID'
+    var holder = document.getElementById('firestickVideo');
+    if (!holder) return;
+
+    if (LOCAL_VIDEO_FILE) {
+      holder.innerHTML = '<video controls playsinline src="images/' + LOCAL_VIDEO_FILE + '"></video>';
+    } else if (YOUTUBE_EMBED_URL) {
+      holder.innerHTML = '<iframe src="' + YOUTUBE_EMBED_URL + '" title="Live TV demo" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+    }
+  })();
+
+  document.getElementById('bookForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var status = document.getElementById('formStatus');
+
+    var name = document.getElementById('name').value.trim();
+    var contactMethod = document.getElementById('contactMethod').value.trim();
+    var device = document.getElementById('device').value.trim();
+    var serviceType = document.getElementById('serviceType').value;
+    var issue = document.getElementById('issue').value.trim();
+
+    status.classList.remove('ok', 'err');
+
+    if (!name || !contactMethod || !device || !serviceType || !issue) {
+      status.textContent = 'Please fill in all fields before continuing.';
+      status.classList.add('err');
+      return;
+    }
+
+    var storeWhatsApp = '18763341156';
+    var message =
+      'New Repair Booking Request — StylesPC\n' +
+      'Name: ' + name + '\n' +
+      'Contact: ' + contactMethod + '\n' +
+      'Device: ' + device + '\n' +
+      'Preferred service: ' + serviceType + '\n' +
+      'Issue: ' + issue;
+
+    var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
+
+    status.textContent = 'Opening WhatsApp…';
+    status.classList.add('ok');
+    window.open(waUrl, '_blank');
+  });
+</script>
+
+</body>
+</html>
