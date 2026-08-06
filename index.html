@@ -559,8 +559,14 @@
           </div>
         </div>
         <div class="work-card">
-          <div class="work-thumb">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="12" rx="1"/><path d="M8 20h8M12 16v4"/></svg>
+          <div class="gallery" data-images="screen-before-1.jpg,screen-before-2.jpg,screen-before-3.jpg,screen-before-4.jpg,screen-before-5.jpg,screen-after-1.jpg,screen-after-2.jpg,screen-after-3.jpg,screen-after-4.jpg,screen-after-5.jpg" data-labels="Before,Before,Before,Before,Before,After,After,After,After,After">
+            <div class="gallery-viewport">
+              <img class="gallery-img" src="" alt="Laptop screen replacement example">
+              <span class="thumb-label gallery-label"></span>
+            </div>
+            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+            <div class="gallery-dots"></div>
           </div>
           <div class="work-body">
             <span class="tag">Hardware</span>
@@ -569,8 +575,8 @@
           </div>
         </div>
         <div class="work-card">
-          <div class="work-thumb">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v6M12 15v6M4.2 6.2l4.2 4.2M15.6 13.6l4.2 4.2M3 12h6M15 12h6M4.2 17.8l4.2-4.2M15.6 10.4l4.2-4.2"/></svg>
+          <div class="build-thumb">
+            <img src="images/virus-cleanup.jpg" alt="Virus removal and cleanup example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
           </div>
           <div class="work-body">
             <span class="tag">Software</span>
@@ -579,8 +585,8 @@
           </div>
         </div>
         <div class="work-card">
-          <div class="work-thumb">
-            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 4h16v12H4z"/><path d="M9 20h6M12 16v4"/><path d="M8 9l2 2 -2 2M13 13h3"/></svg>
+          <div class="build-thumb">
+            <img src="images/os-install.jpg" alt="Fresh OS install and data recovery example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
           </div>
           <div class="work-body">
             <span class="tag">OS Reinstall</span>
@@ -869,15 +875,17 @@
 
 <script>
   // Image galleries (hinge repair, refurbished laptop, etc.)
-  // Reads the data-images list on each .gallery element — empty slots
-  // just show an "Add photo" placeholder until a real photo is uploaded.
+  // Reads the data-images list on each .gallery element, quietly checks
+  // which of those files actually exist, and only builds dots/nav for
+  // the ones present. Any reserved filename you upload later just starts
+  // showing up automatically — no code changes needed.
   (function(){
     var galleries = document.querySelectorAll('.gallery');
 
     galleries.forEach(function(gallery){
-      var files = (gallery.getAttribute('data-images') || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-      var labels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s){ return s.trim(); });
-      if (!files.length) return;
+      var candidateFiles = (gallery.getAttribute('data-images') || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+      var candidateLabels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s){ return s.trim(); });
+      if (!candidateFiles.length) return;
 
       var viewport = gallery.querySelector('.gallery-viewport');
       var img = gallery.querySelector('.gallery-img');
@@ -885,44 +893,72 @@
       var dotsWrap = gallery.querySelector('.gallery-dots');
       var prevBtn = gallery.querySelector('.gallery-prev');
       var nextBtn = gallery.querySelector('.gallery-next');
-      var index = 0;
 
-      files.forEach(function(_, i){
-        var dot = document.createElement('button');
-        dot.type = 'button';
-        dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
-        dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
-        dot.addEventListener('click', function(){ show(i); });
-        dotsWrap.appendChild(dot);
+      img.style.display = 'none';
+
+      // Quietly probe each candidate file to see if it actually exists,
+      // preserving original order, before building the visible gallery.
+      var checks = candidateFiles.map(function(file){
+        return new Promise(function(resolve){
+          var probe = new Image();
+          probe.onload = function(){ resolve(true); };
+          probe.onerror = function(){ resolve(false); };
+          probe.src = 'images/' + file;
+        });
       });
-      var dots = dotsWrap.querySelectorAll('.gallery-dot');
 
-      function show(i){
-        index = (i + files.length) % files.length;
-        img.src = 'images/' + files[index];
-        img.alt = labels[index] || '';
-        labelEl.textContent = labels[index] || '';
-        labelEl.style.display = labels[index] ? 'block' : 'none';
-        dots.forEach(function(d, di){ d.classList.toggle('active', di === index); });
-      }
+      Promise.all(checks).then(function(results){
+        var files = [];
+        var labels = [];
+        results.forEach(function(exists, i){
+          if (exists) {
+            files.push(candidateFiles[i]);
+            labels.push(candidateLabels[i] || '');
+          }
+        });
 
-      img.addEventListener('error', function(){
-        if (viewport.querySelector('.gallery-empty')) return;
-        img.style.display = 'none';
-        var empty = document.createElement('div');
-        empty.className = 'gallery-empty';
-        viewport.insertBefore(empty, img);
-      });
-      img.addEventListener('load', function(){
-        var empty = viewport.querySelector('.gallery-empty');
-        if (empty) empty.remove();
+        if (!files.length) {
+          var empty = document.createElement('div');
+          empty.className = 'gallery-empty';
+          viewport.insertBefore(empty, img);
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+          return;
+        }
+
+        var index = 0;
+
+        files.forEach(function(_, i){
+          var dot = document.createElement('button');
+          dot.type = 'button';
+          dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+          dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
+          dot.addEventListener('click', function(){ show(i); });
+          dotsWrap.appendChild(dot);
+        });
+        var dots = dotsWrap.querySelectorAll('.gallery-dot');
+
+        if (files.length < 2) {
+          prevBtn.style.display = 'none';
+          nextBtn.style.display = 'none';
+          dotsWrap.style.display = 'none';
+        }
+
+        function show(i){
+          index = (i + files.length) % files.length;
+          img.src = 'images/' + files[index];
+          img.alt = labels[index] || '';
+          labelEl.textContent = labels[index] || '';
+          labelEl.style.display = labels[index] ? 'block' : 'none';
+          dots.forEach(function(d, di){ d.classList.toggle('active', di === index); });
+        }
+
         img.style.display = 'block';
+        prevBtn.addEventListener('click', function(){ show(index - 1); });
+        nextBtn.addEventListener('click', function(){ show(index + 1); });
+
+        show(0);
       });
-
-      prevBtn.addEventListener('click', function(){ show(index - 1); });
-      nextBtn.addEventListener('click', function(){ show(index + 1); });
-
-      show(0);
     });
   })();
 
