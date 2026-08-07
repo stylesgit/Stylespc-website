@@ -262,10 +262,16 @@
       <div class="receipt-row"><span class="k">Payment</span><span id="receiptPayment"></span></div>
       <div class="receipt-row receipt-total"><span class="k">Amount</span><span id="receiptAmount"></span></div>
     </div>
+    <p id="receiptSendNote" class="row-sub" style="margin:0 0 10px;">Each option opens the message ready to go in that app — you (or your client) still tap send there.</p>
+    <div class="modal-actions" style="justify-content:flex-start; flex-wrap:wrap;">
+      <button type="button" class="btn btn-amber btn-sm" id="receiptWhatsAppBtn">WhatsApp</button>
+      <button type="button" class="btn btn-amber btn-sm" id="receiptSmsBtn">Text (SMS)</button>
+      <button type="button" class="btn btn-amber btn-sm" id="receiptEmailBtn">Email</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="receiptCopyBtn">Copy message</button>
+    </div>
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost" id="receiptCloseBtn">Close</button>
       <button type="button" class="btn btn-ghost" id="receiptPrintBtn">Print / Save PDF</button>
-      <button type="button" class="btn btn-amber" id="receiptWhatsAppBtn">Send via WhatsApp</button>
     </div>
   </div>
 </div>
@@ -563,22 +569,61 @@
   document.getElementById('receiptCloseBtn').addEventListener('click', function(){ closeModal('receiptModalOverlay'); });
   document.getElementById('receiptPrintBtn').addEventListener('click', function(){ window.print(); });
 
-  document.getElementById('receiptWhatsAppBtn').addEventListener('click', function(){
-    if (!currentReceiptTicket) return;
-    var t = currentReceiptTicket;
-    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
-    if (!c) { alert('No phone number on file for this client.'); return; }
-    var msg =
-      'StylesPC — Receipt for ' + t.ticket_number + '\n' +
+  function receiptMessage(t){
+    return 'StylesPC — Receipt for ' + t.ticket_number + '\n' +
       'Device: ' + t.device + '\n' +
       'Issue: ' + t.issue + '\n' +
       'Status: ' + STATUS_LABELS[t.status] + '\n' +
       'Payment: ' + PAYMENT_LABELS[t.payment_status] + '\n' +
       'Amount: ' + (t.amount != null ? '$' + Number(t.amount).toFixed(2) : 'N/A') + '\n' +
       'Thank you for choosing StylesPC.';
-    window.open('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(msg), '_blank');
-    // Log this as a receipt record
-    sb.from('receipts').insert({ ticket_id: t.id, amount: t.amount || 0, method: 'whatsapp' });
+  }
+
+  function logReceipt(t){
+    sb.from('receipts').insert({ ticket_id: t.id, amount: t.amount || 0, method: 'sent' });
+  }
+
+  document.getElementById('receiptWhatsAppBtn').addEventListener('click', function(){
+    if (!currentReceiptTicket) return;
+    var t = currentReceiptTicket;
+    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
+    if (!c || !c.phone) { alert('No phone number on file for this client.'); return; }
+    window.open('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(receiptMessage(t)), '_blank');
+    logReceipt(t);
+  });
+
+  document.getElementById('receiptSmsBtn').addEventListener('click', function(){
+    if (!currentReceiptTicket) return;
+    var t = currentReceiptTicket;
+    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
+    if (!c || !c.phone) { alert('No phone number on file for this client.'); return; }
+    // sms: URI support varies by OS/browser — works best on mobile devices with a default SMS app.
+    window.open('sms:' + c.phone + '?body=' + encodeURIComponent(receiptMessage(t)), '_blank');
+    logReceipt(t);
+  });
+
+  document.getElementById('receiptEmailBtn').addEventListener('click', function(){
+    if (!currentReceiptTicket) return;
+    var t = currentReceiptTicket;
+    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
+    if (!c || !c.email) { alert('No email on file for this client. Add one by editing the client.'); return; }
+    var subject = 'Your StylesPC receipt — ' + t.ticket_number;
+    window.open('mailto:' + c.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(receiptMessage(t)), '_blank');
+    logReceipt(t);
+  });
+
+  document.getElementById('receiptCopyBtn').addEventListener('click', function(){
+    if (!currentReceiptTicket) return;
+    var msg = receiptMessage(currentReceiptTicket);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(msg).then(function(){
+        alert('Receipt message copied — paste it anywhere.');
+      }, function(){
+        prompt('Copy this message manually:', msg);
+      });
+    } else {
+      prompt('Copy this message manually:', msg);
+    }
   });
 
   // ---------- MODAL HELPERS ----------
