@@ -81,6 +81,7 @@
     padding:10px 18px; border-radius:var(--radius); font-weight:600; font-size:.88rem;
     font-family:'IBM Plex Mono'; letter-spacing:.02em;
   }
+  .nav-cta.whatsapp-nav{background:#25D366; color:#fff;}
   .navtoggle{display:none;}
 
   /* ---------- HERO ---------- */
@@ -128,6 +129,8 @@
   .btn-ghost:hover{background:var(--ink); color:var(--white);}
   .btn-amber{background:var(--amber); color:var(--white);}
   .btn-amber:hover{background:#a9631e; box-shadow:0 8px 20px rgba(201,122,43,.28);}
+  .btn-whatsapp{background:#25D366; color:#fff;}
+  .btn-whatsapp:hover{background:#1da85a; box-shadow:0 8px 20px rgba(37,211,102,.3);}
 
   /* ---------- SIGNATURE: SERVICE TAG TICKET ---------- */
   .ticket-wrap{display:flex; justify-content:center;}
@@ -384,6 +387,33 @@
     font-size:.78rem; color:#8b8779; text-align:center;
   }
 
+  /* ---------- FLOATING WHATSAPP BUTTON ---------- */
+  .whatsapp-float {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 999;
+    background-color: #25D366;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+  }
+  .whatsapp-float:hover {
+    transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+  }
+  .whatsapp-float svg {
+    width: 34px;
+    height: 34px;
+    fill: white;
+  }
+
   /* ---------- RESPONSIVE ---------- */
   @media (max-width:900px){
     .navlinks{display:none;}
@@ -406,7 +436,7 @@
     .field-row{grid-template-columns:1fr;}
   }
 
-  /* ---------- LIGHTBOX (click any photo to view it large) ---------- */
+  /* ---------- LIGHTBOX ---------- */
   .build-thumb img, .gallery-img{cursor:zoom-in;}
   .lightbox-overlay{
     position:fixed; inset:0; background:rgba(20,22,19,0.92); z-index:100;
@@ -465,6 +495,7 @@
       <li><a href="#pay">Pay Online</a></li>
     </ul>
     <a href="#contact" class="nav-cta">Book a Repair</a>
+    <a href="#" class="nav-cta whatsapp-nav" id="navWhatsApp">💬 Chat</a>
   </nav>
 </header>
 
@@ -797,7 +828,7 @@
           <tr><td>Drop-off Fee</td><td class="amt">$1,500</td></tr>
         </tbody>
       </table>
-      <button type="button" class="btn btn-primary" id="firestickBtn" style="margin-top:22px;">Get Started on WhatsApp</button>
+      <button type="button" class="btn btn-whatsapp" id="firestickBtn" style="margin-top:22px;">💬 Get Started on WhatsApp</button>
       <p class="price-note">Prices shown are starting rates and may vary depending on setup requirements.</p>
 
       <div class="firestick-examples">
@@ -856,7 +887,7 @@
               <input type="tel" id="bankPhone" name="phone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
               <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
             </div>
-            <button type="submit" class="btn btn-primary" id="bankSubmitBtn">Continue on WhatsApp</button>
+            <button type="submit" class="btn btn-whatsapp" id="bankSubmitBtn">💬 Continue on WhatsApp</button>
             <p id="bankFormStatus" role="status"></p>
           </form>
         </div>
@@ -947,15 +978,36 @@
   </div>
 </footer>
 
+<!-- Floating WhatsApp Button -->
+<a href="#" id="whatsappFloat" class="whatsapp-float" aria-label="Chat on WhatsApp">
+  <svg viewBox="0 0 24 24" width="32" height="32">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
 <script>
-  // Image galleries (hinge repair, refurbished laptop, etc.)
-  // Reads the data-images list on each .gallery element, quietly checks
-  // which of those files actually exist, and only builds dots/nav for
-  // the ones present. Any reserved filename you upload later just starts
-  // showing up automatically — no code changes needed.
+  // ============================================================
+  //  WHATSAPP CONFIG — centralised number and helper
+  // ============================================================
+  const STORE_WHATSAPP = '18763341156';
+
+  function openWhatsApp(message) {
+    const url = 'https://wa.me/' + STORE_WHATSAPP + '?text=' + encodeURIComponent(message);
+    window.open(url, '_blank');
+  }
+
+  // Helper: ensure 10‑digit numbers get the Jamaica country code (1)
+  function normalizePhoneDigits(raw) {
+    let digits = raw.replace(/\D/g, '');
+    if (digits.length === 10) digits = '1' + digits;
+    return digits;
+  }
+
+  // ============================================================
+  //  IMAGE GALLERIES (unchanged)
+  // ============================================================
   (function(){
     var galleries = document.querySelectorAll('.gallery');
-
     galleries.forEach(function(gallery){
       var candidateFiles = (gallery.getAttribute('data-images') || '').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
       var candidateLabels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s){ return s.trim(); });
@@ -970,8 +1022,6 @@
 
       img.style.display = 'none';
 
-      // Quietly probe each candidate file to see if it actually exists,
-      // preserving original order, before building the visible gallery.
       var checks = candidateFiles.map(function(file){
         return new Promise(function(resolve){
           var probe = new Image();
@@ -1042,18 +1092,20 @@
     });
   })();
 
-  // Firestick — Get Started button
+  // ============================================================
+  //  FIRESTICK
+  // ============================================================
   var firestickBtn = document.getElementById('firestickBtn');
   if (firestickBtn) {
     firestickBtn.addEventListener('click', function(){
-      var storeWhatsApp = '18763341156';
       var message = "Hey, I'm interested in a Firestick full setup with Live TV subscription. Please send me more information.";
-      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
-      window.open(waUrl, '_blank');
+      openWhatsApp(message);
     });
   }
 
-  // Custom Built machine category selector
+  // ============================================================
+  //  CUSTOM BUILT
+  // ============================================================
   (function(){
     var buildLabels = {
       gaming: 'Gaming Machine',
@@ -1084,7 +1136,7 @@
       e.preventDefault();
       var status = document.getElementById('buildFormStatus');
       var name = document.getElementById('buildName').value.trim();
-      var digits = buildPhoneInput.value.replace(/\D/g, '');
+      var digits = normalizePhoneDigits(buildPhoneInput.value);
 
       status.classList.remove('ok', 'err');
 
@@ -1104,21 +1156,20 @@
         return;
       }
 
-      var storeWhatsApp = '18763341156';
       var message =
         'Hey, my name is ' + name + '. ' +
         'I am interested in a custom-built ' + buildLabels[currentBuild] + '. ' +
         'My number is ' + digits + '. Please send me more information.';
 
-      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
-
       status.textContent = 'Opening WhatsApp…';
       status.classList.add('ok');
-      window.open(waUrl, '_blank');
+      openWhatsApp(message);
     });
   })();
 
-  // Refurbished machine category selector
+  // ============================================================
+  //  REFURBISHED
+  // ============================================================
   (function(){
     var refurbLabels = {
       'wfh-desktop': 'Work From Home Desktop',
@@ -1149,7 +1200,7 @@
       e.preventDefault();
       var status = document.getElementById('refurbFormStatus');
       var name = document.getElementById('refurbName').value.trim();
-      var digits = refurbPhoneInput.value.replace(/\D/g, '');
+      var digits = normalizePhoneDigits(refurbPhoneInput.value);
 
       status.classList.remove('ok', 'err');
 
@@ -1169,21 +1220,20 @@
         return;
       }
 
-      var storeWhatsApp = '18763341156';
       var message =
         'Hey, my name is ' + name + '. ' +
         'I am interested in this refurbished ' + refurbLabels[currentRefurb] + ' machine. ' +
         'My number is ' + digits + '. Please send me more information.';
 
-      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
-
       status.textContent = 'Opening WhatsApp…';
       status.classList.add('ok');
-      window.open(waUrl, '_blank');
+      openWhatsApp(message);
     });
   })();
 
-  // Payment method selector
+  // ============================================================
+  //  PAYMENT METHOD SELECTOR
+  // ============================================================
   (function(){
     var buttons = document.querySelectorAll('.method-btn');
     var panel = document.getElementById('methodPanel');
@@ -1204,12 +1254,13 @@
     });
   })();
 
-  // Bank transfer — number entry -> open WhatsApp
+  // ============================================================
+  //  BANK TRANSFER
+  // ============================================================
   var bankForm = document.getElementById('bankForm');
   if (bankForm) {
     var bankPhoneInput = document.getElementById('bankPhone');
 
-    // Keep the field digits-only as the person types
     bankPhoneInput.addEventListener('input', function(){
       bankPhoneInput.value = bankPhoneInput.value.replace(/\D/g, '').slice(0, 11);
     });
@@ -1217,7 +1268,7 @@
     bankForm.addEventListener('submit', function(e){
       e.preventDefault();
       var status = document.getElementById('bankFormStatus');
-      var digits = bankPhoneInput.value.replace(/\D/g, '');
+      var digits = normalizePhoneDigits(bankPhoneInput.value);
 
       status.classList.remove('ok', 'err');
 
@@ -1227,19 +1278,16 @@
         return;
       }
 
-      var storeWhatsApp = '18763341156';
       var message = 'Hi StylesPC, I would like to pay by bank transfer. My number is ' + digits + '. Please send me your banking details.';
-      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
-
       status.textContent = 'Opening WhatsApp…';
       status.classList.add('ok');
-      window.open(waUrl, '_blank');
+      openWhatsApp(message);
     });
   }
 
-  // Hero "Service Tag" ticket — cycles through example jobs so the hero
-  // always shows an active-looking ticket. Edit HERO_TICKETS to change
-  // what appears; this is just illustrative content, not live job data.
+  // ============================================================
+  //  HERO TICKET CYCLER (unchanged)
+  // ============================================================
   (function(){
     var el = {
       wrap: document.getElementById('heroTicket'),
@@ -1283,7 +1331,7 @@
       }
       if (!reduceMotion){
         el.wrap.classList.remove('cycling');
-        void el.wrap.offsetWidth; // restart animation
+        void el.wrap.offsetWidth;
         el.wrap.classList.add('cycling');
       }
     }
@@ -1297,7 +1345,9 @@
     }
   })();
 
-
+  // ============================================================
+  //  LIGHTBOX (unchanged)
+  // ============================================================
   (function(){
     var overlay = document.createElement('div');
     overlay.className = 'lightbox-overlay';
@@ -1331,12 +1381,11 @@
     });
   })();
 
-  // Firestick Live TV demo photo.
-  // Drop a photo named firestick-demo.jpg into your images/ folder and it
-  // shows up here automatically — no code changes needed. Leave it out to
-  // keep showing the "coming soon" placeholder. Click the photo to enlarge.
+  // ============================================================
+  //  FIRESTICK DEMO PHOTO (unchanged)
+  // ============================================================
   (function(){
-    var PHOTO_FILE = 'firestick-demo.jpg'; // place in images/
+    var PHOTO_FILE = 'firestick-demo.jpg';
     var holder = document.getElementById('firestickPhoto');
     var emptyState = document.getElementById('firestickPhotoEmpty');
     if (!holder) return;
@@ -1350,11 +1399,14 @@
       holder.appendChild(img);
     };
     probe.onerror = function(){
-      // leave the "coming soon" placeholder in place
+      // keep placeholder
     };
     probe.src = 'images/' + PHOTO_FILE;
   })();
 
+  // ============================================================
+  //  SUPABASE + BOOKING FORM
+  // ============================================================
   var sbPublic = supabase.createClient(
     'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
     'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
@@ -1375,7 +1427,7 @@
     var submitBtn = document.getElementById('bookSubmitBtn');
 
     var name = document.getElementById('name').value.trim();
-    var phone = document.getElementById('phone').value.trim();
+    var phoneRaw = document.getElementById('phone').value.trim();
     var email = document.getElementById('email').value.trim();
     var device = document.getElementById('device').value.trim();
     var serviceType = serviceTypeEl.value;
@@ -1384,7 +1436,7 @@
 
     status.classList.remove('ok', 'err');
 
-    if (!name || !phone || !device || !serviceType || !issue) {
+    if (!name || !phoneRaw || !device || !serviceType || !issue) {
       status.textContent = 'Please fill in all required fields before continuing.';
       status.classList.add('err');
       return;
@@ -1395,7 +1447,13 @@
       return;
     }
 
-    var phoneDigits = phone.replace(/\D/g, '');
+    var phoneDigits = normalizePhoneDigits(phoneRaw);
+    if (phoneDigits.length !== 11) {
+      status.textContent = 'Please enter a valid phone number with country code (e.g. 8763331156)';
+      status.classList.add('err');
+      return;
+    }
+
     var returnMethod = serviceType === 'Remote' ? 'Remote' : serviceType;
 
     submitBtn.disabled = true;
@@ -1420,27 +1478,38 @@
       }
 
       var ticketNumber = res.data;
-      status.textContent = 'Booked! Your ticket number is ' + ticketNumber + '. Opening WhatsApp to send us a heads-up…';
-      status.classList.add('ok');
-
-      var storeWhatsApp = '18763341156';
       var message =
         'New Repair Booking — ' + ticketNumber + '\n' +
         'Name: ' + name + '\n' +
-        'Phone: ' + phone + '\n' +
+        'Phone: ' + phoneRaw + '\n' +
         (email ? 'Email: ' + email + '\n' : '') +
         'Device: ' + device + '\n' +
         'Preferred service: ' + serviceType + '\n' +
         (address ? 'Address: ' + address + '\n' : '') +
         'Issue: ' + issue;
 
-      var waUrl = 'https://wa.me/' + storeWhatsApp + '?text=' + encodeURIComponent(message);
-      window.open(waUrl, '_blank');
+      status.textContent = 'Booked! Your ticket is ' + ticketNumber + '. Opening WhatsApp…';
+      status.classList.add('ok');
+      openWhatsApp(message);
       document.getElementById('bookForm').reset();
       addressHint.textContent = '(optional)';
       addressField.required = false;
     });
   });
+
+  // ============================================================
+  //  FLOATING WHATSAPP BUTTON + NAV "CHAT" LINK
+  // ============================================================
+  document.getElementById('whatsappFloat').addEventListener('click', function(e) {
+    e.preventDefault();
+    openWhatsApp("Hi StylesPC, I need help with a computer repair or service.");
+  });
+
+  document.getElementById('navWhatsApp').addEventListener('click', function(e) {
+    e.preventDefault();
+    openWhatsApp("Hi, I have a quick question about your repair services.");
+  });
+
 </script>
 
 </body>
