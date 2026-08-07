@@ -10,6 +10,9 @@
     <!-- EmailJS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
     </script>
+    <!-- Leaflet (map + pickup distance/fare estimate) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
         /* ============================================================
            ROOT & RESET
@@ -1227,15 +1230,11 @@
                 <li><a href="#how">How It Works</a></li>
                 <li><a href="#work">Our Work</a></li>
                 <li><a href="#pricing">Pricing</a></li>
-                <li class="dropdown">
-                    <a href="#" aria-haspopup="true">More ▾</a>
-                    <ul class="dropdown-menu" aria-label="More pages">
-                        <li><a href="#custom-build">Custom Build</a></li>
-                        <li><a href="#refurbished">Refurbished</a></li>
-                        <li><a href="#firestick">Firestick</a></li>
-                        <li><a href="#pay">Pay Online</a></li>
-                    </ul>
-                </li>
+                <li><a href="#custom-build">Custom Build</a></li>
+                <li><a href="#refurbished">Refurbished</a></li>
+                <li><a href="#firestick">Firestick</a></li>
+                <li><a href="#tv-repair">TV Repair</a></li>
+                <li><a href="#pay">Pay Online</a></li>
             </ul>
             <a href="#contact" class="nav-cta">Book a Repair</a>
         </nav>
@@ -1249,9 +1248,9 @@
         <section class="hero">
             <div class="wrap">
                 <div>
-                    <span class="eyebrow">Home‑based repair shop · Pickup &amp; drop‑off</span>
+                    <span class="eyebrow">Virtual shop · Home‑based · Pickup &amp; drop‑off</span>
                     <h1>Your computer's <em>next repair ticket</em> starts here.</h1>
-                    <p class="lead">StylesPC collects, diagnoses, and repairs computers and laptops — with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
+                    <p class="lead">StylesPC is a virtual repair shop — I work from a home‑based workshop, not a walk‑in storefront. I collect, diagnose, and repair computers and laptops, with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
                     <div class="hero-ctas">
                         <a href="#contact" class="btn btn-primary">Book a Repair</a>
                         <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
@@ -1603,6 +1602,73 @@
         </section>
 
         <!-- ============================================================
+        TV REPAIR (REFERRAL SERVICE)
+        ============================================================ -->
+        <section id="tv-repair" class="alt">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">TV Repair</span>
+                    <h2>TV Repair — Backlight Specialist</h2>
+                    <p>I connect you with a trusted TV repair partner and handle the booking on your behalf.</p>
+                </div>
+                <div style="margin-bottom:22px;padding:16px 20px;background:rgba(201,122,43,0.08);border:1px solid rgba(201,122,43,0.25);border-radius:6px;">
+                    <p style="font-size:0.88rem;color:var(--ink-soft);margin:0;display:flex;align-items:flex-start;gap:10px;">
+                        <span style="font-size:1.2rem;">ℹ️</span>
+                        <span><strong>This is a referral / facilitation service.</strong> I am not the technician who repairs the TV — I take your booking here and pass your information on to our trusted repair partner, who specializes in backlight issues and will contact you directly to carry out the repair.</span>
+                    </p>
+                </div>
+
+                <h3 style="margin-bottom:6px;">Backlight Repair</h3>
+                <p style="margin-bottom:18px;color:var(--ink-soft);">Our repair partner specializes in fixing TV backlight issues — screens that are dim, flickering, or have gone completely dark while the TV still powers on.</p>
+
+                <div class="firestick-media" style="margin-bottom:22px;">
+                    <div class="gallery" data-images="tv-backlight-before-1.jpg,tv-backlight-before-2.jpg,tv-backlight-before-3.jpg,tv-backlight-after-1.jpg,tv-backlight-after-2.jpg,tv-backlight-after-3.jpg" data-labels="Before,Before,Before,After,After,After">
+                        <div class="gallery-viewport">
+                            <img class="gallery-img" src="" alt="TV backlight repair example">
+                            <span class="thumb-label gallery-label"></span>
+                        </div>
+                        <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+                        <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+                        <div class="gallery-dots"></div>
+                    </div>
+                </div>
+
+                <table class="price-table">
+                    <thead>
+                        <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Booking Fee (to arrange &amp; facilitate)</td><td class="amt">$500</td></tr>
+                        <tr><td>Assessment Fee (technician diagnoses the issue)</td><td class="amt">$2,000</td></tr>
+                    </tbody>
+                </table>
+                <p class="price-note">The assessment fee is charged by our repair partner to diagnose the issue; repair cost is quoted separately once the issue is confirmed.</p>
+
+                <form id="tvForm" class="mini-form" style="margin-top:22px;max-width:440px;">
+                    <div class="field">
+                        <label for="tvName">Full name</label>
+                        <input type="text" id="tvName" name="name" required>
+                    </div>
+                    <div class="field">
+                        <label for="tvPhone">Phone number</label>
+                        <input type="tel" id="tvPhone" name="phone" placeholder="e.g. 876 333 1156" required>
+                    </div>
+                    <div class="field">
+                        <label for="tvEmail">Email</label>
+                        <input type="email" id="tvEmail" name="email" required>
+                    </div>
+                    <div class="field">
+                        <label for="tvIssue">TV brand/model &amp; describe the issue</label>
+                        <textarea id="tvIssue" name="issue" required placeholder="e.g. 50&quot; Samsung, screen is dim/flickering"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-email" id="tvSubmitBtn">✉️ Request TV Repair Referral</button>
+                    <p class="form-note">We'll pass your details to our repair partner, who will reach out to arrange the assessment.</p>
+                    <p id="tvFormStatus" role="status"></p>
+                </form>
+            </div>
+        </section>
+
+        <!-- ============================================================
         PAY ONLINE
         ============================================================ -->
         <section id="pay" class="alt">
@@ -1660,10 +1726,18 @@
                         <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
                     </div>
                     <div class="contact-info">
+                        <div class="info-row"><span class="k">Shop type</span><span>Virtual shop — home‑based, no walk‑in storefront</span></div>
                         <div class="info-row"><span class="k">Email</span><span><a href="mailto:ajstyleg@gmail.com" style="color:var(--teal-dark);font-weight:600;">ajstyleg@gmail.com</a></span></div>
                         <div class="info-row"><span class="k">Phone</span><span>(876) 334-1156</span></div>
                         <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
-                        <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop‑off within local area</span></div>
+                        <div class="info-row"><span class="k">Service area</span><span>Kingston &amp; select Saint Andrew — pickup pricing varies by zone (see below) — drop‑off &amp; remote support available anywhere</span></div>
+                    </div>
+                    <div style="margin-top:16px;padding:16px 20px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;">
+                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 8px;font-weight:600;">Pickup pricing zones</p>
+                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟢 <strong>Free pickup:</strong> Franklintown &amp; Rae Town</p>
+                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🔵 <strong>Standard — $1,500:</strong> rest of Kingston &amp; nearby Saint Andrew</p>
+                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟠 <strong>Far zone — per km:</strong> Papine &amp; other outlying Saint Andrew areas</p>
+                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0;">⚡ <strong>Expedited service:</strong> +25% on top of the pickup fee</p>
                     </div>
                     <!-- Temporary WhatsApp disclaimer -->
                     <div style="margin-top:24px;padding:16px 20px;background:rgba(201,122,43,0.08);border:1px solid rgba(201,122,43,0.25);border-radius:6px;">
@@ -1706,8 +1780,17 @@
                         </div>
                         <div class="field">
                             <label for="address">Address / pickup point <span id="addressHint">(optional)</span></label>
-                            <input type="text" id="address" name="address" placeholder="Needed only if you'd like us to collect it">
+                            <input type="text" id="address" name="address" placeholder="e.g. 12 Hope Road, Kingston 6" autocomplete="off">
+                            <p class="form-note" id="areaNote" style="margin-top:6px;">Free pickup in Franklintown &amp; Rae Town. $1,500 flat rate for the rest of Kingston &amp; nearby Saint Andrew. Per‑km rate for outlying Saint Andrew areas (e.g. Papine).</p>
                         </div>
+                    </div>
+                    <div id="pickupMapWrap" style="display:none; margin:4px 0 18px;">
+                        <div id="pickupMap" style="height:240px; border:1px solid var(--rule); border-radius:6px;"></div>
+                        <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.88rem; cursor:pointer;">
+                            <input type="checkbox" id="expediteCheckbox" style="width:auto;">
+                            Expedited service (+25% on the pickup fee)
+                        </label>
+                        <p id="pickupEstimate" class="form-note" style="margin-top:8px;"></p>
                     </div>
                     <div class="field">
                         <label for="issue">Describe the issue</label>
@@ -1766,9 +1849,13 @@
     ============================================================ -->
     <script>
         // =============================================================
-        //  EMAILJS CONFIGURATION
-        //  Replace these with your own EmailJS credentials from
-        //  https://www.emailjs.com/
+        //  ⚠️ EMAILJS CONFIGURATION — NOT YET SET UP ⚠️
+        //  This is why booking emails aren't reaching your inbox: these
+        //  are still placeholder values, so every booking currently
+        //  falls back to opening a draft in the CUSTOMER's own email
+        //  app — it only reaches you if THEY manually hit send.
+        //  Get free real credentials (200 emails/month) at
+        //  https://www.emailjs.com/ and paste them in below.
         // =============================================================
         const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
         const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
@@ -2269,6 +2356,69 @@
 
 
         // =============================================================
+        //  TV REPAIR REFERRAL — Email Request (with fallback)
+        //  Note: this facilitates a booking with our repair partner —
+        //  we are not the ones repairing the TV.
+        // =============================================================
+        var tvForm = document.getElementById('tvForm');
+        if (tvForm) {
+            tvForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var status = document.getElementById('tvFormStatus');
+                var submitBtn = document.getElementById('tvSubmitBtn');
+                var name = document.getElementById('tvName').value.trim();
+                var phone = document.getElementById('tvPhone').value.trim();
+                var email = document.getElementById('tvEmail').value.trim();
+                var issue = document.getElementById('tvIssue').value.trim();
+
+                status.classList.remove('ok', 'err');
+
+                if (!name || !phone || !email || !issue) {
+                    status.textContent = 'Please fill in all fields.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!email.includes('@') || !email.includes('.')) {
+                    status.textContent = 'Please enter a valid email address.';
+                    status.classList.add('err');
+                    return;
+                }
+
+                var templateParams = {
+                    to_email: 'ajstyleg@gmail.com',
+                    subject: 'TV Repair Referral Request — Backlight Issue',
+                    message_html: 'Hi StylesPC,\n\nI\'d like to request a TV repair referral (Backlight Repair).\n\n' +
+                        'Name: ' + name + '\nPhone: ' + phone + '\nEmail: ' + email +
+                        '\nTV / Issue: ' + issue +
+                        '\n\nBooking fee ($500) and assessment fee ($2,000) noted. Please pass my details to your repair partner.\n\nThanks!',
+                    from_name: name,
+                    from_phone: phone,
+                    from_email: email
+                };
+
+                submitBtn.disabled = true;
+                status.textContent = 'Sending request…';
+                sendEmail(templateParams)
+                    .then(function() {
+                        status.textContent = 'Request sent! We\'ll pass your details to our repair partner shortly.';
+                        status.classList.add('ok');
+                        submitBtn.disabled = false;
+                        tvForm.reset();
+                        if (!EMAILJS_CONFIGURED) {
+                            status.textContent = 'Please check your email client — we\'ve opened a draft for you.';
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                        status.classList.add('err');
+                        submitBtn.disabled = false;
+                    });
+            });
+        }
+
+
+        // =============================================================
         //  HERO TICKET CYCLER
         // =============================================================
         (function() {
@@ -2408,11 +2558,192 @@
         var serviceTypeEl = document.getElementById('serviceType');
         var addressField = document.getElementById('address');
         var addressHint = document.getElementById('addressHint');
+
+        // =============================================================
+        //  PICKUP SERVICE AREA + DISTANCE FARE ESTIMATE
+        //  ⚠️ CONFIGURE THESE BEFORE GOING LIVE ⚠️
+        //  - SHOP_LOCATION: replace with your real home‑workshop lat/lng
+        //    (search your address on openstreetmap.org, right-click the
+        //    pin → "Show address" gives you the coordinates)
+        //  - FREE_AREAS / STANDARD_AREAS / FAR_AREAS: edit these lists to
+        //    match the exact neighbourhoods you serve in each zone
+        //  - PICKUP_STANDARD_FARE / FAR_RATE_PER_KM / EXPEDITE_MULTIPLIER:
+        //    adjust to your real pricing
+        // =============================================================
+        var SHOP_LOCATION = { lat: 17.9784, lng: -76.7831 }; // TODO: set real shop coordinates
+        var PICKUP_STANDARD_FARE = 1500;   // flat rate for the "standard" zone
+        var FAR_RATE_PER_KM = 150;         // JMD per km, "far" zone (no flat fee — pure distance rate)
+        var EXPEDITE_MULTIPLIER = 1.25;    // +25% when expedited service is checked
+        var ROAD_FACTOR = 1.3;             // fudge factor: straight-line → approx. road distance
+
+        // Free pickup — no charge at all
+        var FREE_AREAS = ['franklintown', 'rae town', 'raetown'];
+
+        // Standard flat-rate zone — most of Kingston + close-in Saint Andrew
+        var STANDARD_AREAS = [
+            'half way tree', 'liguanea', 'new kingston', 'barbican',
+            'constant spring', 'cross roads', 'havendale', 'meadowbrook',
+            'hope pastures', 'kingston 6', 'kingston 8', 'kingston 10'
+        ]; // TODO: confirm/expand — anywhere in Kingston not listed above also defaults here
+
+        // Far zone — charged per km instead of a flat fee
+        var FAR_AREAS = ['papine', 'mona']; // TODO: add any other outlying Saint Andrew areas you cover
+
+        var pickupMapWrap = document.getElementById('pickupMapWrap');
+        var pickupMapEl = document.getElementById('pickupMap');
+        var pickupEstimateEl = document.getElementById('pickupEstimate');
+        var expediteCheckbox = document.getElementById('expediteCheckbox');
+        var leafletMap = null, shopMarker = null, pickupMarker = null, routeLine = null;
+        var currentPickupEstimate = null; // read by the submit handler
+        var geocodeTimer = null;
+
+        function haversineKm(lat1, lon1, lat2, lon2) {
+            var R = 6371;
+            var dLat = (lat2 - lat1) * Math.PI / 180;
+            var dLon = (lon2 - lon1) * Math.PI / 180;
+            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function ensureMap() {
+            if (leafletMap) return leafletMap;
+            leafletMap = L.map(pickupMapEl, { scrollWheelZoom: false });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(leafletMap);
+            shopMarker = L.marker([SHOP_LOCATION.lat, SHOP_LOCATION.lng]).addTo(leafletMap)
+                .bindPopup('StylesPC (home workshop)');
+            leafletMap.setView([SHOP_LOCATION.lat, SHOP_LOCATION.lng], 12);
+            return leafletMap;
+        }
+
+        // Returns 'free' | 'standard' | 'far' | 'unserviced'
+        function detectZone(addr, displayName) {
+            var county = ((addr.county || addr.state_district || '') + '').toLowerCase();
+            var display = (displayName || '').toLowerCase();
+            var inList = function(list) {
+                return list.some(function(area) { return display.indexOf(area) !== -1; });
+            };
+
+            if (inList(FREE_AREAS)) return 'free';
+            if (inList(FAR_AREAS)) return 'far';
+            if (inList(STANDARD_AREAS)) return 'standard';
+
+            // Not matched to a specific named area — fall back to parish.
+            if (county.indexOf('kingston') !== -1) return 'standard';
+            if (county.indexOf('andrew') !== -1) return 'unserviced'; // unnamed St Andrew area — not pre-approved
+            return 'unserviced';
+        }
+
+        function renderEstimate(result) {
+            currentPickupEstimate = result;
+            if (!result.serviceable) {
+                pickupEstimateEl.innerHTML = '⚠️ Sorry — we don\'t currently collect from this address. ' +
+                    'Pickup covers Kingston and select Saint Andrew areas (Franklintown, Rae Town, Half Way Tree, ' +
+                    'Liguanea, New Kingston, Papine, Mona and nearby). Please choose Drop‑off instead, or adjust the address.';
+                pickupEstimateEl.style.color = '#a33';
+                return;
+            }
+            pickupEstimateEl.style.color = '';
+            var zoneLabel = result.zone === 'free' ? 'Free zone' : result.zone === 'far' ? 'Far zone (per km)' : 'Standard zone';
+            var feeLine = result.fare === 0 ?
+                '<strong>Free pickup</strong>' :
+                '<strong>estimated pickup fee: $' + result.fare.toLocaleString() + '</strong>' +
+                (result.expedited ? ' (incl. +25% expedited service)' : '');
+            pickupEstimateEl.innerHTML = '📍 Approx. ' + result.km.toFixed(1) + ' km from the shop — ' +
+                zoneLabel + ' — ' + feeLine + '. Final price is confirmed when we accept the booking.';
+
+            var map = ensureMap();
+            var pt = [result.lat, result.lon];
+            if (pickupMarker) { map.removeLayer(pickupMarker); }
+            if (routeLine) { map.removeLayer(routeLine); }
+            pickupMarker = L.marker(pt).addTo(map).bindPopup('Pickup point').openPopup();
+            routeLine = L.polyline([[SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt], { color: '#2F6F63', weight: 3, dashArray: '6,6' }).addTo(map);
+            map.fitBounds(L.latLngBounds([[SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt]).pad(0.3));
+        }
+
+        function computeFare(zone, km) {
+            var base;
+            if (zone === 'free') base = 0;
+            else if (zone === 'far') base = km * FAR_RATE_PER_KM;
+            else base = PICKUP_STANDARD_FARE; // standard
+            var expedited = !!(expediteCheckbox && expediteCheckbox.checked);
+            var fare = expedited ? base * EXPEDITE_MULTIPLIER : base;
+            return { fare: Math.round(fare / 50) * 50, expedited: expedited };
+        }
+
+        function geocodeAndEstimate() {
+            var address = addressField.value.trim();
+            if (!address || serviceTypeEl.value !== 'Pickup') {
+                currentPickupEstimate = null;
+                pickupMapWrap.style.display = 'none';
+                return;
+            }
+            pickupMapWrap.style.display = '';
+            pickupEstimateEl.style.color = '';
+            pickupEstimateEl.textContent = 'Locating address…';
+
+            fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=jm&limit=1&q=' +
+                encodeURIComponent(address + ', Jamaica'))
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data || !data.length) {
+                        pickupEstimateEl.textContent = 'Couldn\'t locate that address — please check it or add more detail (street, area, parish).';
+                        currentPickupEstimate = null;
+                        return;
+                    }
+                    var hit = data[0];
+                    var lat = parseFloat(hit.lat), lon = parseFloat(hit.lon);
+                    var zone = detectZone(hit.address || {}, hit.display_name || '');
+                    if (zone === 'unserviced') {
+                        renderEstimate({ serviceable: false });
+                        return;
+                    }
+                    var km = haversineKm(SHOP_LOCATION.lat, SHOP_LOCATION.lng, lat, lon) * ROAD_FACTOR;
+                    var priced = computeFare(zone, km);
+                    renderEstimate({
+                        serviceable: true, lat: lat, lon: lon, zone: zone,
+                        km: km, fare: priced.fare, expedited: priced.expedited, address: hit.display_name
+                    });
+                })
+                .catch(function(err) {
+                    console.error('Geocoding error:', err);
+                    pickupEstimateEl.textContent = 'Couldn\'t check that address right now — you can still submit and we\'ll confirm pickup cost by phone.';
+                    currentPickupEstimate = null;
+                });
+        }
+
         serviceTypeEl.addEventListener('change', function() {
             var isPickup = serviceTypeEl.value === 'Pickup';
             addressHint.textContent = isPickup ? '(required for pickup)' : '(optional)';
             addressField.required = isPickup;
+            if (isPickup && addressField.value.trim()) {
+                geocodeAndEstimate();
+            } else if (!isPickup) {
+                pickupMapWrap.style.display = 'none';
+                currentPickupEstimate = null;
+            }
         });
+
+        // Geocode when the user finishes typing (debounced) or leaves the field
+        addressField.addEventListener('input', function() {
+            clearTimeout(geocodeTimer);
+            geocodeTimer = setTimeout(geocodeAndEstimate, 900);
+        });
+        addressField.addEventListener('blur', function() {
+            clearTimeout(geocodeTimer);
+            geocodeAndEstimate();
+        });
+        if (expediteCheckbox) {
+            expediteCheckbox.addEventListener('change', function() {
+                if (serviceTypeEl.value === 'Pickup' && addressField.value.trim()) {
+                    geocodeAndEstimate();
+                }
+            });
+        }
 
         document.getElementById('bookForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -2436,6 +2767,11 @@
             }
             if (serviceType === 'Pickup' && !address) {
                 status.textContent = 'Please add a pickup address, or choose Drop‑off instead.';
+                status.classList.add('err');
+                return;
+            }
+            if (serviceType === 'Pickup' && currentPickupEstimate && currentPickupEstimate.serviceable === false) {
+                status.textContent = 'Sorry — pickup isn\'t available for that address yet (Kingston & select Saint Andrew areas only). Please choose Drop‑off instead.';
                 status.classList.add('err');
                 return;
             }
@@ -2479,6 +2815,12 @@
                 }
 
                 var ticketNumber = res.data;
+                var zoneLabels = { free: 'Free zone', standard: 'Standard zone', far: 'Far zone (per km)' };
+                var pickupNote = (serviceType === 'Pickup' && currentPickupEstimate && currentPickupEstimate.serviceable) ?
+                    ('\nEst. distance: ' + currentPickupEstimate.km.toFixed(1) + ' km (' +
+                        (zoneLabels[currentPickupEstimate.zone] || currentPickupEstimate.zone) + ')' +
+                        '\nEst. pickup fee: $' + currentPickupEstimate.fare.toLocaleString() +
+                        (currentPickupEstimate.expedited ? ' (incl. expedited +25%)' : '')) : '';
 
                 // Send email via EmailJS or mailto fallback
                 var templateParams = {
@@ -2492,6 +2834,7 @@
                         'Device: ' + device + '\n' +
                         'Service: ' + serviceType + '\n' +
                         (address ? 'Address: ' + address + '\n' : '') +
+                        pickupNote + '\n' +
                         'Issue: ' + issue + '\n\n' +
                         'Please confirm receipt and let me know the next steps.\n\nThanks!',
                     from_name: name,
