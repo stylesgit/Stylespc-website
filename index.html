@@ -1,2252 +1,2402 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StylesPC — Computer &amp; Laptop Repair</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-  <style>
-    /* ============================================================
-       ROOT & RESET
-       ============================================================ */
-    :root {
-      --paper: #F3EFE7;
-      --paper-2: #EAE3D3;
-      --ink: #1F2421;
-      --ink-soft: #4A4F49;
-      --teal: #2F6F63;
-      --teal-dark: #204b43;
-      --amber: #C97A2B;
-      --rule: #C9C2B2;
-      --white: #FFFDF8;
-      --radius: 2px;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StylesPC — Computer &amp; Laptop Repair</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <style>
+        /* ============================================================
+           ROOT & RESET
+           ============================================================ */
+        :root {
+            --paper: #F3EFE7;
+            --paper-2: #EAE3D3;
+            --ink: #1F2421;
+            --ink-soft: #4A4F49;
+            --teal: #2F6F63;
+            --teal-dark: #204b43;
+            --amber: #C97A2B;
+            --rule: #C9C2B2;
+            --white: #FFFDF8;
+            --radius: 2px;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    html {
-      scroll-behavior: smooth;
-    }
+        html {
+            scroll-behavior: smooth;
+        }
 
-    body {
-      background: var(--paper);
-      color: var(--ink);
-      font-family: 'IBM Plex Sans', sans-serif;
-      line-height: 1.55;
-      -webkit-font-smoothing: antialiased;
-    }
+        body {
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', sans-serif;
+            line-height: 1.55;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    h1, h2, h3 {
-      font-family: 'Space Grotesk', sans-serif;
-      letter-spacing: -0.01em;
-      margin: 0 0 0.4em 0;
-    }
+        h1,
+        h2,
+        h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.01em;
+            margin: 0 0 0.4em 0;
+        }
 
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-    img {
-      max-width: 100%;
-      display: block;
-    }
-    :focus-visible {
-      outline: 3px solid var(--amber);
-      outline-offset: 2px;
-    }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        img {
+            max-width: 100%;
+            display: block;
+        }
+        :focus-visible {
+            outline: 3px solid var(--amber);
+            outline-offset: 2px;
+        }
 
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.001ms !important;
-        transition-duration: 0.001ms !important;
-      }
-    }
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.001ms !important;
+                transition-duration: 0.001ms !important;
+            }
+        }
 
-    .wrap {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
+        .wrap {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
 
-    /* ============================================================
-       BUTTONS
-       ============================================================ */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 13px 22px;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: 0.95rem;
-      border: 1px solid transparent;
-      cursor: pointer;
-      font-family: 'IBM Plex Sans';
-      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-    }
-    .btn-primary {
-      background: var(--teal);
-      color: var(--white);
-    }
-    .btn-primary:hover {
-      background: var(--teal-dark);
-      box-shadow: 0 8px 20px rgba(47, 111, 99, 0.25);
-    }
-    .btn-ghost {
-      background: transparent;
-      color: var(--ink);
-      border-color: var(--ink);
-    }
-    .btn-ghost:hover {
-      background: var(--ink);
-      color: var(--white);
-    }
-    .btn-amber {
-      background: var(--amber);
-      color: var(--white);
-    }
-    .btn-amber:hover {
-      background: #a9631e;
-      box-shadow: 0 8px 20px rgba(201, 122, 43, 0.28);
-    }
-    .btn-whatsapp {
-      background: var(--teal);
-      color: var(--white);
-    }
-    .btn-whatsapp:hover {
-      background: var(--teal-dark);
-      box-shadow: 0 8px 20px rgba(47, 111, 99, 0.3);
-    }
+        /* ============================================================
+           BUTTONS
+           ============================================================ */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 22px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans';
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: var(--teal);
+            color: var(--white);
+        }
+        .btn-primary:hover {
+            background: var(--teal-dark);
+            box-shadow: 0 8px 20px rgba(47, 111, 99, 0.25);
+        }
+        .btn-ghost {
+            background: transparent;
+            color: var(--ink);
+            border-color: var(--ink);
+        }
+        .btn-ghost:hover {
+            background: var(--ink);
+            color: var(--white);
+        }
+        .btn-amber {
+            background: var(--amber);
+            color: var(--white);
+        }
+        .btn-amber:hover {
+            background: #a9631e;
+            box-shadow: 0 8px 20px rgba(201, 122, 43, 0.28);
+        }
+        .btn-email {
+            background: var(--teal);
+            color: var(--white);
+        }
+        .btn-email:hover {
+            background: var(--teal-dark);
+            box-shadow: 0 8px 20px rgba(47, 111, 99, 0.3);
+        }
 
-    /* ============================================================
-       HEADER / NAV
-       ============================================================ */
-    header.site {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: rgba(243, 239, 231, 0.92);
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid var(--rule);
-    }
+        /* ============================================================
+           HEADER / NAV
+           ============================================================ */
+        header.site {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: rgba(243, 239, 231, 0.92);
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid var(--rule);
+        }
 
-    nav.wrap {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 24px;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
+        nav.wrap {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'Space Grotesk';
-      font-weight: 700;
-      font-size: 1.25rem;
-    }
-    .brand .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--teal);
-      box-shadow: 0 0 0 3px rgba(47, 111, 99, 0.18);
-    }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+        .brand .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 0 3px rgba(47, 111, 99, 0.18);
+        }
 
-    .navlinks {
-      display: flex;
-      gap: 24px;
-      list-style: none;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-    .navlinks > li > a {
-      font-size: 0.92rem;
-      font-weight: 500;
-      color: var(--ink-soft);
-      border-bottom: 2px solid transparent;
-      padding-bottom: 2px;
-      transition: color 0.15s, border-color 0.15s;
-    }
-    .navlinks > li > a:hover {
-      color: var(--ink);
-      border-color: var(--amber);
-    }
+        .navlinks {
+            display: flex;
+            gap: 24px;
+            list-style: none;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .navlinks>li>a {
+            font-size: 0.92rem;
+            font-weight: 500;
+            color: var(--ink-soft);
+            border-bottom: 2px solid transparent;
+            padding-bottom: 2px;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .navlinks>li>a:hover {
+            color: var(--ink);
+            border-color: var(--amber);
+        }
 
-    /* dropdown */
-    .navlinks .dropdown {
-      position: relative;
-    }
-    .navlinks .dropdown > a {
-      cursor: default;
-    }
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 4px;
-      padding: 8px 0;
-      list-style: none;
-      min-width: 150px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      z-index: 50;
-    }
-    .dropdown:hover .dropdown-menu,
-    .dropdown:focus-within .dropdown-menu {
-      display: block;
-    }
-    .dropdown-menu a {
-      display: block;
-      padding: 8px 16px;
-      color: var(--ink);
-      font-weight: 400;
-      font-size: 0.88rem;
-      border-bottom: none;
-    }
-    .dropdown-menu a:hover {
-      background: var(--paper-2);
-    }
+        .navlinks .dropdown {
+            position: relative;
+        }
+        .navlinks .dropdown>a {
+            cursor: default;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            padding: 8px 0;
+            list-style: none;
+            min-width: 150px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            z-index: 50;
+        }
+        .dropdown:hover .dropdown-menu,
+        .dropdown:focus-within .dropdown-menu {
+            display: block;
+        }
+        .dropdown-menu a {
+            display: block;
+            padding: 8px 16px;
+            color: var(--ink);
+            font-weight: 400;
+            font-size: 0.88rem;
+            border-bottom: none;
+        }
+        .dropdown-menu a:hover {
+            background: var(--paper-2);
+        }
 
-    .nav-cta {
-      background: var(--ink);
-      color: var(--white);
-      padding: 10px 18px;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: 0.88rem;
-      font-family: 'IBM Plex Mono';
-      letter-spacing: 0.02em;
-      transition: background 0.15s;
-      margin-left: 4px;
-    }
-    .nav-cta:hover {
-      background: var(--teal-dark);
-    }
+        .nav-cta {
+            background: var(--ink);
+            color: var(--white);
+            padding: 10px 18px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.88rem;
+            font-family: 'IBM Plex Mono';
+            letter-spacing: 0.02em;
+            transition: background 0.15s;
+            margin-left: 4px;
+        }
+        .nav-cta:hover {
+            background: var(--teal-dark);
+        }
 
-    /* ============================================================
-       FLOATING WHATSAPP BUTTON (muted teal)
-       ============================================================ */
-    .whatsapp-float {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      z-index: 999;
-      background-color: var(--teal);
-      border-radius: 50%;
-      width: 58px;
-      height: 58px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 16px rgba(47, 111, 99, 0.3);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      text-decoration: none;
-    }
-    .whatsapp-float:hover {
-      transform: scale(1.06);
-      box-shadow: 0 8px 24px rgba(47, 111, 99, 0.4);
-    }
-    .whatsapp-float svg {
-      width: 32px;
-      height: 32px;
-      fill: white;
-    }
+        /* ============================================================
+           DISCLAIMER MODAL (WhatsApp unavailable)
+           ============================================================ */
+        .disclaimer-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 22, 19, 0.75);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            backdrop-filter: blur(4px);
+        }
+        .disclaimer-overlay:not([hidden]) {
+            display: flex;
+        }
+        .disclaimer-modal {
+            background: var(--white);
+            border-radius: 12px;
+            max-width: 480px;
+            width: 100%;
+            padding: 34px 30px 26px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+            position: relative;
+            animation: modalIn 0.3s ease-out;
+        }
+        @keyframes modalIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.94) translateY(16px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .disclaimer-modal h2 {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .disclaimer-modal h2 .icon {
+            font-size: 1.5rem;
+        }
+        .disclaimer-modal p {
+            font-size: 0.95rem;
+            color: var(--ink-soft);
+            margin: 6px 0 14px;
+            line-height: 1.6;
+        }
+        .disclaimer-modal .email-box {
+            background: var(--paper-2);
+            border-radius: 6px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 14px 0 18px;
+            font-family: 'IBM Plex Mono';
+            font-size: 1rem;
+            border: 1px solid var(--rule);
+        }
+        .disclaimer-modal .email-box span {
+            word-break: break-all;
+            color: var(--teal-dark);
+            font-weight: 600;
+        }
+        .disclaimer-modal .email-box .copy-btn {
+            background: var(--teal);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans';
+            white-space: nowrap;
+            transition: background 0.15s;
+        }
+        .disclaimer-modal .email-box .copy-btn:hover {
+            background: var(--teal-dark);
+        }
+        .disclaimer-modal .btn-close-modal {
+            background: var(--ink);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans';
+            font-size: 0.92rem;
+            width: 100%;
+            transition: background 0.15s;
+        }
+        .disclaimer-modal .btn-close-modal:hover {
+            background: var(--teal-dark);
+        }
+        .disclaimer-modal .alt-contact {
+            margin-top: 14px;
+            font-size: 0.84rem;
+            color: var(--ink-soft);
+            text-align: center;
+            border-top: 1px solid var(--rule);
+            padding-top: 14px;
+        }
+        .disclaimer-modal .alt-contact a {
+            color: var(--teal-dark);
+            font-weight: 600;
+            text-decoration: underline;
+        }
 
-    /* ============================================================
-       HERO
-       ============================================================ */
-    .hero {
-      padding: 72px 0 88px;
-    }
-    .hero .wrap {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
-      gap: 48px;
-      align-items: center;
-    }
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: 'IBM Plex Mono';
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--teal-dark);
-      background: rgba(47, 111, 99, 0.09);
-      padding: 6px 12px;
-      border-radius: 20px;
-      margin-bottom: 20px;
-    }
-    .eyebrow::before {
-      content: "●";
-      color: var(--teal);
-      font-size: 0.6rem;
-    }
-    .hero h1 {
-      font-size: clamp(2.3rem, 4.2vw, 3.4rem);
-      line-height: 1.05;
-    }
-    .hero h1 em {
-      font-style: normal;
-      color: var(--teal-dark);
-      background: linear-gradient(transparent 62%, rgba(201, 122, 43, 0.28) 0);
-    }
-    .hero p.lead {
-      font-size: 1.08rem;
-      color: var(--ink-soft);
-      max-width: 46ch;
-      margin: 18px 0 28px;
-    }
-    .hero-ctas {
-      display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
+        /* ============================================================
+           HERO
+           ============================================================ */
+        .hero {
+            padding: 72px 0 88px;
+        }
+        .hero .wrap {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 48px;
+            align-items: center;
+        }
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'IBM Plex Mono';
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--teal-dark);
+            background: rgba(47, 111, 99, 0.09);
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+        .eyebrow::before {
+            content: "●";
+            color: var(--teal);
+            font-size: 0.6rem;
+        }
+        .hero h1 {
+            font-size: clamp(2.3rem, 4.2vw, 3.4rem);
+            line-height: 1.05;
+        }
+        .hero h1 em {
+            font-style: normal;
+            color: var(--teal-dark);
+            background: linear-gradient(transparent 62%, rgba(201, 122, 43, 0.28) 0);
+        }
+        .hero p.lead {
+            font-size: 1.08rem;
+            color: var(--ink-soft);
+            max-width: 46ch;
+            margin: 18px 0 28px;
+        }
+        .hero-ctas {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
 
-    /* ticket */
-    .ticket-wrap {
-      display: flex;
-      justify-content: center;
-    }
-    .ticket {
-      background: var(--white);
-      width: 100%;
-      max-width: 360px;
-      border: 1.5px solid var(--ink);
-      border-radius: 10px;
-      padding: 26px 24px 22px;
-      position: relative;
-      box-shadow: 10px 12px 0 rgba(31, 36, 33, 0.08);
-      animation: stampIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
-    }
-    @keyframes stampIn {
-      0% {
-        opacity: 0;
-        transform: scale(0.92) rotate(-3deg);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1) rotate(-1.2deg);
-      }
-    }
-    .ticket::before,
-    .ticket::after {
-      content: "";
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      background: var(--paper);
-      border: 1.5px solid var(--ink);
-      border-radius: 50%;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-    .ticket::before {
-      left: -11px;
-    }
-    .ticket::after {
-      right: -11px;
-    }
-    .ticket-perf {
-      border-top: 2px dashed var(--rule);
-      margin: 16px 0;
-    }
-    .ticket-row {
-      display: flex;
-      justify-content: space-between;
-      margin: 9px 0;
-      font-size: 0.86rem;
-    }
-    .ticket-row .k {
-      color: var(--ink-soft);
-    }
-    .ticket-row .v {
-      font-family: 'IBM Plex Mono';
-      font-weight: 600;
-    }
-    .ticket-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-    }
-    .ticket-id {
-      font-family: 'IBM Plex Mono';
-      font-size: 0.78rem;
-      color: var(--ink-soft);
-    }
-    .ticket-title {
-      font-family: 'Space Grotesk';
-      font-weight: 700;
-      font-size: 1.1rem;
-    }
-    .status-pill {
-      display: inline-block;
-      font-family: 'IBM Plex Mono';
-      font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      padding: 4px 10px;
-      border-radius: 20px;
-      background: rgba(47, 111, 99, 0.12);
-      color: var(--teal-dark);
-      border: 1px solid rgba(47, 111, 99, 0.35);
-    }
-    .status-pill.amber {
-      background: rgba(201, 122, 43, 0.12);
-      color: #a9631e;
-      border-color: rgba(201, 122, 43, 0.4);
-    }
-    .stamp {
-      position: absolute;
-      bottom: 18px;
-      right: 20px;
-      font-family: 'Space Grotesk';
-      font-weight: 700;
-      font-size: 0.85rem;
-      color: var(--amber);
-      border: 2px solid var(--amber);
-      border-radius: 6px;
-      padding: 4px 10px;
-      transform: rotate(-8deg);
-      opacity: 0.9;
-      letter-spacing: 0.05em;
-    }
-    .stamp[hidden] {
-      display: none;
-    }
-    #heroTicket.cycling {
-      animation: stampIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
-    }
+        /* ticket */
+        .ticket-wrap {
+            display: flex;
+            justify-content: center;
+        }
+        .ticket {
+            background: var(--white);
+            width: 100%;
+            max-width: 360px;
+            border: 1.5px solid var(--ink);
+            border-radius: 10px;
+            padding: 26px 24px 22px;
+            position: relative;
+            box-shadow: 10px 12px 0 rgba(31, 36, 33, 0.08);
+            animation: stampIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+        }
+        @keyframes stampIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.92) rotate(-3deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(-1.2deg);
+            }
+        }
+        .ticket::before,
+        .ticket::after {
+            content: "";
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: var(--paper);
+            border: 1.5px solid var(--ink);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .ticket::before {
+            left: -11px;
+        }
+        .ticket::after {
+            right: -11px;
+        }
+        .ticket-perf {
+            border-top: 2px dashed var(--rule);
+            margin: 16px 0;
+        }
+        .ticket-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 9px 0;
+            font-size: 0.86rem;
+        }
+        .ticket-row .k {
+            color: var(--ink-soft);
+        }
+        .ticket-row .v {
+            font-family: 'IBM Plex Mono';
+            font-weight: 600;
+        }
+        .ticket-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .ticket-id {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+        }
+        .ticket-title {
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        .status-pill {
+            display: inline-block;
+            font-family: 'IBM Plex Mono';
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: rgba(47, 111, 99, 0.12);
+            color: var(--teal-dark);
+            border: 1px solid rgba(47, 111, 99, 0.35);
+        }
+        .status-pill.amber {
+            background: rgba(201, 122, 43, 0.12);
+            color: #a9631e;
+            border-color: rgba(201, 122, 43, 0.4);
+        }
+        .stamp {
+            position: absolute;
+            bottom: 18px;
+            right: 20px;
+            font-family: 'Space Grotesk';
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--amber);
+            border: 2px solid var(--amber);
+            border-radius: 6px;
+            padding: 4px 10px;
+            transform: rotate(-8deg);
+            opacity: 0.9;
+            letter-spacing: 0.05em;
+        }
+        .stamp[hidden] {
+            display: none;
+        }
+        #heroTicket.cycling {
+            animation: stampIn 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+        }
 
-    /* ============================================================
-       SECTIONS
-       ============================================================ */
-    section {
-      padding: 80px 0;
-    }
-    section.alt {
-      background: var(--paper-2);
-      border-top: 1px solid var(--rule);
-      border-bottom: 1px solid var(--rule);
-    }
-    .section-head {
-      max-width: 640px;
-      margin-bottom: 44px;
-    }
-    .section-head .eyebrow {
-      margin-bottom: 12px;
-    }
-    .section-head h2 {
-      font-size: clamp(1.7rem, 3vw, 2.3rem);
-    }
-    .section-head p {
-      color: var(--ink-soft);
-      font-size: 1.02rem;
-    }
+        /* ============================================================
+           SECTIONS
+           ============================================================ */
+        section {
+            padding: 80px 0;
+        }
+        section.alt {
+            background: var(--paper-2);
+            border-top: 1px solid var(--rule);
+            border-bottom: 1px solid var(--rule);
+        }
+        .section-head {
+            max-width: 640px;
+            margin-bottom: 44px;
+        }
+        .section-head .eyebrow {
+            margin-bottom: 12px;
+        }
+        .section-head h2 {
+            font-size: clamp(1.7rem, 3vw, 2.3rem);
+        }
+        .section-head p {
+            color: var(--ink-soft);
+            font-size: 1.02rem;
+        }
 
-    /* services */
-    .services-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
-    }
-    .service-card {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      padding: 26px 22px;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-    }
-    .service-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 30px rgba(31, 36, 33, 0.08);
-    }
-    .service-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 8px;
-      background: rgba(47, 111, 99, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      color: var(--teal-dark);
-    }
-    .service-card h3 {
-      font-size: 1.05rem;
-      margin-bottom: 8px;
-    }
-    .service-card p {
-      font-size: 0.9rem;
-      color: var(--ink-soft);
-      margin: 0;
-    }
+        /* services */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+        .service-card {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 26px 22px;
+            transition: transform 0.18s ease, box-shadow 0.18s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px rgba(31, 36, 33, 0.08);
+        }
+        .service-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 8px;
+            background: rgba(47, 111, 99, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            color: var(--teal-dark);
+        }
+        .service-card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+        }
+        .service-card p {
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+            margin: 0;
+        }
 
-    /* steps */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0;
-      position: relative;
-    }
-    .step {
-      position: relative;
-      padding: 0 20px 0 0;
-    }
-    .step:not(:last-child)::after {
-      content: "";
-      position: absolute;
-      top: 22px;
-      right: -2px;
-      width: calc(100% - 44px);
-      border-top: 1px dashed var(--rule);
-    }
-    .step-num {
-      font-family: 'IBM Plex Mono';
-      font-weight: 600;
-      font-size: 0.85rem;
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      border: 1.5px solid var(--ink);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--white);
-      margin-bottom: 16px;
-      position: relative;
-      z-index: 1;
-    }
-    .step h3 {
-      font-size: 1rem;
-      margin-bottom: 6px;
-    }
-    .step p {
-      font-size: 0.87rem;
-      color: var(--ink-soft);
-    }
+        /* steps */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0;
+            position: relative;
+        }
+        .step {
+            position: relative;
+            padding: 0 20px 0 0;
+        }
+        .step:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 22px;
+            right: -2px;
+            width: calc(100% - 44px);
+            border-top: 1px dashed var(--rule);
+        }
+        .step-num {
+            font-family: 'IBM Plex Mono';
+            font-weight: 600;
+            font-size: 0.85rem;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1.5px solid var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--white);
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+        .step h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+        .step p {
+            font-size: 0.87rem;
+            color: var(--ink-soft);
+        }
 
-    /* work grid */
-    .work-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    .work-card {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .work-body {
-      padding: 18px 20px;
-    }
-    .work-body .tag {
-      font-family: 'IBM Plex Mono';
-      font-size: 0.7rem;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      color: var(--amber);
-      display: block;
-      margin-bottom: 6px;
-    }
-    .work-body h3 {
-      font-size: 1rem;
-      margin-bottom: 6px;
-    }
-    .work-body p {
-      font-size: 0.87rem;
-      color: var(--ink-soft);
-      margin: 0;
-    }
+        /* work grid */
+        .work-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .work-card {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .work-body {
+            padding: 18px 20px;
+        }
+        .work-body .tag {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: var(--amber);
+            display: block;
+            margin-bottom: 6px;
+        }
+        .work-body h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+        .work-body p {
+            font-size: 0.87rem;
+            color: var(--ink-soft);
+            margin: 0;
+        }
 
-    /* gallery */
-    .gallery {
-      position: relative;
-      aspect-ratio: 4/3;
-      border-bottom: 1px solid var(--rule);
-      background: var(--paper-2);
-      overflow: hidden;
-    }
-    .gallery-viewport {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-    .gallery-img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-    .gallery-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      background: repeating-linear-gradient(135deg, rgba(47, 111, 99, 0.08) 0 12px, transparent 12px 24px), var(--paper-2);
-    }
-    .gallery-empty::after {
-      content: "Add photo";
-      font-family: 'IBM Plex Mono';
-      font-size: 0.75rem;
-      color: var(--teal-dark);
-    }
-    .thumb-label {
-      position: absolute;
-      bottom: 6px;
-      left: 6px;
-      font-family: 'IBM Plex Mono';
-      font-size: 0.65rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      background: rgba(31, 36, 33, 0.75);
-      color: #fff;
-      padding: 2px 10px;
-      border-radius: 10px;
-      pointer-events: none;
-    }
-    .gallery-nav {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 2;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      background: rgba(255, 253, 248, 0.85);
-      color: var(--ink);
-      font-size: 1.1rem;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .gallery-nav:hover {
-      background: var(--white);
-    }
-    .gallery-prev {
-      left: 8px;
-    }
-    .gallery-next {
-      right: 8px;
-    }
-    .gallery-dots {
-      position: absolute;
-      bottom: 6px;
-      right: 8px;
-      display: flex;
-      gap: 5px;
-      z-index: 2;
-    }
-    .gallery-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: rgba(31, 36, 33, 0.3);
-      cursor: pointer;
-      border: none;
-      padding: 0;
-    }
-    .gallery-dot.active {
-      background: var(--white);
-    }
+        /* gallery */
+        .gallery {
+            position: relative;
+            aspect-ratio: 4/3;
+            border-bottom: 1px solid var(--rule);
+            background: var(--paper-2);
+            overflow: hidden;
+        }
+        .gallery-viewport {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+        .gallery-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(135deg, rgba(47, 111, 99, 0.08) 0 12px, transparent 12px 24px), var(--paper-2);
+        }
+        .gallery-empty::after {
+            content: "Add photo";
+            font-family: 'IBM Plex Mono';
+            font-size: 0.75rem;
+            color: var(--teal-dark);
+        }
+        .thumb-label {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            font-family: 'IBM Plex Mono';
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background: rgba(31, 36, 33, 0.75);
+            color: #fff;
+            padding: 2px 10px;
+            border-radius: 10px;
+            pointer-events: none;
+        }
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 2;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: rgba(255, 253, 248, 0.85);
+            color: var(--ink);
+            font-size: 1.1rem;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-nav:hover {
+            background: var(--white);
+        }
+        .gallery-prev {
+            left: 8px;
+        }
+        .gallery-next {
+            right: 8px;
+        }
+        .gallery-dots {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            display: flex;
+            gap: 5px;
+            z-index: 2;
+        }
+        .gallery-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(31, 36, 33, 0.3);
+            cursor: pointer;
+            border: none;
+            padding: 0;
+        }
+        .gallery-dot.active {
+            background: var(--white);
+        }
 
-    /* build cards (custom & refurb) */
-    .build-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .build-card {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      padding-bottom: 22px;
-    }
-    .build-thumb {
-      overflow: hidden;
-      background: var(--paper-2);
-      border-bottom: 1px solid var(--rule);
-    }
-    .build-thumb img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-    .build-thumb-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: repeating-linear-gradient(135deg, rgba(47, 111, 99, 0.08) 0 12px, transparent 12px 24px), var(--paper-2);
-      min-height: 120px;
-    }
-    .build-thumb-empty::after {
-      content: "Add photo";
-      font-family: 'IBM Plex Mono';
-      font-size: 0.75rem;
-      color: var(--teal-dark);
-    }
-    .build-card h3 {
-      font-size: 1.05rem;
-      margin: 18px 20px 6px;
-    }
-    .build-card p {
-      font-size: 0.88rem;
-      color: var(--ink-soft);
-      margin: 0 20px 16px;
-      flex-grow: 1;
-    }
-    .build-btn {
-      margin: 0 20px;
-      align-self: flex-start;
-    }
+        /* build cards (custom & refurb) */
+        .build-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .build-card {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 22px;
+        }
+        .build-thumb {
+            overflow: hidden;
+            background: var(--paper-2);
+            border-bottom: 1px solid var(--rule);
+        }
+        .build-thumb img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .build-thumb-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: repeating-linear-gradient(135deg, rgba(47, 111, 99, 0.08) 0 12px, transparent 12px 24px), var(--paper-2);
+            min-height: 120px;
+        }
+        .build-thumb-empty::after {
+            content: "Add photo";
+            font-family: 'IBM Plex Mono';
+            font-size: 0.75rem;
+            color: var(--teal-dark);
+        }
+        .build-card h3 {
+            font-size: 1.05rem;
+            margin: 18px 20px 6px;
+        }
+        .build-card p {
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            margin: 0 20px 16px;
+            flex-grow: 1;
+        }
+        .build-btn {
+            margin: 0 20px;
+            align-self: flex-start;
+        }
 
-    /* pricing table */
-    .price-table {
-      width: 100%;
-      border-collapse: collapse;
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .price-table th,
-    .price-table td {
-      text-align: left;
-      padding: 14px 20px;
-      border-bottom: 1px solid var(--rule);
-      font-size: 0.92rem;
-    }
-    .price-table th {
-      font-family: 'IBM Plex Mono';
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--ink-soft);
-      background: var(--paper-2);
-    }
-    .price-table td.amt {
-      font-family: 'IBM Plex Mono';
-      font-weight: 600;
-      text-align: right;
-    }
-    .price-table tr:last-child td {
-      border-bottom: none;
-    }
-    .price-note {
-      font-size: 0.82rem;
-      color: var(--ink-soft);
-      margin-top: 14px;
-    }
+        /* pricing table */
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .price-table th,
+        .price-table td {
+            text-align: left;
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--rule);
+            font-size: 0.92rem;
+        }
+        .price-table th {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ink-soft);
+            background: var(--paper-2);
+        }
+        .price-table td.amt {
+            font-family: 'IBM Plex Mono';
+            font-weight: 600;
+            text-align: right;
+        }
+        .price-table tr:last-child td {
+            border-bottom: none;
+        }
+        .price-note {
+            font-size: 0.82rem;
+            color: var(--ink-soft);
+            margin-top: 14px;
+        }
 
-    /* payment selector */
-    .method-select {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 22px;
-    }
-    .method-btn {
-      padding: 13px 24px;
-      border-radius: var(--radius);
-      font-weight: 600;
-      font-size: 0.95rem;
-      font-family: 'IBM Plex Sans';
-      cursor: pointer;
-      background: var(--white);
-      color: var(--ink);
-      border: 1.5px solid var(--rule);
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-    }
-    .method-btn:hover {
-      border-color: var(--teal);
-    }
-    .method-btn.active {
-      background: var(--teal);
-      border-color: var(--teal);
-      color: var(--white);
-    }
-    .method-panel {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      padding: 26px;
-      max-width: 560px;
-    }
-    .method-panel-inner h3 {
-      font-size: 1.05rem;
-      margin-bottom: 10px;
-    }
-    .method-panel-inner p {
-      font-size: 0.92rem;
-      color: var(--ink-soft);
-      margin: 0 0 6px;
-    }
+        /* payment selector */
+        .method-select {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+        .method-btn {
+            padding: 13px 24px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.95rem;
+            font-family: 'IBM Plex Sans';
+            cursor: pointer;
+            background: var(--white);
+            color: var(--ink);
+            border: 1.5px solid var(--rule);
+            transition: border-color 0.15s, background 0.15s, color 0.15s;
+        }
+        .method-btn:hover {
+            border-color: var(--teal);
+        }
+        .method-btn.active {
+            background: var(--teal);
+            border-color: var(--teal);
+            color: var(--white);
+        }
+        .method-panel {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 26px;
+            max-width: 560px;
+        }
+        .method-panel-inner h3 {
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+        }
+        .method-panel-inner p {
+            font-size: 0.92rem;
+            color: var(--ink-soft);
+            margin: 0 0 6px;
+        }
 
-    .mini-form {
-      margin-top: 16px;
-      display: grid;
-      gap: 14px;
-      max-width: 340px;
-    }
-    .field-hint {
-      font-size: 0.78rem;
-      color: var(--ink-soft);
-      margin-top: 4px;
-      display: block;
-    }
+        .mini-form {
+            margin-top: 16px;
+            display: grid;
+            gap: 14px;
+            max-width: 340px;
+        }
+        .field-hint {
+            font-size: 0.78rem;
+            color: var(--ink-soft);
+            margin-top: 4px;
+            display: block;
+        }
 
-    /* contact / booking */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 52px;
-      align-items: start;
-    }
-    form.book {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      padding: 30px;
-      display: grid;
-      gap: 16px;
-    }
-    .field {
-      display: grid;
-      gap: 6px;
-    }
-    .field label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--ink-soft);
-    }
-    .field input,
-    .field select,
-    .field textarea {
-      font-family: 'IBM Plex Sans';
-      font-size: 0.94rem;
-      padding: 11px 12px;
-      border: 1px solid var(--rule);
-      border-radius: 4px;
-      background: var(--paper);
-      color: var(--ink);
-      width: 100%;
-    }
-    .field textarea {
-      resize: vertical;
-      min-height: 90px;
-    }
-    .field-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-    .form-note {
-      font-size: 0.8rem;
-      color: var(--ink-soft);
-    }
-    #formStatus,
-    #buildFormStatus,
-    #refurbFormStatus,
-    #bankFormStatus {
-      font-size: 0.88rem;
-      font-weight: 600;
-    }
-    .ok {
-      color: var(--teal-dark);
-    }
-    .err {
-      color: #a3372a;
-    }
+        /* contact / booking */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 52px;
+            align-items: start;
+        }
+        form.book {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 30px;
+            display: grid;
+            gap: 16px;
+        }
+        .field {
+            display: grid;
+            gap: 6px;
+        }
+        .field label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+        }
+        .field input,
+        .field select,
+        .field textarea {
+            font-family: 'IBM Plex Sans';
+            font-size: 0.94rem;
+            padding: 11px 12px;
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            background: var(--paper);
+            color: var(--ink);
+            width: 100%;
+        }
+        .field textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .form-note {
+            font-size: 0.8rem;
+            color: var(--ink-soft);
+        }
+        #formStatus,
+        #buildFormStatus,
+        #refurbFormStatus,
+        #bankFormStatus {
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+        .ok {
+            color: var(--teal-dark);
+        }
+        .err {
+            color: #a3372a;
+        }
 
-    .contact-info h3 {
-      font-size: 1.15rem;
-      margin-bottom: 10px;
-    }
-    .info-row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-      font-size: 0.92rem;
-    }
-    .info-row .k {
-      font-family: 'IBM Plex Mono';
-      color: var(--ink-soft);
-      min-width: 88px;
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding-top: 2px;
-    }
+        .contact-info h3 {
+            font-size: 1.15rem;
+            margin-bottom: 10px;
+        }
+        .info-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 0.92rem;
+        }
+        .info-row .k {
+            font-family: 'IBM Plex Mono';
+            color: var(--ink-soft);
+            min-width: 88px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            padding-top: 2px;
+        }
 
-    /* firestick media */
-    .firestick-examples {
-      margin-top: 36px;
-    }
-    .firestick-examples h3 {
-      font-size: 1.1rem;
-      margin-bottom: 6px;
-    }
-    .firestick-examples > p {
-      font-size: 0.92rem;
-      color: var(--ink-soft);
-      margin: 0 0 20px;
-    }
-    .firestick-media {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .firestick-shots {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    .firestick-photo {
-      background: var(--white);
-      border: 1px solid var(--rule);
-      border-radius: 6px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      aspect-ratio: 16/9;
-    }
-    .firestick-photo img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-      cursor: zoom-in;
-    }
-    .firestick-photo-empty {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-      background: repeating-linear-gradient(135deg, rgba(47, 111, 99, 0.08) 0 12px, transparent 12px 24px), var(--paper-2);
-      font-family: 'IBM Plex Mono';
-      font-size: 0.78rem;
-      color: var(--teal-dark);
-      text-align: center;
-      padding: 0 20px;
-    }
+        /* firestick media */
+        .firestick-examples {
+            margin-top: 36px;
+        }
+        .firestick-examples h3 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+        .firestick-examples>p {
+            font-size: 0.92rem;
+            color: var(--ink-soft);
+            margin: 0 0 20px;
+        }
+        .firestick-media {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .firestick-shots {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        .firestick-photo {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 16/9;
+        }
+        .firestick-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            cursor: zoom-in;
+        }
+        .firestick-photo-empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(135deg, rgba(47, 111, 99, 0.08) 0 12px, transparent 12px 24px), var(--paper-2);
+            font-family: 'IBM Plex Mono';
+            font-size: 0.78rem;
+            color: var(--teal-dark);
+            text-align: center;
+            padding: 0 20px;
+        }
 
-    /* footer */
-    footer {
-      background: var(--ink);
-      color: #DAD6CB;
-      padding: 44px 0 30px;
-    }
-    footer .wrap {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    footer .brand {
-      color: #fff;
-    }
-    footer .brand .dot {
-      background: var(--amber);
-      box-shadow: 0 0 0 3px rgba(201, 122, 43, 0.22);
-    }
-    footer p {
-      font-size: 0.85rem;
-      color: #A9A499;
-      margin: 6px 0 0;
-    }
-    footer .fine {
-      width: 100%;
-      border-top: 1px solid #33372F;
-      margin-top: 30px;
-      padding-top: 18px;
-      font-size: 0.78rem;
-      color: #8b8779;
-      text-align: center;
-    }
+        /* footer */
+        footer {
+            background: var(--ink);
+            color: #DAD6CB;
+            padding: 44px 0 30px;
+        }
+        footer .wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        footer .brand {
+            color: #fff;
+        }
+        footer .brand .dot {
+            background: var(--amber);
+            box-shadow: 0 0 0 3px rgba(201, 122, 43, 0.22);
+        }
+        footer p {
+            font-size: 0.85rem;
+            color: #A9A499;
+            margin: 6px 0 0;
+        }
+        footer .fine {
+            width: 100%;
+            border-top: 1px solid #33372F;
+            margin-top: 30px;
+            padding-top: 18px;
+            font-size: 0.78rem;
+            color: #8b8779;
+            text-align: center;
+        }
 
-    /* lightbox */
-    .build-thumb img,
-    .gallery-img,
-    .firestick-photo img {
-      cursor: zoom-in;
-    }
-    .lightbox-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(20, 22, 19, 0.92);
-      z-index: 100;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 36px;
-      cursor: zoom-out;
-    }
-    .lightbox-overlay:not([hidden]) {
-      display: flex;
-    }
-    .lightbox-overlay img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      border-radius: 4px;
-      cursor: default;
-    }
-    .lightbox-close {
-      position: absolute;
-      top: 18px;
-      right: 20px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(255, 255, 255, 0.14);
-      color: #fff;
-      font-size: 1.3rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .lightbox-close:hover {
-      background: rgba(255, 255, 255, 0.24);
-    }
+        /* lightbox */
+        .build-thumb img,
+        .gallery-img,
+        .firestick-photo img {
+            cursor: zoom-in;
+        }
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 22, 19, 0.92);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 36px;
+            cursor: zoom-out;
+        }
+        .lightbox-overlay:not([hidden]) {
+            display: flex;
+        }
+        .lightbox-overlay img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            cursor: default;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .lightbox-close:hover {
+            background: rgba(255, 255, 255, 0.24);
+        }
 
-    /* ============================================================
-       RESPONSIVE
-       ============================================================ */
-    @media (max-width: 900px) {
-      .hero .wrap {
-        grid-template-columns: 1fr;
-      }
-      .ticket-wrap {
-        margin-top: 10px;
-      }
-      .services-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .steps {
-        grid-template-columns: repeat(2, 1fr);
-        row-gap: 32px;
-      }
-      .step:nth-child(2)::after {
-        display: none;
-      }
-      .work-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .build-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      .contact-grid {
-        grid-template-columns: 1fr;
-      }
-      .firestick-media {
-        grid-template-columns: 1fr;
-      }
-      nav.wrap {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .navlinks {
-        justify-content: center;
-      }
-    }
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 900px) {
+            .hero .wrap {
+                grid-template-columns: 1fr;
+            }
+            .ticket-wrap {
+                margin-top: 10px;
+            }
+            .services-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .steps {
+                grid-template-columns: repeat(2, 1fr);
+                row-gap: 32px;
+            }
+            .step:nth-child(2)::after {
+                display: none;
+            }
+            .work-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .build-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+            .firestick-media {
+                grid-template-columns: 1fr;
+            }
+            nav.wrap {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .navlinks {
+                justify-content: center;
+            }
+        }
 
-    @media (max-width: 560px) {
-      .services-grid {
-        grid-template-columns: 1fr;
-      }
-      .steps {
-        grid-template-columns: 1fr;
-      }
-      .step::after {
-        display: none;
-      }
-      .work-grid {
-        grid-template-columns: 1fr;
-      }
-      .build-grid {
-        grid-template-columns: 1fr;
-      }
-      .field-row {
-        grid-template-columns: 1fr;
-      }
-      .navlinks {
-        gap: 12px;
-      }
-      .navlinks > li > a {
-        font-size: 0.8rem;
-      }
-      .dropdown-menu {
-        min-width: 120px;
-      }
-    }
-  </style>
+        @media (max-width: 560px) {
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+            .steps {
+                grid-template-columns: 1fr;
+            }
+            .step::after {
+                display: none;
+            }
+            .work-grid {
+                grid-template-columns: 1fr;
+            }
+            .build-grid {
+                grid-template-columns: 1fr;
+            }
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+            .navlinks {
+                gap: 12px;
+            }
+            .navlinks>li>a {
+                font-size: 0.8rem;
+            }
+            .dropdown-menu {
+                min-width: 120px;
+            }
+            .disclaimer-modal {
+                padding: 24px 18px 20px;
+            }
+            .disclaimer-modal .email-box {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-  </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
 </head>
 
 <body>
 
-  <!-- ============================================================
-  HEADER
-  ============================================================ -->
-  <header class="site">
-    <nav class="wrap">
-      <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
-      <ul class="navlinks">
-        <li><a href="#services">Services</a></li>
-        <li><a href="#how">How It Works</a></li>
-        <li><a href="#work">Our Work</a></li>
-        <li><a href="#pricing">Pricing</a></li>
-        <li class="dropdown">
-          <a href="#" aria-haspopup="true">More ▾</a>
-          <ul class="dropdown-menu" aria-label="More pages">
-            <li><a href="#custom-build">Custom Build</a></li>
-            <li><a href="#refurbished">Refurbished</a></li>
-            <li><a href="#firestick">Firestick</a></li>
-            <li><a href="#pay">Pay Online</a></li>
-          </ul>
-        </li>
-      </ul>
-      <a href="#contact" class="nav-cta">Book a Repair</a>
-    </nav>
-  </header>
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="site">
+        <nav class="wrap">
+            <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
+            <ul class="navlinks">
+                <li><a href="#services">Services</a></li>
+                <li><a href="#how">How It Works</a></li>
+                <li><a href="#work">Our Work</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li class="dropdown">
+                    <a href="#" aria-haspopup="true">More ▾</a>
+                    <ul class="dropdown-menu" aria-label="More pages">
+                        <li><a href="#custom-build">Custom Build</a></li>
+                        <li><a href="#refurbished">Refurbished</a></li>
+                        <li><a href="#firestick">Firestick</a></li>
+                        <li><a href="#pay">Pay Online</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <a href="#contact" class="nav-cta">Book a Repair</a>
+        </nav>
+    </header>
 
-  <main id="top">
+    <main id="top">
+
+        <!-- ============================================================
+        HERO
+        ============================================================ -->
+        <section class="hero">
+            <div class="wrap">
+                <div>
+                    <span class="eyebrow">Home‑based repair shop · Pickup &amp; drop‑off</span>
+                    <h1>Your computer's <em>next repair ticket</em> starts here.</h1>
+                    <p class="lead">StylesPC collects, diagnoses, and repairs computers and laptops — with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
+                    <div class="hero-ctas">
+                        <a href="#contact" class="btn btn-primary">Book a Repair</a>
+                        <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
+                    </div>
+                </div>
+                <div class="ticket-wrap">
+                    <div class="ticket" id="heroTicket">
+                        <div class="ticket-top">
+                            <div>
+                                <div class="ticket-title">Service Tag</div>
+                                <div class="ticket-id" id="ticketId">#SPC-0148</div>
+                            </div>
+                            <span class="status-pill" id="ticketStatus">IN PROGRESS</span>
+                        </div>
+                        <div class="ticket-perf"></div>
+                        <div class="ticket-row"><span class="k">Device</span><span class="v" id="ticketDevice">Laptop — 14"</span></div>
+                        <div class="ticket-row"><span class="k">Issue</span><span class="v" id="ticketIssue">Won't boot</span></div>
+                        <div class="ticket-row"><span class="k">Intake</span><span class="v" id="ticketIntake">Pickup</span></div>
+                        <div class="ticket-row"><span class="k">Return</span><span class="v" id="ticketReturn">Drop‑off</span></div>
+                        <div class="ticket-perf"></div>
+                        <div class="ticket-row"><span class="k">Technician</span><span class="v" id="ticketTech">StylesPC</span></div>
+                        <div class="stamp" id="ticketStamp">REPAIRED</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        SERVICES
+        ============================================================ -->
+        <section id="services" class="alt">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">What I do</span>
+                    <h2>Repair services, in‑shop or from wherever you are</h2>
+                    <p>Every device gets a service tag, tracked from intake to return.</p>
+                </div>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
+                        </div>
+                        <h3>Full Diagnosis &amp; Repair</h3>
+                        <p>Hardware faults, slow performance, boot failures, and everything in between — diagnosed and fixed at the shop.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17l-4-4 4-4M15 7l4 4-4 4"/></svg>
+                        </div>
+                        <h3>Remote Access Support</h3>
+                        <p>Application errors, operating system issues, and software troubleshooting — fixed live over a remote session.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l3-7h12l3 7v6a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M3 12h18"/></svg>
+                        </div>
+                        <h3>Pickup Service</h3>
+                        <p>Can't get away? I'll collect your device from your address and bring it in for repair.</p>
+                    </div>
+                    <div class="service-card">
+                        <div class="service-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 8h-3V4H4v13h2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/><path d="M4 13h13v4H8"/></svg>
+                        </div>
+                        <h3>Drop‑off / Delivery</h3>
+                        <p>Once your repair's complete, get your device delivered straight back to you.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        HOW IT WORKS
+        ============================================================ -->
+        <section id="how">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Process</span>
+                    <h2>From drop‑off to delivery</h2>
+                    <p>Four steps, start to finish — you can follow your service tag the whole way.</p>
+                </div>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">01</div>
+                        <h3>Request service</h3>
+                        <p>Fill out the booking form with your device and issue. You'll get a service tag number.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">02</div>
+                        <h3>Send it in</h3>
+                        <p>Book a pickup, drop it off yourself, or start a remote session for software/OS issues.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">03</div>
+                        <h3>Diagnose &amp; repair</h3>
+                        <p>Your device is assessed, repaired, and tested against the reported issue.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">04</div>
+                        <h3>Pay &amp; get it back</h3>
+                        <p>Pay online, then pick up or arrange drop‑off delivery back to you.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        OUR WORK
+        ============================================================ -->
+        <section id="work" class="alt">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Our work</span>
+                    <h2>Recent tickets, closed out</h2>
+                    <p>A sample of the kind of repairs that come through the shop.</p>
+                </div>
+                <div class="work-grid">
+                    <div class="work-card">
+                        <div class="gallery" data-images="hinge-before-1.jpg,hinge-before-2.jpg,hinge-before-3.jpg,hinge-before-4.jpg,hinge-before-5.jpg,hinge-before-6.jpg,hinge-before-7.jpg,hinge-before-8.jpg,hinge-before-9.jpg,hinge-before-10.jpg,hinge-after-1.jpg,hinge-after-2.jpg,hinge-after-3.jpg,hinge-after-4.jpg,hinge-after-5.jpg,hinge-after-6.jpg,hinge-after-7.jpg,hinge-after-8.jpg,hinge-after-9.jpg,hinge-after-10.jpg" data-labels="Before,Before,Before,Before,Before,Before,Before,Before,Before,Before,After,After,After,After,After,After,After,After,After,After">
+                            <div class="gallery-viewport">
+                                <img class="gallery-img" src="" alt="Laptop hinge repair example">
+                                <span class="thumb-label gallery-label"></span>
+                            </div>
+                            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+                            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+                            <div class="gallery-dots"></div>
+                        </div>
+                        <div class="work-body">
+                            <span class="tag">Hardware</span>
+                            <h3>Laptop Hinge Repair</h3>
+                            <p>Broken or loose hinge repaired — screen opens and holds position smoothly again.</p>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <div class="gallery" data-images="screen-before-1.jpg,screen-before-2.jpg,screen-before-3.jpg,screen-before-4.jpg,screen-before-5.jpg,screen-after-1.jpg,screen-after-2.jpg,screen-after-3.jpg,screen-after-4.jpg,screen-after-5.jpg" data-labels="Before,Before,Before,Before,Before,After,After,After,After,After">
+                            <div class="gallery-viewport">
+                                <img class="gallery-img" src="" alt="Laptop screen replacement example">
+                                <span class="thumb-label gallery-label"></span>
+                            </div>
+                            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+                            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+                            <div class="gallery-dots"></div>
+                        </div>
+                        <div class="work-body">
+                            <span class="tag">Hardware</span>
+                            <h3>Laptop Screen Replacement</h3>
+                            <p>Cracked display swapped and tested — back to full brightness and color.</p>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <div class="build-thumb">
+                            <img src="images/virus-cleanup.jpg" alt="Virus removal and cleanup example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+                        </div>
+                        <div class="work-body">
+                            <span class="tag">Software</span>
+                            <h3>Virus Removal &amp; Cleanup</h3>
+                            <p>Malware removed, startup programs trimmed, and system performance restored.</p>
+                        </div>
+                    </div>
+                    <div class="work-card">
+                        <div class="build-thumb">
+                            <img src="images/os-install.jpg" alt="Fresh OS install and data recovery example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+                        </div>
+                        <div class="work-body">
+                            <span class="tag">OS Reinstall</span>
+                            <h3>Fresh OS Install &amp; Data Recovery</h3>
+                            <p>Corrupted operating system replaced with a clean install, files recovered first.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        CUSTOM BUILD
+        ============================================================ -->
+        <section id="custom-build">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Custom built</span>
+                    <h2>Custom Built machines</h2>
+                    <p>Built new to your spec and budget — the photo on each card is an example. Send your details and StylesPC will follow up via email.</p>
+                </div>
+                <div class="build-grid">
+                    <div class="build-card">
+                        <div class="build-thumb">
+                            <img src="images/gaming-machine.jpg" alt="Gaming machine example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+                        </div>
+                        <h3>Gaming Machine</h3>
+                        <p>Built new to your spec and budget — example shown.</p>
+                        <button type="button" class="btn btn-primary build-btn" data-build="gaming">I'm Interested</button>
+                    </div>
+                    <div class="build-card">
+                        <div class="build-thumb">
+                            <img src="images/regular-computer.jpg" alt="Regular computer example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+                        </div>
+                        <h3>Regular Computer</h3>
+                        <p>Built new for everyday browsing, school work, and general home use — example shown.</p>
+                        <button type="button" class="btn btn-primary build-btn" data-build="regular">I'm Interested</button>
+                    </div>
+                </div>
+
+                <div id="buildPanel" class="method-panel" hidden>
+                    <h3 id="buildPanelTitle">I'm Interested</h3>
+                    <form id="buildForm" class="mini-form">
+                        <div class="field">
+                            <label for="buildName">Full name</label>
+                            <input type="text" id="buildName" name="buildName" required>
+                        </div>
+                        <div class="field">
+                            <label for="buildPhone">Phone number</label>
+                            <input type="tel" id="buildPhone" name="buildPhone" placeholder="e.g. 876 333 1156" required>
+                        </div>
+                        <button type="submit" class="btn btn-email" id="buildSubmitBtn">✉️ Send Email Enquiry</button>
+                        <p id="buildFormStatus" role="status"></p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        REFURBISHED
+        ============================================================ -->
+        <section id="refurbished" class="alt">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Refurbished</span>
+                    <h2>Refurbished machines</h2>
+                    <p>Pre‑owned, refurbished machines — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up via email.</p>
+                </div>
+                <div class="build-grid">
+                    <div class="build-card">
+                        <div class="build-thumb">
+                            <img src="images/wfh-desktop.jpg" alt="Work from home desktop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
+                        </div>
+                        <h3>Work From Home — Desktop</h3>
+                        <p>Refurbished, available now — example shown.</p>
+                        <button type="button" class="btn btn-primary build-btn" data-build="wfh-desktop">I'm Interested</button>
+                    </div>
+                    <div class="build-card">
+                        <div class="gallery" data-images="wfh-laptop-1.jpg,wfh-laptop-2.jpg,wfh-laptop-3.jpg,wfh-laptop-4.jpg,wfh-laptop-5.jpg,wfh-laptop-6.jpg,wfh-laptop-7.jpg,wfh-laptop-8.jpg,wfh-laptop-9.jpg,wfh-laptop-10.jpg" data-labels="Example,Example,Example,Example,Example,Example,Example,Example,Example,Example">
+                            <div class="gallery-viewport">
+                                <img class="gallery-img" src="" alt="Work from home laptop example">
+                                <span class="thumb-label gallery-label"></span>
+                            </div>
+                            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+                            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+                            <div class="gallery-dots"></div>
+                        </div>
+                        <h3>Work From Home — Laptop</h3>
+                        <p>Refurbished — currently none in stock, built to order — example shown.</p>
+                        <button type="button" class="btn btn-primary build-btn" data-build="wfh-laptop">I'm Interested</button>
+                    </div>
+                </div>
+
+                <div id="refurbPanel" class="method-panel" hidden>
+                    <h3 id="refurbPanelTitle">I'm Interested</h3>
+                    <form id="refurbForm" class="mini-form">
+                        <div class="field">
+                            <label for="refurbName">Full name</label>
+                            <input type="text" id="refurbName" name="refurbName" required>
+                        </div>
+                        <div class="field">
+                            <label for="refurbPhone">Phone number</label>
+                            <input type="tel" id="refurbPhone" name="refurbPhone" placeholder="e.g. 876 333 1156" required>
+                        </div>
+                        <button type="submit" class="btn btn-email" id="refurbSubmitBtn">✉️ Send Email Enquiry</button>
+                        <p id="refurbFormStatus" role="status"></p>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        PRICING
+        ============================================================ -->
+        <section id="pricing">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Rates</span>
+                    <h2>Standard service pricing</h2>
+                    <p>The same rates used on your service tag and invoice — final cost depends on the issue.</p>
+                </div>
+                <table class="price-table">
+                    <thead>
+                        <tr><th>Service</th><th style="text-align:right;">Starting Price</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Diagnostic Fee</td><td class="amt">$2,500</td></tr>
+                        <tr><td>Virus / Malware Removal</td><td class="amt">$3,000</td></tr>
+                        <tr><td>Operating System Reinstall</td><td class="amt">$5,000</td></tr>
+                        <tr><td>Software / Application Troubleshooting</td><td class="amt">$2,000</td></tr>
+                        <tr><td>Remote Access Support (per session)</td><td class="amt">$2,000</td></tr>
+                        <tr><td>Hardware Repair Labor</td><td class="amt">$2,500</td></tr>
+                        <tr><td>Data Backup / Recovery</td><td class="amt">$3,500</td></tr>
+                        <tr><td>Pickup Service</td><td class="amt">$1,500</td></tr>
+                        <tr><td>Misc — Remove Admin Lock‑Out / Reset Windows</td><td class="amt">$1,500</td></tr>
+                        <tr><td>Drop‑off / Delivery Service</td><td class="amt">$1,500</td></tr>
+                    </tbody>
+                </table>
+                <p class="price-note">Prices shown are starting rates and may vary with issue complexity or parts required. You'll always get a quote before work begins.</p>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        FIRESTICK
+        ============================================================ -->
+        <section id="firestick" class="alt">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Firestick</span>
+                    <h2>Firestick setup &amp; Live TV</h2>
+                    <p>Full Firestick setup with Live TV subscription, including local channels.</p>
+                </div>
+                <table class="price-table">
+                    <thead>
+                        <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Full Setup</td><td class="amt">$2,500</td></tr>
+                        <tr><td>Live TV Subscription (incl. local channels) — 1st month, includes app installation &amp; setup</td><td class="amt">$1,500</td></tr>
+                        <tr><td>Live TV Subscription — per month after</td><td class="amt">$500</td></tr>
+                        <tr><td>Apps Installation (per application)</td><td class="amt">$250</td></tr>
+                        <tr><td>Pickup Fee</td><td class="amt">$1,500</td></tr>
+                        <tr><td>Drop‑off Fee</td><td class="amt">$1,500</td></tr>
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-email" id="firestickBtn" style="margin-top:22px;">✉️ Email Enquiry</button>
+                <p class="price-note">Prices shown are starting rates and may vary depending on setup requirements.</p>
+
+                <div class="firestick-examples">
+                    <h3>See it in action</h3>
+                    <p>A look at the Live TV channel guide and setup on an actual Firestick.</p>
+                    <div class="firestick-media">
+                        <div class="gallery firestick-shots" data-images="livetv-1.jpg,livetv-2.jpg,livetv-3.jpg,livetv-4.jpg,livetv-5.jpg,livetv-6.jpg" data-labels="Live TV,Live TV,Live TV,Live TV,Live TV,Live TV">
+                            <div class="gallery-viewport">
+                                <img class="gallery-img" src="" alt="Live TV channel guide example">
+                                <span class="thumb-label gallery-label"></span>
+                            </div>
+                            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
+                            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
+                            <div class="gallery-dots"></div>
+                        </div>
+                        <div class="firestick-photo" id="firestickPhoto">
+                            <div class="firestick-photo-empty" id="firestickPhotoEmpty">Photo coming soon</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        PAY ONLINE
+        ============================================================ -->
+        <section id="pay" class="alt">
+            <div class="wrap">
+                <div class="section-head">
+                    <span class="eyebrow">Pay online</span>
+                    <h2>Pay for a service</h2>
+                    <p>Cover a remote session or a pickup/drop‑off ahead of time — or settle up after your repair is done.</p>
+                </div>
+                <div class="method-select" role="group" aria-label="Choose a payment method">
+                    <button type="button" class="method-btn" data-method="cash">Cash</button>
+                    <button type="button" class="method-btn" data-method="card">Card</button>
+                    <button type="button" class="method-btn" data-method="bank">Bank Transfer</button>
+                </div>
+
+                <div id="methodPanel" class="method-panel" hidden>
+                    <div id="panel-cash" class="method-panel-inner" hidden>
+                        <h3>Pay with Cash</h3>
+                        <p>You can pay in cash when your device is picked up, dropped off, or collected from you — no need to pay online ahead of time.</p>
+                    </div>
+                    <div id="panel-card" class="method-panel-inner" hidden>
+                        <h3>Pay with Card</h3>
+                        <p>Card payments are <strong>temporarily unavailable</strong> — this option is still being set up. In the meantime, please use <strong>Bank Transfer</strong> below.</p>
+                    </div>
+                    <div id="panel-bank" class="method-panel-inner" hidden>
+                        <h3>Pay by Bank Transfer</h3>
+                        <p>Enter your name and phone number below and we'll email you the banking details to complete your payment.</p>
+                        <form id="bankForm" class="mini-form">
+                            <div class="field">
+                                <label for="bankName">Full name</label>
+                                <input type="text" id="bankName" name="name" required>
+                            </div>
+                            <div class="field">
+                                <label for="bankPhone">Phone number</label>
+                                <input type="tel" id="bankPhone" name="phone" placeholder="e.g. 876 333 1156" required>
+                            </div>
+                            <button type="submit" class="btn btn-email" id="bankSubmitBtn">✉️ Request Banking Details</button>
+                            <p id="bankFormStatus" role="status"></p>
+                        </form>
+                    </div>
+                </div>
+                <p class="price-note">Online card payments are on the way — for now, choose Cash on collection/delivery, or Bank Transfer to arrange payment directly with StylesPC over email.</p>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        CONTACT / BOOKING
+        ============================================================ -->
+        <section id="contact">
+            <div class="wrap contact-grid">
+                <div>
+                    <div class="section-head" style="margin-bottom:28px;">
+                        <span class="eyebrow">Get started</span>
+                        <h2>Book a repair</h2>
+                        <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
+                    </div>
+                    <div class="contact-info">
+                        <div class="info-row"><span class="k">Email</span><span><a href="mailto:ajstyleg@gmail.com" style="color:var(--teal-dark);font-weight:600;">ajstyleg@gmail.com</a></span></div>
+                        <div class="info-row"><span class="k">Phone</span><span>(876) 334-1156</span></div>
+                        <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
+                        <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop‑off within local area</span></div>
+                    </div>
+                    <!-- Temporary WhatsApp disclaimer -->
+                    <div style="margin-top:24px;padding:16px 20px;background:rgba(201,122,43,0.08);border:1px solid rgba(201,122,43,0.25);border-radius:6px;">
+                        <p style="font-size:0.88rem;color:var(--ink-soft);margin:0;display:flex;align-items:flex-start;gap:10px;">
+                            <span style="font-size:1.2rem;">📧</span>
+                            <span><strong>WhatsApp is temporarily unavailable.</strong> Please use the booking form below or email us directly at <a href="mailto:ajstyleg@gmail.com" style="color:var(--teal-dark);font-weight:600;">ajstyleg@gmail.com</a> — we'll get back to you as soon as possible.</span>
+                        </p>
+                    </div>
+                </div>
+                <form class="book" id="bookForm">
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="name">Full name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="field">
+                            <label for="phone">Phone number</label>
+                            <input type="tel" id="phone" name="phone" placeholder="e.g. 876 333 1156" required>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="email">Email (required)</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        <div class="field">
+                            <label for="device">Device type</label>
+                            <input type="text" id="device" name="device" placeholder="e.g. Dell laptop" required>
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field">
+                            <label for="serviceType">Preferred service</label>
+                            <select id="serviceType" name="serviceType" required>
+                                <option value="">Choose one</option>
+                                <option value="Pickup">Pickup (collect from my address)</option>
+                                <option value="Drop-off">Drop‑off (I'll bring it in)</option>
+                                <option value="Remote">Remote Access Support</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="address">Address / pickup point <span id="addressHint">(optional)</span></label>
+                            <input type="text" id="address" name="address" placeholder="Needed only if you'd like us to collect it">
+                        </div>
+                    </div>
+                    <div class="field">
+                        <label for="issue">Describe the issue</label>
+                        <textarea id="issue" name="issue" required></textarea>
+                    </div>
+                    <p class="form-note" id="privacyDisclaimer">🔒 Your contact and pickup details are stored securely and used only to manage your repair — we never share your information with anyone else. If you'd rather not share a pickup address, choose Drop‑off instead.</p>
+                    <button type="submit" class="btn btn-primary" id="bookSubmitBtn">Book my repair</button>
+                    <p class="form-note">We'll confirm your ticket here, then send you an email confirmation with next steps.</p>
+                    <p id="formStatus" role="status"></p>
+                </form>
+            </div>
+        </section>
+
+    </main>
 
     <!-- ============================================================
-    HERO
+    FOOTER
     ============================================================ -->
-    <section class="hero">
-      <div class="wrap">
-        <div>
-          <span class="eyebrow">Home‑based repair shop · Pickup &amp; drop‑off</span>
-          <h1>Your computer's <em>next repair ticket</em> starts here.</h1>
-          <p class="lead">StylesPC collects, diagnoses, and repairs computers and laptops — with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
-          <div class="hero-ctas">
-            <a href="#contact" class="btn btn-primary">Book a Repair</a>
-            <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
-          </div>
-        </div>
-        <div class="ticket-wrap">
-          <div class="ticket" id="heroTicket">
-            <div class="ticket-top">
-              <div>
-                <div class="ticket-title">Service Tag</div>
-                <div class="ticket-id" id="ticketId">#SPC-0148</div>
-              </div>
-              <span class="status-pill" id="ticketStatus">IN PROGRESS</span>
+    <footer>
+        <div class="wrap">
+            <div>
+                <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
+                <p>Computer &amp; laptop repair — pickup, drop‑off &amp; remote support.</p>
             </div>
-            <div class="ticket-perf"></div>
-            <div class="ticket-row"><span class="k">Device</span><span class="v" id="ticketDevice">Laptop — 14"</span></div>
-            <div class="ticket-row"><span class="k">Issue</span><span class="v" id="ticketIssue">Won't boot</span></div>
-            <div class="ticket-row"><span class="k">Intake</span><span class="v" id="ticketIntake">Pickup</span></div>
-            <div class="ticket-row"><span class="k">Return</span><span class="v" id="ticketReturn">Drop‑off</span></div>
-            <div class="ticket-perf"></div>
-            <div class="ticket-row"><span class="k">Technician</span><span class="v" id="ticketTech">StylesPC</span></div>
-            <div class="stamp" id="ticketStamp">REPAIRED</div>
-          </div>
+            <div>
+                <p><a href="mailto:ajstyleg@gmail.com" style="color:#DAD6CB;text-decoration:underline;">ajstyleg@gmail.com</a> · (876) 334-1156</p>
+            </div>
         </div>
-      </div>
-    </section>
+        <div class="wrap">
+            <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee.</div>
+        </div>
+    </footer>
 
     <!-- ============================================================
-    SERVICES
+    DISCLAIMER MODAL (WhatsApp temporarily unavailable)
     ============================================================ -->
-    <section id="services" class="alt">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">What I do</span>
-          <h2>Repair services, in‑shop or from wherever you are</h2>
-          <p>Every device gets a service tag, tracked from intake to return.</p>
+    <div class="disclaimer-overlay" id="disclaimerModal" hidden>
+        <div class="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
+            <h2 id="disclaimerTitle"><span class="icon">⏳</span> WhatsApp Temporarily Unavailable</h2>
+            <p>We're currently unable to receive messages via WhatsApp. Please use one of the other methods below to get in touch — we'll reply as quickly as possible.</p>
+            <div class="email-box">
+                <span>ajstyleg@gmail.com</span>
+                <button class="copy-btn" id="copyEmailBtn">Copy</button>
+            </div>
+            <a href="mailto:ajstyleg@gmail.com" class="btn btn-email" style="width:100%;justify-content:center;margin-bottom:12px;">✉️ Send Email Now</a>
+            <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px;">📋 Book a Repair</a>
+            <button class="btn-close-modal" id="closeDisclaimerBtn">Close</button>
+            <div class="alt-contact">
+                Or call us at <a href="tel:8763341156">(876) 334-1156</a>
+            </div>
         </div>
-        <div class="services-grid">
-          <div class="service-card">
-            <div class="service-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="13" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg>
-            </div>
-            <h3>Full Diagnosis &amp; Repair</h3>
-            <p>Hardware faults, slow performance, boot failures, and everything in between — diagnosed and fixed at the shop.</p>
-          </div>
-          <div class="service-card">
-            <div class="service-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 17l-4-4 4-4M15 7l4 4-4 4"/></svg>
-            </div>
-            <h3>Remote Access Support</h3>
-            <p>Application errors, operating system issues, and software troubleshooting — fixed live over a remote session.</p>
-          </div>
-          <div class="service-card">
-            <div class="service-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l3-7h12l3 7v6a1 1 0 01-1 1H4a1 1 0 01-1-1z"/><path d="M3 12h18"/></svg>
-            </div>
-            <h3>Pickup Service</h3>
-            <p>Can't get away? I'll collect your device from your address and bring it in for repair.</p>
-          </div>
-          <div class="service-card">
-            <div class="service-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 8h-3V4H4v13h2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/><path d="M4 13h13v4H8"/></svg>
-            </div>
-            <h3>Drop‑off / Delivery</h3>
-            <p>Once your repair's complete, get your device delivered straight back to you.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    HOW IT WORKS
-    ============================================================ -->
-    <section id="how">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Process</span>
-          <h2>From drop‑off to delivery</h2>
-          <p>Four steps, start to finish — you can follow your service tag the whole way.</p>
-        </div>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">01</div>
-            <h3>Request service</h3>
-            <p>Fill out the booking form with your device and issue. You'll get a service tag number.</p>
-          </div>
-          <div class="step">
-            <div class="step-num">02</div>
-            <h3>Send it in</h3>
-            <p>Book a pickup, drop it off yourself, or start a remote session for software/OS issues.</p>
-          </div>
-          <div class="step">
-            <div class="step-num">03</div>
-            <h3>Diagnose &amp; repair</h3>
-            <p>Your device is assessed, repaired, and tested against the reported issue.</p>
-          </div>
-          <div class="step">
-            <div class="step-num">04</div>
-            <h3>Pay &amp; get it back</h3>
-            <p>Pay online, then pick up or arrange drop‑off delivery back to you.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    OUR WORK
-    ============================================================ -->
-    <section id="work" class="alt">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Our work</span>
-          <h2>Recent tickets, closed out</h2>
-          <p>A sample of the kind of repairs that come through the shop.</p>
-        </div>
-        <div class="work-grid">
-          <div class="work-card">
-            <div class="gallery" data-images="hinge-before-1.jpg,hinge-before-2.jpg,hinge-before-3.jpg,hinge-before-4.jpg,hinge-before-5.jpg,hinge-before-6.jpg,hinge-before-7.jpg,hinge-before-8.jpg,hinge-before-9.jpg,hinge-before-10.jpg,hinge-after-1.jpg,hinge-after-2.jpg,hinge-after-3.jpg,hinge-after-4.jpg,hinge-after-5.jpg,hinge-after-6.jpg,hinge-after-7.jpg,hinge-after-8.jpg,hinge-after-9.jpg,hinge-after-10.jpg" data-labels="Before,Before,Before,Before,Before,Before,Before,Before,Before,Before,After,After,After,After,After,After,After,After,After,After">
-              <div class="gallery-viewport">
-                <img class="gallery-img" src="" alt="Laptop hinge repair example">
-                <span class="thumb-label gallery-label"></span>
-              </div>
-              <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
-              <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
-              <div class="gallery-dots"></div>
-            </div>
-            <div class="work-body">
-              <span class="tag">Hardware</span>
-              <h3>Laptop Hinge Repair</h3>
-              <p>Broken or loose hinge repaired — screen opens and holds position smoothly again.</p>
-            </div>
-          </div>
-          <div class="work-card">
-            <div class="gallery" data-images="screen-before-1.jpg,screen-before-2.jpg,screen-before-3.jpg,screen-before-4.jpg,screen-before-5.jpg,screen-after-1.jpg,screen-after-2.jpg,screen-after-3.jpg,screen-after-4.jpg,screen-after-5.jpg" data-labels="Before,Before,Before,Before,Before,After,After,After,After,After">
-              <div class="gallery-viewport">
-                <img class="gallery-img" src="" alt="Laptop screen replacement example">
-                <span class="thumb-label gallery-label"></span>
-              </div>
-              <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
-              <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
-              <div class="gallery-dots"></div>
-            </div>
-            <div class="work-body">
-              <span class="tag">Hardware</span>
-              <h3>Laptop Screen Replacement</h3>
-              <p>Cracked display swapped and tested — back to full brightness and color.</p>
-            </div>
-          </div>
-          <div class="work-card">
-            <div class="build-thumb">
-              <img src="images/virus-cleanup.jpg" alt="Virus removal and cleanup example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-            </div>
-            <div class="work-body">
-              <span class="tag">Software</span>
-              <h3>Virus Removal &amp; Cleanup</h3>
-              <p>Malware removed, startup programs trimmed, and system performance restored.</p>
-            </div>
-          </div>
-          <div class="work-card">
-            <div class="build-thumb">
-              <img src="images/os-install.jpg" alt="Fresh OS install and data recovery example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-            </div>
-            <div class="work-body">
-              <span class="tag">OS Reinstall</span>
-              <h3>Fresh OS Install &amp; Data Recovery</h3>
-              <p>Corrupted operating system replaced with a clean install, files recovered first.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    CUSTOM BUILD
-    ============================================================ -->
-    <section id="custom-build">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Custom built</span>
-          <h2>Custom Built machines</h2>
-          <p>Built new to your spec and budget — the photo on each card is an example. Send your details and StylesPC will follow up on WhatsApp.</p>
-        </div>
-        <div class="build-grid">
-          <div class="build-card">
-            <div class="build-thumb">
-              <img src="images/gaming-machine.jpg" alt="Gaming machine example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-            </div>
-            <h3>Gaming Machine</h3>
-            <p>Built new to your spec and budget — example shown.</p>
-            <button type="button" class="btn btn-primary build-btn" data-build="gaming">I'm Interested</button>
-          </div>
-          <div class="build-card">
-            <div class="build-thumb">
-              <img src="images/regular-computer.jpg" alt="Regular computer example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-            </div>
-            <h3>Regular Computer</h3>
-            <p>Built new for everyday browsing, school work, and general home use — example shown.</p>
-            <button type="button" class="btn btn-primary build-btn" data-build="regular">I'm Interested</button>
-          </div>
-        </div>
-
-        <div id="buildPanel" class="method-panel" hidden>
-          <h3 id="buildPanelTitle">I'm Interested</h3>
-          <form id="buildForm" class="mini-form">
-            <div class="field">
-              <label for="buildName">Full name</label>
-              <input type="text" id="buildName" name="buildName" required>
-            </div>
-            <div class="field">
-              <label for="buildPhone">Phone / WhatsApp number</label>
-              <input type="tel" id="buildPhone" name="buildPhone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
-              <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
-            </div>
-            <button type="submit" class="btn btn-amber" id="buildSubmitBtn">Continue on WhatsApp</button>
-            <p id="buildFormStatus" role="status"></p>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    REFURBISHED
-    ============================================================ -->
-    <section id="refurbished" class="alt">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Refurbished</span>
-          <h2>Refurbished machines</h2>
-          <p>Pre‑owned, refurbished machines — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up on WhatsApp.</p>
-        </div>
-        <div class="build-grid">
-          <div class="build-card">
-            <div class="build-thumb">
-              <img src="images/wfh-desktop.jpg" alt="Work from home desktop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
-            </div>
-            <h3>Work From Home — Desktop</h3>
-            <p>Refurbished, available now — example shown.</p>
-            <button type="button" class="btn btn-primary build-btn" data-build="wfh-desktop">I'm Interested</button>
-          </div>
-          <div class="build-card">
-            <div class="gallery" data-images="wfh-laptop-1.jpg,wfh-laptop-2.jpg,wfh-laptop-3.jpg,wfh-laptop-4.jpg,wfh-laptop-5.jpg,wfh-laptop-6.jpg,wfh-laptop-7.jpg,wfh-laptop-8.jpg,wfh-laptop-9.jpg,wfh-laptop-10.jpg" data-labels="Example,Example,Example,Example,Example,Example,Example,Example,Example,Example">
-              <div class="gallery-viewport">
-                <img class="gallery-img" src="" alt="Work from home laptop example">
-                <span class="thumb-label gallery-label"></span>
-              </div>
-              <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
-              <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
-              <div class="gallery-dots"></div>
-            </div>
-            <h3>Work From Home — Laptop</h3>
-            <p>Refurbished — currently none in stock, built to order — example shown.</p>
-            <button type="button" class="btn btn-primary build-btn" data-build="wfh-laptop">I'm Interested</button>
-          </div>
-        </div>
-
-        <div id="refurbPanel" class="method-panel" hidden>
-          <h3 id="refurbPanelTitle">I'm Interested</h3>
-          <form id="refurbForm" class="mini-form">
-            <div class="field">
-              <label for="refurbName">Full name</label>
-              <input type="text" id="refurbName" name="refurbName" required>
-            </div>
-            <div class="field">
-              <label for="refurbPhone">Phone / WhatsApp number</label>
-              <input type="tel" id="refurbPhone" name="refurbPhone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
-              <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
-            </div>
-            <button type="submit" class="btn btn-amber" id="refurbSubmitBtn">Continue on WhatsApp</button>
-            <p id="refurbFormStatus" role="status"></p>
-          </form>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    PRICING
-    ============================================================ -->
-    <section id="pricing">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Rates</span>
-          <h2>Standard service pricing</h2>
-          <p>The same rates used on your service tag and invoice — final cost depends on the issue.</p>
-        </div>
-        <table class="price-table">
-          <thead>
-            <tr><th>Service</th><th style="text-align:right;">Starting Price</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Diagnostic Fee</td><td class="amt">$2,500</td></tr>
-            <tr><td>Virus / Malware Removal</td><td class="amt">$3,000</td></tr>
-            <tr><td>Operating System Reinstall</td><td class="amt">$5,000</td></tr>
-            <tr><td>Software / Application Troubleshooting</td><td class="amt">$2,000</td></tr>
-            <tr><td>Remote Access Support (per session)</td><td class="amt">$2,000</td></tr>
-            <tr><td>Hardware Repair Labor</td><td class="amt">$2,500</td></tr>
-            <tr><td>Data Backup / Recovery</td><td class="amt">$3,500</td></tr>
-            <tr><td>Pickup Service</td><td class="amt">$1,500</td></tr>
-            <tr><td>Misc — Remove Admin Lock‑Out / Reset Windows</td><td class="amt">$1,500</td></tr>
-            <tr><td>Drop‑off / Delivery Service</td><td class="amt">$1,500</td></tr>
-          </tbody>
-        </table>
-        <p class="price-note">Prices shown are starting rates and may vary with issue complexity or parts required. You'll always get a quote before work begins.</p>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    FIRESTICK
-    ============================================================ -->
-    <section id="firestick" class="alt">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Firestick</span>
-          <h2>Firestick setup &amp; Live TV</h2>
-          <p>Full Firestick setup with Live TV subscription, including local channels.</p>
-        </div>
-        <table class="price-table">
-          <thead>
-            <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Full Setup</td><td class="amt">$2,500</td></tr>
-            <tr><td>Live TV Subscription (incl. local channels) — 1st month, includes app installation &amp; setup</td><td class="amt">$1,500</td></tr>
-            <tr><td>Live TV Subscription — per month after</td><td class="amt">$500</td></tr>
-            <tr><td>Apps Installation (per application)</td><td class="amt">$250</td></tr>
-            <tr><td>Pickup Fee</td><td class="amt">$1,500</td></tr>
-            <tr><td>Drop‑off Fee</td><td class="amt">$1,500</td></tr>
-          </tbody>
-        </table>
-        <button type="button" class="btn btn-whatsapp" id="firestickBtn" style="margin-top:22px;">💬 Get Started on WhatsApp</button>
-        <p class="price-note">Prices shown are starting rates and may vary depending on setup requirements.</p>
-
-        <div class="firestick-examples">
-          <h3>See it in action</h3>
-          <p>A look at the Live TV channel guide and setup on an actual Firestick.</p>
-          <div class="firestick-media">
-            <div class="gallery firestick-shots" data-images="livetv-1.jpg,livetv-2.jpg,livetv-3.jpg,livetv-4.jpg,livetv-5.jpg,livetv-6.jpg" data-labels="Live TV,Live TV,Live TV,Live TV,Live TV,Live TV">
-              <div class="gallery-viewport">
-                <img class="gallery-img" src="" alt="Live TV channel guide example">
-                <span class="thumb-label gallery-label"></span>
-              </div>
-              <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
-              <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
-              <div class="gallery-dots"></div>
-            </div>
-            <div class="firestick-photo" id="firestickPhoto">
-              <div class="firestick-photo-empty" id="firestickPhotoEmpty">Photo coming soon</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    PAY ONLINE
-    ============================================================ -->
-    <section id="pay" class="alt">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Pay online</span>
-          <h2>Pay for a service</h2>
-          <p>Cover a remote session or a pickup/drop‑off ahead of time — or settle up after your repair is done.</p>
-        </div>
-        <div class="method-select" role="group" aria-label="Choose a payment method">
-          <button type="button" class="method-btn" data-method="cash">Cash</button>
-          <button type="button" class="method-btn" data-method="card">Card</button>
-          <button type="button" class="method-btn" data-method="bank">Bank Transfer</button>
-        </div>
-
-        <div id="methodPanel" class="method-panel" hidden>
-          <div id="panel-cash" class="method-panel-inner" hidden>
-            <h3>Pay with Cash</h3>
-            <p>You can pay in cash when your device is picked up, dropped off, or collected from you — no need to pay online ahead of time.</p>
-          </div>
-          <div id="panel-card" class="method-panel-inner" hidden>
-            <h3>Pay with Card</h3>
-            <p>Card payments are <strong>temporarily unavailable</strong> — this option is still being set up. In the meantime, please use <strong>Bank Transfer</strong> below.</p>
-          </div>
-          <div id="panel-bank" class="method-panel-inner" hidden>
-            <h3>Pay by Bank Transfer</h3>
-            <p>Enter your phone/WhatsApp number below and it'll open WhatsApp so you can send it straight to StylesPC — you'll then be messaged shortly with banking details.</p>
-            <form id="bankForm" class="mini-form">
-              <div class="field">
-                <label for="bankPhone">Phone / WhatsApp number</label>
-                <input type="tel" id="bankPhone" name="phone" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" required>
-                <span class="field-hint">Digits only, with country code — e.g. <strong>18765551234</strong></span>
-              </div>
-              <button type="submit" class="btn btn-whatsapp" id="bankSubmitBtn">💬 Continue on WhatsApp</button>
-              <p id="bankFormStatus" role="status"></p>
-            </form>
-          </div>
-        </div>
-        <p class="pay-note">Online card payments are on the way — for now, choose Cash on collection/delivery, or Bank Transfer to arrange payment directly with StylesPC over WhatsApp.</p>
-      </div>
-    </section>
-
-    <!-- ============================================================
-    CONTACT / BOOKING
-    ============================================================ -->
-    <section id="contact">
-      <div class="wrap contact-grid">
-        <div>
-          <div class="section-head" style="margin-bottom:28px;">
-            <span class="eyebrow">Get started</span>
-            <h2>Book a repair</h2>
-            <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
-          </div>
-          <div class="contact-info">
-            <div class="info-row"><span class="k">Email</span><span>ajstyleg@gmail.com</span></div>
-            <div class="info-row"><span class="k">Phone</span><span>(876) 334-1156</span></div>
-            <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
-            <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop‑off within local area</span></div>
-          </div>
-        </div>
-        <form class="book" id="bookForm">
-          <div class="field-row">
-            <div class="field">
-              <label for="name">Full name</label>
-              <input type="text" id="name" name="name" required>
-            </div>
-            <div class="field">
-              <label for="phone">Phone / WhatsApp number</label>
-              <input type="tel" id="phone" name="phone" placeholder="e.g. 876 333 1156" required>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="email">Email (optional)</label>
-              <input type="email" id="email" name="email">
-            </div>
-            <div class="field">
-              <label for="device">Device type</label>
-              <input type="text" id="device" name="device" placeholder="e.g. Dell laptop" required>
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field">
-              <label for="serviceType">Preferred service</label>
-              <select id="serviceType" name="serviceType" required>
-                <option value="">Choose one</option>
-                <option value="Pickup">Pickup (collect from my address)</option>
-                <option value="Drop-off">Drop‑off (I'll bring it in)</option>
-                <option value="Remote">Remote Access Support</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="address">Address / pickup point <span id="addressHint">(optional)</span></label>
-              <input type="text" id="address" name="address" placeholder="Needed only if you'd like us to collect it">
-            </div>
-          </div>
-          <div class="field">
-            <label for="issue">Describe the issue</label>
-            <textarea id="issue" name="issue" required></textarea>
-          </div>
-          <p class="form-note" id="privacyDisclaimer">🔒 Your contact and pickup details are stored securely and used only to manage your repair — we never share your information with anyone else. If you'd rather not share a pickup address, choose Drop‑off instead.</p>
-          <button type="submit" class="btn btn-primary" id="bookSubmitBtn">Book my repair</button>
-          <p class="form-note">We'll confirm your ticket here, then send a WhatsApp notification to StylesPC – you'll receive a reply shortly.</p>
-          <p id="formStatus" role="status"></p>
-        </form>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- ============================================================
-  FOOTER
-  ============================================================ -->
-  <footer>
-    <div class="wrap">
-      <div>
-        <a href="#top" class="brand"><span class="dot"></span>StylesPC</a>
-        <p>Computer &amp; laptop repair — pickup, drop‑off &amp; remote support.</p>
-      </div>
-      <div>
-        <p>ajstyleg@gmail.com · (876) 334-1156</p>
-      </div>
     </div>
-    <div class="wrap">
-      <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee.</div>
-    </div>
-  </footer>
 
-  <!-- ============================================================
-  FLOATING WHATSAPP BUTTON (muted teal, no bright green)
-  ============================================================ -->
-  <a href="#" id="whatsappFloat" class="whatsapp-float" aria-label="Chat on WhatsApp">
-    <svg viewBox="0 0 24 24" width="32" height="32">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-    </svg>
-  </a>
+    <!-- ============================================================
+    JAVASCRIPT
+    ============================================================ -->
+    <script>
+        // =============================================================
+        //  DISCLAIMER MODAL (WhatsApp unavailable)
+        // =============================================================
+        (function() {
+            var modal = document.getElementById('disclaimerModal');
+            var closeBtn = document.getElementById('closeDisclaimerBtn');
+            var copyBtn = document.getElementById('copyEmailBtn');
+            var emailText = 'ajstyleg@gmail.com';
 
-  <!-- ============================================================
-  JAVASCRIPT
-  ============================================================ -->
-  <script>
-    // =============================================================
-    //  WHATSAPP BACKEND CONFIG
-    // =============================================================
-    const STORE_WHATSAPP = '18763341156';
-    // 🔁 Replace with your actual backend endpoint
-    const BACKEND_URL = 'https://your-api.example.com/api/send-whatsapp';
+            function showDisclaimer() {
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
 
-    /**
-     * Sends a WhatsApp message to your backend.
-     * The backend is responsible for actually delivering the message
-     * (e.g., via Twilio, WhatsApp Cloud API, etc.).
-     */
-    function sendWhatsAppToBackend(message, customerPhone = null) {
-      return fetch(BACKEND_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          customerPhone: customerPhone,
-          storeNumber: STORE_WHATSAPP
-        })
-      }).then(res => {
-        if (!res.ok) throw new Error('Backend responded with ' + res.status);
-        return res.json();
-      });
-    }
+            function hideDisclaimer() {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+            }
 
-    /**
-     * Normalises a phone number: strips non‑digits and adds
-     * Jamaica country code (1) if exactly 10 digits.
-     */
-    function normalizePhoneDigits(raw) {
-      let digits = raw.replace(/\D/g, '');
-      if (digits.length === 10) digits = '1' + digits;
-      return digits;
-    }
+            if (closeBtn) closeBtn.addEventListener('click', hideDisclaimer);
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) hideDisclaimer();
+                });
+            }
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal && !modal.hidden) hideDisclaimer();
+            });
 
-    // =============================================================
-    //  IMAGE GALLERIES (auto‑detect existing files)
-    // =============================================================
-    (function() {
-      var galleries = document.querySelectorAll('.gallery');
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function() {
+                    navigator.clipboard.writeText(emailText).then(function() {
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+                    }).catch(function() {
+                        // fallback
+                        var ta = document.createElement('textarea');
+                        ta.value = emailText;
+                        document.body.appendChild(ta);
+                        ta.select();
+                        document.execCommand('copy');
+                        ta.remove();
+                        copyBtn.textContent = 'Copied!';
+                        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
+                    });
+                });
+            }
 
-      galleries.forEach(function(gallery) {
-        var candidateFiles = (gallery.getAttribute('data-images') || '').split(',').map(function(s) { return s
-            .trim(); }).filter(Boolean);
-        var candidateLabels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s) { return s
-          .trim(); });
-        if (!candidateFiles.length) return;
+            // Expose for use by other buttons
+            window.showWhatsAppDisclaimer = showDisclaimer;
+        })();
 
-        var viewport = gallery.querySelector('.gallery-viewport');
-        var img = gallery.querySelector('.gallery-img');
-        var labelEl = gallery.querySelector('.gallery-label');
-        var dotsWrap = gallery.querySelector('.gallery-dots');
-        var prevBtn = gallery.querySelector('.gallery-prev');
-        var nextBtn = gallery.querySelector('.gallery-next');
 
-        img.style.display = 'none';
+        // =============================================================
+        //  WHATSAPP BACKEND CONFIG — DISABLED (temporarily unavailable)
+        // =============================================================
+        // All WhatsApp functions now show the disclaimer instead.
+        function sendWhatsAppToBackend() {
+            window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
+            return Promise.reject(new Error('WhatsApp is temporarily unavailable.'));
+        }
 
-        var checks = candidateFiles.map(function(file) {
-          return new Promise(function(resolve) {
+
+        // =============================================================
+        //  IMAGE GALLERIES (auto‑detect existing files)
+        // =============================================================
+        (function() {
+            var galleries = document.querySelectorAll('.gallery');
+
+            galleries.forEach(function(gallery) {
+                var candidateFiles = (gallery.getAttribute('data-images') || '').split(',').map(function(s) { return s
+                        .trim(); }).filter(Boolean);
+                var candidateLabels = (gallery.getAttribute('data-labels') || '').split(',').map(function(s) { return s
+                    .trim(); });
+                if (!candidateFiles.length) return;
+
+                var viewport = gallery.querySelector('.gallery-viewport');
+                var img = gallery.querySelector('.gallery-img');
+                var labelEl = gallery.querySelector('.gallery-label');
+                var dotsWrap = gallery.querySelector('.gallery-dots');
+                var prevBtn = gallery.querySelector('.gallery-prev');
+                var nextBtn = gallery.querySelector('.gallery-next');
+
+                img.style.display = 'none';
+
+                var checks = candidateFiles.map(function(file) {
+                    return new Promise(function(resolve) {
+                        var probe = new Image();
+                        probe.onload = function() { resolve({ exists: true, w: probe.naturalWidth, h: probe
+                                .naturalHeight }); };
+                        probe.onerror = function() { resolve({ exists: false }); };
+                        probe.src = 'images/' + file;
+                    });
+                });
+
+                Promise.all(checks).then(function(results) {
+                    var files = [];
+                    var labels = [];
+                    var dims = [];
+                    results.forEach(function(r, i) {
+                        if (r.exists) {
+                            files.push(candidateFiles[i]);
+                            labels.push(candidateLabels[i] || '');
+                            dims.push({ w: r.w, h: r.h });
+                        }
+                    });
+
+                    if (!files.length) {
+                        var empty = document.createElement('div');
+                        empty.className = 'gallery-empty';
+                        viewport.insertBefore(empty, img);
+                        prevBtn.style.display = 'none';
+                        nextBtn.style.display = 'none';
+                        return;
+                    }
+
+                    var index = 0;
+
+                    files.forEach(function(_, i) {
+                        var dot = document.createElement('button');
+                        dot.type = 'button';
+                        dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
+                        dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
+                        dot.addEventListener('click', function() { show(i); });
+                        dotsWrap.appendChild(dot);
+                    });
+                    var dots = dotsWrap.querySelectorAll('.gallery-dot');
+
+                    if (files.length < 2) {
+                        prevBtn.style.display = 'none';
+                        nextBtn.style.display = 'none';
+                        dotsWrap.style.display = 'none';
+                    }
+
+                    function show(i) {
+                        index = (i + files.length) % files.length;
+                        img.src = 'images/' + files[index];
+                        img.alt = labels[index] || '';
+                        labelEl.textContent = labels[index] || '';
+                        labelEl.style.display = labels[index] ? 'block' : 'none';
+                        dots.forEach(function(d, di) { d.classList.toggle('active', di === index); });
+                        var d = dims[index];
+                        if (d && d.w && d.h) {
+                            gallery.style.aspectRatio = d.w + ' / ' + d.h;
+                        }
+                    }
+
+                    img.style.display = 'block';
+                    prevBtn.addEventListener('click', function() { show(index - 1); });
+                    nextBtn.addEventListener('click', function() { show(index + 1); });
+
+                    show(0);
+                });
+            });
+        })();
+
+
+        // =============================================================
+        //  FIRESTICK – Email Enquiry
+        // =============================================================
+        var firestickBtn = document.getElementById('firestickBtn');
+        if (firestickBtn) {
+            firestickBtn.addEventListener('click', function() {
+                var subject = encodeURIComponent('Firestick Setup Enquiry');
+                var body = encodeURIComponent(
+                    "Hi StylesPC,\n\nI'm interested in a Firestick full setup with Live TV subscription. Please send me more information.\n\nMy contact details:\nName: \nPhone: \n\nThanks!"
+                );
+                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
+            });
+        }
+
+
+        // =============================================================
+        //  CUSTOM BUILT — Email Enquiry
+        // =============================================================
+        (function() {
+            var buildLabels = {
+                gaming: 'Gaming Machine',
+                regular: 'Regular Computer'
+            };
+            var buildButtons = document.querySelectorAll('#custom-build .build-btn');
+            var buildPanel = document.getElementById('buildPanel');
+            var buildPanelTitle = document.getElementById('buildPanelTitle');
+            var currentBuild = null;
+
+            buildButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    currentBuild = btn.getAttribute('data-build');
+                    buildPanelTitle.textContent = "I'm Interested — " + buildLabels[currentBuild];
+                    buildPanel.hidden = false;
+                    buildPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            });
+
+            var buildForm = document.getElementById('buildForm');
+            var buildPhoneInput = document.getElementById('buildPhone');
+
+            buildForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var status = document.getElementById('buildFormStatus');
+                var name = document.getElementById('buildName').value.trim();
+                var phone = buildPhoneInput.value.trim();
+
+                status.classList.remove('ok', 'err');
+
+                if (!name) {
+                    status.textContent = 'Please enter your name.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!phone) {
+                    status.textContent = 'Please enter your phone number.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!currentBuild) {
+                    status.textContent = 'Please choose a category above first.';
+                    status.classList.add('err');
+                    return;
+                }
+
+                var subject = encodeURIComponent('Custom Build Enquiry — ' + buildLabels[currentBuild]);
+                var body = encodeURIComponent(
+                    "Hi StylesPC,\n\nI'm interested in a custom-built " + buildLabels[currentBuild] +
+                    ".\n\nMy details:\nName: " + name + "\nPhone: " + phone +
+                    "\n\nPlease send me more information and pricing.\n\nThanks!"
+                );
+
+                status.textContent = 'Opening email…';
+                status.classList.add('ok');
+                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
+
+                // Reset form after a moment
+                setTimeout(function() {
+                    document.getElementById('buildName').value = '';
+                    buildPhoneInput.value = '';
+                    status.textContent = 'Email sent! We\'ll get back to you shortly.';
+                }, 500);
+            });
+        })();
+
+
+        // =============================================================
+        //  REFURBISHED — Email Enquiry
+        // =============================================================
+        (function() {
+            var refurbLabels = {
+                'wfh-desktop': 'Work From Home Desktop',
+                'wfh-laptop': 'Work From Home Laptop'
+            };
+            var refurbButtons = document.querySelectorAll('#refurbished .build-btn');
+            var refurbPanel = document.getElementById('refurbPanel');
+            var refurbPanelTitle = document.getElementById('refurbPanelTitle');
+            var currentRefurb = null;
+
+            refurbButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    currentRefurb = btn.getAttribute('data-build');
+                    refurbPanelTitle.textContent = "I'm Interested — " + refurbLabels[currentRefurb];
+                    refurbPanel.hidden = false;
+                    refurbPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+            });
+
+            var refurbForm = document.getElementById('refurbForm');
+            var refurbPhoneInput = document.getElementById('refurbPhone');
+
+            refurbForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var status = document.getElementById('refurbFormStatus');
+                var name = document.getElementById('refurbName').value.trim();
+                var phone = refurbPhoneInput.value.trim();
+
+                status.classList.remove('ok', 'err');
+
+                if (!name) {
+                    status.textContent = 'Please enter your name.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!phone) {
+                    status.textContent = 'Please enter your phone number.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!currentRefurb) {
+                    status.textContent = 'Please choose a category above first.';
+                    status.classList.add('err');
+                    return;
+                }
+
+                var subject = encodeURIComponent('Refurbished Enquiry — ' + refurbLabels[currentRefurb]);
+                var body = encodeURIComponent(
+                    "Hi StylesPC,\n\nI'm interested in the refurbished " + refurbLabels[currentRefurb] +
+                    " machine.\n\nMy details:\nName: " + name + "\nPhone: " + phone +
+                    "\n\nPlease let me know if it's available and send pricing.\n\nThanks!"
+                );
+
+                status.textContent = 'Opening email…';
+                status.classList.add('ok');
+                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
+
+                setTimeout(function() {
+                    document.getElementById('refurbName').value = '';
+                    refurbPhoneInput.value = '';
+                    status.textContent = 'Email sent! We\'ll get back to you shortly.';
+                }, 500);
+            });
+        })();
+
+
+        // =============================================================
+        //  PAYMENT METHOD TOGGLE
+        // =============================================================
+        (function() {
+            var buttons = document.querySelectorAll('.method-btn');
+            var panel = document.getElementById('methodPanel');
+            var panels = {
+                cash: document.getElementById('panel-cash'),
+                card: document.getElementById('panel-card'),
+                bank: document.getElementById('panel-bank')
+            };
+            buttons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    buttons.forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    Object.keys(panels).forEach(function(key) { panels[key].hidden = true; });
+                    var method = btn.getAttribute('data-method');
+                    panels[method].hidden = false;
+                    panel.hidden = false;
+                });
+            });
+        })();
+
+
+        // =============================================================
+        //  BANK TRANSFER — Email Request
+        // =============================================================
+        var bankForm = document.getElementById('bankForm');
+        if (bankForm) {
+            bankForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var status = document.getElementById('bankFormStatus');
+                var name = document.getElementById('bankName').value.trim();
+                var phone = document.getElementById('bankPhone').value.trim();
+
+                status.classList.remove('ok', 'err');
+
+                if (!name) {
+                    status.textContent = 'Please enter your name.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!phone) {
+                    status.textContent = 'Please enter your phone number.';
+                    status.classList.add('err');
+                    return;
+                }
+
+                var subject = encodeURIComponent('Bank Transfer Payment Request');
+                var body = encodeURIComponent(
+                    "Hi StylesPC,\n\nI would like to pay by bank transfer.\n\nMy details:\nName: " + name +
+                    "\nPhone: " + phone +
+                    "\n\nPlease send me your banking details so I can complete the payment.\n\nThanks!"
+                );
+
+                status.textContent = 'Opening email…';
+                status.classList.add('ok');
+                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
+
+                setTimeout(function() {
+                    document.getElementById('bankName').value = '';
+                    document.getElementById('bankPhone').value = '';
+                    status.textContent = 'Email sent! We\'ll reply with banking details shortly.';
+                }, 500);
+            });
+        }
+
+
+        // =============================================================
+        //  HERO TICKET CYCLER
+        // =============================================================
+        (function() {
+            var el = {
+                wrap: document.getElementById('heroTicket'),
+                id: document.getElementById('ticketId'),
+                status: document.getElementById('ticketStatus'),
+                device: document.getElementById('ticketDevice'),
+                issue: document.getElementById('ticketIssue'),
+                intake: document.getElementById('ticketIntake'),
+                ret: document.getElementById('ticketReturn'),
+                tech: document.getElementById('ticketTech'),
+                stamp: document.getElementById('ticketStamp')
+            };
+            if (!el.wrap) return;
+
+            var HERO_TICKETS = [
+                { id: '#SPC-0148', status: 'IN PROGRESS', device: 'Laptop — 14"', issue: "Won't boot", intake: 'Pickup',
+                    ret: 'Drop‑off', tech: 'StylesPC', stamp: null },
+                { id: '#SPC-0149', status: 'DIAGNOSING', device: 'Desktop — Gaming PC', issue: 'Random blue‑screen crashes',
+                    intake: 'Drop‑off', ret: 'Pickup', tech: 'StylesPC', stamp: null },
+                { id: '#SPC-0150', status: 'READY', device: 'MacBook Pro 13"', issue: 'Cracked screen', intake: 'Drop‑off',
+                    ret: 'Drop‑off', tech: 'StylesPC', stamp: 'REPAIRED' },
+                { id: '#SPC-0151', status: 'READY', device: 'Laptop — 15.6"', issue: 'Slow performance / virus cleanup',
+                    intake: 'Pickup', ret: 'Pickup', tech: 'StylesPC', stamp: 'CLEARED' },
+                { id: '#SPC-0152', status: 'IN PROGRESS', device: 'Desktop — Custom Build', issue: 'No display output',
+                    intake: 'Drop‑off', ret: 'Drop‑off', tech: 'StylesPC', stamp: null },
+                { id: '#SPC-0153', status: 'READY', device: 'Laptop — Hinge repair', issue: 'Loose, broken hinge',
+                    intake: 'Pickup', ret: 'Drop‑off', tech: 'StylesPC', stamp: 'REPAIRED' }
+            ];
+
+            var i = 0;
+            var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            function render(t) {
+                el.id.textContent = t.id;
+                el.status.textContent = t.status;
+                el.status.classList.toggle('amber', t.status !== 'READY');
+                el.device.textContent = t.device;
+                el.issue.textContent = t.issue;
+                el.intake.textContent = t.intake;
+                el.ret.textContent = t.ret;
+                el.tech.textContent = t.tech;
+                if (t.stamp) {
+                    el.stamp.textContent = t.stamp;
+                    el.stamp.hidden = false;
+                } else {
+                    el.stamp.hidden = true;
+                }
+                if (!reduceMotion) {
+                    el.wrap.classList.remove('cycling');
+                    void el.wrap.offsetWidth;
+                    el.wrap.classList.add('cycling');
+                }
+            }
+
+            render(HERO_TICKETS[0]);
+            if (!reduceMotion) {
+                setInterval(function() {
+                    i = (i + 1) % HERO_TICKETS.length;
+                    render(HERO_TICKETS[i]);
+                }, 4500);
+            }
+        })();
+
+
+        // =============================================================
+        //  LIGHTBOX
+        // =============================================================
+        (function() {
+            var overlay = document.createElement('div');
+            overlay.className = 'lightbox-overlay';
+            overlay.hidden = true;
+            overlay.innerHTML =
+                '<button type="button" class="lightbox-close" aria-label="Close">✕</button><img alt="">';
+            document.body.appendChild(overlay);
+            var lbImg = overlay.querySelector('img');
+            var closeBtn = overlay.querySelector('.lightbox-close');
+
+            function openLightbox(src, alt) {
+                lbImg.src = src;
+                lbImg.alt = alt || '';
+                overlay.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeLightbox() {
+                overlay.hidden = true;
+                lbImg.src = '';
+                document.body.style.overflow = '';
+            }
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) closeLightbox();
+            });
+            closeBtn.addEventListener('click', closeLightbox);
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !overlay.hidden) closeLightbox();
+            });
+            document.addEventListener('click', function(e) {
+                var img = e.target.closest('.build-thumb img, .gallery-img, #firestickPhoto img');
+                if (img && img.src) openLightbox(img.src, img.alt);
+            });
+        })();
+
+
+        // =============================================================
+        //  FIRESTICK DEMO PHOTO (probe)
+        // =============================================================
+        (function() {
+            var PHOTO_FILE = 'firestick-demo.jpg';
+            var holder = document.getElementById('firestickPhoto');
+            if (!holder) return;
+
             var probe = new Image();
-            probe.onload = function() { resolve({ exists: true, w: probe.naturalWidth, h: probe
-                  .naturalHeight }); };
-            probe.onerror = function() { resolve({ exists: false }); };
-            probe.src = 'images/' + file;
-          });
+            probe.onload = function() {
+                var img = document.createElement('img');
+                img.src = 'images/' + PHOTO_FILE;
+                img.alt = 'Live TV demo';
+                holder.innerHTML = '';
+                holder.appendChild(img);
+            };
+            probe.onerror = function() {
+                // keep the placeholder
+            };
+            probe.src = 'images/' + PHOTO_FILE;
+        })();
+
+
+        // =============================================================
+        //  SUPABASE + BOOKING FORM (with email notification)
+        // =============================================================
+        var sbPublic = supabase.createClient(
+            'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
+            'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
+        );
+
+        var serviceTypeEl = document.getElementById('serviceType');
+        var addressField = document.getElementById('address');
+        var addressHint = document.getElementById('addressHint');
+        serviceTypeEl.addEventListener('change', function() {
+            var isPickup = serviceTypeEl.value === 'Pickup';
+            addressHint.textContent = isPickup ? '(required for pickup)' : '(optional)';
+            addressField.required = isPickup;
         });
 
-        Promise.all(checks).then(function(results) {
-          var files = [];
-          var labels = [];
-          var dims = [];
-          results.forEach(function(r, i) {
-            if (r.exists) {
-              files.push(candidateFiles[i]);
-              labels.push(candidateLabels[i] || '');
-              dims.push({ w: r.w, h: r.h });
+        document.getElementById('bookForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var status = document.getElementById('formStatus');
+            var submitBtn = document.getElementById('bookSubmitBtn');
+
+            var name = document.getElementById('name').value.trim();
+            var phoneRaw = document.getElementById('phone').value.trim();
+            var email = document.getElementById('email').value.trim();
+            var device = document.getElementById('device').value.trim();
+            var serviceType = serviceTypeEl.value;
+            var address = addressField.value.trim();
+            var issue = document.getElementById('issue').value.trim();
+
+            status.classList.remove('ok', 'err');
+
+            if (!name || !phoneRaw || !email || !device || !serviceType || !issue) {
+                status.textContent = 'Please fill in all required fields (including email).';
+                status.classList.add('err');
+                return;
             }
-          });
-
-          if (!files.length) {
-            var empty = document.createElement('div');
-            empty.className = 'gallery-empty';
-            viewport.insertBefore(empty, img);
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            return;
-          }
-
-          var index = 0;
-
-          files.forEach(function(_, i) {
-            var dot = document.createElement('button');
-            dot.type = 'button';
-            dot.className = 'gallery-dot' + (i === 0 ? ' active' : '');
-            dot.setAttribute('aria-label', 'Show photo ' + (i + 1));
-            dot.addEventListener('click', function() { show(i); });
-            dotsWrap.appendChild(dot);
-          });
-          var dots = dotsWrap.querySelectorAll('.gallery-dot');
-
-          if (files.length < 2) {
-            prevBtn.style.display = 'none';
-            nextBtn.style.display = 'none';
-            dotsWrap.style.display = 'none';
-          }
-
-          function show(i) {
-            index = (i + files.length) % files.length;
-            img.src = 'images/' + files[index];
-            img.alt = labels[index] || '';
-            labelEl.textContent = labels[index] || '';
-            labelEl.style.display = labels[index] ? 'block' : 'none';
-            dots.forEach(function(d, di) { d.classList.toggle('active', di === index); });
-            var d = dims[index];
-            if (d && d.w && d.h) {
-              gallery.style.aspectRatio = d.w + ' / ' + d.h;
+            if (serviceType === 'Pickup' && !address) {
+                status.textContent = 'Please add a pickup address, or choose Drop‑off instead.';
+                status.classList.add('err');
+                return;
             }
-          }
 
-          img.style.display = 'block';
-          prevBtn.addEventListener('click', function() { show(index - 1); });
-          nextBtn.addEventListener('click', function() { show(index + 1); });
+            // Simple email validation
+            if (!email.includes('@') || !email.includes('.')) {
+                status.textContent = 'Please enter a valid email address.';
+                status.classList.add('err');
+                return;
+            }
 
-          show(0);
+            var returnMethod = serviceType === 'Remote' ? 'Remote' : serviceType;
+
+            submitBtn.disabled = true;
+            status.textContent = 'Booking your repair…';
+
+            sbPublic.rpc('book_repair', {
+                p_name: name,
+                p_phone: phoneRaw,
+                p_email: email,
+                p_address: address,
+                p_device: device,
+                p_issue: issue,
+                p_intake: serviceType,
+                p_return: returnMethod
+            }).then(function(res) {
+                submitBtn.disabled = false;
+                if (res.error) {
+                    status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
+                    status.classList.add('err');
+                    console.error(res.error);
+                    return;
+                }
+
+                var ticketNumber = res.data;
+
+                // Compose email with booking details
+                var subject = encodeURIComponent('New Repair Booking — ' + ticketNumber);
+                var body = encodeURIComponent(
+                    "Hi StylesPC,\n\nI've just booked a repair through your website.\n\n" +
+                    "Ticket: " + ticketNumber + "\n" +
+                    "Name: " + name + "\n" +
+                    "Phone: " + phoneRaw + "\n" +
+                    "Email: " + email + "\n" +
+                    "Device: " + device + "\n" +
+                    "Service: " + serviceType + "\n" +
+                    (address ? "Address: " + address + "\n" : "") +
+                    "Issue: " + issue + "\n\n" +
+                    "Please confirm receipt and let me know the next steps.\n\nThanks!"
+                );
+
+                status.textContent = 'Booking saved! Opening email to confirm…';
+
+                // Open mailto with the booking details
+                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
+
+                status.textContent = 'Booked! Ticket ' + ticketNumber +
+                    '. Check your email for confirmation.';
+                status.classList.add('ok');
+
+                document.getElementById('bookForm').reset();
+                addressHint.textContent = '(optional)';
+                addressField.required = false;
+            }).catch(function(err) {
+                submitBtn.disabled = false;
+                status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
+                status.classList.add('err');
+                console.error(err);
+            });
         });
-      });
-    })();
 
-    // =============================================================
-    //  FIRESTICK – GET STARTED
-    // =============================================================
-    var firestickBtn = document.getElementById('firestickBtn');
-    if (firestickBtn) {
-      firestickBtn.addEventListener('click', function() {
-        var message =
-          "Hey, I'm interested in a Firestick full setup with Live TV subscription. Please send me more information.";
-        sendWhatsAppToBackend(message)
-          .then(function() {
-            alert('Message sent! We\'ll get back to you shortly.');
-          })
-          .catch(function() {
-            alert('Could not send message. Please try again later.');
-          });
-      });
-    }
 
-    // =============================================================
-    //  CUSTOM BUILT
-    // =============================================================
-    (function() {
-      var buildLabels = {
-        gaming: 'Gaming Machine',
-        regular: 'Regular Computer'
-      };
-      var buildButtons = document.querySelectorAll('#custom-build .build-btn');
-      var buildPanel = document.getElementById('buildPanel');
-      var buildPanelTitle = document.getElementById('buildPanelTitle');
-      var currentBuild = null;
-
-      buildButtons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          currentBuild = btn.getAttribute('data-build');
-          buildPanelTitle.textContent = "I'm Interested — " + buildLabels[currentBuild];
-          buildPanel.hidden = false;
-          buildPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // =============================================================
+        //  FLOATING WHATSAPP BUTTON → Show Disclaimer
+        // =============================================================
+        document.getElementById('whatsappFloat').addEventListener('click', function(e) {
+            e.preventDefault();
+            window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
         });
-      });
 
-      var buildForm = document.getElementById('buildForm');
-      var buildPhoneInput = document.getElementById('buildPhone');
-
-      buildPhoneInput.addEventListener('input', function() {
-        buildPhoneInput.value = buildPhoneInput.value.replace(/\D/g, '').slice(0, 11);
-      });
-
-      buildForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var status = document.getElementById('buildFormStatus');
-        var name = document.getElementById('buildName').value.trim();
-        var digits = normalizePhoneDigits(buildPhoneInput.value);
-
-        status.classList.remove('ok', 'err');
-
-        if (!name) {
-          status.textContent = 'Please enter your name.';
-          status.classList.add('err');
-          return;
-        }
-        if (digits.length !== 11) {
-          status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
-          status.classList.add('err');
-          return;
-        }
-        if (!currentBuild) {
-          status.textContent = 'Please choose a category above first.';
-          status.classList.add('err');
-          return;
-        }
-
-        var message =
-          'Hey, my name is ' + name + '. ' +
-          'I am interested in a custom-built ' + buildLabels[currentBuild] + '. ' +
-          'My number is ' + digits + '. Please send me more information.';
-
-        status.textContent = 'Sending message…';
-        sendWhatsAppToBackend(message, digits)
-          .then(function() {
-            status.textContent = 'Message sent! You\'ll hear from us soon.';
-            status.classList.add('ok');
-            document.getElementById('buildName').value = '';
-            buildPhoneInput.value = '';
-          })
-          .catch(function() {
-            status.textContent = 'Error sending. Please try again or contact us directly.';
-            status.classList.add('err');
-          });
-      });
-    })();
-
-    // =============================================================
-    //  REFURBISHED
-    // =============================================================
-    (function() {
-      var refurbLabels = {
-        'wfh-desktop': 'Work From Home Desktop',
-        'wfh-laptop': 'Work From Home Laptop'
-      };
-      var refurbButtons = document.querySelectorAll('#refurbished .build-btn');
-      var refurbPanel = document.getElementById('refurbPanel');
-      var refurbPanelTitle = document.getElementById('refurbPanelTitle');
-      var currentRefurb = null;
-
-      refurbButtons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          currentRefurb = btn.getAttribute('data-build');
-          refurbPanelTitle.textContent = "I'm Interested — " + refurbLabels[currentRefurb];
-          refurbPanel.hidden = false;
-          refurbPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Also catch any other WhatsApp button clicks that might have been missed
+        document.querySelectorAll('[href*="whatsapp"]').forEach(function(el) {
+            el.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
+            });
         });
-      });
-
-      var refurbForm = document.getElementById('refurbForm');
-      var refurbPhoneInput = document.getElementById('refurbPhone');
-
-      refurbPhoneInput.addEventListener('input', function() {
-        refurbPhoneInput.value = refurbPhoneInput.value.replace(/\D/g, '').slice(0, 11);
-      });
-
-      refurbForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var status = document.getElementById('refurbFormStatus');
-        var name = document.getElementById('refurbName').value.trim();
-        var digits = normalizePhoneDigits(refurbPhoneInput.value);
-
-        status.classList.remove('ok', 'err');
-
-        if (!name) {
-          status.textContent = 'Please enter your name.';
-          status.classList.add('err');
-          return;
-        }
-        if (digits.length !== 11) {
-          status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
-          status.classList.add('err');
-          return;
-        }
-        if (!currentRefurb) {
-          status.textContent = 'Please choose a category above first.';
-          status.classList.add('err');
-          return;
-        }
-
-        var message =
-          'Hey, my name is ' + name + '. ' +
-          'I am interested in this refurbished ' + refurbLabels[currentRefurb] + ' machine. ' +
-          'My number is ' + digits + '. Please send me more information.';
-
-        status.textContent = 'Sending message…';
-        sendWhatsAppToBackend(message, digits)
-          .then(function() {
-            status.textContent = 'Message sent! You\'ll hear from us soon.';
-            status.classList.add('ok');
-            document.getElementById('refurbName').value = '';
-            refurbPhoneInput.value = '';
-          })
-          .catch(function() {
-            status.textContent = 'Error sending. Please try again or contact us directly.';
-            status.classList.add('err');
-          });
-      });
-    })();
-
-    // =============================================================
-    //  PAYMENT METHOD TOGGLE
-    // =============================================================
-    (function() {
-      var buttons = document.querySelectorAll('.method-btn');
-      var panel = document.getElementById('methodPanel');
-      var panels = {
-        cash: document.getElementById('panel-cash'),
-        card: document.getElementById('panel-card'),
-        bank: document.getElementById('panel-bank')
-      };
-      buttons.forEach(function(btn) {
-        btn.addEventListener('click', function() {
-          buttons.forEach(function(b) { b.classList.remove('active'); });
-          btn.classList.add('active');
-          Object.keys(panels).forEach(function(key) { panels[key].hidden = true; });
-          var method = btn.getAttribute('data-method');
-          panels[method].hidden = false;
-          panel.hidden = false;
-        });
-      });
-    })();
-
-    // =============================================================
-    //  BANK TRANSFER
-    // =============================================================
-    var bankForm = document.getElementById('bankForm');
-    if (bankForm) {
-      var bankPhoneInput = document.getElementById('bankPhone');
-
-      bankPhoneInput.addEventListener('input', function() {
-        bankPhoneInput.value = bankPhoneInput.value.replace(/\D/g, '').slice(0, 11);
-      });
-
-      bankForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        var status = document.getElementById('bankFormStatus');
-        var digits = normalizePhoneDigits(bankPhoneInput.value);
-
-        status.classList.remove('ok', 'err');
-
-        if (digits.length !== 11) {
-          status.textContent = 'Please enter your number with country code, digits only — e.g. 18765551234.';
-          status.classList.add('err');
-          return;
-        }
-
-        var message = 'Hi StylesPC, I would like to pay by bank transfer. My number is ' + digits +
-          '. Please send me your banking details.';
-        status.textContent = 'Sending message…';
-        sendWhatsAppToBackend(message, digits)
-          .then(function() {
-            status.textContent = 'Message sent! We\'ll reply with details shortly.';
-            status.classList.add('ok');
-            bankPhoneInput.value = '';
-          })
-          .catch(function() {
-            status.textContent = 'Error sending. Please try again.';
-            status.classList.add('err');
-          });
-      });
-    }
-
-    // =============================================================
-    //  HERO TICKET CYCLER
-    // =============================================================
-    (function() {
-      var el = {
-        wrap: document.getElementById('heroTicket'),
-        id: document.getElementById('ticketId'),
-        status: document.getElementById('ticketStatus'),
-        device: document.getElementById('ticketDevice'),
-        issue: document.getElementById('ticketIssue'),
-        intake: document.getElementById('ticketIntake'),
-        ret: document.getElementById('ticketReturn'),
-        tech: document.getElementById('ticketTech'),
-        stamp: document.getElementById('ticketStamp')
-      };
-      if (!el.wrap) return;
-
-      var HERO_TICKETS = [
-        { id: '#SPC-0148', status: 'IN PROGRESS', device: 'Laptop — 14"', issue: "Won't boot", intake: 'Pickup',
-          ret: 'Drop‑off', tech: 'StylesPC', stamp: null },
-        { id: '#SPC-0149', status: 'DIAGNOSING', device: 'Desktop — Gaming PC', issue: 'Random blue‑screen crashes',
-          intake: 'Drop‑off', ret: 'Pickup', tech: 'StylesPC', stamp: null },
-        { id: '#SPC-0150', status: 'READY', device: 'MacBook Pro 13"', issue: 'Cracked screen', intake: 'Drop‑off',
-          ret: 'Drop‑off', tech: 'StylesPC', stamp: 'REPAIRED' },
-        { id: '#SPC-0151', status: 'READY', device: 'Laptop — 15.6"', issue: 'Slow performance / virus cleanup',
-          intake: 'Pickup', ret: 'Pickup', tech: 'StylesPC', stamp: 'CLEARED' },
-        { id: '#SPC-0152', status: 'IN PROGRESS', device: 'Desktop — Custom Build', issue: 'No display output',
-          intake: 'Drop‑off', ret: 'Drop‑off', tech: 'StylesPC', stamp: null },
-        { id: '#SPC-0153', status: 'READY', device: 'Laptop — Hinge repair', issue: 'Loose, broken hinge',
-          intake: 'Pickup', ret: 'Drop‑off', tech: 'StylesPC', stamp: 'REPAIRED' }
-      ];
-
-      var i = 0;
-      var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      function render(t) {
-        el.id.textContent = t.id;
-        el.status.textContent = t.status;
-        el.status.classList.toggle('amber', t.status !== 'READY');
-        el.device.textContent = t.device;
-        el.issue.textContent = t.issue;
-        el.intake.textContent = t.intake;
-        el.ret.textContent = t.ret;
-        el.tech.textContent = t.tech;
-        if (t.stamp) {
-          el.stamp.textContent = t.stamp;
-          el.stamp.hidden = false;
-        } else {
-          el.stamp.hidden = true;
-        }
-        if (!reduceMotion) {
-          el.wrap.classList.remove('cycling');
-          void el.wrap.offsetWidth;
-          el.wrap.classList.add('cycling');
-        }
-      }
-
-      render(HERO_TICKETS[0]);
-      if (!reduceMotion) {
-        setInterval(function() {
-          i = (i + 1) % HERO_TICKETS.length;
-          render(HERO_TICKETS[i]);
-        }, 4500);
-      }
-    })();
-
-    // =============================================================
-    //  LIGHTBOX
-    // =============================================================
-    (function() {
-      var overlay = document.createElement('div');
-      overlay.className = 'lightbox-overlay';
-      overlay.hidden = true;
-      overlay.innerHTML =
-        '<button type="button" class="lightbox-close" aria-label="Close">✕</button><img alt="">';
-      document.body.appendChild(overlay);
-      var lbImg = overlay.querySelector('img');
-      var closeBtn = overlay.querySelector('.lightbox-close');
-
-      function openLightbox(src, alt) {
-        lbImg.src = src;
-        lbImg.alt = alt || '';
-        overlay.hidden = false;
-        document.body.style.overflow = 'hidden';
-      }
-
-      function closeLightbox() {
-        overlay.hidden = true;
-        lbImg.src = '';
-        document.body.style.overflow = '';
-      }
-      overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) closeLightbox();
-      });
-      closeBtn.addEventListener('click', closeLightbox);
-      document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && !overlay.hidden) closeLightbox();
-      });
-      document.addEventListener('click', function(e) {
-        var img = e.target.closest('.build-thumb img, .gallery-img, #firestickPhoto img');
-        if (img && img.src) openLightbox(img.src, img.alt);
-      });
-    })();
-
-    // =============================================================
-    //  FIRESTICK DEMO PHOTO (probe)
-    // =============================================================
-    (function() {
-      var PHOTO_FILE = 'firestick-demo.jpg';
-      var holder = document.getElementById('firestickPhoto');
-      if (!holder) return;
-
-      var probe = new Image();
-      probe.onload = function() {
-        var img = document.createElement('img');
-        img.src = 'images/' + PHOTO_FILE;
-        img.alt = 'Live TV demo';
-        holder.innerHTML = '';
-        holder.appendChild(img);
-      };
-      probe.onerror = function() {
-        // keep the placeholder
-      };
-      probe.src = 'images/' + PHOTO_FILE;
-    })();
-
-    // =============================================================
-    //  SUPABASE + BOOKING FORM
-    // =============================================================
-    var sbPublic = supabase.createClient(
-      'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
-      'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
-    );
-
-    var serviceTypeEl = document.getElementById('serviceType');
-    var addressField = document.getElementById('address');
-    var addressHint = document.getElementById('addressHint');
-    serviceTypeEl.addEventListener('change', function() {
-      var isPickup = serviceTypeEl.value === 'Pickup';
-      addressHint.textContent = isPickup ? '(required for pickup)' : '(optional)';
-      addressField.required = isPickup;
-    });
-
-    document.getElementById('bookForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var status = document.getElementById('formStatus');
-      var submitBtn = document.getElementById('bookSubmitBtn');
-
-      var name = document.getElementById('name').value.trim();
-      var phoneRaw = document.getElementById('phone').value.trim();
-      var email = document.getElementById('email').value.trim();
-      var device = document.getElementById('device').value.trim();
-      var serviceType = serviceTypeEl.value;
-      var address = addressField.value.trim();
-      var issue = document.getElementById('issue').value.trim();
-
-      status.classList.remove('ok', 'err');
-
-      if (!name || !phoneRaw || !device || !serviceType || !issue) {
-        status.textContent = 'Please fill in all required fields.';
-        status.classList.add('err');
-        return;
-      }
-      if (serviceType === 'Pickup' && !address) {
-        status.textContent = 'Please add a pickup address, or choose Drop‑off instead.';
-        status.classList.add('err');
-        return;
-      }
-
-      var phoneDigits = normalizePhoneDigits(phoneRaw);
-      if (phoneDigits.length !== 11) {
-        status.textContent = 'Please enter a valid phone number with country code (e.g. 8763331156)';
-        status.classList.add('err');
-        return;
-      }
-
-      var returnMethod = serviceType === 'Remote' ? 'Remote' : serviceType;
-
-      submitBtn.disabled = true;
-      status.textContent = 'Booking your repair…';
-
-      sbPublic.rpc('book_repair', {
-        p_name: name,
-        p_phone: phoneDigits,
-        p_email: email,
-        p_address: address,
-        p_device: device,
-        p_issue: issue,
-        p_intake: serviceType,
-        p_return: returnMethod
-      }).then(function(res) {
-        submitBtn.disabled = false;
-        if (res.error) {
-          status.textContent = "Error saving booking. You can still contact us directly.";
-          status.classList.add('err');
-          console.error(res.error);
-          return;
-        }
-
-        var ticketNumber = res.data;
-        var message =
-          'New Repair Booking — ' + ticketNumber + '\n' +
-          'Name: ' + name + '\n' +
-          'Phone: ' + phoneRaw + '\n' +
-          (email ? 'Email: ' + email + '\n' : '') +
-          'Device: ' + device + '\n' +
-          'Preferred service: ' + serviceType + '\n' +
-          (address ? 'Address: ' + address + '\n' : '') +
-          'Issue: ' + issue;
-
-        status.textContent = 'Booking saved! Sending notification…';
-        sendWhatsAppToBackend(message, phoneDigits)
-          .then(function() {
-            status.textContent = 'Booked! Ticket ' + ticketNumber +
-              '. We\'ll confirm via WhatsApp.';
-            status.classList.add('ok');
-            document.getElementById('bookForm').reset();
-            addressHint.textContent = '(optional)';
-            addressField.required = false;
-          })
-          .catch(function() {
-            status.textContent = 'Booking saved but notification failed. We\'ll still contact you.';
-            status.classList.add('ok');
-          });
-      });
-    });
-
-    // =============================================================
-    //  FLOATING WHATSAPP BUTTON
-    // =============================================================
-    document.getElementById('whatsappFloat').addEventListener('click', function(e) {
-      e.preventDefault();
-      var msg = "Hi StylesPC, I need help with a computer repair or service.";
-      sendWhatsAppToBackend(msg)
-        .then(function() {
-          alert('Message sent! We\'ll reply soon.');
-        })
-        .catch(function() {
-          alert('Error sending. Please try again later.');
-        });
-    });
-  </script>
+    </script>
 
 </body>
 </html>
