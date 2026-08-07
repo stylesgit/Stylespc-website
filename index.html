@@ -244,6 +244,15 @@
             background: var(--teal-dark);
         }
 
+        /* Admin area is discreet — hidden from normal scrolling, only
+           shown via the small floating link or a direct #admin visit */
+        #admin {
+            display: none;
+        }
+        #admin.revealed {
+            display: block;
+        }
+
         /* ============================================================
            DISCLAIMER MODAL (WhatsApp unavailable)
            ============================================================ */
@@ -1874,9 +1883,12 @@
             </div>
         </div>
         <div class="wrap">
-            <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee. · <a href="#admin" style="color:#8a8676;text-decoration:underline;">Admin</a></div>
+            <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee.</div>
         </div>
     </footer>
+
+    <!-- Discreet admin access — intentionally not in the main nav or footer -->
+    <a href="#admin" id="adminDiscreetLink" style="position:fixed;bottom:12px;right:14px;font-size:0.68rem;color:var(--ink-soft);opacity:0.35;text-decoration:none;z-index:60;letter-spacing:0.02em;font-family:'IBM Plex Mono';">Admin</a>
 
     <!-- ============================================================
     DISCLAIMER MODAL (WhatsApp unavailable)
@@ -2612,7 +2624,7 @@
         // =============================================================
         //  ⚠️ ADMIN SIGN-IN — SETUP REQUIRED IN SUPABASE ⚠️
         //  This form itself works out of the box (it's just Supabase
-        //  Auth), but two things need doing on your end first:
+        //  Auth), but a few things need doing on your end first:
         //
         //  1. Create YOUR admin login: Supabase Dashboard → Authentication
         //     → Users → Add user (email + password). Do this yourself —
@@ -2621,18 +2633,46 @@
         //
         //  2. Set ADMIN_BOOKINGS_TABLE below to the real table your
         //     book_repair() function writes to (Database → Tables).
-        //     Then lock it down so only signed-in staff can read it —
-        //     run this in the Supabase SQL editor (swap in your table
-        //     name):
+        //
+        //  3. Make sure that table has an "id" column (primary key) and
+        //     a text column named "status" — add one if it doesn't
+        //     exist (Database → Tables → your table → + New column,
+        //     type text, default value "Booked"). This is what the
+        //     "Mark Complimentary" button below writes to.
+        //
+        //  4. Lock the table down so only signed-in staff can read AND
+        //     update it — run this in the Supabase SQL editor (swap in
+        //     your real table name):
         //       alter table public.YOUR_TABLE enable row level security;
         //       create policy "Admins can read bookings"
         //         on public.YOUR_TABLE for select
         //         using (auth.role() = 'authenticated');
+        //       create policy "Admins can update bookings"
+        //         on public.YOUR_TABLE for update
+        //         using (auth.role() = 'authenticated')
+        //         with check (auth.role() = 'authenticated');
         //     Your existing booking form still works after this — it
-        //     only calls the book_repair() function, it never reads
-        //     the table directly.
+        //     only calls the book_repair() function, it never reads or
+        //     writes the table directly.
         // =============================================================
-        var ADMIN_BOOKINGS_TABLE = 'repairs'; // TODO: set to your real table name
+        var ADMIN_BOOKINGS_TABLE = 'repairs';  // TODO: set to your real table name
+        var ADMIN_ID_COLUMN = 'id';            // TODO: set to your real primary key column
+        var ADMIN_STATUS_COLUMN = 'status';    // TODO: set to your real status column
+        var COMPLIMENTARY_LABEL = 'Complimentary (Free)';
+
+        // Reveal the admin section only via the discreet link or a direct #admin visit
+        (function() {
+            var adminSection = document.getElementById('admin');
+            if (!adminSection) return;
+            function sync() {
+                if (window.location.hash === '#admin') {
+                    adminSection.classList.add('revealed');
+                    adminSection.scrollIntoView({ behavior: 'instant' });
+                }
+            }
+            window.addEventListener('hashchange', sync);
+            sync();
+        })();
 
         (function() {
             var loginBox = document.getElementById('adminLoginBox');
@@ -2680,12 +2720,29 @@
                             return;
                         }
                         var cols = Object.keys(rows[0]);
-                        tableHead.innerHTML = cols.map(function(c) { return '<th>' + c + '</th>'; }).join('');
+                        var hasIdCol = cols.indexOf(ADMIN_ID_COLUMN) !== -1;
+                        var hasStatusCol = cols.indexOf(ADMIN_STATUS_COLUMN) !== -1;
+
+                        tableHead.innerHTML = cols.map(function(c) { return '<th>' + c + '</th>'; }).join('') +
+                            (hasIdCol ? '<th>Actions</th>' : '');
+
                         tableBody.innerHTML = rows.map(function(row) {
-                            return '<tr>' + cols.map(function(c) {
+                            var cells = cols.map(function(c) {
                                 var val = row[c];
                                 return '<td>' + (val === null || val === undefined ? '' : String(val)) + '</td>';
-                            }).join('') + '</tr>';
+                            }).join('');
+                            var actionCell = '';
+                            if (hasIdCol) {
+                                var isComplimentary = hasStatusCol && row[ADMIN_STATUS_COLUMN] === COMPLIMENTARY_LABEL;
+                                actionCell = '<td>' + (hasStatusCol ?
+                                    '<button type="button" class="btn btn-ghost admin-action-btn" style="font-size:0.78rem;padding:6px 10px;" ' +
+                                        'data-id="' + row[ADMIN_ID_COLUMN] + '" data-mode="' + (isComplimentary ? 'undo' : 'complimentary') + '">' +
+                                        (isComplimentary ? 'Undo Complimentary' : 'Mark Complimentary') +
+                                    '</button>' :
+                                    '<span style="font-size:0.78rem;color:#a33;">Add a "status" column to enable</span>') +
+                                '</td>';
+                            }
+                            return '<tr>' + cells + actionCell + '</tr>';
                         }).join('');
                         bookingsStatus.textContent = '';
                         bookingsTable.style.display = '';
@@ -2695,6 +2752,41 @@
                         bookingsStatus.textContent = 'Error loading bookings: ' + err.message;
                     });
             }
+
+            // Delegated click handler for the dynamically-rendered "Mark Complimentary" / "Undo" buttons
+            tableBody.addEventListener('click', function(e) {
+                var btn = e.target.closest('.admin-action-btn');
+                if (!btn) return;
+                var id = btn.getAttribute('data-id');
+                var mode = btn.getAttribute('data-mode');
+                var newStatus = mode === 'complimentary' ? COMPLIMENTARY_LABEL : 'Booked';
+
+                btn.disabled = true;
+                var originalText = btn.textContent;
+                btn.textContent = 'Saving…';
+
+                var update = {};
+                update[ADMIN_STATUS_COLUMN] = newStatus;
+
+                sbPublic.from(ADMIN_BOOKINGS_TABLE).update(update).eq(ADMIN_ID_COLUMN, id)
+                    .then(function(res) {
+                        if (res.error) {
+                            btn.disabled = false;
+                            btn.textContent = originalText;
+                            bookingsStatus.style.color = '#a33';
+                            bookingsStatus.textContent = 'Error updating booking: ' + res.error.message +
+                                ' — make sure an UPDATE policy exists for signed-in users (see setup notes in the code).';
+                            return;
+                        }
+                        loadBookings();
+                    })
+                    .catch(function(err) {
+                        btn.disabled = false;
+                        btn.textContent = originalText;
+                        bookingsStatus.style.color = '#a33';
+                        bookingsStatus.textContent = 'Error updating booking: ' + err.message;
+                    });
+            });
 
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
