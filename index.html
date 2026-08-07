@@ -7,6 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
     <style>
         /* ============================================================
            ROOT & RESET
@@ -1739,7 +1742,7 @@
     </footer>
 
     <!-- ============================================================
-    DISCLAIMER MODAL (WhatsApp temporarily unavailable)
+    DISCLAIMER MODAL (WhatsApp unavailable)
     ============================================================ -->
     <div class="disclaimer-overlay" id="disclaimerModal" hidden>
         <div class="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
@@ -1762,6 +1765,46 @@
     JAVASCRIPT
     ============================================================ -->
     <script>
+        // =============================================================
+        //  EMAILJS CONFIGURATION
+        //  Replace these with your own EmailJS credentials from
+        //  https://www.emailjs.com/
+        // =============================================================
+        const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
+        const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
+        const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+
+        // Initialize EmailJS
+        (function() {
+            if (EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') {
+                console.warn('EmailJS not configured. Please set your public key in the code.');
+                return;
+            }
+            emailjs.init({
+                publicKey: EMAILJS_PUBLIC_KEY,
+                blockHeadless: true,
+            });
+        })();
+
+        /**
+         * Send an email via EmailJS
+         */
+        function sendEmail(templateParams) {
+            return new Promise((resolve, reject) => {
+                if (EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') {
+                    reject(new Error('EmailJS is not configured. Please set your keys.'));
+                    return;
+                }
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+                    .then(function(response) {
+                        resolve(response);
+                    }, function(error) {
+                        reject(error);
+                    });
+            });
+        }
+
+
         // =============================================================
         //  DISCLAIMER MODAL (WhatsApp unavailable)
         // =============================================================
@@ -1797,7 +1840,6 @@
                         copyBtn.textContent = 'Copied!';
                         setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
                     }).catch(function() {
-                        // fallback
                         var ta = document.createElement('textarea');
                         ta.value = emailText;
                         document.body.appendChild(ta);
@@ -1810,7 +1852,6 @@
                 });
             }
 
-            // Expose for use by other buttons
             window.showWhatsAppDisclaimer = showDisclaimer;
         })();
 
@@ -1818,7 +1859,6 @@
         // =============================================================
         //  WHATSAPP BACKEND CONFIG — DISABLED (temporarily unavailable)
         // =============================================================
-        // All WhatsApp functions now show the disclaimer instead.
         function sendWhatsAppToBackend() {
             window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
             return Promise.reject(new Error('WhatsApp is temporarily unavailable.'));
@@ -1925,17 +1965,29 @@
         var firestickBtn = document.getElementById('firestickBtn');
         if (firestickBtn) {
             firestickBtn.addEventListener('click', function() {
-                var subject = encodeURIComponent('Firestick Setup Enquiry');
-                var body = encodeURIComponent(
-                    "Hi StylesPC,\n\nI'm interested in a Firestick full setup with Live TV subscription. Please send me more information.\n\nMy contact details:\nName: \nPhone: \n\nThanks!"
-                );
-                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
+                // Use EmailJS
+                var templateParams = {
+                    to_email: 'ajstyleg@gmail.com',
+                    subject: 'Firestick Setup Enquiry',
+                    message_html: '<p>Hi StylesPC,</p><p>I\'m interested in a Firestick full setup with Live TV subscription. Please send me more information.</p><p>Thank you!</p>',
+                    from_name: 'Website Visitor',
+                    from_phone: 'Not provided',
+                    from_email: 'visitor@example.com'
+                };
+                sendEmail(templateParams)
+                    .then(function() {
+                        alert('Enquiry sent! We\'ll get back to you shortly.');
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        alert('Could not send email. Please contact us directly at ajstyleg@gmail.com');
+                    });
             });
         }
 
 
         // =============================================================
-        //  CUSTOM BUILT — Email Enquiry
+        //  CUSTOM BUILT — Email Enquiry (via EmailJS)
         // =============================================================
         (function() {
             var buildLabels = {
@@ -1957,12 +2009,13 @@
             });
 
             var buildForm = document.getElementById('buildForm');
+            var buildNameInput = document.getElementById('buildName');
             var buildPhoneInput = document.getElementById('buildPhone');
 
             buildForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 var status = document.getElementById('buildFormStatus');
-                var name = document.getElementById('buildName').value.trim();
+                var name = buildNameInput.value.trim();
                 var phone = buildPhoneInput.value.trim();
 
                 status.classList.remove('ok', 'err');
@@ -1983,29 +2036,36 @@
                     return;
                 }
 
-                var subject = encodeURIComponent('Custom Build Enquiry — ' + buildLabels[currentBuild]);
-                var body = encodeURIComponent(
-                    "Hi StylesPC,\n\nI'm interested in a custom-built " + buildLabels[currentBuild] +
-                    ".\n\nMy details:\nName: " + name + "\nPhone: " + phone +
-                    "\n\nPlease send me more information and pricing.\n\nThanks!"
-                );
+                var templateParams = {
+                    to_email: 'ajstyleg@gmail.com',
+                    subject: 'Custom Build Enquiry — ' + buildLabels[currentBuild],
+                    message_html: '<p>Hi StylesPC,</p><p>I\'m interested in a custom-built <strong>' +
+                        buildLabels[currentBuild] + '</strong>.</p><p>Name: ' + name + '</p><p>Phone: ' +
+                        phone + '</p><p>Please send me more information and pricing.</p><p>Thanks!</p>',
+                    from_name: name,
+                    from_phone: phone,
+                    from_email: 'visitor@example.com' // We don't have email, but optional
+                };
 
-                status.textContent = 'Opening email…';
-                status.classList.add('ok');
-                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
-
-                // Reset form after a moment
-                setTimeout(function() {
-                    document.getElementById('buildName').value = '';
-                    buildPhoneInput.value = '';
-                    status.textContent = 'Email sent! We\'ll get back to you shortly.';
-                }, 500);
+                status.textContent = 'Sending enquiry…';
+                sendEmail(templateParams)
+                    .then(function() {
+                        status.textContent = 'Enquiry sent! We\'ll get back to you shortly.';
+                        status.classList.add('ok');
+                        buildNameInput.value = '';
+                        buildPhoneInput.value = '';
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                        status.classList.add('err');
+                    });
             });
         })();
 
 
         // =============================================================
-        //  REFURBISHED — Email Enquiry
+        //  REFURBISHED — Email Enquiry (via EmailJS)
         // =============================================================
         (function() {
             var refurbLabels = {
@@ -2027,12 +2087,13 @@
             });
 
             var refurbForm = document.getElementById('refurbForm');
+            var refurbNameInput = document.getElementById('refurbName');
             var refurbPhoneInput = document.getElementById('refurbPhone');
 
             refurbForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 var status = document.getElementById('refurbFormStatus');
-                var name = document.getElementById('refurbName').value.trim();
+                var name = refurbNameInput.value.trim();
                 var phone = refurbPhoneInput.value.trim();
 
                 status.classList.remove('ok', 'err');
@@ -2053,22 +2114,31 @@
                     return;
                 }
 
-                var subject = encodeURIComponent('Refurbished Enquiry — ' + refurbLabels[currentRefurb]);
-                var body = encodeURIComponent(
-                    "Hi StylesPC,\n\nI'm interested in the refurbished " + refurbLabels[currentRefurb] +
-                    " machine.\n\nMy details:\nName: " + name + "\nPhone: " + phone +
-                    "\n\nPlease let me know if it's available and send pricing.\n\nThanks!"
-                );
+                var templateParams = {
+                    to_email: 'ajstyleg@gmail.com',
+                    subject: 'Refurbished Enquiry — ' + refurbLabels[currentRefurb],
+                    message_html: '<p>Hi StylesPC,</p><p>I\'m interested in the refurbished <strong>' +
+                        refurbLabels[currentRefurb] + '</strong> machine.</p><p>Name: ' + name +
+                        '</p><p>Phone: ' + phone +
+                        '</p><p>Please let me know if it\'s available and send pricing.</p><p>Thanks!</p>',
+                    from_name: name,
+                    from_phone: phone,
+                    from_email: 'visitor@example.com'
+                };
 
-                status.textContent = 'Opening email…';
-                status.classList.add('ok');
-                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
-
-                setTimeout(function() {
-                    document.getElementById('refurbName').value = '';
-                    refurbPhoneInput.value = '';
-                    status.textContent = 'Email sent! We\'ll get back to you shortly.';
-                }, 500);
+                status.textContent = 'Sending enquiry…';
+                sendEmail(templateParams)
+                    .then(function() {
+                        status.textContent = 'Enquiry sent! We\'ll get back to you shortly.';
+                        status.classList.add('ok');
+                        refurbNameInput.value = '';
+                        refurbPhoneInput.value = '';
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                        status.classList.add('err');
+                    });
             });
         })();
 
@@ -2098,15 +2168,18 @@
 
 
         // =============================================================
-        //  BANK TRANSFER — Email Request
+        //  BANK TRANSFER — Email Request (via EmailJS)
         // =============================================================
         var bankForm = document.getElementById('bankForm');
         if (bankForm) {
+            var bankNameInput = document.getElementById('bankName');
+            var bankPhoneInput = document.getElementById('bankPhone');
+
             bankForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 var status = document.getElementById('bankFormStatus');
-                var name = document.getElementById('bankName').value.trim();
-                var phone = document.getElementById('bankPhone').value.trim();
+                var name = bankNameInput.value.trim();
+                var phone = bankPhoneInput.value.trim();
 
                 status.classList.remove('ok', 'err');
 
@@ -2121,22 +2194,30 @@
                     return;
                 }
 
-                var subject = encodeURIComponent('Bank Transfer Payment Request');
-                var body = encodeURIComponent(
-                    "Hi StylesPC,\n\nI would like to pay by bank transfer.\n\nMy details:\nName: " + name +
-                    "\nPhone: " + phone +
-                    "\n\nPlease send me your banking details so I can complete the payment.\n\nThanks!"
-                );
+                var templateParams = {
+                    to_email: 'ajstyleg@gmail.com',
+                    subject: 'Bank Transfer Payment Request',
+                    message_html: '<p>Hi StylesPC,</p><p>I would like to pay by bank transfer.</p><p>Name: ' +
+                        name + '</p><p>Phone: ' + phone +
+                        '</p><p>Please send me your banking details so I can complete the payment.</p><p>Thanks!</p>',
+                    from_name: name,
+                    from_phone: phone,
+                    from_email: 'visitor@example.com'
+                };
 
-                status.textContent = 'Opening email…';
-                status.classList.add('ok');
-                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
-
-                setTimeout(function() {
-                    document.getElementById('bankName').value = '';
-                    document.getElementById('bankPhone').value = '';
-                    status.textContent = 'Email sent! We\'ll reply with banking details shortly.';
-                }, 500);
+                status.textContent = 'Sending request…';
+                sendEmail(templateParams)
+                    .then(function() {
+                        status.textContent = 'Request sent! We\'ll reply with banking details shortly.';
+                        status.classList.add('ok');
+                        bankNameInput.value = '';
+                        bankPhoneInput.value = '';
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                        status.classList.add('err');
+                    });
             });
         }
 
@@ -2271,7 +2352,7 @@
 
 
         // =============================================================
-        //  SUPABASE + BOOKING FORM (with email notification)
+        //  SUPABASE + BOOKING FORM (with email notification via EmailJS)
         // =============================================================
         var sbPublic = supabase.createClient(
             'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
@@ -2313,7 +2394,6 @@
                 return;
             }
 
-            // Simple email validation
             if (!email.includes('@') || !email.includes('.')) {
                 status.textContent = 'Please enter a valid email address.';
                 status.classList.add('err');
@@ -2345,33 +2425,40 @@
 
                 var ticketNumber = res.data;
 
-                // Compose email with booking details
-                var subject = encodeURIComponent('New Repair Booking — ' + ticketNumber);
-                var body = encodeURIComponent(
-                    "Hi StylesPC,\n\nI've just booked a repair through your website.\n\n" +
-                    "Ticket: " + ticketNumber + "\n" +
-                    "Name: " + name + "\n" +
-                    "Phone: " + phoneRaw + "\n" +
-                    "Email: " + email + "\n" +
-                    "Device: " + device + "\n" +
-                    "Service: " + serviceType + "\n" +
-                    (address ? "Address: " + address + "\n" : "") +
-                    "Issue: " + issue + "\n\n" +
-                    "Please confirm receipt and let me know the next steps.\n\nThanks!"
-                );
+                // Send email via EmailJS
+                var templateParams = {
+                    to_email: 'ajstyleg@gmail.com',
+                    subject: 'New Repair Booking — ' + ticketNumber,
+                    message_html: '<p>Hi StylesPC,</p><p>I\'ve just booked a repair through your website.</p>' +
+                        '<p><strong>Ticket:</strong> ' + ticketNumber + '</p>' +
+                        '<p><strong>Name:</strong> ' + name + '</p>' +
+                        '<p><strong>Phone:</strong> ' + phoneRaw + '</p>' +
+                        '<p><strong>Email:</strong> ' + email + '</p>' +
+                        '<p><strong>Device:</strong> ' + device + '</p>' +
+                        '<p><strong>Service:</strong> ' + serviceType + '</p>' +
+                        (address ? '<p><strong>Address:</strong> ' + address + '</p>' : '') +
+                        '<p><strong>Issue:</strong> ' + issue + '</p>' +
+                        '<p>Please confirm receipt and let me know the next steps.</p><p>Thanks!</p>',
+                    from_name: name,
+                    from_phone: phoneRaw,
+                    from_email: email
+                };
 
-                status.textContent = 'Booking saved! Opening email to confirm…';
-
-                // Open mailto with the booking details
-                window.location.href = 'mailto:ajstyleg@gmail.com?subject=' + subject + '&body=' + body;
-
-                status.textContent = 'Booked! Ticket ' + ticketNumber +
-                    '. Check your email for confirmation.';
-                status.classList.add('ok');
-
-                document.getElementById('bookForm').reset();
-                addressHint.textContent = '(optional)';
-                addressField.required = false;
+                status.textContent = 'Booking saved! Sending notification…';
+                sendEmail(templateParams)
+                    .then(function() {
+                        status.textContent = 'Booked! Ticket ' + ticketNumber +
+                            '. Check your email for confirmation.';
+                        status.classList.add('ok');
+                        document.getElementById('bookForm').reset();
+                        addressHint.textContent = '(optional)';
+                        addressField.required = false;
+                    })
+                    .catch(function(error) {
+                        console.error(error);
+                        status.textContent = 'Booking saved but notification failed. We\'ll still contact you.';
+                        status.classList.add('ok');
+                    });
             }).catch(function(err) {
                 submitBtn.disabled = false;
                 status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
@@ -2389,13 +2476,27 @@
             window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
         });
 
-        // Also catch any other WhatsApp button clicks that might have been missed
+        // Also catch any other WhatsApp button clicks
         document.querySelectorAll('[href*="whatsapp"]').forEach(function(el) {
             el.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
             });
         });
+
+        // =============================================================
+        //  CHECK EMAILJS CONFIGURATION
+        // =============================================================
+        if (EMAILJS_PUBLIC_KEY === 'YOUR_EMAILJS_PUBLIC_KEY') {
+            console.warn('⚠️ EmailJS is not configured. Please set your keys in the JavaScript to receive email notifications.');
+            // Show a persistent warning on the page (optional)
+            var warn = document.createElement('div');
+            warn.style.cssText =
+                'background:#a3372a;color:white;text-align:center;padding:10px;font-weight:bold;position:sticky;top:0;z-index:999;';
+            warn.textContent =
+                '⚠️ EmailJS not configured – you will not receive email notifications. Please update the script with your keys.';
+            document.body.prepend(warn);
+        }
     </script>
 
 </body>
