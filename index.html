@@ -1804,6 +1804,51 @@
             </div>
         </section>
 
+        <!-- ============================================================
+        ADMIN (staff only — not linked from main nav)
+        ============================================================ -->
+        <section id="admin" class="alt">
+            <div class="wrap" style="max-width:640px;">
+                <div class="section-head">
+                    <span class="eyebrow">Admin</span>
+                    <h2>Admin Sign In</h2>
+                    <p>Staff access only — sign in to view incoming bookings.</p>
+                </div>
+
+                <div id="adminLoginBox">
+                    <form id="adminLoginForm" class="mini-form">
+                        <div class="field">
+                            <label for="adminEmail">Email</label>
+                            <input type="email" id="adminEmail" name="email" required autocomplete="username">
+                        </div>
+                        <div class="field">
+                            <label for="adminPassword">Password</label>
+                            <input type="password" id="adminPassword" name="password" required autocomplete="current-password">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="adminLoginBtn">Sign In</button>
+                        <p id="adminLoginStatus" role="status"></p>
+                    </form>
+                </div>
+
+                <div id="adminDashboard" hidden>
+                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
+                        <p style="margin:0;">Signed in as <strong id="adminEmailDisplay"></strong></p>
+                        <div style="display:flex;gap:10px;">
+                            <button type="button" class="btn btn-ghost" id="adminRefreshBtn">↻ Refresh</button>
+                            <button type="button" class="btn btn-ghost" id="adminLogoutBtn">Sign Out</button>
+                        </div>
+                    </div>
+                    <div id="adminBookingsWrap" style="overflow-x:auto;">
+                        <p id="adminBookingsStatus" role="status">Loading bookings…</p>
+                        <table class="price-table" id="adminBookingsTable" style="display:none;">
+                            <thead><tr id="adminTableHead"></tr></thead>
+                            <tbody id="adminTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- ============================================================
@@ -1820,7 +1865,7 @@
             </div>
         </div>
         <div class="wrap">
-            <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee.</div>
+            <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee. · <a href="#admin" style="color:#8a8676;text-decoration:underline;">Admin</a></div>
         </div>
     </footer>
 
@@ -2554,6 +2599,135 @@
             'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
             'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
         );
+
+        // =============================================================
+        //  ⚠️ ADMIN SIGN-IN — SETUP REQUIRED IN SUPABASE ⚠️
+        //  This form itself works out of the box (it's just Supabase
+        //  Auth), but two things need doing on your end first:
+        //
+        //  1. Create YOUR admin login: Supabase Dashboard → Authentication
+        //     → Users → Add user (email + password). Do this yourself —
+        //     there's no public sign-up form here on purpose, so random
+        //     visitors can't create accounts.
+        //
+        //  2. Set ADMIN_BOOKINGS_TABLE below to the real table your
+        //     book_repair() function writes to (Database → Tables).
+        //     Then lock it down so only signed-in staff can read it —
+        //     run this in the Supabase SQL editor (swap in your table
+        //     name):
+        //       alter table public.YOUR_TABLE enable row level security;
+        //       create policy "Admins can read bookings"
+        //         on public.YOUR_TABLE for select
+        //         using (auth.role() = 'authenticated');
+        //     Your existing booking form still works after this — it
+        //     only calls the book_repair() function, it never reads
+        //     the table directly.
+        // =============================================================
+        var ADMIN_BOOKINGS_TABLE = 'repairs'; // TODO: set to your real table name
+
+        (function() {
+            var loginBox = document.getElementById('adminLoginBox');
+            var dashboard = document.getElementById('adminDashboard');
+            var loginForm = document.getElementById('adminLoginForm');
+            var loginStatus = document.getElementById('adminLoginStatus');
+            var loginBtn = document.getElementById('adminLoginBtn');
+            var emailDisplay = document.getElementById('adminEmailDisplay');
+            var refreshBtn = document.getElementById('adminRefreshBtn');
+            var logoutBtn = document.getElementById('adminLogoutBtn');
+            var bookingsStatus = document.getElementById('adminBookingsStatus');
+            var bookingsTable = document.getElementById('adminBookingsTable');
+            var tableHead = document.getElementById('adminTableHead');
+            var tableBody = document.getElementById('adminTableBody');
+            if (!loginForm) return;
+
+            function showDashboard(session) {
+                loginBox.hidden = true;
+                dashboard.hidden = false;
+                emailDisplay.textContent = session.user.email;
+                loadBookings();
+            }
+
+            function showLogin() {
+                dashboard.hidden = true;
+                loginBox.hidden = false;
+            }
+
+            function loadBookings() {
+                bookingsStatus.style.color = '';
+                bookingsStatus.textContent = 'Loading bookings…';
+                bookingsTable.style.display = 'none';
+
+                sbPublic.from(ADMIN_BOOKINGS_TABLE).select('*').order('created_at', { ascending: false })
+                    .then(function(res) {
+                        if (res.error) {
+                            bookingsStatus.style.color = '#a33';
+                            bookingsStatus.textContent = 'Error loading bookings: ' + res.error.message +
+                                ' — check that ADMIN_BOOKINGS_TABLE is set to your real table name, and that a read policy exists for signed-in users.';
+                            return;
+                        }
+                        var rows = res.data || [];
+                        if (!rows.length) {
+                            bookingsStatus.textContent = 'No bookings yet.';
+                            return;
+                        }
+                        var cols = Object.keys(rows[0]);
+                        tableHead.innerHTML = cols.map(function(c) { return '<th>' + c + '</th>'; }).join('');
+                        tableBody.innerHTML = rows.map(function(row) {
+                            return '<tr>' + cols.map(function(c) {
+                                var val = row[c];
+                                return '<td>' + (val === null || val === undefined ? '' : String(val)) + '</td>';
+                            }).join('') + '</tr>';
+                        }).join('');
+                        bookingsStatus.textContent = '';
+                        bookingsTable.style.display = '';
+                    })
+                    .catch(function(err) {
+                        bookingsStatus.style.color = '#a33';
+                        bookingsStatus.textContent = 'Error loading bookings: ' + err.message;
+                    });
+            }
+
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                var email = document.getElementById('adminEmail').value.trim();
+                var password = document.getElementById('adminPassword').value;
+                loginStatus.classList.remove('ok', 'err');
+                loginStatus.textContent = 'Signing in…';
+                loginBtn.disabled = true;
+
+                sbPublic.auth.signInWithPassword({ email: email, password: password })
+                    .then(function(res) {
+                        loginBtn.disabled = false;
+                        if (res.error) {
+                            loginStatus.textContent = res.error.message;
+                            loginStatus.classList.add('err');
+                            return;
+                        }
+                        loginStatus.textContent = '';
+                        loginForm.reset();
+                        showDashboard(res.data.session);
+                    })
+                    .catch(function(err) {
+                        loginBtn.disabled = false;
+                        loginStatus.textContent = 'Sign-in error: ' + err.message;
+                        loginStatus.classList.add('err');
+                    });
+            });
+
+            if (refreshBtn) refreshBtn.addEventListener('click', loadBookings);
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    sbPublic.auth.signOut().then(function() { showLogin(); });
+                });
+            }
+
+            // Restore session if already signed in (e.g. after a page refresh)
+            sbPublic.auth.getSession().then(function(res) {
+                if (res.data && res.data.session) {
+                    showDashboard(res.data.session);
+                }
+            });
+        })();
 
         var serviceTypeEl = document.getElementById('serviceType');
         var addressField = document.getElementById('address');
