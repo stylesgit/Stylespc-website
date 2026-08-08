@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StylesPC — Admin Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StylesPC — Admin Enterprise Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* ============================================================
-           ROOT & RESET
-           ============================================================ */
         :root {
             --paper: #F3EFE7;
             --paper-2: #EAE3D3;
@@ -21,1004 +19,1089 @@
             --amber: #C97A2B;
             --rule: #C9C2B2;
             --white: #FFFDF8;
-            --radius: 2px;
+            --red: #a3372a;
+            --green: #4CAF50;
+            --radius: 4px;
         }
 
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
         }
 
         body {
+            margin: 0;
             background: var(--paper);
             color: var(--ink);
             font-family: 'IBM Plex Sans', sans-serif;
-            line-height: 1.55;
-            -webkit-font-smoothing: antialiased;
+            line-height: 1.5;
         }
 
-        h1,
-        h2,
-        h3 {
+        h1, h2, h3 {
             font-family: 'Space Grotesk', sans-serif;
+            margin: 0 0 0.3em;
             letter-spacing: -0.01em;
-            margin: 0 0 0.4em 0;
         }
 
-        a {
-            color: inherit;
-            text-decoration: none;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        img {
-            max-width: 100%;
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--rule);
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+        }
+
+        .header .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--teal);
+            border-radius: 50%;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-pill {
+            background: rgba(47, 111, 99, 0.12);
+            color: var(--teal-dark);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--rule);
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--ink);
+        }
+
+        .nav-tab.active {
+            color: var(--ink);
+            border-color: var(--amber);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
             display: block;
         }
-        :focus-visible {
-            outline: 3px solid var(--amber);
-            outline-offset: 2px;
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.001ms !important;
-                transition-duration: 0.001ms !important;
-            }
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            gap: 8px;
         }
 
-        .wrap {
-            max-width: 1120px;
-            margin: 0 auto;
-            padding: 0 24px;
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
         }
 
-        /* ============================================================
-           BUTTONS
-           ============================================================ */
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 13px 22px;
+            gap: 6px;
+            padding: 10px 16px;
             border-radius: var(--radius);
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.86rem;
             border: 1px solid transparent;
             cursor: pointer;
-            font-family: 'IBM Plex Sans';
-            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+            text-decoration: none;
+            transition: all 0.2s;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
+
         .btn-primary {
             background: var(--teal);
-            color: var(--white);
+            color: white;
         }
+
         .btn-primary:hover {
             background: var(--teal-dark);
-            box-shadow: 0 8px 20px rgba(47, 111, 99, 0.25);
         }
-        .btn-ghost {
-            background: transparent;
-            color: var(--ink);
-            border-color: var(--ink);
-        }
-        .btn-ghost:hover {
-            background: var(--ink);
-            color: var(--white);
-        }
-        .btn-danger {
-            background: #a33;
-            color: var(--white);
-        }
-        .btn-danger:hover {
-            background: #822;
-        }
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.78rem;
-        }
+
         .btn-amber {
             background: var(--amber);
-            color: var(--white);
+            color: white;
         }
+
         .btn-amber:hover {
             background: #a9631e;
         }
 
-        /* ============================================================
-           ADMIN LAYOUT
-           ============================================================ */
-        header.admin-header {
-            background: var(--ink);
-            color: #DAD6CB;
-            padding: 16px 0;
-            border-bottom: 2px solid var(--amber);
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid rgba(163, 55, 42, 0.4);
         }
-        header.admin-header .wrap {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
+
+        .btn-danger:hover {
+            background: rgba(163, 55, 42, 0.08);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .list-container {
+            display: grid;
             gap: 12px;
         }
-        header.admin-header .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-family: 'Space Grotesk';
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: #fff;
-        }
-        header.admin-header .brand .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--amber);
-            box-shadow: 0 0 0 3px rgba(201, 122, 43, 0.22);
-        }
-        header.admin-header a {
-            color: #DAD6CB;
-            text-decoration: underline;
-        }
-        header.admin-header a:hover {
-            color: #fff;
-        }
 
-        .admin-section {
-            padding: 50px 0;
-        }
-        .admin-section.alt {
-            background: var(--paper-2);
-        }
-
-        .admin-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            border-bottom: 1px solid var(--rule);
-        }
-        .admin-tab-btn {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            padding: 10px 4px;
-            margin-right: 18px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--ink-soft);
-            cursor: pointer;
-        }
-        .admin-tab-btn.active {
-            color: var(--teal-dark);
-            border-bottom-color: var(--teal-dark);
-        }
-
-        .row-card {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-            padding: 14px 16px;
-            border: 1px solid var(--rule);
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-        .row-main {
-            min-width: 200px;
-        }
-        .row-title {
-            font-weight: 600;
-        }
-        .row-sub {
-            font-size: 0.82rem;
-            color: var(--ink-soft);
-            margin-top: 2px;
-        }
-        .row-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .empty-state {
-            font-size: 0.88rem;
-            color: var(--ink-soft);
-            padding: 20px 0;
-        }
-
-        .price-table {
-            width: 100%;
-            border-collapse: collapse;
+        .list-item {
             background: var(--white);
             border: 1px solid var(--rule);
             border-radius: 6px;
-            overflow: hidden;
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: start;
         }
-        .price-table th,
-        .price-table td {
-            text-align: left;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--rule);
-            font-size: 0.88rem;
+
+        .list-item-main {
+            display: grid;
+            gap: 8px;
         }
-        .price-table th {
+
+        .list-item-header {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .list-item-id {
             font-family: 'IBM Plex Mono';
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.75rem;
             color: var(--ink-soft);
             background: var(--paper-2);
-        }
-        .price-table tr:last-child td {
-            border-bottom: none;
+            padding: 2px 8px;
+            border-radius: 3px;
         }
 
-        .mini-form {
-            display: grid;
-            gap: 14px;
-            max-width: 340px;
+        .list-item-title {
+            font-weight: 700;
+            font-size: 1.1rem;
         }
-        .field {
-            display: grid;
-            gap: 6px;
-        }
-        .field label {
-            font-size: 0.82rem;
-            font-weight: 600;
+
+        .list-item-subtitle {
+            font-size: 0.9rem;
             color: var(--ink-soft);
         }
-        .field input,
-        .field select,
-        .field textarea {
-            font-family: 'IBM Plex Sans';
-            font-size: 0.94rem;
-            padding: 11px 12px;
-            border: 1px solid var(--rule);
-            border-radius: 4px;
-            background: var(--paper);
-            color: var(--ink);
-            width: 100%;
-        }
-        .field-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+
+        .list-item-details {
+            display: flex;
             gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
         }
 
-        .admin-modal-overlay {
+        .detail-tag {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .detail-tag .label {
+            color: var(--ink-soft);
+            font-weight: 600;
+        }
+
+        .detail-tag .value {
+            color: var(--ink);
+        }
+
+        .status-badge {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-open {
+            background: rgba(47, 111, 99, 0.12);
+            color: var(--teal-dark);
+        }
+
+        .status-in-progress {
+            background: rgba(201, 122, 43, 0.12);
+            color: #a9631e;
+        }
+
+        .status-closed {
+            background: rgba(76, 175, 80, 0.12);
+            color: #388E3C;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 6px;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-soft);
+        }
+
+        .empty-state h3 {
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(20, 22, 19, 0.55);
-            z-index: 70;
+            background: rgba(20, 22, 19, 0.6);
+            z-index: 100;
             display: none;
             align-items: flex-start;
             justify-content: center;
             padding: 40px 20px;
             overflow-y: auto;
         }
-        .admin-modal-overlay:not([hidden]) {
+
+        .modal-overlay.active {
             display: flex;
         }
-        .admin-modal {
+
+        .modal {
             background: var(--white);
             border-radius: 8px;
-            padding: 26px;
+            padding: 32px;
             width: 100%;
-            max-width: 420px;
-        }
-        .admin-modal h3 {
-            font-size: 1.05rem;
-            margin-bottom: 16px;
-        }
-        .admin-modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            justify-content: flex-end;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(20, 22, 19, 0.15);
         }
 
-        .form-note {
-            font-size: 0.8rem;
-            color: var(--ink-soft);
+        .modal h2 {
+            margin-bottom: 24px;
+            font-size: 1.4rem;
         }
-        .ok {
-            color: var(--teal-dark);
+
+        .form-group {
+            margin-bottom: 18px;
         }
-        .err {
-            color: #a3372a;
-        }
-        #adminLoginStatus,
-        #adminBookingsStatus,
-        #adminClientsStatus {
-            font-size: 0.88rem;
+
+        .form-group label {
+            display: block;
             font-weight: 600;
-        }
-
-        /* Back to site link */
-        .back-link {
-            display: inline-block;
-            margin-top: 18px;
             font-size: 0.85rem;
             color: var(--ink-soft);
-        }
-        .back-link:hover {
-            color: var(--ink);
+            margin-bottom: 6px;
         }
 
-        @media (max-width: 560px) {
-            .field-row {
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 28px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--teal);
+            font-family: 'Space Grotesk';
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-top: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .list-item {
                 grid-template-columns: 1fr;
             }
-            .row-card {
-                flex-direction: column;
-            }
-            .row-actions {
-                width: 100%;
+            .list-item-actions {
+                flex-direction: row;
                 justify-content: flex-start;
             }
-            .admin-tabs {
-                flex-wrap: wrap;
+            .form-row {
+                grid-template-columns: 1fr;
             }
-            .admin-tab-btn {
-                margin-right: 8px;
+            .header {
+                flex-direction: column;
+                gap: 14px;
+                align-items: flex-start;
             }
         }
     </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
-    </script>
 </head>
-
 <body>
 
-    <!-- ============================================================
-    ADMIN HEADER
-    ============================================================ -->
-    <header class="admin-header">
-        <div class="wrap">
-            <div class="brand"><span class="dot"></span>StylesPC Admin</div>
-            <div>
-                <a href="index.html">← Back to site</a>
+    <div class="container">
+        <div class="header">
+            <h1><span class="dot"></span>StylesPC Admin</h1>
+            <div class="user-menu">
+                <div class="user-pill">👤 Admin User</div>
+                <button class="btn btn-amber btn-sm" onclick="logout()">Logout</button>
             </div>
         </div>
-    </header>
 
-    <main>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('tickets')">🎫 Tickets</button>
+            <button class="nav-tab" onclick="switchTab('clients')">👥 Clients</button>
+            <button class="nav-tab" onclick="switchTab('users')">🔐 Users</button>
+            <button class="nav-tab" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
 
-        <!-- ============================================================
-        ADMIN LOGIN
-        ============================================================ -->
-        <section class="admin-section alt">
-            <div class="wrap" style="max-width:480px;">
-                <div class="section-head">
-                    <h2>Sign In</h2>
-                    <p>Staff access only — manage tickets, clients, and site design.</p>
+        <div id="dashboard" class="section active">
+            <h2>Dashboard</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTickets">0</div>
+                    <div class="stat-label">Total Tickets</div>
                 </div>
-
-                <div id="adminLoginBox">
-                    <form id="adminLoginForm" class="mini-form">
-                        <div class="field">
-                            <label for="adminEmail">Email</label>
-                            <input type="email" id="adminEmail" name="email" required autocomplete="username">
-                        </div>
-                        <div class="field">
-                            <label for="adminPassword">Password</label>
-                            <input type="password" id="adminPassword" name="password" required autocomplete="current-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="adminLoginBtn">Sign In</button>
-                        <p id="adminLoginStatus" role="status"></p>
-                    </form>
+                <div class="stat-card">
+                    <div class="stat-number" id="openTickets">0</div>
+                    <div class="stat-label">Open Tickets</div>
                 </div>
-
-                <div id="adminDashboard" hidden>
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-                        <p style="margin:0;">Signed in as <strong id="adminEmailDisplay"></strong></p>
-                        <div style="display:flex;gap:10px;">
-                            <button type="button" class="btn btn-ghost btn-sm" id="adminRefreshBtn">↻ Refresh</button>
-                            <button type="button" class="btn btn-danger btn-sm" id="adminLogoutBtn">Sign Out</button>
-                        </div>
-                    </div>
-
-                    <div class="admin-tabs">
-                        <button type="button" class="admin-tab-btn active" data-admin-tab="tickets">Tickets</button>
-                        <button type="button" class="admin-tab-btn" data-admin-tab="clients">Clients</button>
-                        <button type="button" class="admin-tab-btn" data-admin-tab="design">Design</button>
-                    </div>
-
-                    <!-- TICKETS -->
-                    <div id="adminTicketsPanel">
-                        <div style="overflow-x:auto;">
-                            <p id="adminBookingsStatus" role="status">Loading bookings…</p>
-                            <table class="price-table" id="adminBookingsTable" style="display:none;">
-                                <thead><tr id="adminTableHead"></tr></thead>
-                                <tbody id="adminTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- CLIENTS -->
-                    <div id="adminClientsPanel" hidden>
-                        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-                            <button type="button" class="btn btn-primary" id="newClientBtn">+ New Client</button>
-                        </div>
-                        <p id="adminClientsStatus" role="status">Loading clients…</p>
-                        <div id="adminClientList"></div>
-                    </div>
-
-                    <!-- DESIGN -->
-                    <div id="adminDesignPanel" hidden>
-                        <h3 style="margin-top:0;">Theme customiser</h3>
-                        <p>Changes are saved automatically in your browser. They will persist until you clear your cache.</p>
-                        <div class="field-row" style="grid-template-columns:1fr 1fr; gap:20px;">
-                            <div class="field">
-                                <label for="designPaper">Background (paper)</label>
-                                <input type="color" id="designPaper" value="#F3EFE7">
-                            </div>
-                            <div class="field">
-                                <label for="designTeal">Primary colour (teal)</label>
-                                <input type="color" id="designTeal" value="#2F6F63">
-                            </div>
-                            <div class="field">
-                                <label for="designAmber">Accent colour (amber)</label>
-                                <input type="color" id="designAmber" value="#C97A2B">
-                            </div>
-                            <div class="field">
-                                <label for="designInk">Text colour (ink)</label>
-                                <input type="color" id="designInk" value="#1F2421">
-                            </div>
-                        </div>
-                        <div class="field" style="margin-top:16px;">
-                            <label for="designFontFamily">Font (Google Font name)</label>
-                            <input type="text" id="designFontFamily" placeholder="e.g. Inter" value="IBM Plex Sans">
-                        </div>
-                        <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
-                            <button type="button" class="btn btn-ghost btn-sm" id="resetDesignBtn">Reset to defaults</button>
-                            <button type="button" class="btn btn-primary btn-sm" id="exportDesignBtn">Export settings</button>
-                            <button type="button" class="btn btn-ghost btn-sm" id="importDesignBtn">Import settings</button>
-                            <input type="file" id="importDesignInput" accept=".json" style="display:none;">
-                        </div>
-                        <p class="form-note" style="margin-top:12px;">Design settings are stored in your browser's localStorage and applied to both the admin and public site.</p>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalClients">0</div>
+                    <div class="stat-label">Total Clients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalAdmins">0</div>
+                    <div class="stat-label">Admins</div>
                 </div>
             </div>
-        </section>
+            <h3>Recent Activity</h3>
+            <div class="list-container" id="recentActivity">
+                <div class="empty-state"><h3>No activity yet</h3></div>
+            </div>
+        </div>
 
-    </main>
+        <div id="tickets" class="section">
+            <h2>Tickets Management</h2>
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="ticketSearch" placeholder="Search tickets..." onkeyup="filterTickets()">
+                </div>
+                <select id="ticketStatus" onchange="filterTickets()">
+                    <option value="">All Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <button class="btn btn-primary" onclick="openTicketModal('new')">+ New Ticket</button>
+            </div>
+            <div class="list-container" id="ticketsList">
+                <div class="empty-state"><h3>No tickets yet</h3></div>
+            </div>
+        </div>
 
-    <!-- ============================================================
-    CLIENT MODAL
-    ============================================================ -->
-    <div class="admin-modal-overlay" id="clientModalOverlay" hidden>
-        <div class="admin-modal">
-            <h3 id="clientModalTitle">New client</h3>
-            <form id="clientForm" class="mini-form">
-                <input type="hidden" id="clientFormId">
-                <div class="field">
-                    <label for="clientNameInput">Full name</label>
-                    <input type="text" id="clientNameInput" required>
+        <div id="clients" class="section">
+            <h2>Clients Management</h2>
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="clientSearch" placeholder="Search clients..." onkeyup="filterClients()">
                 </div>
-                <div class="field">
-                    <label for="clientPhoneInput">Phone / WhatsApp (digits + country code)</label>
-                    <input type="tel" id="clientPhoneInput" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{7,15}" required>
+                <button class="btn btn-primary" onclick="openClientModal('new')">+ New Client</button>
+            </div>
+            <div class="list-container" id="clientsList">
+                <div class="empty-state"><h3>No clients yet</h3></div>
+            </div>
+        </div>
+
+        <div id="users" class="section">
+            <h2>Users & Admins</h2>
+            <div class="toolbar">
+                <button class="btn btn-primary" onclick="openUserModal('new')">+ Add User/Admin</button>
+            </div>
+            <div class="list-container" id="usersList">
+                <div class="empty-state"><h3>No users yet</h3></div>
+            </div>
+        </div>
+
+        <div id="settings" class="section">
+            <h2>Settings</h2>
+            <div class="list-item">
+                <div class="list-item-main">
+                    <h3>Export Data</h3>
+                    <p style="color: var(--ink-soft); margin: 0;">Download all your data as JSON</p>
                 </div>
-                <div class="field">
-                    <label for="clientEmailInput">Email (optional)</label>
-                    <input type="email" id="clientEmailInput">
+                <button class="btn btn-amber btn-sm" onclick="exportData()">📥 Export</button>
+            </div>
+            <div class="list-item">
+                <div class="list-item-main">
+                    <h3>Clear All Data</h3>
+                    <p style="color: var(--ink-soft); margin: 0; color: var(--red);">⚠️ This cannot be undone</p>
                 </div>
-                <div class="field">
-                    <label for="clientNotesInput">Notes (optional)</label>
-                    <textarea id="clientNotesInput" rows="2"></textarea>
-                </div>
-                <p id="clientFormError" class="form-note" style="color:#a33;"></p>
-                <div class="admin-modal-actions">
-                    <button type="button" class="btn btn-ghost" id="clientCancelBtn">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Client</button>
-                </div>
-            </form>
+                <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete everything?')) clearAllData();">Clear</button>
+            </div>
         </div>
     </div>
 
-    <!-- ============================================================
-    JAVASCRIPT
-    ============================================================ -->
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal">
+            <h2 id="ticketModalTitle">New Ticket</h2>
+            <div class="form-group">
+                <label>Service Tag #</label>
+                <input type="text" id="ticketId" placeholder="AUTO-GENERATED" readonly style="background: var(--paper-2);">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" id="ticketClientName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="ticketPhone" placeholder="876-333-1156" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Device Type</label>
+                <input type="text" id="ticketDevice" placeholder="Dell Laptop" required>
+            </div>
+            <div class="form-group">
+                <label>Issue Description</label>
+                <textarea id="ticketIssue" placeholder="Describe the problem..." required></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="ticketStatus">
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="ticketPriority">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="clientModal">
+        <div class="modal">
+            <h2 id="clientModalTitle">New Client</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="clientFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="clientLastName" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="clientPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="clientEmail">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="clientAddress"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveClient()">Save Client</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <h2 id="userModalTitle">Add User/Admin</h2>
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="userName" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="userEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="userRole">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // =============================================================
-        //  SUPABASE CLIENT
-        // =============================================================
-        var sbPublic = supabase.createClient(
-            'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
-            'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
-        );
+        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+        let clients = JSON.parse(localStorage.getItem('clients')) || [];
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentEditId = null;
 
-        // =============================================================
-        //  DESIGN SETTINGS (localStorage) – shared with index.html
-        // =============================================================
-        const DESIGN_STORAGE_KEY = 'stylespc_design_settings';
-        const DEFAULT_DESIGN = {
-            paper: '#F3EFE7',
-            teal: '#2F6F63',
-            amber: '#C97A2B',
-            ink: '#1F2421',
-            fontFamily: 'IBM Plex Sans',
-        };
-
-        function loadDesignSettings() {
-            let settings = DEFAULT_DESIGN;
-            try {
-                const stored = localStorage.getItem(DESIGN_STORAGE_KEY);
-                if (stored) {
-                    const parsed = JSON.parse(stored);
-                    settings = { ...DEFAULT_DESIGN, ...parsed };
-                }
-            } catch (_) {}
-            return settings;
+        function init() {
+            if (users.length === 0) {
+                users = [{
+                    id: 'u001',
+                    name: 'Admin User',
+                    email: 'admin@stylespc.com',
+                    role: 'Admin',
+                    createdAt: new Date().toISOString()
+                }];
+                saveData();
+            }
+            updateDashboard();
+            renderTickets();
+            renderClients();
+            renderUsers();
         }
 
-        function saveDesignSettings(settings) {
-            localStorage.setItem(DESIGN_STORAGE_KEY, JSON.stringify(settings));
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
         }
 
-        function darken(hex, percent) {
-            let c = hex.replace('#', '');
-            if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
-            let r = parseInt(c.substring(0, 2), 16),
-                g = parseInt(c.substring(2, 4), 16),
-                b = parseInt(c.substring(4, 6), 16);
-            r = Math.max(0, r - percent);
-            g = Math.max(0, g - percent);
-            b = Math.max(0, b - percent);
-            return '#' + [r, g, b].map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+        function openTicketModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('ticketModalTitle').textContent = mode === 'new' ? 'New Ticket' : 'Edit Ticket';
+            if (mode === 'new') {
+                document.getElementById('ticketId').value = 'TST-' + Date.now();
+                document.getElementById('ticketClientName').value = '';
+                document.getElementById('ticketPhone').value = '';
+                document.getElementById('ticketDevice').value = '';
+                document.getElementById('ticketIssue').value = '';
+                document.getElementById('ticketStatus').value = 'Open';
+                document.getElementById('ticketPriority').value = 'Medium';
+            } else {
+                const ticket = tickets.find(t => t.id === id);
+                if (ticket) {
+                    document.getElementById('ticketId').value = ticket.id;
+                    document.getElementById('ticketClientName').value = ticket.clientName;
+                    document.getElementById('ticketPhone').value = ticket.phone;
+                    document.getElementById('ticketDevice').value = ticket.device;
+                    document.getElementById('ticketIssue').value = ticket.issue;
+                    document.getElementById('ticketStatus').value = ticket.status;
+                    document.getElementById('ticketPriority').value = ticket.priority;
+                }
+            }
+            document.getElementById('ticketModal').classList.add('active');
         }
 
-        function applyDesignSettings(settings) {
-            const root = document.documentElement;
-            root.style.setProperty('--paper', settings.paper);
-            root.style.setProperty('--teal', settings.teal);
-            root.style.setProperty('--teal-dark', darken(settings.teal, 15));
-            root.style.setProperty('--amber', settings.amber);
-            root.style.setProperty('--ink', settings.ink);
-            document.body.style.fontFamily = settings.fontFamily + ', sans-serif';
+        function openClientModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('clientModalTitle').textContent = mode === 'new' ? 'New Client' : 'Edit Client';
+            if (mode === 'new') {
+                document.getElementById('clientFirstName').value = '';
+                document.getElementById('clientLastName').value = '';
+                document.getElementById('clientPhone').value = '';
+                document.getElementById('clientEmail').value = '';
+                document.getElementById('clientAddress').value = '';
+            } else {
+                const client = clients.find(c => c.id === id);
+                if (client) {
+                    document.getElementById('clientFirstName').value = client.firstName;
+                    document.getElementById('clientLastName').value = client.lastName;
+                    document.getElementById('clientPhone').value = client.phone;
+                    document.getElementById('clientEmail').value = client.email || '';
+                    document.getElementById('clientAddress').value = client.address || '';
+                }
+            }
+            document.getElementById('clientModal').classList.add('active');
         }
 
-        // Apply design on load
-        const initialDesign = loadDesignSettings();
-        applyDesignSettings(initialDesign);
-
-        // =============================================================
-        //  ADMIN — AUTHENTICATION, TICKETS, CLIENTS, DESIGN
-        // =============================================================
-        (function() {
-            var loginBox = document.getElementById('adminLoginBox');
-            var dashboard = document.getElementById('adminDashboard');
-            var loginForm = document.getElementById('adminLoginForm');
-            var loginStatus = document.getElementById('adminLoginStatus');
-            var loginBtn = document.getElementById('adminLoginBtn');
-            var emailDisplay = document.getElementById('adminEmailDisplay');
-            var refreshBtn = document.getElementById('adminRefreshBtn');
-            var logoutBtn = document.getElementById('adminLogoutBtn');
-            var bookingsStatus = document.getElementById('adminBookingsStatus');
-            var bookingsTable = document.getElementById('adminBookingsTable');
-            var tableHead = document.getElementById('adminTableHead');
-            var tableBody = document.getElementById('adminTableBody');
-            var ticketsCache = [];
-            if (!loginForm) return;
-
-            function escapeHtml(str) {
-                return String(str == null ? '' : str)
-                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            }
-
-            function showDashboard(session) {
-                loginBox.hidden = true;
-                dashboard.hidden = false;
-                emailDisplay.textContent = session.user.email;
-                loadBookings();
-            }
-
-            function showLogin() {
-                dashboard.hidden = true;
-                loginBox.hidden = false;
-            }
-
-            var DISPLAY_COLUMNS = [
-                { label: 'Ticket #', get: function(r) { return r.ticket_number || r.id; } },
-                { label: 'Client', get: function(r) { return (r.clients && r.clients.name) || r.client_id || ''; } },
-                { label: 'Phone', get: function(r) { return (r.clients && r.clients.phone) || ''; } },
-                { label: 'Device', get: function(r) { return r.device || ''; } },
-                { label: 'Issue', get: function(r) { return r.issue || ''; } },
-                { label: 'Status', get: function(r) { return r.status || ''; } },
-                { label: 'Amount', get: function(r) { return (r.amount === null || r.amount === undefined) ? '' : '$' + r.amount; } },
-                { label: 'Payment', get: function(r) { return r.payment_status || ''; } },
-                { label: 'Booked', get: function(r) { return r.created_at ? new Date(r.created_at).toLocaleString() : ''; } }
-            ];
-
-            function loadBookings() {
-                bookingsStatus.style.color = '';
-                bookingsStatus.textContent = 'Loading bookings…';
-                bookingsTable.style.display = 'none';
-
-                sbPublic.from('tickets')
-                    .select('*, clients(name, phone, email)')
-                    .order('created_at', { ascending: false })
-                    .then(function(res) {
-                        if (res.error) {
-                            return sbPublic.from('tickets').select('*').order('created_at', { ascending: false });
-                        }
-                        return res;
-                    })
-                    .then(function(res) {
-                        if (res.error) {
-                            bookingsStatus.style.color = '#a33';
-                            bookingsStatus.textContent = 'Error loading bookings: ' + res.error.message;
-                            return;
-                        }
-                        var rows = res.data || [];
-                        ticketsCache = rows;
-                        if (!rows.length) {
-                            bookingsStatus.textContent = 'No bookings yet.';
-                            return;
-                        }
-
-                        tableHead.innerHTML = DISPLAY_COLUMNS.map(function(c) { return '<th>' + c.label + '</th>'; }).join('') +
-                            '<th>Actions</th>';
-
-                        tableBody.innerHTML = rows.map(function(row) {
-                            var cells = DISPLAY_COLUMNS.map(function(c) {
-                                var val = c.get(row);
-                                return '<td>' + (val === null || val === undefined ? '' : String(val)) + '</td>';
-                            }).join('');
-                            var isComplimentary = row.payment_status === 'paid' && Number(row.amount) === 0;
-                            var actionCell = '<td>' + (isComplimentary ?
-                                '<span style="font-size:0.78rem;color:var(--teal-dark);">✓ Complimentary</span>' :
-                                '<button type="button" class="btn btn-ghost admin-action-btn" style="font-size:0.78rem;padding:6px 10px;" ' +
-                                'data-id="' + row.id + '">Mark Complimentary</button>') +
-                                '</td>';
-                            return '<tr>' + cells + actionCell + '</tr>';
-                        }).join('');
-                        bookingsStatus.textContent = '';
-                        bookingsTable.style.display = '';
-                    })
-                    .catch(function(err) {
-                        bookingsStatus.style.color = '#a33';
-                        bookingsStatus.textContent = 'Error loading bookings: ' + err.message;
-                    });
-            }
-
-            tableBody.addEventListener('click', function(e) {
-                var btn = e.target.closest('.admin-action-btn');
-                if (!btn) return;
-                var id = btn.getAttribute('data-id');
-
-                if (!confirm('Mark this ticket as complimentary? This sets the amount to $0 and payment status to Paid.')) {
-                    return;
+        function openUserModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('userModalTitle').textContent = mode === 'new' ? 'Add User/Admin' : 'Edit User/Admin';
+            if (mode === 'new') {
+                document.getElementById('userName').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('userRole').value = 'User';
+            } else {
+                const user = users.find(u => u.id === id);
+                if (user) {
+                    document.getElementById('userName').value = user.name;
+                    document.getElementById('userEmail').value = user.email;
+                    document.getElementById('userRole').value = user.role;
                 }
+            }
+            document.getElementById('userModal').classList.add('active');
+        }
 
-                btn.disabled = true;
-                btn.textContent = 'Saving…';
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            currentEditId = null;
+        }
 
-                sbPublic.from('tickets').update({ amount: 0, payment_status: 'paid' }).eq('id', id)
-                    .then(function(res) {
-                        if (res.error) {
-                            btn.disabled = false;
-                            btn.textContent = 'Mark Complimentary';
-                            bookingsStatus.style.color = '#a33';
-                            bookingsStatus.textContent = 'Error updating booking: ' + res.error.message;
-                            return;
-                        }
-                        loadBookings();
-                    })
-                    .catch(function(err) {
-                        btn.disabled = false;
-                        btn.textContent = 'Mark Complimentary';
-                        bookingsStatus.style.color = '#a33';
-                        bookingsStatus.textContent = 'Error updating booking: ' + err.message;
-                    });
-            });
+        function saveTicket() {
+            const id = document.getElementById('ticketId').value;
+            const ticket = {
+                id: id,
+                clientName: document.getElementById('ticketClientName').value,
+                phone: document.getElementById('ticketPhone').value,
+                device: document.getElementById('ticketDevice').value,
+                issue: document.getElementById('ticketIssue').value,
+                status: document.getElementById('ticketStatus').value,
+                priority: document.getElementById('ticketPriority').value,
+                createdAt: currentEditId ? (tickets.find(t => t.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
 
-            // =============================================================
-            //  ADMIN TABS
-            // =============================================================
-            var ticketsPanel = document.getElementById('adminTicketsPanel');
-            var clientsPanel = document.getElementById('adminClientsPanel');
-            var designPanel = document.getElementById('adminDesignPanel');
-            var adminTabBtns = document.querySelectorAll('.admin-tab-btn');
-
-            adminTabBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    adminTabBtns.forEach(function(b) { b.classList.remove('active'); });
-                    btn.classList.add('active');
-                    var tab = btn.getAttribute('data-admin-tab');
-                    ticketsPanel.hidden = tab !== 'tickets';
-                    clientsPanel.hidden = tab !== 'clients';
-                    designPanel.hidden = tab !== 'design';
-                    if (tab === 'clients') loadClients();
-                    if (tab === 'design') populateDesignControls();
-                });
-            });
-
-            // =============================================================
-            //  CLIENTS
-            // =============================================================
-            var clientsCache = [];
-            var clientsStatus = document.getElementById('adminClientsStatus');
-            var clientList = document.getElementById('adminClientList');
-            var clientModalOverlay = document.getElementById('clientModalOverlay');
-            var clientForm = document.getElementById('clientForm');
-            var clientFormError = document.getElementById('clientFormError');
-            var newClientBtn = document.getElementById('newClientBtn');
-            var clientCancelBtn = document.getElementById('clientCancelBtn');
-
-            function openClientModal() { clientModalOverlay.hidden = false; }
-
-            function closeClientModal() { clientModalOverlay.hidden = true; }
-
-            function loadClients() {
-                clientsStatus.style.color = '';
-                clientsStatus.textContent = 'Loading clients…';
-                clientList.innerHTML = '';
-                sbPublic.from('clients').select('*').order('created_at', { ascending: false })
-                    .then(function(res) {
-                        if (res.error) {
-                            clientsStatus.style.color = '#a33';
-                            clientsStatus.textContent = 'Error loading clients: ' + res.error.message;
-                            return;
-                        }
-                        clientsCache = res.data || [];
-                        renderClients();
-                    })
-                    .catch(function(err) {
-                        clientsStatus.style.color = '#a33';
-                        clientsStatus.textContent = 'Error loading clients: ' + err.message;
-                    });
+            if (currentEditId) {
+                const index = tickets.findIndex(t => t.id === currentEditId);
+                if (index !== -1) tickets[index] = ticket;
+            } else {
+                tickets.push(ticket);
             }
 
-            function renderClients() {
-                if (!clientsCache.length) {
-                    clientsStatus.textContent = '';
-                    clientList.innerHTML = '<div class="empty-state">No clients yet. Add your first one with "+ New Client".</div>';
-                    return;
-                }
-                clientsStatus.textContent = '';
-                clientList.innerHTML = clientsCache.map(function(c) {
-                    var ticketCount = ticketsCache.filter(function(t) { return t.client_id === c.id; }).length;
-                    return (
-                        '<div class="row-card">' +
-                        '<div class="row-main">' +
-                        '<div class="row-title">' + escapeHtml(c.name) + '</div>' +
-                        '<div class="row-sub">' + escapeHtml(c.phone) + (c.email ? ' · ' + escapeHtml(c.email) : '') +
-                        '</div>' +
-                        (c.notes ? '<div class="row-sub">' + escapeHtml(c.notes) + '</div>' : '') +
-                        '<div class="row-sub">' + ticketCount + ' ticket' + (ticketCount === 1 ? '' : 's') + '</div>' +
-                        '</div>' +
-                        '<div class="row-actions">' +
-                        '<button type="button" class="btn btn-amber btn-sm client-whatsapp-btn" data-id="' + c.id +
-                        '">WhatsApp</button>' +
-                        '<button type="button" class="btn btn-ghost btn-sm client-edit-btn" data-id="' + c.id +
-                        '">Edit</button>' +
-                        '<button type="button" class="btn btn-danger btn-sm client-delete-btn" data-id="' + c.id +
-                        '">Delete</button>' +
-                        '</div>' +
-                        '</div>'
-                    );
-                }).join('');
+            saveData();
+            renderTickets();
+            closeModal('ticketModal');
+            alert('Ticket saved!');
+        }
+
+        function saveClient() {
+            const id = currentEditId || 'c' + Date.now();
+            const client = {
+                id: id,
+                firstName: document.getElementById('clientFirstName').value,
+                lastName: document.getElementById('clientLastName').value,
+                phone: document.getElementById('clientPhone').value,
+                email: document.getElementById('clientEmail').value,
+                address: document.getElementById('clientAddress').value,
+                createdAt: currentEditId ? (clients.find(c => c.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
+
+            if (currentEditId) {
+                const index = clients.findIndex(c => c.id === currentEditId);
+                if (index !== -1) clients[index] = client;
+            } else {
+                clients.push(client);
             }
 
-            clientList.addEventListener('click', function(e) {
-                var waBtn = e.target.closest('.client-whatsapp-btn');
-                var editBtn = e.target.closest('.client-edit-btn');
-                var delBtn = e.target.closest('.client-delete-btn');
+            saveData();
+            renderClients();
+            closeModal('clientModal');
+            alert('Client saved!');
+        }
 
-                if (waBtn) {
-                    var c1 = clientsCache.find(function(x) { return x.id === waBtn.getAttribute('data-id'); });
-                    if (!c1) return;
-                    var msg = 'Hi ' + c1.name + ', this is StylesPC reaching out about your service.';
-                    window.open('https://wa.me/' + c1.phone + '?text=' + encodeURIComponent(msg), '_blank');
-                    return;
-                }
+        function saveUser() {
+            const id = currentEditId || 'u' + Date.now();
+            const user = {
+                id: id,
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                role: document.getElementById('userRole').value,
+                createdAt: currentEditId ? (users.find(u => u.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
 
-                if (editBtn) {
-                    var c2 = clientsCache.find(function(x) { return x.id === editBtn.getAttribute('data-id'); });
-                    if (!c2) return;
-                    document.getElementById('clientModalTitle').textContent = 'Edit client';
-                    document.getElementById('clientFormId').value = c2.id;
-                    document.getElementById('clientNameInput').value = c2.name;
-                    document.getElementById('clientPhoneInput').value = c2.phone;
-                    document.getElementById('clientEmailInput').value = c2.email || '';
-                    document.getElementById('clientNotesInput').value = c2.notes || '';
-                    clientFormError.textContent = '';
-                    openClientModal();
-                    return;
-                }
-
-                if (delBtn) {
-                    var id = delBtn.getAttribute('data-id');
-                    if (!confirm('Delete this client? Their tickets will stay but lose the client link.')) return;
-                    delBtn.disabled = true;
-                    sbPublic.from('clients').delete().eq('id', id)
-                        .then(function(res) {
-                            if (res.error) {
-                                clientsStatus.style.color = '#a33';
-                                clientsStatus.textContent = 'Error deleting client: ' + res.error.message;
-                                delBtn.disabled = false;
-                                return;
-                            }
-                            loadClients();
-                        })
-                        .catch(function(err) {
-                            clientsStatus.style.color = '#a33';
-                            clientsStatus.textContent = 'Error deleting client: ' + err.message;
-                            delBtn.disabled = false;
-                        });
-                }
-            });
-
-            if (newClientBtn) {
-                newClientBtn.addEventListener('click', function() {
-                    document.getElementById('clientModalTitle').textContent = 'New client';
-                    clientForm.reset();
-                    document.getElementById('clientFormId').value = '';
-                    clientFormError.textContent = '';
-                    openClientModal();
-                });
-            }
-            if (clientCancelBtn) clientCancelBtn.addEventListener('click', closeClientModal);
-            if (clientModalOverlay) {
-                clientModalOverlay.addEventListener('click', function(e) {
-                    if (e.target === clientModalOverlay) closeClientModal();
-                });
+            if (currentEditId) {
+                const index = users.findIndex(u => u.id === currentEditId);
+                if (index !== -1) users[index] = user;
+            } else {
+                users.push(user);
             }
 
-            if (clientForm) {
-                clientForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    var id = document.getElementById('clientFormId').value;
-                    var payload = {
-                        name: document.getElementById('clientNameInput').value.trim(),
-                        phone: document.getElementById('clientPhoneInput').value.replace(/\D/g, ''),
-                        email: document.getElementById('clientEmailInput').value.trim() || null,
-                        notes: document.getElementById('clientNotesInput').value.trim() || null
-                    };
-                    clientFormError.textContent = '';
-                    var query = id ? sbPublic.from('clients').update(payload).eq('id', id) : sbPublic.from('clients')
-                        .insert(payload);
-                    query.then(function(res) {
-                        if (res.error) {
-                            clientFormError.textContent = res.error.message;
-                            return;
-                        }
-                        closeClientModal();
-                        loadClients();
-                    }).catch(function(err) {
-                        clientFormError.textContent = err.message;
-                    });
-                });
+            saveData();
+            renderUsers();
+            closeModal('userModal');
+            alert('User saved!');
+        }
+
+        function renderTickets() {
+            const container = document.getElementById('ticketsList');
+            if (tickets.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No tickets</h3></div>';
+                return;
+            }
+            container.innerHTML = tickets.map(ticket => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-id">${ticket.id}</span>
+                            <span class="list-item-title">${ticket.device}</span>
+                            <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                        </div>
+                        <div class="list-item-subtitle">${ticket.clientName}</div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📱</span><span class="value">${ticket.phone}</span></div>
+                            <div class="detail-tag"><span class="label">🎯</span><span class="value">${ticket.priority}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit', '${ticket.id}')">✏️ Edit</button>
+                        <button class="btn btn-amber btn-sm" onclick="printTicket('${ticket.id}')">🖨️ Print</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${ticket.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderClients() {
+            const container = document.getElementById('clientsList');
+            if (clients.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No clients</h3></div>';
+                return;
+            }
+            container.innerHTML = clients.map(client => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-title">${client.firstName} ${client.lastName}</span>
+                        </div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📱</span><span class="value">${client.phone}</span></div>
+                            <div class="detail-tag"><span class="label">📧</span><span class="value">${client.email || 'N/A'}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openClientModal('edit', '${client.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient('${client.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderUsers() {
+            const container = document.getElementById('usersList');
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No users</h3></div>';
+                return;
+            }
+            container.innerHTML = users.map(user => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-title">${user.name}</span>
+                            <span class="status-badge status-${user.role.toLowerCase()}">${user.role}</span>
+                        </div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📧</span><span class="value">${user.email}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openUserModal('edit', '${user.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteTicket(id) {
+            if (confirm('Delete this ticket?')) {
+                tickets = tickets.filter(t => t.id !== id);
+                saveData();
+                renderTickets();
+            }
+        }
+
+        function deleteClient(id) {
+            if (confirm('Delete this client?')) {
+                clients = clients.filter(c => c.id !== id);
+                saveData();
+                renderClients();
+            }
+        }
+
+        function deleteUser(id) {
+            if (users.length === 1) {
+                alert('Cannot delete the last user!');
+                return;
+            }
+            if (confirm('Delete this user?')) {
+                users = users.filter(u => u.id !== id);
+                saveData();
+                renderUsers();
+            }
+        }
+
+        function filterTickets() {
+            const search = document.getElementById('ticketSearch').value.toLowerCase();
+            const status = document.getElementById('ticketStatus').value;
+            const filtered = tickets.filter(t => 
+                (t.clientName.toLowerCase().includes(search) || t.device.toLowerCase().includes(search) || t.id.toLowerCase().includes(search)) &&
+                (!status || t.status === status)
+            );
+
+            const container = document.getElementById('ticketsList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
+                return;
             }
 
-            // =============================================================
-            //  DESIGN CONTROLS
-            // =============================================================
-            function populateDesignControls() {
-                const settings = loadDesignSettings();
-                document.getElementById('designPaper').value = settings.paper;
-                document.getElementById('designTeal').value = settings.teal;
-                document.getElementById('designAmber').value = settings.amber;
-                document.getElementById('designInk').value = settings.ink;
-                document.getElementById('designFontFamily').value = settings.fontFamily;
+            container.innerHTML = filtered.map(ticket => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-id">${ticket.id}</span>
+                            <span class="list-item-title">${ticket.device}</span>
+                            <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                        </div>
+                        <div class="list-item-subtitle">${ticket.clientName}</div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit', '${ticket.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${ticket.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterClients() {
+            const search = document.getElementById('clientSearch').value.toLowerCase();
+            const filtered = clients.filter(c => 
+                c.firstName.toLowerCase().includes(search) || c.lastName.toLowerCase().includes(search) || c.phone.includes(search)
+            );
+
+            const container = document.getElementById('clientsList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
+                return;
             }
 
-            document.querySelectorAll('#adminDesignPanel input[type="color"]').forEach(function(input) {
-                input.addEventListener('input', function() {
-                    const settings = loadDesignSettings();
-                    settings[this.id.replace('design', '').toLowerCase()] = this.value;
-                    saveDesignSettings(settings);
-                    applyDesignSettings(settings);
-                });
-            });
+            container.innerHTML = filtered.map(client => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-title">${client.firstName} ${client.lastName}</span>
+                        </div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📱</span><span class="value">${client.phone}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openClientModal('edit', '${client.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient('${client.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-            document.getElementById('designFontFamily').addEventListener('input', function() {
-                const settings = loadDesignSettings();
-                settings.fontFamily = this.value.trim() || 'IBM Plex Sans';
-                saveDesignSettings(settings);
-                applyDesignSettings(settings);
-            });
+        function printTicket(id) {
+            const ticket = tickets.find(t => t.id === id);
+            if (!ticket) return;
 
-            document.getElementById('resetDesignBtn').addEventListener('click', function() {
-                if (confirm('Reset all design settings to default?')) {
-                    localStorage.removeItem(DESIGN_STORAGE_KEY);
-                    applyDesignSettings(DEFAULT_DESIGN);
-                    populateDesignControls();
-                }
-            });
+            const html = `
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial; margin: 20px; }
+                        .header { border-bottom: 2px solid #2F6F63; margin-bottom: 20px; padding-bottom: 10px; }
+                        .section { margin-bottom: 20px; }
+                        .label { font-weight: bold; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>StylesPC Service Ticket</h1>
+                        <p>Service Tag: <strong>${ticket.id}</strong></p>
+                    </div>
+                    <div class="section">
+                        <div class="label">Client Name:</div>
+                        <div>${ticket.clientName}</div>
+                        <div class="label">Phone:</div>
+                        <div>${ticket.phone}</div>
+                        <div class="label">Device:</div>
+                        <div>${ticket.device}</div>
+                    </div>
+                    <div class="section">
+                        <div class="label">Issue:</div>
+                        <div>${ticket.issue}</div>
+                    </div>
+                    <div class="section">
+                        <div class="label">Status:</div>
+                        <div>${ticket.status}</div>
+                        <div class="label">Priority:</div>
+                        <div>${ticket.priority}</div>
+                    </div>
+                    <hr>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+                        StylesPC — Computer & Laptop Repair
+                        <br>
+                        ajstyleg@gmail.com · (876) 334-1156
+                    </p>
+                </body>
+                </html>
+            `;
 
-            document.getElementById('exportDesignBtn').addEventListener('click', function() {
-                const settings = loadDesignSettings();
-                const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'stylespc-design.json';
-                a.click();
-                URL.revokeObjectURL(url);
-            });
+            const opt = {
+                margin: 10,
+                filename: `ticket-${ticket.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
 
-            document.getElementById('importDesignBtn').addEventListener('click', function() {
-                document.getElementById('importDesignInput').click();
-            });
+            html2pdf().set(opt).from(html).save();
+        }
 
-            document.getElementById('importDesignInput').addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = function(ev) {
-                    try {
-                        const imported = JSON.parse(ev.target.result);
-                        const settings = { ...DEFAULT_DESIGN, ...imported };
-                        saveDesignSettings(settings);
-                        applyDesignSettings(settings);
-                        populateDesignControls();
-                        alert('Design settings imported successfully!');
-                    } catch (_) {
-                        alert('Invalid JSON file.');
-                    }
-                };
-                reader.readAsText(file);
-                this.value = '';
-            });
+        function updateDashboard() {
+            document.getElementById('totalTickets').textContent = tickets.length;
+            document.getElementById('openTickets').textContent = tickets.filter(t => t.status === 'Open').length;
+            document.getElementById('totalClients').textContent = clients.length;
+            document.getElementById('totalAdmins').textContent = users.filter(u => u.role === 'Admin').length;
 
-            // =============================================================
-            //  AUTHENTICATION
-            // =============================================================
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                var email = document.getElementById('adminEmail').value.trim();
-                var password = document.getElementById('adminPassword').value;
-                loginStatus.classList.remove('ok', 'err');
-                loginStatus.textContent = 'Signing in…';
-                loginBtn.disabled = true;
+            const allActivity = [
+                ...tickets.map(t => ({ type: 'ticket', name: `Ticket ${t.id}`, date: t.createdAt })),
+                ...clients.map(c => ({ type: 'client', name: `Client ${c.firstName} ${c.lastName}`, date: c.createdAt }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
-                sbPublic.auth.signInWithPassword({ email: email, password: password })
-                    .then(function(res) {
-                        loginBtn.disabled = false;
-                        if (res.error) {
-                            loginStatus.textContent = res.error.message;
-                            loginStatus.classList.add('err');
-                            return;
-                        }
-                        loginStatus.textContent = '';
-                        loginForm.reset();
-                        showDashboard(res.data.session);
-                    })
-                    .catch(function(err) {
-                        loginBtn.disabled = false;
-                        loginStatus.textContent = 'Sign-in error: ' + err.message;
-                        loginStatus.classList.add('err');
-                    });
-            });
-
-            if (refreshBtn) refreshBtn.addEventListener('click', loadBookings);
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    sbPublic.auth.signOut().then(function() { showLogin(); });
-                });
+            const container = document.getElementById('recentActivity');
+            if (allActivity.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No activity</h3></div>';
+            } else {
+                container.innerHTML = allActivity.map(item => `
+                    <div class="list-item">
+                        <div class="list-item-main">
+                            <span class="list-item-title">${item.name}</span>
+                            <span class="list-item-subtitle">${new Date(item.date).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `).join('');
             }
+        }
 
-            // Restore session if already signed in
-            sbPublic.auth.getSession().then(function(res) {
-                if (res.data && res.data.session) {
-                    showDashboard(res.data.session);
-                }
-            });
-        })();
+        function saveData() {
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('clients', JSON.stringify(clients));
+            localStorage.setItem('users', JSON.stringify(users));
+            updateDashboard();
+        }
+
+        function exportData() {
+            const data = { tickets, clients, users, exportDate: new Date().toISOString() };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function clearAllData() {
+            tickets = [];
+            clients = [];
+            users = [];
+            saveData();
+            renderTickets();
+            renderClients();
+            renderUsers();
+            alert('All data cleared!');
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                window.location.href = '/';
+            }
+        }
+
+        init();
     </script>
-
 </body>
 </html>
