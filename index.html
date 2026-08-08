@@ -123,6 +123,105 @@
             background: #a9631e;
             box-shadow: 0 8px 20px rgba(201, 122, 43, 0.28);
         }
+        .btn-danger {
+            background: #a33;
+            color: var(--white);
+        }
+        .btn-danger:hover {
+            background: #822;
+        }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.78rem;
+        }
+
+        /* Admin tabs */
+        .admin-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--rule);
+        }
+        .admin-tab-btn {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            padding: 10px 4px;
+            margin-right: 18px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            cursor: pointer;
+        }
+        .admin-tab-btn.active {
+            color: var(--teal-dark);
+            border-bottom-color: var(--teal-dark);
+        }
+
+        /* Client row cards */
+        .row-card {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 14px 16px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+        .row-main {
+            min-width: 200px;
+        }
+        .row-title {
+            font-weight: 600;
+        }
+        .row-sub {
+            font-size: 0.82rem;
+            color: var(--ink-soft);
+            margin-top: 2px;
+        }
+        .row-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .empty-state {
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            padding: 20px 0;
+        }
+
+        /* Simple admin modal (client add/edit) */
+        .admin-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 22, 19, 0.55);
+            z-index: 70;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+        .admin-modal {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 26px;
+            width: 100%;
+            max-width: 420px;
+        }
+        .admin-modal h3 {
+            font-size: 1.05rem;
+            margin-bottom: 16px;
+        }
+        .admin-modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            justify-content: flex-end;
+        }
         .btn-email {
             background: var(--teal);
             color: var(--white);
@@ -1839,11 +1938,11 @@
         ADMIN (staff only — not linked from main nav)
         ============================================================ -->
         <section id="admin" class="alt">
-            <div class="wrap" style="max-width:640px;">
+            <div class="wrap" style="max-width:820px;">
                 <div class="section-head">
                     <span class="eyebrow">Admin</span>
                     <h2>Admin Sign In</h2>
-                    <p>Staff access only — sign in to view incoming bookings.</p>
+                    <p>Staff access only — sign in to manage tickets and clients.</p>
                 </div>
 
                 <div id="adminLoginBox">
@@ -1869,16 +1968,65 @@
                             <button type="button" class="btn btn-ghost" id="adminLogoutBtn">Sign Out</button>
                         </div>
                     </div>
-                    <div id="adminBookingsWrap" style="overflow-x:auto;">
-                        <p id="adminBookingsStatus" role="status">Loading bookings…</p>
-                        <table class="price-table" id="adminBookingsTable" style="display:none;">
-                            <thead><tr id="adminTableHead"></tr></thead>
-                            <tbody id="adminTableBody"></tbody>
-                        </table>
+
+                    <div class="admin-tabs">
+                        <button type="button" class="admin-tab-btn active" data-admin-tab="tickets">Tickets</button>
+                        <button type="button" class="admin-tab-btn" data-admin-tab="clients">Clients</button>
+                    </div>
+
+                    <div id="adminTicketsPanel">
+                        <div id="adminBookingsWrap" style="overflow-x:auto;">
+                            <p id="adminBookingsStatus" role="status">Loading bookings…</p>
+                            <table class="price-table" id="adminBookingsTable" style="display:none;">
+                                <thead><tr id="adminTableHead"></tr></thead>
+                                <tbody id="adminTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="adminClientsPanel" hidden>
+                        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
+                            <button type="button" class="btn btn-primary" id="newClientBtn">+ New Client</button>
+                        </div>
+                        <p id="adminClientsStatus" role="status">Loading clients…</p>
+                        <div id="adminClientList"></div>
                     </div>
                 </div>
             </div>
         </section>
+
+        <!-- ============================================================
+        ADMIN — CLIENT ADD/EDIT MODAL
+        ============================================================ -->
+        <div class="admin-modal-overlay" id="clientModalOverlay" hidden>
+            <div class="admin-modal">
+                <h3 id="clientModalTitle">New client</h3>
+                <form id="clientForm" class="mini-form">
+                    <input type="hidden" id="clientFormId">
+                    <div class="field">
+                        <label for="clientNameInput">Full name</label>
+                        <input type="text" id="clientNameInput" required>
+                    </div>
+                    <div class="field">
+                        <label for="clientPhoneInput">Phone / WhatsApp (digits + country code)</label>
+                        <input type="tel" id="clientPhoneInput" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{7,15}" required>
+                    </div>
+                    <div class="field">
+                        <label for="clientEmailInput">Email (optional)</label>
+                        <input type="email" id="clientEmailInput">
+                    </div>
+                    <div class="field">
+                        <label for="clientNotesInput">Notes (optional)</label>
+                        <textarea id="clientNotesInput" rows="2"></textarea>
+                    </div>
+                    <p id="clientFormError" class="form-note" style="color:#a33;"></p>
+                    <div class="admin-modal-actions">
+                        <button type="button" class="btn btn-ghost" id="clientCancelBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Client</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
     </main>
 
@@ -2726,8 +2874,10 @@
         //     visitors can't create accounts.
         //
         //  2. Lock the tickets/clients tables down so only signed-in
-        //     staff can read AND update them — run this in the Supabase
-        //     SQL editor:
+        //     staff can read AND write them — run this in the Supabase
+        //     SQL editor. (Skip any "alter table ... enable row level
+        //     security" line if you already ran it for admin.html —
+        //     running it twice just errors harmlessly.)
         //       alter table public.tickets enable row level security;
         //       create policy "Admins can read tickets"
         //         on public.tickets for select
@@ -2740,11 +2890,21 @@
         //       create policy "Admins can read clients"
         //         on public.clients for select
         //         using (auth.role() = 'authenticated');
+        //       create policy "Admins can insert clients"
+        //         on public.clients for insert
+        //         with check (auth.role() = 'authenticated');
+        //       create policy "Admins can update clients"
+        //         on public.clients for update
+        //         using (auth.role() = 'authenticated')
+        //         with check (auth.role() = 'authenticated');
+        //       create policy "Admins can delete clients"
+        //         on public.clients for delete
+        //         using (auth.role() = 'authenticated');
         //     Your existing booking form still works after this — it
         //     only calls the book_repair() function, it never reads or
         //     writes the tables directly.
         //
-        //  Note: this reads the same "tickets" (+ linked "clients")
+        //  Note: this reads/writes the same "tickets" and "clients"
         //  tables as your admin.html panel. "Mark Complimentary" sets
         //  amount = 0 and payment_status = 'paid' on the ticket — there's
         //  no separate "complimentary" status in this schema, so this is
@@ -2780,7 +2940,14 @@
             var bookingsTable = document.getElementById('adminBookingsTable');
             var tableHead = document.getElementById('adminTableHead');
             var tableBody = document.getElementById('adminTableBody');
+            var ticketsCache = [];
             if (!loginForm) return;
+
+            function escapeHtml(str) {
+                return String(str == null ? '' : str)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
 
             function showDashboard(session) {
                 loginBox.hidden = true;
@@ -2833,6 +3000,7 @@
                             return;
                         }
                         var rows = res.data || [];
+                        ticketsCache = rows;
                         if (!rows.length) {
                             bookingsStatus.textContent = 'No bookings yet.';
                             return;
@@ -2899,6 +3067,177 @@
                     });
             });
 
+
+            // =============================================================
+            //  ADMIN TABS (Tickets / Clients)
+            // =============================================================
+            var ticketsPanel = document.getElementById('adminTicketsPanel');
+            var clientsPanel = document.getElementById('adminClientsPanel');
+            var adminTabBtns = document.querySelectorAll('.admin-tab-btn');
+            adminTabBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    adminTabBtns.forEach(function(b) { b.classList.remove('active'); });
+                    btn.classList.add('active');
+                    var tab = btn.getAttribute('data-admin-tab');
+                    ticketsPanel.hidden = tab !== 'tickets';
+                    clientsPanel.hidden = tab !== 'clients';
+                    if (tab === 'clients') loadClients();
+                });
+            });
+
+            // =============================================================
+            //  ADMIN — CLIENT MANAGEMENT (mirrors admin.html's Clients tab)
+            // =============================================================
+            var clientsCache = [];
+            var clientsStatus = document.getElementById('adminClientsStatus');
+            var clientList = document.getElementById('adminClientList');
+            var clientModalOverlay = document.getElementById('clientModalOverlay');
+            var clientForm = document.getElementById('clientForm');
+            var clientFormError = document.getElementById('clientFormError');
+            var newClientBtn = document.getElementById('newClientBtn');
+            var clientCancelBtn = document.getElementById('clientCancelBtn');
+
+            function openClientModal() { clientModalOverlay.hidden = false; }
+            function closeClientModal() { clientModalOverlay.hidden = true; }
+
+            function loadClients() {
+                clientsStatus.style.color = '';
+                clientsStatus.textContent = 'Loading clients…';
+                clientList.innerHTML = '';
+                sbPublic.from('clients').select('*').order('created_at', { ascending: false })
+                    .then(function(res) {
+                        if (res.error) {
+                            clientsStatus.style.color = '#a33';
+                            clientsStatus.textContent = 'Error loading clients: ' + res.error.message +
+                                ' — make sure a read policy exists on "clients" for signed-in users.';
+                            return;
+                        }
+                        clientsCache = res.data || [];
+                        renderClients();
+                    })
+                    .catch(function(err) {
+                        clientsStatus.style.color = '#a33';
+                        clientsStatus.textContent = 'Error loading clients: ' + err.message;
+                    });
+            }
+
+            function renderClients() {
+                if (!clientsCache.length) {
+                    clientsStatus.textContent = '';
+                    clientList.innerHTML = '<div class="empty-state">No clients yet. Add your first one with "+ New Client".</div>';
+                    return;
+                }
+                clientsStatus.textContent = '';
+                clientList.innerHTML = clientsCache.map(function(c) {
+                    var ticketCount = ticketsCache.filter(function(t) { return t.client_id === c.id; }).length;
+                    return (
+                        '<div class="row-card">' +
+                            '<div class="row-main">' +
+                                '<div class="row-title">' + escapeHtml(c.name) + '</div>' +
+                                '<div class="row-sub">' + escapeHtml(c.phone) + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
+                                (c.notes ? '<div class="row-sub">' + escapeHtml(c.notes) + '</div>' : '') +
+                                '<div class="row-sub">' + ticketCount + ' ticket' + (ticketCount === 1 ? '' : 's') + '</div>' +
+                            '</div>' +
+                            '<div class="row-actions">' +
+                                '<button type="button" class="btn btn-amber btn-sm client-whatsapp-btn" data-id="' + c.id + '">WhatsApp</button>' +
+                                '<button type="button" class="btn btn-ghost btn-sm client-edit-btn" data-id="' + c.id + '">Edit</button>' +
+                                '<button type="button" class="btn btn-danger btn-sm client-delete-btn" data-id="' + c.id + '">Delete</button>' +
+                            '</div>' +
+                        '</div>'
+                    );
+                }).join('');
+            }
+
+            // Delegated handlers for the dynamically-rendered client row buttons
+            clientList.addEventListener('click', function(e) {
+                var waBtn = e.target.closest('.client-whatsapp-btn');
+                var editBtn = e.target.closest('.client-edit-btn');
+                var delBtn = e.target.closest('.client-delete-btn');
+
+                if (waBtn) {
+                    var c1 = clientsCache.find(function(x) { return x.id === waBtn.getAttribute('data-id'); });
+                    if (!c1) return;
+                    var msg = 'Hi ' + c1.name + ', this is StylesPC reaching out about your service.';
+                    window.open('https://wa.me/' + c1.phone + '?text=' + encodeURIComponent(msg), '_blank');
+                    return;
+                }
+
+                if (editBtn) {
+                    var c2 = clientsCache.find(function(x) { return x.id === editBtn.getAttribute('data-id'); });
+                    if (!c2) return;
+                    document.getElementById('clientModalTitle').textContent = 'Edit client';
+                    document.getElementById('clientFormId').value = c2.id;
+                    document.getElementById('clientNameInput').value = c2.name;
+                    document.getElementById('clientPhoneInput').value = c2.phone;
+                    document.getElementById('clientEmailInput').value = c2.email || '';
+                    document.getElementById('clientNotesInput').value = c2.notes || '';
+                    clientFormError.textContent = '';
+                    openClientModal();
+                    return;
+                }
+
+                if (delBtn) {
+                    var id = delBtn.getAttribute('data-id');
+                    if (!confirm('Delete this client? Their tickets will stay but lose the client link.')) return;
+                    delBtn.disabled = true;
+                    sbPublic.from('clients').delete().eq('id', id)
+                        .then(function(res) {
+                            if (res.error) {
+                                clientsStatus.style.color = '#a33';
+                                clientsStatus.textContent = 'Error deleting client: ' + res.error.message;
+                                delBtn.disabled = false;
+                                return;
+                            }
+                            loadClients();
+                        })
+                        .catch(function(err) {
+                            clientsStatus.style.color = '#a33';
+                            clientsStatus.textContent = 'Error deleting client: ' + err.message;
+                            delBtn.disabled = false;
+                        });
+                }
+            });
+
+            if (newClientBtn) {
+                newClientBtn.addEventListener('click', function() {
+                    document.getElementById('clientModalTitle').textContent = 'New client';
+                    clientForm.reset();
+                    document.getElementById('clientFormId').value = '';
+                    clientFormError.textContent = '';
+                    openClientModal();
+                });
+            }
+            if (clientCancelBtn) clientCancelBtn.addEventListener('click', closeClientModal);
+            if (clientModalOverlay) {
+                clientModalOverlay.addEventListener('click', function(e) {
+                    if (e.target === clientModalOverlay) closeClientModal();
+                });
+            }
+
+            if (clientForm) {
+                clientForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var id = document.getElementById('clientFormId').value;
+                    var payload = {
+                        name: document.getElementById('clientNameInput').value.trim(),
+                        phone: document.getElementById('clientPhoneInput').value.replace(/\D/g, ''),
+                        email: document.getElementById('clientEmailInput').value.trim() || null,
+                        notes: document.getElementById('clientNotesInput').value.trim() || null
+                    };
+                    clientFormError.textContent = '';
+                    var query = id ? sbPublic.from('clients').update(payload).eq('id', id) : sbPublic.from('clients').insert(payload);
+                    query.then(function(res) {
+                        if (res.error) {
+                            clientFormError.textContent = res.error.message;
+                            return;
+                        }
+                        closeClientModal();
+                        loadClients();
+                    }).catch(function(err) {
+                        clientFormError.textContent = err.message;
+                    });
+                });
+            }
 
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -3275,10 +3614,13 @@
         // =============================================================
         //  FLOATING WHATSAPP BUTTON → Show Disclaimer
         // =============================================================
-        document.getElementById('whatsappFloat').addEventListener('click', function(e) {
-            e.preventDefault();
-            window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
-        });
+        var whatsappFloatBtn = document.getElementById('whatsappFloat');
+        if (whatsappFloatBtn) {
+            whatsappFloatBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
+            });
+        }
 
         // Also catch any other WhatsApp button clicks
         document.querySelectorAll('[href*="whatsapp"]').forEach(function(el) {
