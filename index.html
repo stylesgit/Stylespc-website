@@ -7,9 +7,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-    <!-- Leaflet (map + pickup distance/fare estimate) -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
     <style>
         /* ============================================================
            ROOT & RESET
@@ -122,105 +122,6 @@
         .btn-amber:hover {
             background: #a9631e;
             box-shadow: 0 8px 20px rgba(201, 122, 43, 0.28);
-        }
-        .btn-danger {
-            background: #a33;
-            color: var(--white);
-        }
-        .btn-danger:hover {
-            background: #822;
-        }
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.78rem;
-        }
-
-        /* Admin tabs */
-        .admin-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px;
-            border-bottom: 1px solid var(--rule);
-        }
-        .admin-tab-btn {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            padding: 10px 4px;
-            margin-right: 18px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--ink-soft);
-            cursor: pointer;
-        }
-        .admin-tab-btn.active {
-            color: var(--teal-dark);
-            border-bottom-color: var(--teal-dark);
-        }
-
-        /* Client row cards */
-        .row-card {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-            padding: 14px 16px;
-            border: 1px solid var(--rule);
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-        .row-main {
-            min-width: 200px;
-        }
-        .row-title {
-            font-weight: 600;
-        }
-        .row-sub {
-            font-size: 0.82rem;
-            color: var(--ink-soft);
-            margin-top: 2px;
-        }
-        .row-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .empty-state {
-            font-size: 0.88rem;
-            color: var(--ink-soft);
-            padding: 20px 0;
-        }
-
-        /* Simple admin modal (client add/edit) */
-        .admin-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(20, 22, 19, 0.55);
-            z-index: 70;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 40px 20px;
-            overflow-y: auto;
-        }
-        .admin-modal {
-            background: var(--white);
-            border-radius: 8px;
-            padding: 26px;
-            width: 100%;
-            max-width: 420px;
-        }
-        .admin-modal h3 {
-            font-size: 1.05rem;
-            margin-bottom: 16px;
-        }
-        .admin-modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            justify-content: flex-end;
         }
         .btn-email {
             background: var(--teal);
@@ -340,130 +241,35 @@
             background: var(--teal-dark);
         }
 
-        /* Admin area is discreet — hidden from normal scrolling, only
-           shown via the small floating link or a direct #admin visit */
-        #admin {
-            display: none;
-        }
-        #admin.revealed {
-            display: block;
-        }
-
         /* ============================================================
-           DISCLAIMER MODAL (WhatsApp unavailable)
+           FLOATING EMAIL BUTTON
            ============================================================ */
-        .disclaimer-overlay {
+        .email-float {
             position: fixed;
-            inset: 0;
-            background: rgba(20, 22, 19, 0.75);
-            z-index: 200;
-            display: none;
+            bottom: 28px;
+            right: 28px;
+            z-index: 999;
+            background-color: var(--teal);
+            border-radius: 50%;
+            width: 58px;
+            height: 58px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
-            backdrop-filter: blur(4px);
-        }
-        .disclaimer-overlay:not([hidden]) {
-            display: flex;
-        }
-        .disclaimer-modal {
-            background: var(--white);
-            border-radius: 12px;
-            max-width: 480px;
-            width: 100%;
-            padding: 34px 30px 26px;
-            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
-            position: relative;
-            animation: modalIn 0.3s ease-out;
-        }
-        @keyframes modalIn {
-            0% {
-                opacity: 0;
-                transform: scale(0.94) translateY(16px);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) translateY(0);
-            }
-        }
-        .disclaimer-modal h2 {
-            font-size: 1.25rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .disclaimer-modal h2 .icon {
-            font-size: 1.5rem;
-        }
-        .disclaimer-modal p {
-            font-size: 0.95rem;
-            color: var(--ink-soft);
-            margin: 6px 0 14px;
-            line-height: 1.6;
-        }
-        .disclaimer-modal .email-box {
-            background: var(--paper-2);
-            border-radius: 6px;
-            padding: 14px 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin: 14px 0 18px;
-            font-family: 'IBM Plex Mono';
-            font-size: 1rem;
-            border: 1px solid var(--rule);
-        }
-        .disclaimer-modal .email-box span {
-            word-break: break-all;
-            color: var(--teal-dark);
-            font-weight: 600;
-        }
-        .disclaimer-modal .email-box .copy-btn {
-            background: var(--teal);
-            color: var(--white);
+            box-shadow: 0 4px 16px rgba(47, 111, 99, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
             border: none;
-            border-radius: 4px;
-            padding: 6px 14px;
-            font-size: 0.78rem;
-            font-weight: 600;
             cursor: pointer;
-            font-family: 'IBM Plex Sans';
-            white-space: nowrap;
-            transition: background 0.15s;
         }
-        .disclaimer-modal .email-box .copy-btn:hover {
-            background: var(--teal-dark);
+        .email-float:hover {
+            transform: scale(1.06);
+            box-shadow: 0 8px 24px rgba(47, 111, 99, 0.4);
         }
-        .disclaimer-modal .btn-close-modal {
-            background: var(--ink);
-            color: var(--white);
-            border: none;
-            border-radius: 6px;
-            padding: 12px 24px;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'IBM Plex Sans';
-            font-size: 0.92rem;
-            width: 100%;
-            transition: background 0.15s;
-        }
-        .disclaimer-modal .btn-close-modal:hover {
-            background: var(--teal-dark);
-        }
-        .disclaimer-modal .alt-contact {
-            margin-top: 14px;
-            font-size: 0.84rem;
-            color: var(--ink-soft);
-            text-align: center;
-            border-top: 1px solid var(--rule);
-            padding-top: 14px;
-        }
-        .disclaimer-modal .alt-contact a {
-            color: var(--teal-dark);
-            font-weight: 600;
-            text-decoration: underline;
+        .email-float svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
         }
 
         /* ============================================================
@@ -1274,18 +1080,9 @@
             }
             nav.wrap {
                 flex-wrap: wrap;
-                justify-content: flex-start;
-            }
-            .brand {
-                order: 1;
-            }
-            .nav-cta {
-                order: 2;
-                margin-left: auto;
+                justify-content: center;
             }
             .navlinks {
-                order: 3;
-                flex-basis: 100%;
                 justify-content: center;
             }
         }
@@ -1318,12 +1115,6 @@
             .dropdown-menu {
                 min-width: 120px;
             }
-            .disclaimer-modal {
-                padding: 24px 18px 20px;
-            }
-            .disclaimer-modal .email-box {
-                flex-wrap: wrap;
-            }
         }
     </style>
 
@@ -1344,11 +1135,15 @@
                 <li><a href="#how">How It Works</a></li>
                 <li><a href="#work">Our Work</a></li>
                 <li><a href="#pricing">Pricing</a></li>
-                <li><a href="#custom-build">Custom Build</a></li>
-                <li><a href="#refurbished">Refurbished</a></li>
-                <li><a href="#firestick">Firestick</a></li>
-                <li><a href="#tv-repair">TV Repair</a></li>
-                <li><a href="#pay">Pay Online</a></li>
+                <li class="dropdown">
+                    <a href="#" aria-haspopup="true">More ▾</a>
+                    <ul class="dropdown-menu" aria-label="More pages">
+                        <li><a href="#custom-build">Custom Build</a></li>
+                        <li><a href="#refurbished">Refurbished</a></li>
+                        <li><a href="#firestick">Firestick</a></li>
+                        <li><a href="#pay">Pay Online</a></li>
+                    </ul>
+                </li>
             </ul>
             <a href="#contact" class="nav-cta">Book a Repair</a>
         </nav>
@@ -1362,12 +1157,12 @@
         <section class="hero">
             <div class="wrap">
                 <div>
-                    <span class="eyebrow">Virtual shop · Home‑based · Pickup &amp; drop‑off</span>
+                    <span class="eyebrow">Home‑based repair shop · Pickup &amp; drop‑off</span>
                     <h1>Your computer's <em>next repair ticket</em> starts here.</h1>
-                    <p class="lead">StylesPC is a virtual repair shop — I work from a home‑based workshop, not a walk‑in storefront. I collect, diagnose, and repair computers and laptops, with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
+                    <p class="lead">StylesPC collects, diagnoses, and repairs computers and laptops — with remote support for software and OS issues when you don't even need to send the machine in at all.</p>
                     <div class="hero-ctas">
-                        <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
                         <a href="#contact" class="btn btn-primary">Book a Repair</a>
+                        <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
                     </div>
                 </div>
                 <div class="ticket-wrap">
@@ -1545,7 +1340,7 @@
                 <div class="section-head">
                     <span class="eyebrow">Custom built</span>
                     <h2>Custom Built machines</h2>
-                    <p>Built new to your spec and budget — the photo on each card is an example. Send your details and StylesPC will follow up via email.</p>
+                    <p>Built new to your spec and budget — the photo on each card is an example. Send your details and StylesPC will follow up by email.</p>
                 </div>
                 <div class="build-grid">
                     <div class="build-card">
@@ -1574,6 +1369,10 @@
                             <input type="text" id="buildName" name="buildName" required>
                         </div>
                         <div class="field">
+                            <label for="buildEmail">Email address</label>
+                            <input type="email" id="buildEmail" name="buildEmail" placeholder="you@example.com" required>
+                        </div>
+                        <div class="field">
                             <label for="buildPhone">Phone number</label>
                             <input type="tel" id="buildPhone" name="buildPhone" placeholder="e.g. 876 333 1156" required>
                         </div>
@@ -1592,18 +1391,12 @@
                 <div class="section-head">
                     <span class="eyebrow">Refurbished</span>
                     <h2>Refurbished machines</h2>
-                    <p>Pre‑owned, refurbished machines — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up via email.</p>
+                    <p>Pre‑owned, refurbished machines — the photo on each card is an example, exact unit in stock may vary. Send your details and StylesPC will follow up by email.</p>
                 </div>
                 <div class="build-grid">
                     <div class="build-card">
-                        <div class="gallery" data-images="wfh-desktop-1.jpg,wfh-desktop-2.jpg,wfh-desktop-3.jpg,wfh-desktop-4.jpg,wfh-desktop-5.jpg,wfh-desktop-6.jpg,wfh-desktop-7.jpg,wfh-desktop-8.jpg,wfh-desktop-9.jpg,wfh-desktop-10.jpg" data-labels="Example,Example,Example,Example,Example,Example,Example,Example,Example,Example">
-                            <div class="gallery-viewport">
-                                <img class="gallery-img" src="" alt="Work from home desktop example">
-                                <span class="thumb-label gallery-label"></span>
-                            </div>
-                            <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
-                            <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
-                            <div class="gallery-dots"></div>
+                        <div class="build-thumb">
+                            <img src="images/wfh-desktop.jpg" alt="Work from home desktop example" onerror="this.parentElement.classList.add('build-thumb-empty'); this.remove();">
                         </div>
                         <h3>Work From Home — Desktop</h3>
                         <p>Refurbished, available now — example shown.</p>
@@ -1631,6 +1424,10 @@
                         <div class="field">
                             <label for="refurbName">Full name</label>
                             <input type="text" id="refurbName" name="refurbName" required>
+                        </div>
+                        <div class="field">
+                            <label for="refurbEmail">Email address</label>
+                            <input type="email" id="refurbEmail" name="refurbEmail" placeholder="you@example.com" required>
                         </div>
                         <div class="field">
                             <label for="refurbPhone">Phone number</label>
@@ -1722,83 +1519,6 @@
         </section>
 
         <!-- ============================================================
-        TV REPAIR (REFERRAL SERVICE)
-        ============================================================ -->
-        <section id="tv-repair" class="alt">
-            <div class="wrap">
-                <div class="section-head">
-                    <span class="eyebrow">TV Repair</span>
-                    <h2>TV Repair — Backlight Specialist</h2>
-                    <p>I connect you with a trusted TV repair partner and handle the booking on your behalf.</p>
-                </div>
-                <div style="margin-bottom:22px;padding:16px 20px;background:rgba(201,122,43,0.08);border:1px solid rgba(201,122,43,0.25);border-radius:6px;">
-                    <p style="font-size:0.88rem;color:var(--ink-soft);margin:0;display:flex;align-items:flex-start;gap:10px;">
-                        <span style="font-size:1.2rem;">ℹ️</span>
-                        <span><strong>This is a referral / facilitation service.</strong> I am not the technician who repairs the TV — I take your booking here and pass your information on to our trusted repair partner, who specializes in backlight issues and will contact you directly to carry out the repair.</span>
-                    </p>
-                </div>
-
-                <h3 style="margin-bottom:6px;">Backlight Repair</h3>
-                <p style="margin-bottom:18px;color:var(--ink-soft);">Our repair partner specializes in fixing TV backlight issues — screens that are dim, flickering, or have gone completely dark while the TV still powers on.</p>
-
-                <div class="firestick-media" style="margin-bottom:22px;">
-                    <div class="gallery" data-images="tv-backlight-before-1.jpg,tv-backlight-before-2.jpg,tv-backlight-before-3.jpg,tv-backlight-after-1.jpg,tv-backlight-after-2.jpg,tv-backlight-after-3.jpg" data-labels="Before,Before,Before,After,After,After">
-                        <div class="gallery-viewport">
-                            <img class="gallery-img" src="" alt="TV backlight repair example">
-                            <span class="thumb-label gallery-label"></span>
-                        </div>
-                        <button type="button" class="gallery-nav gallery-prev" aria-label="Previous photo">‹</button>
-                        <button type="button" class="gallery-nav gallery-next" aria-label="Next photo">›</button>
-                        <div class="gallery-dots"></div>
-                    </div>
-                </div>
-
-                <table class="price-table">
-                    <thead>
-                        <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr><td>Booking Fee (to arrange &amp; facilitate) — due upfront</td><td class="amt">$1,000</td></tr>
-                        <tr><td>Assessment Fee (technician diagnoses the issue)</td><td class="amt">$2,500</td></tr>
-                    </tbody>
-                </table>
-                <p class="price-note">The $1,000 booking fee is required upfront by bank transfer to confirm your request. The assessment fee is charged separately by our repair partner; repair cost is quoted once the issue is confirmed.</p>
-
-                <button type="button" class="btn btn-ghost" id="viewBankDetailsBtn" style="margin:6px 0 22px;">🏦 View Bank Transfer Details</button>
-
-                <form id="tvForm" class="mini-form" style="margin-top:22px;max-width:440px;">
-                    <div class="field">
-                        <label for="tvName">Full name</label>
-                        <input type="text" id="tvName" name="name" required>
-                    </div>
-                    <div class="field">
-                        <label for="tvPhone">Phone number</label>
-                        <input type="tel" id="tvPhone" name="phone" placeholder="e.g. 876 333 1156" required>
-                    </div>
-                    <div class="field">
-                        <label for="tvEmail">Email</label>
-                        <input type="email" id="tvEmail" name="email" required>
-                    </div>
-                    <div class="field">
-                        <label for="tvIssue">TV brand/model &amp; describe the issue</label>
-                        <textarea id="tvIssue" name="issue" required placeholder="e.g. 50&quot; Samsung, screen is dim/flickering"></textarea>
-                    </div>
-                    <div class="field">
-                        <label for="tvTransferRef">Bank transfer reference / confirmation number</label>
-                        <input type="text" id="tvTransferRef" name="transferRef" placeholder="e.g. last 4 digits or transaction ID" required>
-                    </div>
-                    <label style="display:flex; align-items:flex-start; gap:8px; margin:4px 0 16px; font-size:0.85rem; cursor:pointer;">
-                        <input type="checkbox" id="tvPaymentConfirm" style="width:auto; margin-top:3px;" required>
-                        <span>I confirm I have completed the $1,000 bank transfer using the details above, and the reference number I entered is accurate.</span>
-                    </label>
-                    <button type="submit" class="btn btn-email" id="tvSubmitBtn">✉️ Request TV Repair Referral</button>
-                    <p class="form-note">We'll verify your payment and pass your details to our repair partner, who will reach out to arrange the assessment.</p>
-                    <p id="tvFormStatus" role="status"></p>
-                </form>
-            </div>
-        </section>
-
-        <!-- ============================================================
         PAY ONLINE
         ============================================================ -->
         <section id="pay" class="alt">
@@ -1825,11 +1545,15 @@
                     </div>
                     <div id="panel-bank" class="method-panel-inner" hidden>
                         <h3>Pay by Bank Transfer</h3>
-                        <p>Enter your name and phone number below and we'll email you the banking details to complete your payment.</p>
+                        <p>Enter your name, email and phone number below and we'll email you the banking details to complete your payment.</p>
                         <form id="bankForm" class="mini-form">
                             <div class="field">
                                 <label for="bankName">Full name</label>
                                 <input type="text" id="bankName" name="name" required>
+                            </div>
+                            <div class="field">
+                                <label for="bankEmail">Email address</label>
+                                <input type="email" id="bankEmail" name="email" placeholder="you@example.com" required>
                             </div>
                             <div class="field">
                                 <label for="bankPhone">Phone number</label>
@@ -1840,7 +1564,7 @@
                         </form>
                     </div>
                 </div>
-                <p class="price-note">Online card payments are on the way — for now, choose Cash on collection/delivery, or Bank Transfer to arrange payment directly with StylesPC over email.</p>
+                <p class="price-note">Online card payments are on the way — for now, choose Cash on collection/delivery, or Bank Transfer to arrange payment directly with StylesPC by email.</p>
             </div>
         </section>
 
@@ -1856,24 +1580,15 @@
                         <p>Tell me about your device and the issue — you'll get a reply with next steps and a service tag number.</p>
                     </div>
                     <div class="contact-info">
-                        <div class="info-row"><span class="k">Shop type</span><span>Virtual shop — home‑based, no walk‑in storefront</span></div>
                         <div class="info-row"><span class="k">Email</span><span><a href="mailto:ajstyleg@gmail.com" style="color:var(--teal-dark);font-weight:600;">ajstyleg@gmail.com</a></span></div>
                         <div class="info-row"><span class="k">Phone</span><span>(876) 334-1156</span></div>
                         <div class="info-row"><span class="k">Hours</span><span>Mon–Sat, 9am–6pm</span></div>
-                        <div class="info-row"><span class="k">Service area</span><span>Kingston &amp; select Saint Andrew — pickup pricing varies by zone (see below) — drop‑off &amp; remote support available anywhere</span></div>
+                        <div class="info-row"><span class="k">Service area</span><span>Pickup &amp; drop‑off within local area</span></div>
                     </div>
-                    <div style="margin-top:16px;padding:16px 20px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;">
-                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 8px;font-weight:600;">Pickup pricing zones</p>
-                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟢 <strong>Free pickup:</strong> Franklintown &amp; Rae Town</p>
-                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🔵 <strong>Standard — $1,500:</strong> rest of Kingston &amp; nearby Saint Andrew</p>
-                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟠 <strong>Far zone — per km:</strong> Papine &amp; other outlying Saint Andrew areas</p>
-                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0;">⚡ <strong>Expedited service:</strong> +25% on top of the pickup fee</p>
-                    </div>
-                    <!-- Temporary WhatsApp disclaimer -->
-                    <div style="margin-top:24px;padding:16px 20px;background:rgba(201,122,43,0.08);border:1px solid rgba(201,122,43,0.25);border-radius:6px;">
+                    <div style="margin-top:24px;padding:16px 20px;background:rgba(47,111,99,0.08);border:1px solid rgba(47,111,99,0.25);border-radius:6px;">
                         <p style="font-size:0.88rem;color:var(--ink-soft);margin:0;display:flex;align-items:flex-start;gap:10px;">
                             <span style="font-size:1.2rem;">📧</span>
-                            <span><strong>WhatsApp is temporarily unavailable.</strong> Please use the booking form below or email us directly at <a href="mailto:ajstyleg@gmail.com" style="color:var(--teal-dark);font-weight:600;">ajstyleg@gmail.com</a> — we'll get back to you as soon as possible.</span>
+                            <span><strong>We're currently using email for all enquiries.</strong> Fill out the booking form and we'll get back to you as soon as possible. You can also email us directly at <a href="mailto:ajstyleg@gmail.com" style="color:var(--teal-dark);font-weight:600;">ajstyleg@gmail.com</a>.</span>
                         </p>
                     </div>
                 </div>
@@ -1910,17 +1625,8 @@
                         </div>
                         <div class="field">
                             <label for="address">Address / pickup point <span id="addressHint">(optional)</span></label>
-                            <input type="text" id="address" name="address" placeholder="e.g. 12 Hope Road, Kingston 6" autocomplete="off">
-                            <p class="form-note" id="areaNote" style="margin-top:6px;">Free pickup in Franklintown &amp; Rae Town. $1,500 flat rate for the rest of Kingston &amp; nearby Saint Andrew. Per‑km rate for outlying Saint Andrew areas (e.g. Papine).</p>
+                            <input type="text" id="address" name="address" placeholder="Needed only if you'd like us to collect it">
                         </div>
-                    </div>
-                    <div id="pickupMapWrap" style="display:none; margin:4px 0 18px;">
-                        <div id="pickupMap" style="height:240px; border:1px solid var(--rule); border-radius:6px;"></div>
-                        <label style="display:flex; align-items:center; gap:8px; margin-top:10px; font-size:0.88rem; cursor:pointer;">
-                            <input type="checkbox" id="expediteCheckbox" style="width:auto;">
-                            Expedited service (+25% on the pickup fee)
-                        </label>
-                        <p id="pickupEstimate" class="form-note" style="margin-top:8px;"></p>
                     </div>
                     <div class="field">
                         <label for="issue">Describe the issue</label>
@@ -1933,100 +1639,6 @@
                 </form>
             </div>
         </section>
-
-        <!-- ============================================================
-        ADMIN (staff only — not linked from main nav)
-        ============================================================ -->
-        <section id="admin" class="alt">
-            <div class="wrap" style="max-width:820px;">
-                <div class="section-head">
-                    <span class="eyebrow">Admin</span>
-                    <h2>Admin Sign In</h2>
-                    <p>Staff access only — sign in to manage tickets and clients.</p>
-                </div>
-
-                <div id="adminLoginBox">
-                    <form id="adminLoginForm" class="mini-form">
-                        <div class="field">
-                            <label for="adminEmail">Email</label>
-                            <input type="email" id="adminEmail" name="email" required autocomplete="username">
-                        </div>
-                        <div class="field">
-                            <label for="adminPassword">Password</label>
-                            <input type="password" id="adminPassword" name="password" required autocomplete="current-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="adminLoginBtn">Sign In</button>
-                        <p id="adminLoginStatus" role="status"></p>
-                    </form>
-                </div>
-
-                <div id="adminDashboard" hidden>
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-                        <p style="margin:0;">Signed in as <strong id="adminEmailDisplay"></strong></p>
-                        <div style="display:flex;gap:10px;">
-                            <button type="button" class="btn btn-ghost" id="adminRefreshBtn">↻ Refresh</button>
-                            <button type="button" class="btn btn-ghost" id="adminLogoutBtn">Sign Out</button>
-                        </div>
-                    </div>
-
-                    <div class="admin-tabs">
-                        <button type="button" class="admin-tab-btn active" data-admin-tab="tickets">Tickets</button>
-                        <button type="button" class="admin-tab-btn" data-admin-tab="clients">Clients</button>
-                    </div>
-
-                    <div id="adminTicketsPanel">
-                        <div id="adminBookingsWrap" style="overflow-x:auto;">
-                            <p id="adminBookingsStatus" role="status">Loading bookings…</p>
-                            <table class="price-table" id="adminBookingsTable" style="display:none;">
-                                <thead><tr id="adminTableHead"></tr></thead>
-                                <tbody id="adminTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="adminClientsPanel" hidden>
-                        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-                            <button type="button" class="btn btn-primary" id="newClientBtn">+ New Client</button>
-                        </div>
-                        <p id="adminClientsStatus" role="status">Loading clients…</p>
-                        <div id="adminClientList"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-        ADMIN — CLIENT ADD/EDIT MODAL
-        ============================================================ -->
-        <div class="admin-modal-overlay" id="clientModalOverlay" hidden>
-            <div class="admin-modal">
-                <h3 id="clientModalTitle">New client</h3>
-                <form id="clientForm" class="mini-form">
-                    <input type="hidden" id="clientFormId">
-                    <div class="field">
-                        <label for="clientNameInput">Full name</label>
-                        <input type="text" id="clientNameInput" required>
-                    </div>
-                    <div class="field">
-                        <label for="clientPhoneInput">Phone / WhatsApp (digits + country code)</label>
-                        <input type="tel" id="clientPhoneInput" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{7,15}" required>
-                    </div>
-                    <div class="field">
-                        <label for="clientEmailInput">Email (optional)</label>
-                        <input type="email" id="clientEmailInput">
-                    </div>
-                    <div class="field">
-                        <label for="clientNotesInput">Notes (optional)</label>
-                        <textarea id="clientNotesInput" rows="2"></textarea>
-                    </div>
-                    <p id="clientFormError" class="form-note" style="color:#a33;"></p>
-                    <div class="admin-modal-actions">
-                        <button type="button" class="btn btn-ghost" id="clientCancelBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Client</button>
-                    </div>
-                </form>
-            </div>
-        </div>
 
     </main>
 
@@ -2048,236 +1660,80 @@
         </div>
     </footer>
 
-    <!-- Discreet admin access — intentionally not in the main nav or footer -->
-    <a href="#admin" id="adminDiscreetLink" style="position:fixed;bottom:12px;right:14px;font-size:0.68rem;color:var(--ink-soft);opacity:0.35;text-decoration:none;z-index:60;letter-spacing:0.02em;font-family:'IBM Plex Mono';">Admin</a>
-
     <!-- ============================================================
-    DISCLAIMER MODAL (WhatsApp unavailable)
+    FLOATING EMAIL BUTTON
     ============================================================ -->
-    <div class="disclaimer-overlay" id="disclaimerModal" hidden>
-        <div class="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
-            <h2 id="disclaimerTitle"><span class="icon">⏳</span> WhatsApp Temporarily Unavailable</h2>
-            <p>We're currently unable to receive messages via WhatsApp. Please use one of the other methods below to get in touch — we'll reply as quickly as possible.</p>
-            <div class="email-box">
-                <span>ajstyleg@gmail.com</span>
-                <button class="copy-btn" id="copyEmailBtn">Copy</button>
-            </div>
-            <a href="mailto:ajstyleg@gmail.com" class="btn btn-email" style="width:100%;justify-content:center;margin-bottom:12px;">✉️ Send Email Now</a>
-            <a href="#contact" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px;">📋 Book a Repair</a>
-            <button class="btn-close-modal" id="closeDisclaimerBtn">Close</button>
-            <div class="alt-contact">
-                Or call us at <a href="tel:8763341156">(876) 334-1156</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================================================
-    BANK TRANSFER DISCLAIMER MODAL (TV Repair booking fee)
-    ============================================================ -->
-    <div class="disclaimer-overlay" id="bankDisclaimerModal" hidden>
-        <div class="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="bankDisclaimerTitle">
-            <h2 id="bankDisclaimerTitle"><span class="icon">🏦</span> Bank Transfer — Please Read</h2>
-            <p>The $1,000 booking fee confirms your TV repair referral request and is <strong>non‑refundable</strong> once we've passed your details to our repair partner. This fee covers the facilitation/referral service only — StylesPC is not the technician performing the repair and cannot guarantee repair outcomes, timelines, or the final repair cost.</p>
-            <p>Before sending, please confirm the account name matches <strong>Andrew Johnson</strong>. Keep your transaction receipt or reference number — you'll need to enter it on the request form to confirm payment.</p>
-            <label style="display:flex;align-items:flex-start;gap:8px;margin:14px 0;font-size:0.85rem;cursor:pointer;">
-                <input type="checkbox" id="bankDisclaimerAgree" style="width:auto;margin-top:3px;">
-                <span>I have read and agree to the above.</span>
-            </label>
-            <div id="bankAccountDetails" hidden style="margin-bottom:16px;">
-                <div style="padding:12px 14px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;margin-bottom:10px;">
-                    <p style="font-weight:600;margin:0 0 4px;font-size:0.85rem;">NCB</p>
-                    <p style="margin:0;font-size:0.85rem;">Name: Andrew Johnson</p>
-                    <p style="margin:0;font-size:0.85rem;">Account #: 435067077</p>
-                </div>
-                <div style="padding:12px 14px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;">
-                    <p style="font-weight:600;margin:0 0 4px;font-size:0.85rem;">JMMB</p>
-                    <p style="margin:0;font-size:0.85rem;">Name: Andrew Johnson</p>
-                    <p style="margin:0;font-size:0.85rem;">Account #: 000300229897</p>
-                </div>
-            </div>
-            <button class="btn-close-modal" id="closeBankDisclaimerBtn">Close</button>
-        </div>
-    </div>
+    <button id="emailFloat" class="email-float" aria-label="Send email enquiry">
+        <svg viewBox="0 0 24 24" width="32" height="32">
+            <path d="M22 4H2v16h20V4zm-2 4l-8 5-8-5V6l8 5 8-5v2z"/>
+        </svg>
+    </button>
 
     <!-- ============================================================
     JAVASCRIPT
     ============================================================ -->
     <script>
         // =============================================================
-        //  EMAIL NOTIFICATIONS — via Formspree (silent background POST)
-        //  Endpoint: https://formspree.io/f/mbgrrzja
-        //  Falls back to opening the visitor's own email client (mailto)
-        //  only if the Formspree request itself fails.
+        //  EMAILJS CONFIGURATION
+        //  Replace these with your own EmailJS credentials from
+        //  https://www.emailjs.com/
         // =============================================================
-        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja';
+        const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
+        const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
+        const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+        const STORE_EMAIL = 'ajstyleg@gmail.com';
+
+        const EMAILJS_CONFIGURED = EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY' &&
+            EMAILJS_SERVICE_ID !== 'YOUR_EMAILJS_SERVICE_ID' &&
+            EMAILJS_TEMPLATE_ID !== 'YOUR_EMAILJS_TEMPLATE_ID';
+
+        if (EMAILJS_CONFIGURED) {
+            emailjs.init({
+                publicKey: EMAILJS_PUBLIC_KEY,
+                blockHeadless: true,
+            });
+            console.log('✅ EmailJS initialized');
+        } else {
+            console.log('📧 EmailJS not configured — using mailto fallback');
+        }
 
         /**
-         * Send an email by POSTing to Formspree in the background.
-         * Falls back to mailto only if the Formspree request fails.
+         * Send an email via EmailJS with mailto fallback
          */
         function sendEmail(templateParams) {
-            return new Promise(function(resolve) {
-                var plainMessage = (templateParams.message_html || '')
-                    .replace(/<[^>]*>/g, '\n')
-                    .replace(/&nbsp;/g, ' ')
-                    .replace(/\n{3,}/g, '\n\n')
-                    .trim();
+            return new Promise((resolve, reject) => {
+                if (!EMAILJS_CONFIGURED) {
+                    openMailTo(templateParams);
+                    resolve({ status: 'fallback', message: 'Email client opened' });
+                    return;
+                }
 
-                var payload = {
-                    _subject: templateParams.subject || 'New Enquiry — StylesPC',
-                    _replyto: templateParams.from_email || '',
-                    name: templateParams.from_name || '',
-                    phone: templateParams.from_phone || '',
-                    message: plainMessage
-                };
-
-                fetch(FORMSPREE_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
-                    .then(function(res) {
-                        if (res.ok) {
-                            console.log('✅ Sent via Formspree');
-                            resolve({ status: 'sent' });
-                        } else {
-                            return res.json().then(function(data) {
-                                throw new Error((data && data.error) || 'Formspree request failed (' + res.status + ')');
-                            });
-                        }
-                    })
-                    .catch(function(err) {
-                        console.error('❌ Formspree error, falling back to mailto:', err);
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
+                    .then(function(response) {
+                        resolve(response);
+                    }, function(error) {
+                        console.error('❌ EmailJS error:', error);
                         openMailTo(templateParams);
                         resolve({ status: 'fallback', message: 'Email client opened' });
                     });
             });
         }
 
-        /**
-         * Open the user's email client with pre-filled details
-         * (used only as a fallback if Formspree itself fails)
-         */
         function openMailTo(params) {
-            var to = params.to_email || 'ajstyleg@gmail.com';
+            var to = params.to_email || STORE_EMAIL;
             var subject = encodeURIComponent(params.subject || 'New Enquiry');
             var body = encodeURIComponent(
-                (params.message_html || '').replace(/<[^>]*>/g, '\n') // strip HTML tags for plain text
+                (params.message_html || '').replace(/<[^>]*>/g, '\n')
                 .replace(/&nbsp;/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim() +
                 '\n\n---\nSent from StylesPC website'
             );
-            var mailto = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
-            window.location.href = mailto;
+            window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
         }
 
-
         // =============================================================
-        //  DISCLAIMER MODAL (WhatsApp unavailable)
-        // =============================================================
-        (function() {
-            var modal = document.getElementById('disclaimerModal');
-            var closeBtn = document.getElementById('closeDisclaimerBtn');
-            var copyBtn = document.getElementById('copyEmailBtn');
-            var emailText = 'ajstyleg@gmail.com';
-
-            function showDisclaimer() {
-                modal.hidden = false;
-                document.body.style.overflow = 'hidden';
-            }
-
-            function hideDisclaimer() {
-                modal.hidden = true;
-                document.body.style.overflow = '';
-            }
-
-            if (closeBtn) closeBtn.addEventListener('click', hideDisclaimer);
-            if (modal) {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) hideDisclaimer();
-                });
-            }
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal && !modal.hidden) hideDisclaimer();
-            });
-
-            if (copyBtn) {
-                copyBtn.addEventListener('click', function() {
-                    navigator.clipboard.writeText(emailText).then(function() {
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
-                    }).catch(function() {
-                        var ta = document.createElement('textarea');
-                        ta.value = emailText;
-                        document.body.appendChild(ta);
-                        ta.select();
-                        document.execCommand('copy');
-                        ta.remove();
-                        copyBtn.textContent = 'Copied!';
-                        setTimeout(function() { copyBtn.textContent = 'Copy'; }, 2000);
-                    });
-                });
-            }
-
-            window.showWhatsAppDisclaimer = showDisclaimer;
-        })();
-
-
-        // =============================================================
-        //  BANK TRANSFER DISCLAIMER MODAL (TV Repair booking fee)
-        //  Account details only reveal after the customer checks the
-        //  "I agree" box — nothing is shown by default.
-        // =============================================================
-        (function() {
-            var viewBtn = document.getElementById('viewBankDetailsBtn');
-            var modal = document.getElementById('bankDisclaimerModal');
-            var closeBtn = document.getElementById('closeBankDisclaimerBtn');
-            var agreeCheckbox = document.getElementById('bankDisclaimerAgree');
-            var detailsBox = document.getElementById('bankAccountDetails');
-            if (!viewBtn || !modal) return;
-
-            function showModal() {
-                modal.hidden = false;
-                document.body.style.overflow = 'hidden';
-            }
-
-            function hideModal() {
-                modal.hidden = true;
-                document.body.style.overflow = '';
-            }
-
-            viewBtn.addEventListener('click', showModal);
-            if (closeBtn) closeBtn.addEventListener('click', hideModal);
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) hideModal();
-            });
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && !modal.hidden) hideModal();
-            });
-
-            if (agreeCheckbox && detailsBox) {
-                agreeCheckbox.addEventListener('change', function() {
-                    detailsBox.hidden = !agreeCheckbox.checked;
-                });
-            }
-        })();
-
-
-        // =============================================================
-        //  WHATSAPP BACKEND CONFIG — DISABLED (temporarily unavailable)
-        // =============================================================
-        function sendWhatsAppToBackend() {
-            window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
-            return Promise.reject(new Error('WhatsApp is temporarily unavailable.'));
-        }
-
-
-        // =============================================================
-        //  IMAGE GALLERIES (auto‑detect existing files)
+        //  IMAGE GALLERIES
         // =============================================================
         (function() {
             var galleries = document.querySelectorAll('.gallery');
@@ -2369,40 +1825,31 @@
             });
         })();
 
-
         // =============================================================
-        //  FIRESTICK – Email Enquiry (with fallback)
+        //  FIRESTICK – Email Enquiry
         // =============================================================
         var firestickBtn = document.getElementById('firestickBtn');
         if (firestickBtn) {
             firestickBtn.addEventListener('click', function() {
                 var templateParams = {
-                    to_email: 'ajstyleg@gmail.com',
+                    to_email: STORE_EMAIL,
                     subject: 'Firestick Setup Enquiry',
                     message_html: 'Hi StylesPC,\n\nI\'m interested in a Firestick full setup with Live TV subscription. Please send me more information.\n\nThank you!',
                     from_name: 'Website Visitor',
-                    from_phone: 'Not provided',
                     from_email: 'visitor@example.com'
                 };
-                sendEmail(templateParams)
-                    .then(function(sendResult) {
-                        if (sendResult && sendResult.status === 'fallback') {
-                            // mailto fallback was used, user's email client opened
-                            // no alert needed since the email client opens
-                        } else {
-                            alert('Enquiry sent! We\'ll get back to you shortly.');
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error(error);
-                        alert('Could not send email. Please contact us directly at ajstyleg@gmail.com');
-                    });
+                sendEmail(templateParams).then(function() {
+                    if (EMAILJS_CONFIGURED) {
+                        alert('Enquiry sent! We\'ll get back to you shortly.');
+                    }
+                }).catch(function() {
+                    alert('Could not send email. Please contact us directly at ' + STORE_EMAIL);
+                });
             });
         }
 
-
         // =============================================================
-        //  CUSTOM BUILT — Email Enquiry (with fallback)
+        //  CUSTOM BUILT – Email Enquiry
         // =============================================================
         (function() {
             var buildLabels = {
@@ -2425,18 +1872,25 @@
 
             var buildForm = document.getElementById('buildForm');
             var buildNameInput = document.getElementById('buildName');
+            var buildEmailInput = document.getElementById('buildEmail');
             var buildPhoneInput = document.getElementById('buildPhone');
 
             buildForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 var status = document.getElementById('buildFormStatus');
                 var name = buildNameInput.value.trim();
+                var email = buildEmailInput.value.trim();
                 var phone = buildPhoneInput.value.trim();
 
                 status.classList.remove('ok', 'err');
 
                 if (!name) {
                     status.textContent = 'Please enter your name.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!email || !email.includes('@')) {
+                    status.textContent = 'Please enter a valid email address.';
                     status.classList.add('err');
                     return;
                 }
@@ -2452,40 +1906,37 @@
                 }
 
                 var templateParams = {
-                    to_email: 'ajstyleg@gmail.com',
+                    to_email: STORE_EMAIL,
                     subject: 'Custom Build Enquiry — ' + buildLabels[currentBuild],
                     message_html: 'Hi StylesPC,\n\nI\'m interested in a custom-built ' + buildLabels[
-                        currentBuild] + '.\n\nName: ' + name + '\nPhone: ' + phone +
+                        currentBuild] + '.\n\nName: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone +
                         '\n\nPlease send me more information and pricing.\n\nThanks!',
                     from_name: name,
-                    from_phone: phone,
-                    from_email: 'visitor@example.com'
+                    from_email: email,
                 };
 
                 status.textContent = 'Sending enquiry…';
                 sendEmail(templateParams)
-                    .then(function(sendResult) {
-                        status.textContent = 'Enquiry sent! We\'ll get back to you shortly.';
+                    .then(function() {
+                        status.textContent = '✅ Enquiry sent! We\'ll get back to you shortly.';
                         status.classList.add('ok');
                         buildNameInput.value = '';
+                        buildEmailInput.value = '';
                         buildPhoneInput.value = '';
-                        if (sendResult && sendResult.status === 'fallback') {
-                            // mailto fallback was used, email client opened
+                        if (!EMAILJS_CONFIGURED) {
                             status.textContent =
-                            'Please check your email client — we\'ve opened a draft for you.';
+                                '✅ Please check your email client — we\'ve opened a draft for you.';
                         }
                     })
-                    .catch(function(error) {
-                        console.error(error);
-                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                    .catch(function() {
+                        status.textContent = 'Error sending. Please email us directly at ' + STORE_EMAIL;
                         status.classList.add('err');
                     });
             });
         })();
 
-
         // =============================================================
-        //  REFURBISHED — Email Enquiry (with fallback)
+        //  REFURBISHED – Email Enquiry
         // =============================================================
         (function() {
             var refurbLabels = {
@@ -2508,18 +1959,25 @@
 
             var refurbForm = document.getElementById('refurbForm');
             var refurbNameInput = document.getElementById('refurbName');
+            var refurbEmailInput = document.getElementById('refurbEmail');
             var refurbPhoneInput = document.getElementById('refurbPhone');
 
             refurbForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 var status = document.getElementById('refurbFormStatus');
                 var name = refurbNameInput.value.trim();
+                var email = refurbEmailInput.value.trim();
                 var phone = refurbPhoneInput.value.trim();
 
                 status.classList.remove('ok', 'err');
 
                 if (!name) {
                     status.textContent = 'Please enter your name.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!email || !email.includes('@')) {
+                    status.textContent = 'Please enter a valid email address.';
                     status.classList.add('err');
                     return;
                 }
@@ -2535,36 +1993,35 @@
                 }
 
                 var templateParams = {
-                    to_email: 'ajstyleg@gmail.com',
+                    to_email: STORE_EMAIL,
                     subject: 'Refurbished Enquiry — ' + refurbLabels[currentRefurb],
                     message_html: 'Hi StylesPC,\n\nI\'m interested in the refurbished ' + refurbLabels[
-                        currentRefurb] + ' machine.\n\nName: ' + name + '\nPhone: ' + phone +
+                        currentRefurb] + ' machine.\n\nName: ' + name + '\nEmail: ' + email +
+                        '\nPhone: ' + phone +
                         '\n\nPlease let me know if it\'s available and send pricing.\n\nThanks!',
                     from_name: name,
-                    from_phone: phone,
-                    from_email: 'visitor@example.com'
+                    from_email: email,
                 };
 
                 status.textContent = 'Sending enquiry…';
                 sendEmail(templateParams)
-                    .then(function(sendResult) {
-                        status.textContent = 'Enquiry sent! We\'ll get back to you shortly.';
+                    .then(function() {
+                        status.textContent = '✅ Enquiry sent! We\'ll get back to you shortly.';
                         status.classList.add('ok');
                         refurbNameInput.value = '';
+                        refurbEmailInput.value = '';
                         refurbPhoneInput.value = '';
-                        if (sendResult && sendResult.status === 'fallback') {
+                        if (!EMAILJS_CONFIGURED) {
                             status.textContent =
-                            'Please check your email client — we\'ve opened a draft for you.';
+                                '✅ Please check your email client — we\'ve opened a draft for you.';
                         }
                     })
-                    .catch(function(error) {
-                        console.error(error);
-                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                    .catch(function() {
+                        status.textContent = 'Error sending. Please email us directly at ' + STORE_EMAIL;
                         status.classList.add('err');
                     });
             });
         })();
-
 
         // =============================================================
         //  PAYMENT METHOD TOGGLE
@@ -2589,25 +2046,31 @@
             });
         })();
 
-
         // =============================================================
-        //  BANK TRANSFER — Email Request (with fallback)
+        //  BANK TRANSFER – Email Request
         // =============================================================
         var bankForm = document.getElementById('bankForm');
         if (bankForm) {
             var bankNameInput = document.getElementById('bankName');
+            var bankEmailInput = document.getElementById('bankEmail');
             var bankPhoneInput = document.getElementById('bankPhone');
 
             bankForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 var status = document.getElementById('bankFormStatus');
                 var name = bankNameInput.value.trim();
+                var email = bankEmailInput.value.trim();
                 var phone = bankPhoneInput.value.trim();
 
                 status.classList.remove('ok', 'err');
 
                 if (!name) {
                     status.textContent = 'Please enter your name.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!email || !email.includes('@')) {
+                    status.textContent = 'Please enter a valid email address.';
                     status.classList.add('err');
                     return;
                 }
@@ -2618,113 +2081,34 @@
                 }
 
                 var templateParams = {
-                    to_email: 'ajstyleg@gmail.com',
+                    to_email: STORE_EMAIL,
                     subject: 'Bank Transfer Payment Request',
                     message_html: 'Hi StylesPC,\n\nI would like to pay by bank transfer.\n\nName: ' + name +
-                        '\nPhone: ' + phone +
+                        '\nEmail: ' + email + '\nPhone: ' + phone +
                         '\n\nPlease send me your banking details so I can complete the payment.\n\nThanks!',
                     from_name: name,
-                    from_phone: phone,
-                    from_email: 'visitor@example.com'
+                    from_email: email,
                 };
 
                 status.textContent = 'Sending request…';
                 sendEmail(templateParams)
-                    .then(function(sendResult) {
-                        status.textContent = 'Request sent! We\'ll reply with banking details shortly.';
+                    .then(function() {
+                        status.textContent = '✅ Request sent! We\'ll reply with banking details shortly.';
                         status.classList.add('ok');
                         bankNameInput.value = '';
+                        bankEmailInput.value = '';
                         bankPhoneInput.value = '';
-                        if (sendResult && sendResult.status === 'fallback') {
+                        if (!EMAILJS_CONFIGURED) {
                             status.textContent =
-                            'Please check your email client — we\'ve opened a draft for you.';
+                                '✅ Please check your email client — we\'ve opened a draft for you.';
                         }
                     })
-                    .catch(function(error) {
-                        console.error(error);
-                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
+                    .catch(function() {
+                        status.textContent = 'Error sending. Please email us directly at ' + STORE_EMAIL;
                         status.classList.add('err');
                     });
             });
         }
-
-
-        // =============================================================
-        //  TV REPAIR REFERRAL — Email Request (with fallback)
-        //  Note: this facilitates a booking with our repair partner —
-        //  we are not the ones repairing the TV.
-        // =============================================================
-        var tvForm = document.getElementById('tvForm');
-        if (tvForm) {
-            tvForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                var status = document.getElementById('tvFormStatus');
-                var submitBtn = document.getElementById('tvSubmitBtn');
-                var name = document.getElementById('tvName').value.trim();
-                var phone = document.getElementById('tvPhone').value.trim();
-                var email = document.getElementById('tvEmail').value.trim();
-                var issue = document.getElementById('tvIssue').value.trim();
-                var transferRef = document.getElementById('tvTransferRef').value.trim();
-                var paymentConfirmed = document.getElementById('tvPaymentConfirm').checked;
-
-                status.classList.remove('ok', 'err');
-
-                if (!name || !phone || !email || !issue) {
-                    status.textContent = 'Please fill in all fields.';
-                    status.classList.add('err');
-                    return;
-                }
-                if (!email.includes('@') || !email.includes('.')) {
-                    status.textContent = 'Please enter a valid email address.';
-                    status.classList.add('err');
-                    return;
-                }
-                if (!transferRef) {
-                    status.textContent = 'Please enter your bank transfer reference number.';
-                    status.classList.add('err');
-                    return;
-                }
-                if (!paymentConfirmed) {
-                    status.textContent = 'Please complete the $1,000 bank transfer and check the confirmation box before submitting.';
-                    status.classList.add('err');
-                    return;
-                }
-
-                var templateParams = {
-                    to_email: 'ajstyleg@gmail.com',
-                    subject: 'TV Repair Referral Request — Backlight Issue (Payment Confirmed)',
-                    message_html: 'Hi StylesPC,\n\nI\'d like to request a TV repair referral (Backlight Repair).\n\n' +
-                        'Name: ' + name + '\nPhone: ' + phone + '\nEmail: ' + email +
-                        '\nTV / Issue: ' + issue +
-                        '\n\n$1,000 booking fee — bank transfer reference: ' + transferRef +
-                        '\n(Please verify this against your bank statement before confirming the booking.)' +
-                        '\n\nAssessment fee ($2,500) noted separately. Please pass my details to your repair partner.\n\nThanks!',
-                    from_name: name,
-                    from_phone: phone,
-                    from_email: email
-                };
-
-                submitBtn.disabled = true;
-                status.textContent = 'Sending request…';
-                sendEmail(templateParams)
-                    .then(function(sendResult) {
-                        status.textContent = 'Request sent! We\'ll verify your payment and pass your details to our repair partner shortly.';
-                        status.classList.add('ok');
-                        submitBtn.disabled = false;
-                        tvForm.reset();
-                        if (sendResult && sendResult.status === 'fallback') {
-                            status.textContent = 'Please check your email client — we\'ve opened a draft for you.';
-                        }
-                    })
-                    .catch(function(error) {
-                        console.error(error);
-                        status.textContent = 'Error sending. Please email us directly at ajstyleg@gmail.com';
-                        status.classList.add('err');
-                        submitBtn.disabled = false;
-                    });
-            });
-        }
-
 
         // =============================================================
         //  HERO TICKET CYCLER
@@ -2792,7 +2176,6 @@
             }
         })();
 
-
         // =============================================================
         //  LIGHTBOX
         // =============================================================
@@ -2831,7 +2214,6 @@
             });
         })();
 
-
         // =============================================================
         //  FIRESTICK DEMO PHOTO (probe)
         // =============================================================
@@ -2854,622 +2236,22 @@
             probe.src = 'images/' + PHOTO_FILE;
         })();
 
-
         // =============================================================
-        //  SUPABASE + BOOKING FORM (with email notification + fallback)
+        //  SUPABASE + BOOKING FORM (with email notification)
         // =============================================================
         var sbPublic = supabase.createClient(
             'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
             'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
         );
 
-        // =============================================================
-        //  ⚠️ ADMIN SIGN-IN — SETUP REQUIRED IN SUPABASE ⚠️
-        //  This form itself works out of the box (it's just Supabase
-        //  Auth), but a few things need doing on your end first:
-        //
-        //  1. Create YOUR admin login: Supabase Dashboard → Authentication
-        //     → Users → Add user (email + password). Do this yourself —
-        //     there's no public sign-up form here on purpose, so random
-        //     visitors can't create accounts.
-        //
-        //  2. Lock the tickets/clients tables down so only signed-in
-        //     staff can read AND write them — run this in the Supabase
-        //     SQL editor. (Skip any "alter table ... enable row level
-        //     security" line if you already ran it for admin.html —
-        //     running it twice just errors harmlessly.)
-        //       alter table public.tickets enable row level security;
-        //       create policy "Admins can read tickets"
-        //         on public.tickets for select
-        //         using (auth.role() = 'authenticated');
-        //       create policy "Admins can update tickets"
-        //         on public.tickets for update
-        //         using (auth.role() = 'authenticated')
-        //         with check (auth.role() = 'authenticated');
-        //       alter table public.clients enable row level security;
-        //       create policy "Admins can read clients"
-        //         on public.clients for select
-        //         using (auth.role() = 'authenticated');
-        //       create policy "Admins can insert clients"
-        //         on public.clients for insert
-        //         with check (auth.role() = 'authenticated');
-        //       create policy "Admins can update clients"
-        //         on public.clients for update
-        //         using (auth.role() = 'authenticated')
-        //         with check (auth.role() = 'authenticated');
-        //       create policy "Admins can delete clients"
-        //         on public.clients for delete
-        //         using (auth.role() = 'authenticated');
-        //     Your existing booking form still works after this — it
-        //     only calls the book_repair() function, it never reads or
-        //     writes the tables directly.
-        //
-        //  Note: this reads/writes the same "tickets" and "clients"
-        //  tables as your admin.html panel. "Mark Complimentary" sets
-        //  amount = 0 and payment_status = 'paid' on the ticket — there's
-        //  no separate "complimentary" status in this schema, so this is
-        //  the equivalent within your existing columns.
-        // =============================================================
-        var ADMIN_TICKETS_TABLE = 'tickets';
-        var ADMIN_ID_COLUMN = 'id';
-
-        // Reveal the admin section only via the discreet link or a direct #admin visit
-        (function() {
-            var adminSection = document.getElementById('admin');
-            if (!adminSection) return;
-            function sync() {
-                if (window.location.hash === '#admin') {
-                    adminSection.classList.add('revealed');
-                    adminSection.scrollIntoView({ behavior: 'instant' });
-                }
-            }
-            window.addEventListener('hashchange', sync);
-            sync();
-        })();
-
-        (function() {
-            var loginBox = document.getElementById('adminLoginBox');
-            var dashboard = document.getElementById('adminDashboard');
-            var loginForm = document.getElementById('adminLoginForm');
-            var loginStatus = document.getElementById('adminLoginStatus');
-            var loginBtn = document.getElementById('adminLoginBtn');
-            var emailDisplay = document.getElementById('adminEmailDisplay');
-            var refreshBtn = document.getElementById('adminRefreshBtn');
-            var logoutBtn = document.getElementById('adminLogoutBtn');
-            var bookingsStatus = document.getElementById('adminBookingsStatus');
-            var bookingsTable = document.getElementById('adminBookingsTable');
-            var tableHead = document.getElementById('adminTableHead');
-            var tableBody = document.getElementById('adminTableBody');
-            var ticketsCache = [];
-            if (!loginForm) return;
-
-            function escapeHtml(str) {
-                return String(str == null ? '' : str)
-                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            }
-
-            function showDashboard(session) {
-                loginBox.hidden = true;
-                dashboard.hidden = false;
-                emailDisplay.textContent = session.user.email;
-                loadBookings();
-            }
-
-            function showLogin() {
-                dashboard.hidden = true;
-                loginBox.hidden = false;
-            }
-
-            // Columns shown, in order, with a friendly label + how to read the value off a row
-            var DISPLAY_COLUMNS = [
-                { label: 'Ticket #', get: function(r) { return r.ticket_number || r.id; } },
-                { label: 'Client', get: function(r) { return (r.clients && r.clients.name) || r.client_id || ''; } },
-                { label: 'Phone', get: function(r) { return (r.clients && r.clients.phone) || ''; } },
-                { label: 'Device', get: function(r) { return r.device || ''; } },
-                { label: 'Issue', get: function(r) { return r.issue || ''; } },
-                { label: 'Status', get: function(r) { return r.status || ''; } },
-                { label: 'Amount', get: function(r) { return (r.amount === null || r.amount === undefined) ? '' : '$' + r.amount; } },
-                { label: 'Payment', get: function(r) { return r.payment_status || ''; } },
-                { label: 'Booked', get: function(r) { return r.created_at ? new Date(r.created_at).toLocaleString() : ''; } }
-            ];
-
-            function loadBookings() {
-                bookingsStatus.style.color = '';
-                bookingsStatus.textContent = 'Loading bookings…';
-                bookingsTable.style.display = 'none';
-
-                // Try to pull the linked client's name/phone/email along with each ticket.
-                // Falls back to a plain select if the tickets→clients relationship
-                // isn't set up as a real foreign key in Supabase.
-                sbPublic.from(ADMIN_TICKETS_TABLE)
-                    .select('*, clients(name, phone, email)')
-                    .order('created_at', { ascending: false })
-                    .then(function(res) {
-                        if (res.error) {
-                            // Fallback: plain select without the client join
-                            return sbPublic.from(ADMIN_TICKETS_TABLE).select('*').order('created_at', { ascending: false });
-                        }
-                        return res;
-                    })
-                    .then(function(res) {
-                        if (res.error) {
-                            bookingsStatus.style.color = '#a33';
-                            bookingsStatus.textContent = 'Error loading bookings: ' + res.error.message +
-                                ' — check that a read policy exists on "tickets" (and "clients") for signed-in users.';
-                            return;
-                        }
-                        var rows = res.data || [];
-                        ticketsCache = rows;
-                        if (!rows.length) {
-                            bookingsStatus.textContent = 'No bookings yet.';
-                            return;
-                        }
-
-                        tableHead.innerHTML = DISPLAY_COLUMNS.map(function(c) { return '<th>' + c.label + '</th>'; }).join('') +
-                            '<th>Actions</th>';
-
-                        tableBody.innerHTML = rows.map(function(row) {
-                            var cells = DISPLAY_COLUMNS.map(function(c) {
-                                var val = c.get(row);
-                                return '<td>' + (val === null || val === undefined ? '' : String(val)) + '</td>';
-                            }).join('');
-                            var isComplimentary = row.payment_status === 'paid' && Number(row.amount) === 0;
-                            var actionCell = '<td>' + (isComplimentary ?
-                                '<span style="font-size:0.78rem;color:var(--teal-dark);">✓ Complimentary</span>' :
-                                '<button type="button" class="btn btn-ghost admin-action-btn" style="font-size:0.78rem;padding:6px 10px;" ' +
-                                    'data-id="' + row[ADMIN_ID_COLUMN] + '">Mark Complimentary</button>') +
-                                '</td>';
-                            return '<tr>' + cells + actionCell + '</tr>';
-                        }).join('');
-                        bookingsStatus.textContent = '';
-                        bookingsTable.style.display = '';
-                    })
-                    .catch(function(err) {
-                        bookingsStatus.style.color = '#a33';
-                        bookingsStatus.textContent = 'Error loading bookings: ' + err.message;
-                    });
-            }
-
-            // Delegated click handler for the dynamically-rendered "Mark Complimentary" buttons.
-            // Sets amount = 0 and payment_status = 'paid' — there's no separate
-            // "complimentary" status in this schema, so this is the equivalent.
-            tableBody.addEventListener('click', function(e) {
-                var btn = e.target.closest('.admin-action-btn');
-                if (!btn) return;
-                var id = btn.getAttribute('data-id');
-
-                if (!confirm('Mark this ticket as complimentary? This sets the amount to $0 and payment status to Paid — it overwrites any existing amount.')) {
-                    return;
-                }
-
-                btn.disabled = true;
-                var originalText = btn.textContent;
-                btn.textContent = 'Saving…';
-
-                sbPublic.from(ADMIN_TICKETS_TABLE).update({ amount: 0, payment_status: 'paid' }).eq(ADMIN_ID_COLUMN, id)
-                    .then(function(res) {
-                        if (res.error) {
-                            btn.disabled = false;
-                            btn.textContent = originalText;
-                            bookingsStatus.style.color = '#a33';
-                            bookingsStatus.textContent = 'Error updating booking: ' + res.error.message +
-                                ' — make sure an UPDATE policy exists on "tickets" for signed-in users (see setup notes in the code).';
-                            return;
-                        }
-                        loadBookings();
-                    })
-                    .catch(function(err) {
-                        btn.disabled = false;
-                        btn.textContent = originalText;
-                        bookingsStatus.style.color = '#a33';
-                        bookingsStatus.textContent = 'Error updating booking: ' + err.message;
-                    });
-            });
-
-
-            // =============================================================
-            //  ADMIN TABS (Tickets / Clients)
-            // =============================================================
-            var ticketsPanel = document.getElementById('adminTicketsPanel');
-            var clientsPanel = document.getElementById('adminClientsPanel');
-            var adminTabBtns = document.querySelectorAll('.admin-tab-btn');
-            adminTabBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    adminTabBtns.forEach(function(b) { b.classList.remove('active'); });
-                    btn.classList.add('active');
-                    var tab = btn.getAttribute('data-admin-tab');
-                    ticketsPanel.hidden = tab !== 'tickets';
-                    clientsPanel.hidden = tab !== 'clients';
-                    if (tab === 'clients') loadClients();
-                });
-            });
-
-            // =============================================================
-            //  ADMIN — CLIENT MANAGEMENT (mirrors admin.html's Clients tab)
-            // =============================================================
-            var clientsCache = [];
-            var clientsStatus = document.getElementById('adminClientsStatus');
-            var clientList = document.getElementById('adminClientList');
-            var clientModalOverlay = document.getElementById('clientModalOverlay');
-            var clientForm = document.getElementById('clientForm');
-            var clientFormError = document.getElementById('clientFormError');
-            var newClientBtn = document.getElementById('newClientBtn');
-            var clientCancelBtn = document.getElementById('clientCancelBtn');
-
-            function openClientModal() { clientModalOverlay.hidden = false; }
-            function closeClientModal() { clientModalOverlay.hidden = true; }
-
-            function loadClients() {
-                clientsStatus.style.color = '';
-                clientsStatus.textContent = 'Loading clients…';
-                clientList.innerHTML = '';
-                sbPublic.from('clients').select('*').order('created_at', { ascending: false })
-                    .then(function(res) {
-                        if (res.error) {
-                            clientsStatus.style.color = '#a33';
-                            clientsStatus.textContent = 'Error loading clients: ' + res.error.message +
-                                ' — make sure a read policy exists on "clients" for signed-in users.';
-                            return;
-                        }
-                        clientsCache = res.data || [];
-                        renderClients();
-                    })
-                    .catch(function(err) {
-                        clientsStatus.style.color = '#a33';
-                        clientsStatus.textContent = 'Error loading clients: ' + err.message;
-                    });
-            }
-
-            function renderClients() {
-                if (!clientsCache.length) {
-                    clientsStatus.textContent = '';
-                    clientList.innerHTML = '<div class="empty-state">No clients yet. Add your first one with "+ New Client".</div>';
-                    return;
-                }
-                clientsStatus.textContent = '';
-                clientList.innerHTML = clientsCache.map(function(c) {
-                    var ticketCount = ticketsCache.filter(function(t) { return t.client_id === c.id; }).length;
-                    return (
-                        '<div class="row-card">' +
-                            '<div class="row-main">' +
-                                '<div class="row-title">' + escapeHtml(c.name) + '</div>' +
-                                '<div class="row-sub">' + escapeHtml(c.phone) + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
-                                (c.notes ? '<div class="row-sub">' + escapeHtml(c.notes) + '</div>' : '') +
-                                '<div class="row-sub">' + ticketCount + ' ticket' + (ticketCount === 1 ? '' : 's') + '</div>' +
-                            '</div>' +
-                            '<div class="row-actions">' +
-                                '<button type="button" class="btn btn-amber btn-sm client-whatsapp-btn" data-id="' + c.id + '">WhatsApp</button>' +
-                                '<button type="button" class="btn btn-ghost btn-sm client-edit-btn" data-id="' + c.id + '">Edit</button>' +
-                                '<button type="button" class="btn btn-danger btn-sm client-delete-btn" data-id="' + c.id + '">Delete</button>' +
-                            '</div>' +
-                        '</div>'
-                    );
-                }).join('');
-            }
-
-            // Delegated handlers for the dynamically-rendered client row buttons
-            clientList.addEventListener('click', function(e) {
-                var waBtn = e.target.closest('.client-whatsapp-btn');
-                var editBtn = e.target.closest('.client-edit-btn');
-                var delBtn = e.target.closest('.client-delete-btn');
-
-                if (waBtn) {
-                    var c1 = clientsCache.find(function(x) { return x.id === waBtn.getAttribute('data-id'); });
-                    if (!c1) return;
-                    var msg = 'Hi ' + c1.name + ', this is StylesPC reaching out about your service.';
-                    window.open('https://wa.me/' + c1.phone + '?text=' + encodeURIComponent(msg), '_blank');
-                    return;
-                }
-
-                if (editBtn) {
-                    var c2 = clientsCache.find(function(x) { return x.id === editBtn.getAttribute('data-id'); });
-                    if (!c2) return;
-                    document.getElementById('clientModalTitle').textContent = 'Edit client';
-                    document.getElementById('clientFormId').value = c2.id;
-                    document.getElementById('clientNameInput').value = c2.name;
-                    document.getElementById('clientPhoneInput').value = c2.phone;
-                    document.getElementById('clientEmailInput').value = c2.email || '';
-                    document.getElementById('clientNotesInput').value = c2.notes || '';
-                    clientFormError.textContent = '';
-                    openClientModal();
-                    return;
-                }
-
-                if (delBtn) {
-                    var id = delBtn.getAttribute('data-id');
-                    if (!confirm('Delete this client? Their tickets will stay but lose the client link.')) return;
-                    delBtn.disabled = true;
-                    sbPublic.from('clients').delete().eq('id', id)
-                        .then(function(res) {
-                            if (res.error) {
-                                clientsStatus.style.color = '#a33';
-                                clientsStatus.textContent = 'Error deleting client: ' + res.error.message;
-                                delBtn.disabled = false;
-                                return;
-                            }
-                            loadClients();
-                        })
-                        .catch(function(err) {
-                            clientsStatus.style.color = '#a33';
-                            clientsStatus.textContent = 'Error deleting client: ' + err.message;
-                            delBtn.disabled = false;
-                        });
-                }
-            });
-
-            if (newClientBtn) {
-                newClientBtn.addEventListener('click', function() {
-                    document.getElementById('clientModalTitle').textContent = 'New client';
-                    clientForm.reset();
-                    document.getElementById('clientFormId').value = '';
-                    clientFormError.textContent = '';
-                    openClientModal();
-                });
-            }
-            if (clientCancelBtn) clientCancelBtn.addEventListener('click', closeClientModal);
-            if (clientModalOverlay) {
-                clientModalOverlay.addEventListener('click', function(e) {
-                    if (e.target === clientModalOverlay) closeClientModal();
-                });
-            }
-
-            if (clientForm) {
-                clientForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    var id = document.getElementById('clientFormId').value;
-                    var payload = {
-                        name: document.getElementById('clientNameInput').value.trim(),
-                        phone: document.getElementById('clientPhoneInput').value.replace(/\D/g, ''),
-                        email: document.getElementById('clientEmailInput').value.trim() || null,
-                        notes: document.getElementById('clientNotesInput').value.trim() || null
-                    };
-                    clientFormError.textContent = '';
-                    var query = id ? sbPublic.from('clients').update(payload).eq('id', id) : sbPublic.from('clients').insert(payload);
-                    query.then(function(res) {
-                        if (res.error) {
-                            clientFormError.textContent = res.error.message;
-                            return;
-                        }
-                        closeClientModal();
-                        loadClients();
-                    }).catch(function(err) {
-                        clientFormError.textContent = err.message;
-                    });
-                });
-            }
-
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                var email = document.getElementById('adminEmail').value.trim();
-                var password = document.getElementById('adminPassword').value;
-                loginStatus.classList.remove('ok', 'err');
-                loginStatus.textContent = 'Signing in…';
-                loginBtn.disabled = true;
-
-                sbPublic.auth.signInWithPassword({ email: email, password: password })
-                    .then(function(res) {
-                        loginBtn.disabled = false;
-                        if (res.error) {
-                            loginStatus.textContent = res.error.message;
-                            loginStatus.classList.add('err');
-                            return;
-                        }
-                        loginStatus.textContent = '';
-                        loginForm.reset();
-                        showDashboard(res.data.session);
-                    })
-                    .catch(function(err) {
-                        loginBtn.disabled = false;
-                        loginStatus.textContent = 'Sign-in error: ' + err.message;
-                        loginStatus.classList.add('err');
-                    });
-            });
-
-            if (refreshBtn) refreshBtn.addEventListener('click', loadBookings);
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    sbPublic.auth.signOut().then(function() { showLogin(); });
-                });
-            }
-
-            // Restore session if already signed in (e.g. after a page refresh)
-            sbPublic.auth.getSession().then(function(res) {
-                if (res.data && res.data.session) {
-                    showDashboard(res.data.session);
-                }
-            });
-        })();
-
         var serviceTypeEl = document.getElementById('serviceType');
         var addressField = document.getElementById('address');
         var addressHint = document.getElementById('addressHint');
-
-        // =============================================================
-        //  PICKUP SERVICE AREA + DISTANCE FARE ESTIMATE
-        //  ⚠️ CONFIGURE THESE BEFORE GOING LIVE ⚠️
-        //  - SHOP_LOCATION: replace with your real home‑workshop lat/lng
-        //    (search your address on openstreetmap.org, right-click the
-        //    pin → "Show address" gives you the coordinates)
-        //  - FREE_AREAS / STANDARD_AREAS / FAR_AREAS: edit these lists to
-        //    match the exact neighbourhoods you serve in each zone
-        //  - PICKUP_STANDARD_FARE / FAR_RATE_PER_KM / EXPEDITE_MULTIPLIER:
-        //    adjust to your real pricing
-        // =============================================================
-        var SHOP_LOCATION = { lat: 17.9784, lng: -76.7831 }; // TODO: set real shop coordinates
-        var PICKUP_STANDARD_FARE = 1500;   // flat rate for the "standard" zone
-        var FAR_RATE_PER_KM = 150;         // JMD per km, "far" zone (no flat fee — pure distance rate)
-        var EXPEDITE_MULTIPLIER = 1.25;    // +25% when expedited service is checked
-        var ROAD_FACTOR = 1.3;             // fudge factor: straight-line → approx. road distance
-
-        // Free pickup — no charge at all
-        var FREE_AREAS = ['franklintown', 'rae town', 'raetown'];
-
-        // Standard flat-rate zone — most of Kingston + close-in Saint Andrew
-        var STANDARD_AREAS = [
-            'half way tree', 'liguanea', 'new kingston', 'barbican',
-            'constant spring', 'cross roads', 'havendale', 'meadowbrook',
-            'hope pastures', 'kingston 6', 'kingston 8', 'kingston 10'
-        ]; // TODO: confirm/expand — anywhere in Kingston not listed above also defaults here
-
-        // Far zone — charged per km instead of a flat fee
-        var FAR_AREAS = ['papine', 'mona']; // TODO: add any other outlying Saint Andrew areas you cover
-
-        var pickupMapWrap = document.getElementById('pickupMapWrap');
-        var pickupMapEl = document.getElementById('pickupMap');
-        var pickupEstimateEl = document.getElementById('pickupEstimate');
-        var expediteCheckbox = document.getElementById('expediteCheckbox');
-        var leafletMap = null, shopMarker = null, pickupMarker = null, routeLine = null;
-        var currentPickupEstimate = null; // read by the submit handler
-        var geocodeTimer = null;
-
-        function haversineKm(lat1, lon1, lat2, lon2) {
-            var R = 6371;
-            var dLat = (lat2 - lat1) * Math.PI / 180;
-            var dLon = (lon2 - lon1) * Math.PI / 180;
-            var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-
-        function ensureMap() {
-            if (leafletMap) return leafletMap;
-            leafletMap = L.map(pickupMapEl, { scrollWheelZoom: false });
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '&copy; OpenStreetMap contributors',
-                maxZoom: 18
-            }).addTo(leafletMap);
-            shopMarker = L.marker([SHOP_LOCATION.lat, SHOP_LOCATION.lng]).addTo(leafletMap)
-                .bindPopup('StylesPC (home workshop)');
-            leafletMap.setView([SHOP_LOCATION.lat, SHOP_LOCATION.lng], 12);
-            return leafletMap;
-        }
-
-        // Returns 'free' | 'standard' | 'far' | 'unserviced'
-        function detectZone(addr, displayName) {
-            var county = ((addr.county || addr.state_district || '') + '').toLowerCase();
-            var display = (displayName || '').toLowerCase();
-            var inList = function(list) {
-                return list.some(function(area) { return display.indexOf(area) !== -1; });
-            };
-
-            if (inList(FREE_AREAS)) return 'free';
-            if (inList(FAR_AREAS)) return 'far';
-            if (inList(STANDARD_AREAS)) return 'standard';
-
-            // Not matched to a specific named area — fall back to parish.
-            if (county.indexOf('kingston') !== -1) return 'standard';
-            if (county.indexOf('andrew') !== -1) return 'unserviced'; // unnamed St Andrew area — not pre-approved
-            return 'unserviced';
-        }
-
-        function renderEstimate(result) {
-            currentPickupEstimate = result;
-            if (!result.serviceable) {
-                pickupEstimateEl.innerHTML = '⚠️ Sorry — we don\'t currently collect from this address. ' +
-                    'Pickup covers Kingston and select Saint Andrew areas (Franklintown, Rae Town, Half Way Tree, ' +
-                    'Liguanea, New Kingston, Papine, Mona and nearby). Please choose Drop‑off instead, or adjust the address.';
-                pickupEstimateEl.style.color = '#a33';
-                return;
-            }
-            pickupEstimateEl.style.color = '';
-            var zoneLabel = result.zone === 'free' ? 'Free zone' : result.zone === 'far' ? 'Far zone (per km)' : 'Standard zone';
-            var feeLine = result.fare === 0 ?
-                '<strong>Free pickup</strong>' :
-                '<strong>estimated pickup fee: $' + result.fare.toLocaleString() + '</strong>' +
-                (result.expedited ? ' (incl. +25% expedited service)' : '');
-            pickupEstimateEl.innerHTML = '📍 Approx. ' + result.km.toFixed(1) + ' km from the shop — ' +
-                zoneLabel + ' — ' + feeLine + '. Final price is confirmed when we accept the booking.';
-
-            var map = ensureMap();
-            var pt = [result.lat, result.lon];
-            if (pickupMarker) { map.removeLayer(pickupMarker); }
-            if (routeLine) { map.removeLayer(routeLine); }
-            pickupMarker = L.marker(pt).addTo(map).bindPopup('Pickup point').openPopup();
-            routeLine = L.polyline([[SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt], { color: '#2F6F63', weight: 3, dashArray: '6,6' }).addTo(map);
-            map.fitBounds(L.latLngBounds([[SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt]).pad(0.3));
-        }
-
-        function computeFare(zone, km) {
-            var base;
-            if (zone === 'free') base = 0;
-            else if (zone === 'far') base = km * FAR_RATE_PER_KM;
-            else base = PICKUP_STANDARD_FARE; // standard
-            var expedited = !!(expediteCheckbox && expediteCheckbox.checked);
-            var fare = expedited ? base * EXPEDITE_MULTIPLIER : base;
-            return { fare: Math.round(fare / 50) * 50, expedited: expedited };
-        }
-
-        function geocodeAndEstimate() {
-            var address = addressField.value.trim();
-            if (!address || serviceTypeEl.value !== 'Pickup') {
-                currentPickupEstimate = null;
-                pickupMapWrap.style.display = 'none';
-                return;
-            }
-            pickupMapWrap.style.display = '';
-            pickupEstimateEl.style.color = '';
-            pickupEstimateEl.textContent = 'Locating address…';
-
-            fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=jm&limit=1&q=' +
-                encodeURIComponent(address + ', Jamaica'))
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (!data || !data.length) {
-                        pickupEstimateEl.textContent = 'Couldn\'t locate that address — please check it or add more detail (street, area, parish).';
-                        currentPickupEstimate = null;
-                        return;
-                    }
-                    var hit = data[0];
-                    var lat = parseFloat(hit.lat), lon = parseFloat(hit.lon);
-                    var zone = detectZone(hit.address || {}, hit.display_name || '');
-                    if (zone === 'unserviced') {
-                        renderEstimate({ serviceable: false });
-                        return;
-                    }
-                    var km = haversineKm(SHOP_LOCATION.lat, SHOP_LOCATION.lng, lat, lon) * ROAD_FACTOR;
-                    var priced = computeFare(zone, km);
-                    renderEstimate({
-                        serviceable: true, lat: lat, lon: lon, zone: zone,
-                        km: km, fare: priced.fare, expedited: priced.expedited, address: hit.display_name
-                    });
-                })
-                .catch(function(err) {
-                    console.error('Geocoding error:', err);
-                    pickupEstimateEl.textContent = 'Couldn\'t check that address right now — you can still submit and we\'ll confirm pickup cost by phone.';
-                    currentPickupEstimate = null;
-                });
-        }
-
         serviceTypeEl.addEventListener('change', function() {
             var isPickup = serviceTypeEl.value === 'Pickup';
             addressHint.textContent = isPickup ? '(required for pickup)' : '(optional)';
             addressField.required = isPickup;
-            if (isPickup && addressField.value.trim()) {
-                geocodeAndEstimate();
-            } else if (!isPickup) {
-                pickupMapWrap.style.display = 'none';
-                currentPickupEstimate = null;
-            }
         });
-
-        // Geocode when the user finishes typing (debounced) or leaves the field
-        addressField.addEventListener('input', function() {
-            clearTimeout(geocodeTimer);
-            geocodeTimer = setTimeout(geocodeAndEstimate, 900);
-        });
-        addressField.addEventListener('blur', function() {
-            clearTimeout(geocodeTimer);
-            geocodeAndEstimate();
-        });
-        if (expediteCheckbox) {
-            expediteCheckbox.addEventListener('change', function() {
-                if (serviceTypeEl.value === 'Pickup' && addressField.value.trim()) {
-                    geocodeAndEstimate();
-                }
-            });
-        }
 
         document.getElementById('bookForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -3493,11 +2275,6 @@
             }
             if (serviceType === 'Pickup' && !address) {
                 status.textContent = 'Please add a pickup address, or choose Drop‑off instead.';
-                status.classList.add('err');
-                return;
-            }
-            if (serviceType === 'Pickup' && currentPickupEstimate && currentPickupEstimate.serviceable === false) {
-                status.textContent = 'Sorry — pickup isn\'t available for that address yet (Kingston & select Saint Andrew areas only). Please choose Drop‑off instead.';
                 status.classList.add('err');
                 return;
             }
@@ -3525,13 +2302,13 @@
             }).then(function(res) {
                 submitBtn.disabled = false;
                 if (res.error) {
-                    status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
+                    status.textContent = "Error saving booking. Please email us directly at " + STORE_EMAIL;
                     status.classList.add('err');
                     console.error(res.error);
-                    // Still try to open mailto as fallback
+                    // Fallback: open mailto
                     var fallbackParams = {
-                        to_email: 'ajstyleg@gmail.com',
-                        subject: 'Repair Booking (Fallback — DB Error)',
+                        to_email: STORE_EMAIL,
+                        subject: 'Repair Booking (Fallback)',
                         message_html: 'Name: ' + name + '\nPhone: ' + phoneRaw + '\nEmail: ' + email +
                             '\nDevice: ' + device + '\nService: ' + serviceType +
                             (address ? '\nAddress: ' + address : '') + '\nIssue: ' + issue,
@@ -3541,16 +2318,9 @@
                 }
 
                 var ticketNumber = res.data;
-                var zoneLabels = { free: 'Free zone', standard: 'Standard zone', far: 'Far zone (per km)' };
-                var pickupNote = (serviceType === 'Pickup' && currentPickupEstimate && currentPickupEstimate.serviceable) ?
-                    ('\nEst. distance: ' + currentPickupEstimate.km.toFixed(1) + ' km (' +
-                        (zoneLabels[currentPickupEstimate.zone] || currentPickupEstimate.zone) + ')' +
-                        '\nEst. pickup fee: $' + currentPickupEstimate.fare.toLocaleString() +
-                        (currentPickupEstimate.expedited ? ' (incl. expedited +25%)' : '')) : '';
 
-                // Send email via Formspree, with mailto fallback only if that fails
                 var templateParams = {
-                    to_email: 'ajstyleg@gmail.com',
+                    to_email: STORE_EMAIL,
                     subject: 'New Repair Booking — ' + ticketNumber,
                     message_html: 'Hi StylesPC,\n\nI\'ve just booked a repair through your website.\n\n' +
                         'Ticket: ' + ticketNumber + '\n' +
@@ -3560,31 +2330,27 @@
                         'Device: ' + device + '\n' +
                         'Service: ' + serviceType + '\n' +
                         (address ? 'Address: ' + address + '\n' : '') +
-                        pickupNote + '\n' +
                         'Issue: ' + issue + '\n\n' +
                         'Please confirm receipt and let me know the next steps.\n\nThanks!',
                     from_name: name,
-                    from_phone: phoneRaw,
-                    from_email: email
+                    from_email: email,
                 };
 
                 status.textContent = 'Booking saved! Sending notification…';
                 sendEmail(templateParams)
-                    .then(function(sendResult) {
+                    .then(function() {
                         status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                             '. Check your email for confirmation.';
                         status.classList.add('ok');
                         document.getElementById('bookForm').reset();
                         addressHint.textContent = '(optional)';
                         addressField.required = false;
-                        if (sendResult && sendResult.status === 'fallback') {
+                        if (!EMAILJS_CONFIGURED) {
                             status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                                 '. Please check your email client — we\'ve opened a draft for you.';
                         }
                     })
-                    .catch(function(error) {
-                        console.error(error);
-                        // Fallback: mailto already opened by sendEmail
+                    .catch(function() {
                         status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                             '. Please check your email client — we\'ve opened a draft for you.';
                         status.classList.add('ok');
@@ -3594,12 +2360,11 @@
                     });
             }).catch(function(err) {
                 submitBtn.disabled = false;
-                status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
+                status.textContent = "Error saving booking. Please email us directly at " + STORE_EMAIL;
                 status.classList.add('err');
                 console.error(err);
-                // Open mailto as emergency fallback
                 var fallbackParams = {
-                    to_email: 'ajstyleg@gmail.com',
+                    to_email: STORE_EMAIL,
                     subject: 'Repair Booking (Emergency Fallback)',
                     message_html: 'Name: ' + name + '\nPhone: ' + phoneRaw + '\nEmail: ' + email +
                         '\nDevice: ' + device + '\nService: ' + serviceType +
@@ -3610,25 +2375,43 @@
             });
         });
 
-
         // =============================================================
-        //  FLOATING WHATSAPP BUTTON → Show Disclaimer
+        //  FLOATING EMAIL BUTTON
         // =============================================================
-        var whatsappFloatBtn = document.getElementById('whatsappFloat');
-        if (whatsappFloatBtn) {
-            whatsappFloatBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
-            });
-        }
-
-        // Also catch any other WhatsApp button clicks
-        document.querySelectorAll('[href*="whatsapp"]').forEach(function(el) {
-            el.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
-            });
+        document.getElementById('emailFloat').addEventListener('click', function() {
+            var templateParams = {
+                to_email: STORE_EMAIL,
+                subject: 'General Enquiry — StylesPC',
+                message_html: 'Hi StylesPC,\n\nI need help with a computer repair or service. Please get back to me.\n\nThanks!',
+                from_name: 'Website Visitor',
+                from_email: 'visitor@example.com'
+            };
+            sendEmail(templateParams)
+                .then(function() {
+                    if (EMAILJS_CONFIGURED) {
+                        alert('Message sent! We\'ll reply soon.');
+                    }
+                })
+                .catch(function() {
+                    alert('Could not send email. Please contact us directly at ' + STORE_EMAIL);
+                });
         });
+
+        // =============================================================
+        //  CONFIGURATION STATUS DISPLAY
+        // =============================================================
+        if (!EMAILJS_CONFIGURED) {
+            console.log('📧 EmailJS not configured — using mailto fallback for all notifications.');
+            var note = document.createElement('div');
+            note.style.cssText =
+                'background:rgba(201,122,43,0.12);border:1px solid rgba(201,122,43,0.3);border-radius:6px;padding:8px 16px;margin:10px auto;max-width:1120px;font-size:0.82rem;color:var(--ink-soft);text-align:center;';
+            note.innerHTML =
+                '📧 <strong>Email notifications:</strong> Your email client will open with pre-filled booking details. For automatic notifications, <a href="https://www.emailjs.com/" target="_blank" style="color:var(--teal-dark);font-weight:600;">set up EmailJS</a> and update the keys in the code.';
+            var wrap = document.querySelector('.wrap');
+            if (wrap) {
+                wrap.parentNode.insertBefore(note, wrap);
+            }
+        }
     </script>
 
 </body>
