@@ -2725,34 +2725,33 @@
         //     there's no public sign-up form here on purpose, so random
         //     visitors can't create accounts.
         //
-        //  2. Set ADMIN_BOOKINGS_TABLE below to the real table your
-        //     book_repair() function writes to (Database → Tables).
-        //
-        //  3. Make sure that table has an "id" column (primary key) and
-        //     a text column named "status" — add one if it doesn't
-        //     exist (Database → Tables → your table → + New column,
-        //     type text, default value "Booked"). This is what the
-        //     "Mark Complimentary" button below writes to.
-        //
-        //  4. Lock the table down so only signed-in staff can read AND
-        //     update it — run this in the Supabase SQL editor (swap in
-        //     your real table name):
-        //       alter table public.YOUR_TABLE enable row level security;
-        //       create policy "Admins can read bookings"
-        //         on public.YOUR_TABLE for select
+        //  2. Lock the tickets/clients tables down so only signed-in
+        //     staff can read AND update them — run this in the Supabase
+        //     SQL editor:
+        //       alter table public.tickets enable row level security;
+        //       create policy "Admins can read tickets"
+        //         on public.tickets for select
         //         using (auth.role() = 'authenticated');
-        //       create policy "Admins can update bookings"
-        //         on public.YOUR_TABLE for update
+        //       create policy "Admins can update tickets"
+        //         on public.tickets for update
         //         using (auth.role() = 'authenticated')
         //         with check (auth.role() = 'authenticated');
+        //       alter table public.clients enable row level security;
+        //       create policy "Admins can read clients"
+        //         on public.clients for select
+        //         using (auth.role() = 'authenticated');
         //     Your existing booking form still works after this — it
         //     only calls the book_repair() function, it never reads or
-        //     writes the table directly.
+        //     writes the tables directly.
+        //
+        //  Note: this reads the same "tickets" (+ linked "clients")
+        //  tables as your admin.html panel. "Mark Complimentary" sets
+        //  amount = 0 and payment_status = 'paid' on the ticket — there's
+        //  no separate "complimentary" status in this schema, so this is
+        //  the equivalent within your existing columns.
         // =============================================================
-        var ADMIN_BOOKINGS_TABLE = 'repairs';  // TODO: set to your real table name
-        var ADMIN_ID_COLUMN = 'id';            // TODO: set to your real primary key column
-        var ADMIN_STATUS_COLUMN = 'status';    // TODO: set to your real status column
-        var COMPLIMENTARY_LABEL = 'Complimentary (Free)';
+        var ADMIN_TICKETS_TABLE = 'tickets';
+        var ADMIN_ID_COLUMN = 'id';
 
         // Reveal the admin section only via the discreet link or a direct #admin visit
         (function() {
@@ -2795,17 +2794,42 @@
                 loginBox.hidden = false;
             }
 
+            // Columns shown, in order, with a friendly label + how to read the value off a row
+            var DISPLAY_COLUMNS = [
+                { label: 'Ticket #', get: function(r) { return r.ticket_number || r.id; } },
+                { label: 'Client', get: function(r) { return (r.clients && r.clients.name) || r.client_id || ''; } },
+                { label: 'Phone', get: function(r) { return (r.clients && r.clients.phone) || ''; } },
+                { label: 'Device', get: function(r) { return r.device || ''; } },
+                { label: 'Issue', get: function(r) { return r.issue || ''; } },
+                { label: 'Status', get: function(r) { return r.status || ''; } },
+                { label: 'Amount', get: function(r) { return (r.amount === null || r.amount === undefined) ? '' : '$' + r.amount; } },
+                { label: 'Payment', get: function(r) { return r.payment_status || ''; } },
+                { label: 'Booked', get: function(r) { return r.created_at ? new Date(r.created_at).toLocaleString() : ''; } }
+            ];
+
             function loadBookings() {
                 bookingsStatus.style.color = '';
                 bookingsStatus.textContent = 'Loading bookings…';
                 bookingsTable.style.display = 'none';
 
-                sbPublic.from(ADMIN_BOOKINGS_TABLE).select('*').order('created_at', { ascending: false })
+                // Try to pull the linked client's name/phone/email along with each ticket.
+                // Falls back to a plain select if the tickets→clients relationship
+                // isn't set up as a real foreign key in Supabase.
+                sbPublic.from(ADMIN_TICKETS_TABLE)
+                    .select('*, clients(name, phone, email)')
+                    .order('created_at', { ascending: false })
+                    .then(function(res) {
+                        if (res.error) {
+                            // Fallback: plain select without the client join
+                            return sbPublic.from(ADMIN_TICKETS_TABLE).select('*').order('created_at', { ascending: false });
+                        }
+                        return res;
+                    })
                     .then(function(res) {
                         if (res.error) {
                             bookingsStatus.style.color = '#a33';
                             bookingsStatus.textContent = 'Error loading bookings: ' + res.error.message +
-                                ' — check that ADMIN_BOOKINGS_TABLE is set to your real table name, and that a read policy exists for signed-in users.';
+                                ' — check that a read policy exists on "tickets" (and "clients") for signed-in users.';
                             return;
                         }
                         var rows = res.data || [];
@@ -2813,29 +2837,21 @@
                             bookingsStatus.textContent = 'No bookings yet.';
                             return;
                         }
-                        var cols = Object.keys(rows[0]);
-                        var hasIdCol = cols.indexOf(ADMIN_ID_COLUMN) !== -1;
-                        var hasStatusCol = cols.indexOf(ADMIN_STATUS_COLUMN) !== -1;
 
-                        tableHead.innerHTML = cols.map(function(c) { return '<th>' + c + '</th>'; }).join('') +
-                            (hasIdCol ? '<th>Actions</th>' : '');
+                        tableHead.innerHTML = DISPLAY_COLUMNS.map(function(c) { return '<th>' + c.label + '</th>'; }).join('') +
+                            '<th>Actions</th>';
 
                         tableBody.innerHTML = rows.map(function(row) {
-                            var cells = cols.map(function(c) {
-                                var val = row[c];
+                            var cells = DISPLAY_COLUMNS.map(function(c) {
+                                var val = c.get(row);
                                 return '<td>' + (val === null || val === undefined ? '' : String(val)) + '</td>';
                             }).join('');
-                            var actionCell = '';
-                            if (hasIdCol) {
-                                var isComplimentary = hasStatusCol && row[ADMIN_STATUS_COLUMN] === COMPLIMENTARY_LABEL;
-                                actionCell = '<td>' + (hasStatusCol ?
-                                    '<button type="button" class="btn btn-ghost admin-action-btn" style="font-size:0.78rem;padding:6px 10px;" ' +
-                                        'data-id="' + row[ADMIN_ID_COLUMN] + '" data-mode="' + (isComplimentary ? 'undo' : 'complimentary') + '">' +
-                                        (isComplimentary ? 'Undo Complimentary' : 'Mark Complimentary') +
-                                    '</button>' :
-                                    '<span style="font-size:0.78rem;color:#a33;">Add a "status" column to enable</span>') +
+                            var isComplimentary = row.payment_status === 'paid' && Number(row.amount) === 0;
+                            var actionCell = '<td>' + (isComplimentary ?
+                                '<span style="font-size:0.78rem;color:var(--teal-dark);">✓ Complimentary</span>' :
+                                '<button type="button" class="btn btn-ghost admin-action-btn" style="font-size:0.78rem;padding:6px 10px;" ' +
+                                    'data-id="' + row[ADMIN_ID_COLUMN] + '">Mark Complimentary</button>') +
                                 '</td>';
-                            }
                             return '<tr>' + cells + actionCell + '</tr>';
                         }).join('');
                         bookingsStatus.textContent = '';
@@ -2847,29 +2863,30 @@
                     });
             }
 
-            // Delegated click handler for the dynamically-rendered "Mark Complimentary" / "Undo" buttons
+            // Delegated click handler for the dynamically-rendered "Mark Complimentary" buttons.
+            // Sets amount = 0 and payment_status = 'paid' — there's no separate
+            // "complimentary" status in this schema, so this is the equivalent.
             tableBody.addEventListener('click', function(e) {
                 var btn = e.target.closest('.admin-action-btn');
                 if (!btn) return;
                 var id = btn.getAttribute('data-id');
-                var mode = btn.getAttribute('data-mode');
-                var newStatus = mode === 'complimentary' ? COMPLIMENTARY_LABEL : 'Booked';
+
+                if (!confirm('Mark this ticket as complimentary? This sets the amount to $0 and payment status to Paid — it overwrites any existing amount.')) {
+                    return;
+                }
 
                 btn.disabled = true;
                 var originalText = btn.textContent;
                 btn.textContent = 'Saving…';
 
-                var update = {};
-                update[ADMIN_STATUS_COLUMN] = newStatus;
-
-                sbPublic.from(ADMIN_BOOKINGS_TABLE).update(update).eq(ADMIN_ID_COLUMN, id)
+                sbPublic.from(ADMIN_TICKETS_TABLE).update({ amount: 0, payment_status: 'paid' }).eq(ADMIN_ID_COLUMN, id)
                     .then(function(res) {
                         if (res.error) {
                             btn.disabled = false;
                             btn.textContent = originalText;
                             bookingsStatus.style.color = '#a33';
                             bookingsStatus.textContent = 'Error updating booking: ' + res.error.message +
-                                ' — make sure an UPDATE policy exists for signed-in users (see setup notes in the code).';
+                                ' — make sure an UPDATE policy exists on "tickets" for signed-in users (see setup notes in the code).';
                             return;
                         }
                         loadBookings();
@@ -2881,6 +2898,7 @@
                         bookingsStatus.textContent = 'Error updating booking: ' + err.message;
                     });
             });
+
 
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
