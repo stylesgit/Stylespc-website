@@ -1,645 +1,1107 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StylesPC — Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-  :root{
-    --paper:#F3EFE7; --paper-2:#EAE3D3; --ink:#1F2421; --ink-soft:#4A4F49;
-    --teal:#2F6F63; --teal-dark:#204b43; --amber:#C97A2B; --rule:#C9C2B2;
-    --white:#FFFDF8; --red:#a3372a; --radius:4px;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0; background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans',sans-serif; line-height:1.5;}
-  h1,h2,h3{font-family:'Space Grotesk',sans-serif; margin:0 0 .3em; letter-spacing:-0.01em;}
-  .mono{font-family:'IBM Plex Mono',monospace;}
-  button{font-family:inherit; cursor:pointer;}
-  input,select,textarea{font-family:inherit; font-size:.92rem; padding:9px 11px; border:1px solid var(--rule); border-radius:var(--radius); background:var(--white); color:var(--ink); width:100%;}
-  label{font-size:.8rem; font-weight:600; color:var(--ink-soft); display:block; margin-bottom:4px;}
-  .field{margin-bottom:14px;}
-  .btn{display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:var(--radius); font-weight:600; font-size:.86rem; border:1px solid transparent; text-decoration:none;}
-  .btn-primary{background:var(--teal); color:#fff;}
-  .btn-primary:hover{background:var(--teal-dark);}
-  .btn-ghost{background:transparent; color:var(--ink); border-color:var(--rule);}
-  .btn-ghost:hover{border-color:var(--ink);}
-  .btn-amber{background:var(--amber); color:#fff;}
-  .btn-amber:hover{background:#a9631e;}
-  .btn-danger{background:transparent; color:var(--red); border-color:rgba(163,55,42,.4);}
-  .btn-danger:hover{background:rgba(163,55,42,.08);}
-  .btn-sm{padding:5px 10px; font-size:.76rem;}
-  .err{color:var(--red); font-size:.85rem; margin-top:8px;}
-  .hidden{display:none !important;}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StylesPC — Admin Enterprise Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --paper: #F3EFE7;
+            --paper-2: #EAE3D3;
+            --ink: #1F2421;
+            --ink-soft: #4A4F49;
+            --teal: #2F6F63;
+            --teal-dark: #204b43;
+            --amber: #C97A2B;
+            --rule: #C9C2B2;
+            --white: #FFFDF8;
+            --red: #a3372a;
+            --green: #4CAF50;
+            --radius: 4px;
+        }
 
-  /* ---------- LOGIN ---------- */
-  #loginScreen{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;}
-  .login-box{background:var(--white); border:1px solid var(--rule); border-radius:8px; padding:32px; width:100%; max-width:360px;}
-  .login-box .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:700; font-size:1.2rem; margin-bottom:22px;}
-  .login-box .dot{width:10px; height:10px; border-radius:50%; background:var(--teal);}
+        * {
+            box-sizing: border-box;
+        }
 
-  /* ---------- APP SHELL ---------- */
-  #app{min-height:100vh;}
-  .topbar{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--rule); background:rgba(243,239,231,.92); position:sticky; top:0; z-index:10;}
-  .topbar .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:700; font-size:1.1rem;}
-  .topbar .dot{width:9px; height:9px; border-radius:50%; background:var(--teal);}
-  .tabs{display:flex; gap:6px; padding:16px 24px 0;}
-  .tab-btn{background:transparent; border:none; padding:10px 4px; margin-right:22px; font-weight:600; font-size:.92rem; color:var(--ink-soft); border-bottom:2px solid transparent;}
-  .tab-btn.active{color:var(--ink); border-color:var(--amber);}
-  .wrap{max-width:1080px; margin:0 auto; padding:20px 24px 60px;}
-  .toolbar{display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
-  .toolbar select{width:auto;}
+        body {
+            margin: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font-family: 'IBM Plex Sans', sans-serif;
+            line-height: 1.5;
+        }
 
-  /* ---------- TABLE / CARDS ---------- */
-  .list{display:grid; gap:10px;}
-  .row-card{background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:16px 18px; display:grid; grid-template-columns:1fr auto; gap:12px; align-items:center;}
-  .row-main{display:grid; gap:4px;}
-  .row-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-  .row-id{font-family:'IBM Plex Mono'; font-size:.78rem; color:var(--ink-soft);}
-  .row-title{font-weight:600;}
-  .row-sub{font-size:.85rem; color:var(--ink-soft);}
-  .pill{font-family:'IBM Plex Mono'; font-size:.68rem; font-weight:600; letter-spacing:.03em; padding:3px 9px; border-radius:20px; text-transform:uppercase;}
-  .pill-teal{background:rgba(47,111,99,.12); color:var(--teal-dark); border:1px solid rgba(47,111,99,.35);}
-  .pill-amber{background:rgba(201,122,43,.12); color:#a9631e; border:1px solid rgba(201,122,43,.4);}
-  .pill-red{background:rgba(163,55,42,.1); color:var(--red); border:1px solid rgba(163,55,42,.35);}
-  .row-actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;}
-  .empty-state{text-align:center; padding:60px 20px; color:var(--ink-soft); font-size:.92rem;}
+        h1, h2, h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            margin: 0 0 0.3em;
+            letter-spacing: -0.01em;
+        }
 
-  /* ---------- MODAL ---------- */
-  .modal-overlay{position:fixed; inset:0; background:rgba(20,22,19,.55); z-index:50; display:none; align-items:flex-start; justify-content:center; padding:40px 20px; overflow-y:auto;}
-  .modal-overlay:not([hidden]){display:flex;}
-  .modal{background:var(--white); border-radius:8px; padding:28px; width:100%; max-width:440px;}
-  .modal h3{font-size:1.1rem; margin-bottom:18px;}
-  .modal-actions{display:flex; gap:10px; margin-top:18px; justify-content:flex-end;}
-  .field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
 
-  /* ---------- RECEIPT ---------- */
-  #receiptModal .receipt-sheet{border:1px dashed var(--rule); border-radius:6px; padding:20px; margin-bottom:18px;}
-  #receiptModal .receipt-row{display:flex; justify-content:space-between; font-size:.88rem; margin:6px 0;}
-  #receiptModal .receipt-row .k{color:var(--ink-soft);}
-  #receiptModal .receipt-total{border-top:1px solid var(--rule); margin-top:10px; padding-top:10px; font-weight:700;}
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--rule);
+        }
 
-  @media print{
-    body *{visibility:hidden;}
-    #receiptModal, #receiptModal *{visibility:visible;}
-    #receiptModal{position:fixed; inset:0; background:#fff; padding:40px;}
-    .modal-actions, .lightbox-close{display:none !important;}
-  }
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.8rem;
+        }
 
-  @media (max-width:640px){
-    .row-card{grid-template-columns:1fr;}
-    .row-actions{justify-content:flex-start;}
-    .field-row{grid-template-columns:1fr;}
-  }
-</style>
+        .header .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--teal);
+            border-radius: 50%;
+        }
+
+        .user-menu {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-pill {
+            background: rgba(47, 111, 99, 0.12);
+            color: var(--teal-dark);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--rule);
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+            transition: all 0.2s;
+        }
+
+        .nav-tab:hover {
+            color: var(--ink);
+        }
+
+        .nav-tab.active {
+            color: var(--ink);
+            border-color: var(--amber);
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.86rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--teal);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--teal-dark);
+        }
+
+        .btn-amber {
+            background: var(--amber);
+            color: white;
+        }
+
+        .btn-amber:hover {
+            background: #a9631e;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid rgba(163, 55, 42, 0.4);
+        }
+
+        .btn-danger:hover {
+            background: rgba(163, 55, 42, 0.08);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
+        .list-container {
+            display: grid;
+            gap: 12px;
+        }
+
+        .list-item {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .list-item-main {
+            display: grid;
+            gap: 8px;
+        }
+
+        .list-item-header {
+            display: flex;
+            gap: 10px;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+
+        .list-item-id {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+            background: var(--paper-2);
+            padding: 2px 8px;
+            border-radius: 3px;
+        }
+
+        .list-item-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .list-item-subtitle {
+            font-size: 0.9rem;
+            color: var(--ink-soft);
+        }
+
+        .list-item-details {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+        }
+
+        .detail-tag {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .detail-tag .label {
+            color: var(--ink-soft);
+            font-weight: 600;
+        }
+
+        .detail-tag .value {
+            color: var(--ink);
+        }
+
+        .status-badge {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .status-open {
+            background: rgba(47, 111, 99, 0.12);
+            color: var(--teal-dark);
+        }
+
+        .status-in-progress {
+            background: rgba(201, 122, 43, 0.12);
+            color: #a9631e;
+        }
+
+        .status-closed {
+            background: rgba(76, 175, 80, 0.12);
+            color: #388E3C;
+        }
+
+        .list-item-actions {
+            display: flex;
+            gap: 6px;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--ink-soft);
+        }
+
+        .empty-state h3 {
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 22, 19, 0.6);
+            z-index: 100;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 40px 20px;
+            overflow-y: auto;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 32px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(20, 22, 19, 0.15);
+        }
+
+        .modal h2 {
+            margin-bottom: 24px;
+            font-size: 1.4rem;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-bottom: 6px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--rule);
+            border-radius: var(--radius);
+            font-family: inherit;
+            font-size: 0.9rem;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 28px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.4rem;
+            font-weight: 700;
+            color: var(--teal);
+            font-family: 'Space Grotesk';
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--ink-soft);
+            margin-top: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .list-item {
+                grid-template-columns: 1fr;
+            }
+            .list-item-actions {
+                flex-direction: row;
+                justify-content: flex-start;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .header {
+                flex-direction: column;
+                gap: 14px;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- ================= LOGIN ================= -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="brand"><span class="dot"></span>StylesPC Admin</div>
-    <form id="loginForm">
-      <div class="field">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" required autocomplete="username">
-      </div>
-      <div class="field">
-        <label for="loginPassword">Password</label>
-        <input type="password" id="loginPassword" required autocomplete="current-password">
-      </div>
-      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center;">Sign in</button>
-      <p id="loginError" class="err" role="status"></p>
-    </form>
-  </div>
-</div>
+    <div class="container">
+        <div class="header">
+            <h1><span class="dot"></span>StylesPC Admin</h1>
+            <div class="user-menu">
+                <div class="user-pill">👤 Admin User</div>
+                <button class="btn btn-amber btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
 
-<!-- ================= APP ================= -->
-<div id="app" class="hidden">
-  <div class="topbar">
-    <div class="brand"><span class="dot"></span>StylesPC Admin</div>
-    <button type="button" class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
-  </div>
-  <div class="tabs">
-    <button type="button" class="tab-btn active" data-tab="tickets">Tickets</button>
-    <button type="button" class="tab-btn" data-tab="clients">Clients</button>
-  </div>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('tickets')">🎫 Tickets</button>
+            <button class="nav-tab" onclick="switchTab('clients')">👥 Clients</button>
+            <button class="nav-tab" onclick="switchTab('users')">🔐 Users</button>
+            <button class="nav-tab" onclick="switchTab('settings')">⚙️ Settings</button>
+        </div>
 
-  <!-- TICKETS TAB -->
-  <div class="wrap" id="tab-tickets">
-    <div class="toolbar">
-      <select id="statusFilter">
-        <option value="">All statuses</option>
-        <option value="received">Received</option>
-        <option value="diagnosing">Diagnosing</option>
-        <option value="in_progress">In progress</option>
-        <option value="ready">Ready</option>
-        <option value="delivered">Delivered</option>
-        <option value="cancelled">Cancelled</option>
-      </select>
-      <button type="button" class="btn btn-primary" id="newTicketBtn">+ New ticket</button>
+        <div id="dashboard" class="section active">
+            <h2>Dashboard</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalTickets">0</div>
+                    <div class="stat-label">Total Tickets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="openTickets">0</div>
+                    <div class="stat-label">Open Tickets</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalClients">0</div>
+                    <div class="stat-label">Total Clients</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalAdmins">0</div>
+                    <div class="stat-label">Admins</div>
+                </div>
+            </div>
+            <h3>Recent Activity</h3>
+            <div class="list-container" id="recentActivity">
+                <div class="empty-state"><h3>No activity yet</h3></div>
+            </div>
+        </div>
+
+        <div id="tickets" class="section">
+            <h2>Tickets Management</h2>
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="ticketSearch" placeholder="Search tickets..." onkeyup="filterTickets()">
+                </div>
+                <select id="ticketStatus" onchange="filterTickets()">
+                    <option value="">All Status</option>
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Closed">Closed</option>
+                </select>
+                <button class="btn btn-primary" onclick="openTicketModal('new')">+ New Ticket</button>
+            </div>
+            <div class="list-container" id="ticketsList">
+                <div class="empty-state"><h3>No tickets yet</h3></div>
+            </div>
+        </div>
+
+        <div id="clients" class="section">
+            <h2>Clients Management</h2>
+            <div class="toolbar">
+                <div class="search-box">
+                    <input type="text" id="clientSearch" placeholder="Search clients..." onkeyup="filterClients()">
+                </div>
+                <button class="btn btn-primary" onclick="openClientModal('new')">+ New Client</button>
+            </div>
+            <div class="list-container" id="clientsList">
+                <div class="empty-state"><h3>No clients yet</h3></div>
+            </div>
+        </div>
+
+        <div id="users" class="section">
+            <h2>Users & Admins</h2>
+            <div class="toolbar">
+                <button class="btn btn-primary" onclick="openUserModal('new')">+ Add User/Admin</button>
+            </div>
+            <div class="list-container" id="usersList">
+                <div class="empty-state"><h3>No users yet</h3></div>
+            </div>
+        </div>
+
+        <div id="settings" class="section">
+            <h2>Settings</h2>
+            <div class="list-item">
+                <div class="list-item-main">
+                    <h3>Export Data</h3>
+                    <p style="color: var(--ink-soft); margin: 0;">Download all your data as JSON</p>
+                </div>
+                <button class="btn btn-amber btn-sm" onclick="exportData()">📥 Export</button>
+            </div>
+            <div class="list-item">
+                <div class="list-item-main">
+                    <h3>Clear All Data</h3>
+                    <p style="color: var(--ink-soft); margin: 0; color: var(--red);">⚠️ This cannot be undone</p>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="if(confirm('Delete everything?')) clearAllData();">Clear</button>
+            </div>
+        </div>
     </div>
-    <div class="list" id="ticketList"></div>
-  </div>
 
-  <!-- CLIENTS TAB -->
-  <div class="wrap hidden" id="tab-clients">
-    <div class="toolbar">
-      <div></div>
-      <button type="button" class="btn btn-primary" id="newClientBtn">+ New client</button>
+    <div class="modal-overlay" id="ticketModal">
+        <div class="modal">
+            <h2 id="ticketModalTitle">New Ticket</h2>
+            <div class="form-group">
+                <label>Service Tag #</label>
+                <input type="text" id="ticketId" placeholder="AUTO-GENERATED" readonly style="background: var(--paper-2);">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Client Name</label>
+                    <input type="text" id="ticketClientName" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="ticketPhone" placeholder="876-333-1156" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Device Type</label>
+                <input type="text" id="ticketDevice" placeholder="Dell Laptop" required>
+            </div>
+            <div class="form-group">
+                <label>Issue Description</label>
+                <textarea id="ticketIssue" placeholder="Describe the problem..." required></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="ticketStatus">
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Priority</label>
+                    <select id="ticketPriority">
+                        <option value="Low">Low</option>
+                        <option value="Medium">Medium</option>
+                        <option value="High">High</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button>
+            </div>
+        </div>
     </div>
-    <div class="list" id="clientList"></div>
-  </div>
-</div>
 
-<!-- ================= TICKET MODAL ================= -->
-<div class="modal-overlay" id="ticketModalOverlay" hidden>
-  <div class="modal">
-    <h3 id="ticketModalTitle">New ticket</h3>
-    <form id="ticketForm">
-      <input type="hidden" id="ticketFormId">
-      <div class="field">
-        <label for="ticketClient">Client</label>
-        <select id="ticketClient" required></select>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="ticketDeviceInput">Device</label>
-          <input type="text" id="ticketDeviceInput" placeholder='Laptop — 14"' required>
+    <div class="modal-overlay" id="clientModal">
+        <div class="modal">
+            <h2 id="clientModalTitle">New Client</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>First Name</label>
+                    <input type="text" id="clientFirstName" required>
+                </div>
+                <div class="form-group">
+                    <label>Last Name</label>
+                    <input type="text" id="clientLastName" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="tel" id="clientPhone" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="clientEmail">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <textarea id="clientAddress"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveClient()">Save Client</button>
+            </div>
         </div>
-        <div class="field">
-          <label for="ticketStatusInput">Status</label>
-          <select id="ticketStatusInput">
-            <option value="received">Received</option>
-            <option value="diagnosing">Diagnosing</option>
-            <option value="in_progress">In progress</option>
-            <option value="ready">Ready</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </div>
-      </div>
-      <div class="field">
-        <label for="ticketIssueInput">Issue</label>
-        <input type="text" id="ticketIssueInput" placeholder="Won't boot" required>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="ticketIntakeInput">Intake</label>
-          <select id="ticketIntakeInput"><option>Drop-off</option><option>Pickup</option></select>
-        </div>
-        <div class="field">
-          <label for="ticketReturnInput">Return</label>
-          <select id="ticketReturnInput"><option>Drop-off</option><option>Pickup</option></select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label for="ticketAmountInput">Amount ($)</label>
-          <input type="number" step="0.01" id="ticketAmountInput" placeholder="0.00">
-        </div>
-        <div class="field">
-          <label for="ticketPaymentInput">Payment</label>
-          <select id="ticketPaymentInput">
-            <option value="unpaid">Unpaid</option>
-            <option value="partial">Partial</option>
-            <option value="paid">Paid</option>
-          </select>
-        </div>
-      </div>
-      <p id="ticketFormError" class="err"></p>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" id="ticketCancelBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save ticket</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ================= CLIENT MODAL ================= -->
-<div class="modal-overlay" id="clientModalOverlay" hidden>
-  <div class="modal">
-    <h3 id="clientModalTitle">New client</h3>
-    <form id="clientForm">
-      <input type="hidden" id="clientFormId">
-      <div class="field">
-        <label for="clientNameInput">Full name</label>
-        <input type="text" id="clientNameInput" required>
-      </div>
-      <div class="field">
-        <label for="clientPhoneInput">Phone / WhatsApp (digits + country code)</label>
-        <input type="tel" id="clientPhoneInput" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{7,15}" required>
-      </div>
-      <div class="field">
-        <label for="clientEmailInput">Email (optional)</label>
-        <input type="email" id="clientEmailInput">
-      </div>
-      <div class="field">
-        <label for="clientNotesInput">Notes (optional)</label>
-        <textarea id="clientNotesInput" rows="2"></textarea>
-      </div>
-      <p id="clientFormError" class="err"></p>
-      <div class="modal-actions">
-        <button type="button" class="btn btn-ghost" id="clientCancelBtn">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save client</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- ================= RECEIPT MODAL ================= -->
-<div class="modal-overlay" id="receiptModalOverlay" hidden>
-  <div class="modal" id="receiptModal">
-    <h3>Receipt — <span id="receiptTicketNum"></span></h3>
-    <div class="receipt-sheet">
-      <div class="receipt-row"><span class="k">Client</span><span id="receiptClient"></span></div>
-      <div class="receipt-row"><span class="k">Device</span><span id="receiptDevice"></span></div>
-      <div class="receipt-row"><span class="k">Issue</span><span id="receiptIssue"></span></div>
-      <div class="receipt-row"><span class="k">Status</span><span id="receiptStatus"></span></div>
-      <div class="receipt-row"><span class="k">Payment</span><span id="receiptPayment"></span></div>
-      <div class="receipt-row receipt-total"><span class="k">Amount</span><span id="receiptAmount"></span></div>
     </div>
-    <p id="receiptSendNote" class="row-sub" style="margin:0 0 10px;">Each option opens the message ready to go in that app — you (or your client) still tap send there.</p>
-    <div class="modal-actions" style="justify-content:flex-start; flex-wrap:wrap;">
-      <button type="button" class="btn btn-amber btn-sm" id="receiptWhatsAppBtn">WhatsApp</button>
-      <button type="button" class="btn btn-amber btn-sm" id="receiptSmsBtn">Text (SMS)</button>
-      <button type="button" class="btn btn-amber btn-sm" id="receiptEmailBtn">Email</button>
-      <button type="button" class="btn btn-ghost btn-sm" id="receiptCopyBtn">Copy message</button>
+
+    <div class="modal-overlay" id="userModal">
+        <div class="modal">
+            <h2 id="userModalTitle">Add User/Admin</h2>
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" id="userName" required>
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="userEmail" required>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <select id="userRole">
+                    <option value="User">User</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveUser()">Save User</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" id="receiptCloseBtn">Close</button>
-      <button type="button" class="btn btn-ghost" id="receiptPrintBtn">Print / Save PDF</button>
-    </div>
-  </div>
-</div>
 
-<script>
-  // ---------- CONFIG ----------
-  var SUPABASE_URL = 'https://gtfqasmqbgxjfnwlvxjp.supabase.co';
-  var SUPABASE_KEY = 'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1';
-  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script>
+        let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+        let clients = JSON.parse(localStorage.getItem('clients')) || [];
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let currentEditId = null;
 
-  var STATUS_LABELS = {received:'Received', diagnosing:'Diagnosing', in_progress:'In progress', ready:'Ready', delivered:'Delivered', cancelled:'Cancelled'};
-  var PAYMENT_LABELS = {unpaid:'Unpaid', partial:'Partial', paid:'Paid'};
+        function init() {
+            if (users.length === 0) {
+                users = [{
+                    id: 'u001',
+                    name: 'Admin User',
+                    email: 'admin@stylespc.com',
+                    role: 'Admin',
+                    createdAt: new Date().toISOString()
+                }];
+                saveData();
+            }
+            updateDashboard();
+            renderTickets();
+            renderClients();
+            renderUsers();
+        }
 
-  var clientsCache = [];
-  var ticketsCache = [];
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            event.target.classList.add('active');
+        }
 
-  // ---------- AUTH ----------
-  var loginScreen = document.getElementById('loginScreen');
-  var appEl = document.getElementById('app');
+        function openTicketModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('ticketModalTitle').textContent = mode === 'new' ? 'New Ticket' : 'Edit Ticket';
+            if (mode === 'new') {
+                document.getElementById('ticketId').value = 'TST-' + Date.now();
+                document.getElementById('ticketClientName').value = '';
+                document.getElementById('ticketPhone').value = '';
+                document.getElementById('ticketDevice').value = '';
+                document.getElementById('ticketIssue').value = '';
+                document.getElementById('ticketStatus').value = 'Open';
+                document.getElementById('ticketPriority').value = 'Medium';
+            } else {
+                const ticket = tickets.find(t => t.id === id);
+                if (ticket) {
+                    document.getElementById('ticketId').value = ticket.id;
+                    document.getElementById('ticketClientName').value = ticket.clientName;
+                    document.getElementById('ticketPhone').value = ticket.phone;
+                    document.getElementById('ticketDevice').value = ticket.device;
+                    document.getElementById('ticketIssue').value = ticket.issue;
+                    document.getElementById('ticketStatus').value = ticket.status;
+                    document.getElementById('ticketPriority').value = ticket.priority;
+                }
+            }
+            document.getElementById('ticketModal').classList.add('active');
+        }
 
-  sb.auth.onAuthStateChange(function(event, session){
-    if (session){
-      loginScreen.classList.add('hidden');
-      appEl.classList.remove('hidden');
-      loadClients().then(loadTickets);
-    } else {
-      appEl.classList.add('hidden');
-      loginScreen.classList.remove('hidden');
-    }
-  });
+        function openClientModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('clientModalTitle').textContent = mode === 'new' ? 'New Client' : 'Edit Client';
+            if (mode === 'new') {
+                document.getElementById('clientFirstName').value = '';
+                document.getElementById('clientLastName').value = '';
+                document.getElementById('clientPhone').value = '';
+                document.getElementById('clientEmail').value = '';
+                document.getElementById('clientAddress').value = '';
+            } else {
+                const client = clients.find(c => c.id === id);
+                if (client) {
+                    document.getElementById('clientFirstName').value = client.firstName;
+                    document.getElementById('clientLastName').value = client.lastName;
+                    document.getElementById('clientPhone').value = client.phone;
+                    document.getElementById('clientEmail').value = client.email || '';
+                    document.getElementById('clientAddress').value = client.address || '';
+                }
+            }
+            document.getElementById('clientModal').classList.add('active');
+        }
 
-  sb.auth.getSession().then(function(res){
-    if (!res.data.session){
-      loginScreen.classList.remove('hidden');
-    }
-  });
+        function openUserModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('userModalTitle').textContent = mode === 'new' ? 'Add User/Admin' : 'Edit User/Admin';
+            if (mode === 'new') {
+                document.getElementById('userName').value = '';
+                document.getElementById('userEmail').value = '';
+                document.getElementById('userRole').value = 'User';
+            } else {
+                const user = users.find(u => u.id === id);
+                if (user) {
+                    document.getElementById('userName').value = user.name;
+                    document.getElementById('userEmail').value = user.email;
+                    document.getElementById('userRole').value = user.role;
+                }
+            }
+            document.getElementById('userModal').classList.add('active');
+        }
 
-  document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var email = document.getElementById('loginEmail').value.trim();
-    var password = document.getElementById('loginPassword').value;
-    var errEl = document.getElementById('loginError');
-    errEl.textContent = '';
-    sb.auth.signInWithPassword({ email: email, password: password }).then(function(res){
-      if (res.error) errEl.textContent = res.error.message;
-    });
-  });
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            currentEditId = null;
+        }
 
-  document.getElementById('logoutBtn').addEventListener('click', function(){
-    sb.auth.signOut();
-  });
+        function saveTicket() {
+            const id = document.getElementById('ticketId').value;
+            const ticket = {
+                id: id,
+                clientName: document.getElementById('ticketClientName').value,
+                phone: document.getElementById('ticketPhone').value,
+                device: document.getElementById('ticketDevice').value,
+                issue: document.getElementById('ticketIssue').value,
+                status: document.getElementById('ticketStatus').value,
+                priority: document.getElementById('ticketPriority').value,
+                createdAt: currentEditId ? (tickets.find(t => t.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
 
-  // ---------- TABS ----------
-  document.querySelectorAll('.tab-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
-      btn.classList.add('active');
-      document.getElementById('tab-tickets').classList.toggle('hidden', btn.dataset.tab !== 'tickets');
-      document.getElementById('tab-clients').classList.toggle('hidden', btn.dataset.tab !== 'clients');
-    });
-  });
+            if (currentEditId) {
+                const index = tickets.findIndex(t => t.id === currentEditId);
+                if (index !== -1) tickets[index] = ticket;
+            } else {
+                tickets.push(ticket);
+            }
 
-  // ---------- CLIENTS ----------
-  function loadClients(){
-    return sb.from('clients').select('*').order('created_at', {ascending:false}).then(function(res){
-      if (res.error) { console.error(res.error); return; }
-      clientsCache = res.data || [];
-      renderClientSelect();
-      renderClients();
-    });
-  }
+            saveData();
+            renderTickets();
+            closeModal('ticketModal');
+            alert('Ticket saved!');
+        }
 
-  function renderClientSelect(){
-    var sel = document.getElementById('ticketClient');
-    var options = '<option value="" disabled selected>Select a client…</option>';
-    options += clientsCache.map(function(c){
-      return '<option value="' + c.id + '">' + escapeHtml(c.name) + ' — ' + escapeHtml(c.phone) + '</option>';
-    }).join('');
-    sel.innerHTML = options;
-  }
+        function saveClient() {
+            const id = currentEditId || 'c' + Date.now();
+            const client = {
+                id: id,
+                firstName: document.getElementById('clientFirstName').value,
+                lastName: document.getElementById('clientLastName').value,
+                phone: document.getElementById('clientPhone').value,
+                email: document.getElementById('clientEmail').value,
+                address: document.getElementById('clientAddress').value,
+                createdAt: currentEditId ? (clients.find(c => c.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
 
-  function renderClients(){
-    var list = document.getElementById('clientList');
-    if (!clientsCache.length){
-      list.innerHTML = '<div class="empty-state">No clients yet. Add your first one with "+ New client".</div>';
-      return;
-    }
-    list.innerHTML = clientsCache.map(function(c){
-      var ticketCount = ticketsCache.filter(function(t){ return t.client_id === c.id; }).length;
-      return (
-        '<div class="row-card">' +
-          '<div class="row-main">' +
-            '<div class="row-top"><span class="row-title">' + escapeHtml(c.name) + '</span></div>' +
-            '<div class="row-sub mono">' + escapeHtml(c.phone) + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
-            (c.notes ? '<div class="row-sub">' + escapeHtml(c.notes) + '</div>' : '') +
-            '<div class="row-sub">' + ticketCount + ' ticket' + (ticketCount === 1 ? '' : 's') + '</div>' +
-          '</div>' +
-          '<div class="row-actions">' +
-            '<button type="button" class="btn btn-amber btn-sm" onclick="messageClient(\'' + c.id + '\')">WhatsApp</button>' +
-            '<button type="button" class="btn btn-ghost btn-sm" onclick="editClient(\'' + c.id + '\')">Edit</button>' +
-            '<button type="button" class="btn btn-danger btn-sm" onclick="deleteClient(\'' + c.id + '\')">Delete</button>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
-  }
+            if (currentEditId) {
+                const index = clients.findIndex(c => c.id === currentEditId);
+                if (index !== -1) clients[index] = client;
+            } else {
+                clients.push(client);
+            }
 
-  window.messageClient = function(id){
-    var c = clientsCache.find(function(x){ return x.id === id; });
-    if (!c) return;
-    var msg = 'Hi ' + c.name + ', this is StylesPC reaching out about your service.';
-    window.open('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(msg), '_blank');
-  };
+            saveData();
+            renderClients();
+            closeModal('clientModal');
+            alert('Client saved!');
+        }
 
-  window.editClient = function(id){
-    var c = clientsCache.find(function(x){ return x.id === id; });
-    if (!c) return;
-    document.getElementById('clientModalTitle').textContent = 'Edit client';
-    document.getElementById('clientFormId').value = c.id;
-    document.getElementById('clientNameInput').value = c.name;
-    document.getElementById('clientPhoneInput').value = c.phone;
-    document.getElementById('clientEmailInput').value = c.email || '';
-    document.getElementById('clientNotesInput').value = c.notes || '';
-    openModal('clientModalOverlay');
-  };
+        function saveUser() {
+            const id = currentEditId || 'u' + Date.now();
+            const user = {
+                id: id,
+                name: document.getElementById('userName').value,
+                email: document.getElementById('userEmail').value,
+                role: document.getElementById('userRole').value,
+                createdAt: currentEditId ? (users.find(u => u.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
 
-  window.deleteClient = function(id){
-    if (!confirm('Delete this client? Their tickets will stay but lose the client link.')) return;
-    sb.from('clients').delete().eq('id', id).then(function(res){
-      if (res.error) { alert(res.error.message); return; }
-      loadClients().then(loadTickets);
-    });
-  };
+            if (currentEditId) {
+                const index = users.findIndex(u => u.id === currentEditId);
+                if (index !== -1) users[index] = user;
+            } else {
+                users.push(user);
+            }
 
-  document.getElementById('newClientBtn').addEventListener('click', function(){
-    document.getElementById('clientModalTitle').textContent = 'New client';
-    document.getElementById('clientForm').reset();
-    document.getElementById('clientFormId').value = '';
-    openModal('clientModalOverlay');
-  });
-  document.getElementById('clientCancelBtn').addEventListener('click', function(){ closeModal('clientModalOverlay'); });
+            saveData();
+            renderUsers();
+            closeModal('userModal');
+            alert('User saved!');
+        }
 
-  document.getElementById('clientForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var id = document.getElementById('clientFormId').value;
-    var payload = {
-      name: document.getElementById('clientNameInput').value.trim(),
-      phone: document.getElementById('clientPhoneInput').value.replace(/\D/g,''),
-      email: document.getElementById('clientEmailInput').value.trim() || null,
-      notes: document.getElementById('clientNotesInput').value.trim() || null
-    };
-    var errEl = document.getElementById('clientFormError');
-    errEl.textContent = '';
-    var query = id ? sb.from('clients').update(payload).eq('id', id) : sb.from('clients').insert(payload);
-    query.then(function(res){
-      if (res.error) { errEl.textContent = res.error.message; return; }
-      closeModal('clientModalOverlay');
-      loadClients().then(renderTickets);
-    });
-  });
+        function renderTickets() {
+            const container = document.getElementById('ticketsList');
+            if (tickets.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No tickets</h3></div>';
+                return;
+            }
+            container.innerHTML = tickets.map(ticket => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-id">${ticket.id}</span>
+                            <span class="list-item-title">${ticket.device}</span>
+                            <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                        </div>
+                        <div class="list-item-subtitle">${ticket.clientName}</div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📱</span><span class="value">${ticket.phone}</span></div>
+                            <div class="detail-tag"><span class="label">🎯</span><span class="value">${ticket.priority}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit', '${ticket.id}')">✏️ Edit</button>
+                        <button class="btn btn-amber btn-sm" onclick="printTicket('${ticket.id}')">🖨️ Print</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${ticket.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  // ---------- TICKETS ----------
-  function loadTickets(){
-    return sb.from('tickets').select('*').order('created_at', {ascending:false}).then(function(res){
-      if (res.error) { console.error(res.error); return; }
-      ticketsCache = res.data || [];
-      renderTickets();
-      renderClients();
-    });
-  }
+        function renderClients() {
+            const container = document.getElementById('clientsList');
+            if (clients.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No clients</h3></div>';
+                return;
+            }
+            container.innerHTML = clients.map(client => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-title">${client.firstName} ${client.lastName}</span>
+                        </div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📱</span><span class="value">${client.phone}</span></div>
+                            <div class="detail-tag"><span class="label">📧</span><span class="value">${client.email || 'N/A'}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openClientModal('edit', '${client.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient('${client.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  function clientName(id){
-    var c = clientsCache.find(function(x){ return x.id === id; });
-    return c ? c.name : '—';
-  }
+        function renderUsers() {
+            const container = document.getElementById('usersList');
+            if (users.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No users</h3></div>';
+                return;
+            }
+            container.innerHTML = users.map(user => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-title">${user.name}</span>
+                            <span class="status-badge status-${user.role.toLowerCase()}">${user.role}</span>
+                        </div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📧</span><span class="value">${user.email}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openUserModal('edit', '${user.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  function statusPillClass(status){
-    if (status === 'ready' || status === 'delivered') return 'pill-teal';
-    if (status === 'cancelled') return 'pill-red';
-    return 'pill-amber';
-  }
+        function deleteTicket(id) {
+            if (confirm('Delete this ticket?')) {
+                tickets = tickets.filter(t => t.id !== id);
+                saveData();
+                renderTickets();
+            }
+        }
 
-  function renderTickets(){
-    var filter = document.getElementById('statusFilter').value;
-    var list = document.getElementById('ticketList');
-    var rows = ticketsCache.filter(function(t){ return !filter || t.status === filter; });
-    if (!rows.length){
-      list.innerHTML = '<div class="empty-state">No tickets match this filter yet.</div>';
-      return;
-    }
-    list.innerHTML = rows.map(function(t){
-      return (
-        '<div class="row-card">' +
-          '<div class="row-main">' +
-            '<div class="row-top">' +
-              '<span class="row-id mono">' + t.ticket_number + '</span>' +
-              '<span class="pill ' + statusPillClass(t.status) + '">' + STATUS_LABELS[t.status] + '</span>' +
-              '<span class="pill ' + (t.payment_status === 'paid' ? 'pill-teal' : 'pill-amber') + '">' + PAYMENT_LABELS[t.payment_status] + '</span>' +
-            '</div>' +
-            '<div class="row-title">' + escapeHtml(t.device) + ' — ' + escapeHtml(clientName(t.client_id)) + '</div>' +
-            '<div class="row-sub">' + escapeHtml(t.issue) + '</div>' +
-            '<div class="row-sub">' + (t.amount != null ? '$' + Number(t.amount).toFixed(2) : 'No amount set') + ' · ' + t.intake + ' in / ' + t.return_method + ' out</div>' +
-          '</div>' +
-          '<div class="row-actions">' +
-            '<button type="button" class="btn btn-ghost btn-sm" onclick="editTicket(\'' + t.id + '\')">Edit</button>' +
-            '<button type="button" class="btn btn-amber btn-sm" onclick="openReceipt(\'' + t.id + '\')">Receipt</button>' +
-            '<button type="button" class="btn btn-danger btn-sm" onclick="cancelTicket(\'' + t.id + '\')">Cancel</button>' +
-          '</div>' +
-        '</div>'
-      );
-    }).join('');
-  }
+        function deleteClient(id) {
+            if (confirm('Delete this client?')) {
+                clients = clients.filter(c => c.id !== id);
+                saveData();
+                renderClients();
+            }
+        }
 
-  document.getElementById('statusFilter').addEventListener('change', renderTickets);
+        function deleteUser(id) {
+            if (users.length === 1) {
+                alert('Cannot delete the last user!');
+                return;
+            }
+            if (confirm('Delete this user?')) {
+                users = users.filter(u => u.id !== id);
+                saveData();
+                renderUsers();
+            }
+        }
 
-  document.getElementById('newTicketBtn').addEventListener('click', function(){
-    if (!clientsCache.length){
-      alert('Add a client first, then create their ticket.');
-      return;
-    }
-    document.getElementById('ticketModalTitle').textContent = 'New ticket';
-    document.getElementById('ticketForm').reset();
-    document.getElementById('ticketFormId').value = '';
-    renderClientSelect();
-    openModal('ticketModalOverlay');
-  });
-  document.getElementById('ticketCancelBtn').addEventListener('click', function(){ closeModal('ticketModalOverlay'); });
+        function filterTickets() {
+            const search = document.getElementById('ticketSearch').value.toLowerCase();
+            const status = document.getElementById('ticketStatus').value;
+            const filtered = tickets.filter(t => 
+                (t.clientName.toLowerCase().includes(search) || t.device.toLowerCase().includes(search) || t.id.toLowerCase().includes(search)) &&
+                (!status || t.status === status)
+            );
 
-  window.editTicket = function(id){
-    var t = ticketsCache.find(function(x){ return x.id === id; });
-    if (!t) return;
-    document.getElementById('ticketModalTitle').textContent = 'Edit ticket ' + t.ticket_number;
-    document.getElementById('ticketFormId').value = t.id;
-    renderClientSelect();
-    document.getElementById('ticketClient').value = t.client_id || '';
-    document.getElementById('ticketDeviceInput').value = t.device;
-    document.getElementById('ticketIssueInput').value = t.issue;
-    document.getElementById('ticketStatusInput').value = t.status;
-    document.getElementById('ticketIntakeInput').value = t.intake;
-    document.getElementById('ticketReturnInput').value = t.return_method;
-    document.getElementById('ticketAmountInput').value = t.amount != null ? t.amount : '';
-    document.getElementById('ticketPaymentInput').value = t.payment_status;
-    openModal('ticketModalOverlay');
-  };
+            const container = document.getElementById('ticketsList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
+                return;
+            }
 
-  window.cancelTicket = function(id){
-    if (!confirm('Mark this ticket as cancelled?')) return;
-    sb.from('tickets').update({status:'cancelled'}).eq('id', id).then(function(res){
-      if (res.error) { alert(res.error.message); return; }
-      loadTickets();
-    });
-  };
+            container.innerHTML = filtered.map(ticket => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-id">${ticket.id}</span>
+                            <span class="list-item-title">${ticket.device}</span>
+                            <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                        </div>
+                        <div class="list-item-subtitle">${ticket.clientName}</div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit', '${ticket.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${ticket.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  document.getElementById('ticketForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var id = document.getElementById('ticketFormId').value;
-    var amountVal = document.getElementById('ticketAmountInput').value;
-    var payload = {
-      client_id: document.getElementById('ticketClient').value,
-      device: document.getElementById('ticketDeviceInput').value.trim(),
-      issue: document.getElementById('ticketIssueInput').value.trim(),
-      status: document.getElementById('ticketStatusInput').value,
-      intake: document.getElementById('ticketIntakeInput').value,
-      return_method: document.getElementById('ticketReturnInput').value,
-      amount: amountVal === '' ? null : Number(amountVal),
-      payment_status: document.getElementById('ticketPaymentInput').value
-    };
-    var errEl = document.getElementById('ticketFormError');
-    errEl.textContent = '';
-    var query = id ? sb.from('tickets').update(payload).eq('id', id) : sb.from('tickets').insert(payload);
-    query.then(function(res){
-      if (res.error) { errEl.textContent = res.error.message; return; }
-      closeModal('ticketModalOverlay');
-      loadTickets();
-    });
-  });
+        function filterClients() {
+            const search = document.getElementById('clientSearch').value.toLowerCase();
+            const filtered = clients.filter(c => 
+                c.firstName.toLowerCase().includes(search) || c.lastName.toLowerCase().includes(search) || c.phone.includes(search)
+            );
 
-  // ---------- RECEIPT ----------
-  var currentReceiptTicket = null;
+            const container = document.getElementById('clientsList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
+                return;
+            }
 
-  window.openReceipt = function(id){
-    var t = ticketsCache.find(function(x){ return x.id === id; });
-    if (!t) return;
-    currentReceiptTicket = t;
-    document.getElementById('receiptTicketNum').textContent = t.ticket_number;
-    document.getElementById('receiptClient').textContent = clientName(t.client_id);
-    document.getElementById('receiptDevice').textContent = t.device;
-    document.getElementById('receiptIssue').textContent = t.issue;
-    document.getElementById('receiptStatus').textContent = STATUS_LABELS[t.status];
-    document.getElementById('receiptPayment').textContent = PAYMENT_LABELS[t.payment_status];
-    document.getElementById('receiptAmount').textContent = t.amount != null ? '$' + Number(t.amount).toFixed(2) : '—';
-    openModal('receiptModalOverlay');
-  };
+            container.innerHTML = filtered.map(client => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-title">${client.firstName} ${client.lastName}</span>
+                        </div>
+                        <div class="list-item-details">
+                            <div class="detail-tag"><span class="label">📱</span><span class="value">${client.phone}</span></div>
+                        </div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openClientModal('edit', '${client.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteClient('${client.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
 
-  document.getElementById('receiptCloseBtn').addEventListener('click', function(){ closeModal('receiptModalOverlay'); });
-  document.getElementById('receiptPrintBtn').addEventListener('click', function(){ window.print(); });
+        function printTicket(id) {
+            const ticket = tickets.find(t => t.id === id);
+            if (!ticket) return;
 
-  function receiptMessage(t){
-    return 'StylesPC — Receipt for ' + t.ticket_number + '\n' +
-      'Device: ' + t.device + '\n' +
-      'Issue: ' + t.issue + '\n' +
-      'Status: ' + STATUS_LABELS[t.status] + '\n' +
-      'Payment: ' + PAYMENT_LABELS[t.payment_status] + '\n' +
-      'Amount: ' + (t.amount != null ? '$' + Number(t.amount).toFixed(2) : 'N/A') + '\n' +
-      'Thank you for choosing StylesPC.';
-  }
+            const html = `
+                <html>
+                <head>
+                    <style>
+                        body { font-family: Arial; margin: 20px; }
+                        .header { border-bottom: 2px solid #2F6F63; margin-bottom: 20px; padding-bottom: 10px; }
+                        .section { margin-bottom: 20px; }
+                        .label { font-weight: bold; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>StylesPC Service Ticket</h1>
+                        <p>Service Tag: <strong>${ticket.id}</strong></p>
+                    </div>
+                    <div class="section">
+                        <div class="label">Client Name:</div>
+                        <div>${ticket.clientName}</div>
+                        <div class="label">Phone:</div>
+                        <div>${ticket.phone}</div>
+                        <div class="label">Device:</div>
+                        <div>${ticket.device}</div>
+                    </div>
+                    <div class="section">
+                        <div class="label">Issue:</div>
+                        <div>${ticket.issue}</div>
+                    </div>
+                    <div class="section">
+                        <div class="label">Status:</div>
+                        <div>${ticket.status}</div>
+                        <div class="label">Priority:</div>
+                        <div>${ticket.priority}</div>
+                    </div>
+                    <hr>
+                    <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+                        StylesPC — Computer & Laptop Repair
+                        <br>
+                        ajstyleg@gmail.com · (876) 334-1156
+                    </p>
+                </body>
+                </html>
+            `;
 
-  function logReceipt(t){
-    sb.from('receipts').insert({ ticket_id: t.id, amount: t.amount || 0, method: 'sent' });
-  }
+            const opt = {
+                margin: 10,
+                filename: `ticket-${ticket.id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+            };
 
-  document.getElementById('receiptWhatsAppBtn').addEventListener('click', function(){
-    if (!currentReceiptTicket) return;
-    var t = currentReceiptTicket;
-    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
-    if (!c || !c.phone) { alert('No phone number on file for this client.'); return; }
-    window.open('https://wa.me/' + c.phone + '?text=' + encodeURIComponent(receiptMessage(t)), '_blank');
-    logReceipt(t);
-  });
+            html2pdf().set(opt).from(html).save();
+        }
 
-  document.getElementById('receiptSmsBtn').addEventListener('click', function(){
-    if (!currentReceiptTicket) return;
-    var t = currentReceiptTicket;
-    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
-    if (!c || !c.phone) { alert('No phone number on file for this client.'); return; }
-    // sms: URI support varies by OS/browser — works best on mobile devices with a default SMS app.
-    window.open('sms:' + c.phone + '?body=' + encodeURIComponent(receiptMessage(t)), '_blank');
-    logReceipt(t);
-  });
+        function updateDashboard() {
+            document.getElementById('totalTickets').textContent = tickets.length;
+            document.getElementById('openTickets').textContent = tickets.filter(t => t.status === 'Open').length;
+            document.getElementById('totalClients').textContent = clients.length;
+            document.getElementById('totalAdmins').textContent = users.filter(u => u.role === 'Admin').length;
 
-  document.getElementById('receiptEmailBtn').addEventListener('click', function(){
-    if (!currentReceiptTicket) return;
-    var t = currentReceiptTicket;
-    var c = clientsCache.find(function(x){ return x.id === t.client_id; });
-    if (!c || !c.email) { alert('No email on file for this client. Add one by editing the client.'); return; }
-    var subject = 'Your StylesPC receipt — ' + t.ticket_number;
-    window.open('mailto:' + c.email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(receiptMessage(t)), '_blank');
-    logReceipt(t);
-  });
+            const allActivity = [
+                ...tickets.map(t => ({ type: 'ticket', name: `Ticket ${t.id}`, date: t.createdAt })),
+                ...clients.map(c => ({ type: 'client', name: `Client ${c.firstName} ${c.lastName}`, date: c.createdAt }))
+            ].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
 
-  document.getElementById('receiptCopyBtn').addEventListener('click', function(){
-    if (!currentReceiptTicket) return;
-    var msg = receiptMessage(currentReceiptTicket);
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(msg).then(function(){
-        alert('Receipt message copied — paste it anywhere.');
-      }, function(){
-        prompt('Copy this message manually:', msg);
-      });
-    } else {
-      prompt('Copy this message manually:', msg);
-    }
-  });
+            const container = document.getElementById('recentActivity');
+            if (allActivity.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No activity</h3></div>';
+            } else {
+                container.innerHTML = allActivity.map(item => `
+                    <div class="list-item">
+                        <div class="list-item-main">
+                            <span class="list-item-title">${item.name}</span>
+                            <span class="list-item-subtitle">${new Date(item.date).toLocaleString()}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
 
-  // ---------- MODAL HELPERS ----------
-  function openModal(id){ document.getElementById(id).hidden = false; }
-  function closeModal(id){ document.getElementById(id).hidden = true; }
-  document.querySelectorAll('.modal-overlay').forEach(function(overlay){
-    overlay.addEventListener('click', function(e){
-      if (e.target === overlay) overlay.hidden = true;
-    });
-  });
+        function saveData() {
+            localStorage.setItem('tickets', JSON.stringify(tickets));
+            localStorage.setItem('clients', JSON.stringify(clients));
+            localStorage.setItem('users', JSON.stringify(users));
+            updateDashboard();
+        }
 
-  function escapeHtml(str){
-    return String(str == null ? '' : str).replace(/[&<>"']/g, function(m){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-    });
-  }
-</script>
+        function exportData() {
+            const data = { tickets, clients, users, exportDate: new Date().toISOString() };
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+        }
+
+        function clearAllData() {
+            tickets = [];
+            clients = [];
+            users = [];
+            saveData();
+            renderTickets();
+            renderClients();
+            renderUsers();
+            alert('All data cleared!');
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                window.location.href = '/';
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
