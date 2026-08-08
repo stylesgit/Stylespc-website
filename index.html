@@ -7,9 +7,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-    <!-- EmailJS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
-    </script>
     <!-- Leaflet (map + pickup distance/fare estimate) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -1656,11 +1653,13 @@
                         <tr><th>Service</th><th style="text-align:right;">Price</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Booking Fee (to arrange &amp; facilitate)</td><td class="amt">$500</td></tr>
-                        <tr><td>Assessment Fee (technician diagnoses the issue)</td><td class="amt">$2,000</td></tr>
+                        <tr><td>Booking Fee (to arrange &amp; facilitate) — due upfront</td><td class="amt">$1,000</td></tr>
+                        <tr><td>Assessment Fee (technician diagnoses the issue)</td><td class="amt">$2,500</td></tr>
                     </tbody>
                 </table>
-                <p class="price-note">The assessment fee is charged by our repair partner to diagnose the issue; repair cost is quoted separately once the issue is confirmed.</p>
+                <p class="price-note">The $1,000 booking fee is required upfront by bank transfer to confirm your request. The assessment fee is charged separately by our repair partner; repair cost is quoted once the issue is confirmed.</p>
+
+                <button type="button" class="btn btn-ghost" id="viewBankDetailsBtn" style="margin:6px 0 22px;">🏦 View Bank Transfer Details</button>
 
                 <form id="tvForm" class="mini-form" style="margin-top:22px;max-width:440px;">
                     <div class="field">
@@ -1679,8 +1678,16 @@
                         <label for="tvIssue">TV brand/model &amp; describe the issue</label>
                         <textarea id="tvIssue" name="issue" required placeholder="e.g. 50&quot; Samsung, screen is dim/flickering"></textarea>
                     </div>
+                    <div class="field">
+                        <label for="tvTransferRef">Bank transfer reference / confirmation number</label>
+                        <input type="text" id="tvTransferRef" name="transferRef" placeholder="e.g. last 4 digits or transaction ID" required>
+                    </div>
+                    <label style="display:flex; align-items:flex-start; gap:8px; margin:4px 0 16px; font-size:0.85rem; cursor:pointer;">
+                        <input type="checkbox" id="tvPaymentConfirm" style="width:auto; margin-top:3px;" required>
+                        <span>I confirm I have completed the $1,000 bank transfer using the details above, and the reference number I entered is accurate.</span>
+                    </label>
                     <button type="submit" class="btn btn-email" id="tvSubmitBtn">✉️ Request TV Repair Referral</button>
-                    <p class="form-note">We'll pass your details to our repair partner, who will reach out to arrange the assessment.</p>
+                    <p class="form-note">We'll verify your payment and pass your details to our repair partner, who will reach out to arrange the assessment.</p>
                     <p id="tvFormStatus" role="status"></p>
                 </form>
             </div>
@@ -1911,59 +1918,85 @@
     </div>
 
     <!-- ============================================================
+    BANK TRANSFER DISCLAIMER MODAL (TV Repair booking fee)
+    ============================================================ -->
+    <div class="disclaimer-overlay" id="bankDisclaimerModal" hidden>
+        <div class="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="bankDisclaimerTitle">
+            <h2 id="bankDisclaimerTitle"><span class="icon">🏦</span> Bank Transfer — Please Read</h2>
+            <p>The $1,000 booking fee confirms your TV repair referral request and is <strong>non‑refundable</strong> once we've passed your details to our repair partner. This fee covers the facilitation/referral service only — StylesPC is not the technician performing the repair and cannot guarantee repair outcomes, timelines, or the final repair cost.</p>
+            <p>Before sending, please confirm the account name matches <strong>Andrew Johnson</strong>. Keep your transaction receipt or reference number — you'll need to enter it on the request form to confirm payment.</p>
+            <label style="display:flex;align-items:flex-start;gap:8px;margin:14px 0;font-size:0.85rem;cursor:pointer;">
+                <input type="checkbox" id="bankDisclaimerAgree" style="width:auto;margin-top:3px;">
+                <span>I have read and agree to the above.</span>
+            </label>
+            <div id="bankAccountDetails" hidden style="margin-bottom:16px;">
+                <div style="padding:12px 14px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;margin-bottom:10px;">
+                    <p style="font-weight:600;margin:0 0 4px;font-size:0.85rem;">NCB</p>
+                    <p style="margin:0;font-size:0.85rem;">Name: Andrew Johnson</p>
+                    <p style="margin:0;font-size:0.85rem;">Account #: 435067077</p>
+                </div>
+                <div style="padding:12px 14px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;">
+                    <p style="font-weight:600;margin:0 0 4px;font-size:0.85rem;">JMMB</p>
+                    <p style="margin:0;font-size:0.85rem;">Name: Andrew Johnson</p>
+                    <p style="margin:0;font-size:0.85rem;">Account #: 000300229897</p>
+                </div>
+            </div>
+            <button class="btn-close-modal" id="closeBankDisclaimerBtn">Close</button>
+        </div>
+    </div>
+
+    <!-- ============================================================
     JAVASCRIPT
     ============================================================ -->
     <script>
         // =============================================================
-        //  ⚠️ EMAILJS CONFIGURATION — NOT YET SET UP ⚠️
-        //  This is why booking emails aren't reaching your inbox: these
-        //  are still placeholder values, so every booking currently
-        //  falls back to opening a draft in the CUSTOMER's own email
-        //  app — it only reaches you if THEY manually hit send.
-        //  Get free real credentials (200 emails/month) at
-        //  https://www.emailjs.com/ and paste them in below.
+        //  EMAIL NOTIFICATIONS — via Formspree (silent background POST)
+        //  Endpoint: https://formspree.io/f/mbgrrzja
+        //  Falls back to opening the visitor's own email client (mailto)
+        //  only if the Formspree request itself fails.
         // =============================================================
-        const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
-        const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
-        const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
-
-        // Track if EmailJS is configured
-        const EMAILJS_CONFIGURED = EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY' &&
-            EMAILJS_SERVICE_ID !== 'YOUR_EMAILJS_SERVICE_ID' &&
-            EMAILJS_TEMPLATE_ID !== 'YOUR_EMAILJS_TEMPLATE_ID';
-
-        // Initialize EmailJS if configured
-        if (EMAILJS_CONFIGURED) {
-            emailjs.init({
-                publicKey: EMAILJS_PUBLIC_KEY,
-                blockHeadless: true,
-            });
-            console.log('✅ EmailJS initialized');
-        } else {
-            console.log('⚠️ EmailJS not configured — using mailto fallback');
-        }
+        const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja';
 
         /**
-         * Send an email via EmailJS with mailto fallback
+         * Send an email by POSTing to Formspree in the background.
+         * Falls back to mailto only if the Formspree request fails.
          */
         function sendEmail(templateParams) {
-            return new Promise((resolve, reject) => {
-                // If EmailJS is not configured, use mailto fallback
-                if (!EMAILJS_CONFIGURED) {
-                    console.log('📧 Using mailto fallback');
-                    openMailTo(templateParams);
-                    resolve({ status: 'fallback', message: 'Email client opened' });
-                    return;
-                }
+            return new Promise(function(resolve) {
+                var plainMessage = (templateParams.message_html || '')
+                    .replace(/<[^>]*>/g, '\n')
+                    .replace(/&nbsp;/g, ' ')
+                    .replace(/\n{3,}/g, '\n\n')
+                    .trim();
 
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
-                    .then(function(response) {
-                        console.log('✅ EmailJS sent:', response);
-                        resolve(response);
-                    }, function(error) {
-                        console.error('❌ EmailJS error:', error);
-                        // Fallback to mailto on error
-                        console.log('📧 Falling back to mailto');
+                var payload = {
+                    _subject: templateParams.subject || 'New Enquiry — StylesPC',
+                    _replyto: templateParams.from_email || '',
+                    name: templateParams.from_name || '',
+                    phone: templateParams.from_phone || '',
+                    message: plainMessage
+                };
+
+                fetch(FORMSPREE_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                })
+                    .then(function(res) {
+                        if (res.ok) {
+                            console.log('✅ Sent via Formspree');
+                            resolve({ status: 'sent' });
+                        } else {
+                            return res.json().then(function(data) {
+                                throw new Error((data && data.error) || 'Formspree request failed (' + res.status + ')');
+                            });
+                        }
+                    })
+                    .catch(function(err) {
+                        console.error('❌ Formspree error, falling back to mailto:', err);
                         openMailTo(templateParams);
                         resolve({ status: 'fallback', message: 'Email client opened' });
                     });
@@ -1972,6 +2005,7 @@
 
         /**
          * Open the user's email client with pre-filled details
+         * (used only as a fallback if Formspree itself fails)
          */
         function openMailTo(params) {
             var to = params.to_email || 'ajstyleg@gmail.com';
@@ -2036,6 +2070,46 @@
             }
 
             window.showWhatsAppDisclaimer = showDisclaimer;
+        })();
+
+
+        // =============================================================
+        //  BANK TRANSFER DISCLAIMER MODAL (TV Repair booking fee)
+        //  Account details only reveal after the customer checks the
+        //  "I agree" box — nothing is shown by default.
+        // =============================================================
+        (function() {
+            var viewBtn = document.getElementById('viewBankDetailsBtn');
+            var modal = document.getElementById('bankDisclaimerModal');
+            var closeBtn = document.getElementById('closeBankDisclaimerBtn');
+            var agreeCheckbox = document.getElementById('bankDisclaimerAgree');
+            var detailsBox = document.getElementById('bankAccountDetails');
+            if (!viewBtn || !modal) return;
+
+            function showModal() {
+                modal.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function hideModal() {
+                modal.hidden = true;
+                document.body.style.overflow = '';
+            }
+
+            viewBtn.addEventListener('click', showModal);
+            if (closeBtn) closeBtn.addEventListener('click', hideModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) hideModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && !modal.hidden) hideModal();
+            });
+
+            if (agreeCheckbox && detailsBox) {
+                agreeCheckbox.addEventListener('change', function() {
+                    detailsBox.hidden = !agreeCheckbox.checked;
+                });
+            }
         })();
 
 
@@ -2157,8 +2231,8 @@
                     from_email: 'visitor@example.com'
                 };
                 sendEmail(templateParams)
-                    .then(function() {
-                        if (!EMAILJS_CONFIGURED) {
+                    .then(function(sendResult) {
+                        if (sendResult && sendResult.status === 'fallback') {
                             // mailto fallback was used, user's email client opened
                             // no alert needed since the email client opens
                         } else {
@@ -2236,12 +2310,12 @@
 
                 status.textContent = 'Sending enquiry…';
                 sendEmail(templateParams)
-                    .then(function() {
+                    .then(function(sendResult) {
                         status.textContent = 'Enquiry sent! We\'ll get back to you shortly.';
                         status.classList.add('ok');
                         buildNameInput.value = '';
                         buildPhoneInput.value = '';
-                        if (!EMAILJS_CONFIGURED) {
+                        if (sendResult && sendResult.status === 'fallback') {
                             // mailto fallback was used, email client opened
                             status.textContent =
                             'Please check your email client — we\'ve opened a draft for you.';
@@ -2319,12 +2393,12 @@
 
                 status.textContent = 'Sending enquiry…';
                 sendEmail(templateParams)
-                    .then(function() {
+                    .then(function(sendResult) {
                         status.textContent = 'Enquiry sent! We\'ll get back to you shortly.';
                         status.classList.add('ok');
                         refurbNameInput.value = '';
                         refurbPhoneInput.value = '';
-                        if (!EMAILJS_CONFIGURED) {
+                        if (sendResult && sendResult.status === 'fallback') {
                             status.textContent =
                             'Please check your email client — we\'ve opened a draft for you.';
                         }
@@ -2402,12 +2476,12 @@
 
                 status.textContent = 'Sending request…';
                 sendEmail(templateParams)
-                    .then(function() {
+                    .then(function(sendResult) {
                         status.textContent = 'Request sent! We\'ll reply with banking details shortly.';
                         status.classList.add('ok');
                         bankNameInput.value = '';
                         bankPhoneInput.value = '';
-                        if (!EMAILJS_CONFIGURED) {
+                        if (sendResult && sendResult.status === 'fallback') {
                             status.textContent =
                             'Please check your email client — we\'ve opened a draft for you.';
                         }
@@ -2436,6 +2510,8 @@
                 var phone = document.getElementById('tvPhone').value.trim();
                 var email = document.getElementById('tvEmail').value.trim();
                 var issue = document.getElementById('tvIssue').value.trim();
+                var transferRef = document.getElementById('tvTransferRef').value.trim();
+                var paymentConfirmed = document.getElementById('tvPaymentConfirm').checked;
 
                 status.classList.remove('ok', 'err');
 
@@ -2449,14 +2525,26 @@
                     status.classList.add('err');
                     return;
                 }
+                if (!transferRef) {
+                    status.textContent = 'Please enter your bank transfer reference number.';
+                    status.classList.add('err');
+                    return;
+                }
+                if (!paymentConfirmed) {
+                    status.textContent = 'Please complete the $1,000 bank transfer and check the confirmation box before submitting.';
+                    status.classList.add('err');
+                    return;
+                }
 
                 var templateParams = {
                     to_email: 'ajstyleg@gmail.com',
-                    subject: 'TV Repair Referral Request — Backlight Issue',
+                    subject: 'TV Repair Referral Request — Backlight Issue (Payment Confirmed)',
                     message_html: 'Hi StylesPC,\n\nI\'d like to request a TV repair referral (Backlight Repair).\n\n' +
                         'Name: ' + name + '\nPhone: ' + phone + '\nEmail: ' + email +
                         '\nTV / Issue: ' + issue +
-                        '\n\nBooking fee ($500) and assessment fee ($2,000) noted. Please pass my details to your repair partner.\n\nThanks!',
+                        '\n\n$1,000 booking fee — bank transfer reference: ' + transferRef +
+                        '\n(Please verify this against your bank statement before confirming the booking.)' +
+                        '\n\nAssessment fee ($2,500) noted separately. Please pass my details to your repair partner.\n\nThanks!',
                     from_name: name,
                     from_phone: phone,
                     from_email: email
@@ -2465,12 +2553,12 @@
                 submitBtn.disabled = true;
                 status.textContent = 'Sending request…';
                 sendEmail(templateParams)
-                    .then(function() {
-                        status.textContent = 'Request sent! We\'ll pass your details to our repair partner shortly.';
+                    .then(function(sendResult) {
+                        status.textContent = 'Request sent! We\'ll verify your payment and pass your details to our repair partner shortly.';
                         status.classList.add('ok');
                         submitBtn.disabled = false;
                         tvForm.reset();
-                        if (!EMAILJS_CONFIGURED) {
+                        if (sendResult && sendResult.status === 'fallback') {
                             status.textContent = 'Please check your email client — we\'ve opened a draft for you.';
                         }
                     })
@@ -3097,7 +3185,7 @@
                         '\nEst. pickup fee: $' + currentPickupEstimate.fare.toLocaleString() +
                         (currentPickupEstimate.expedited ? ' (incl. expedited +25%)' : '')) : '';
 
-                // Send email via EmailJS or mailto fallback
+                // Send email via Formspree, with mailto fallback only if that fails
                 var templateParams = {
                     to_email: 'ajstyleg@gmail.com',
                     subject: 'New Repair Booking — ' + ticketNumber,
@@ -3119,14 +3207,14 @@
 
                 status.textContent = 'Booking saved! Sending notification…';
                 sendEmail(templateParams)
-                    .then(function() {
+                    .then(function(sendResult) {
                         status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                             '. Check your email for confirmation.';
                         status.classList.add('ok');
                         document.getElementById('bookForm').reset();
                         addressHint.textContent = '(optional)';
                         addressField.required = false;
-                        if (!EMAILJS_CONFIGURED) {
+                        if (sendResult && sendResult.status === 'fallback') {
                             status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                                 '. Please check your email client — we\'ve opened a draft for you.';
                         }
@@ -3175,23 +3263,6 @@
                 window.showWhatsAppDisclaimer && window.showWhatsAppDisclaimer();
             });
         });
-
-        // =============================================================
-        //  CONFIGURATION STATUS DISPLAY
-        // =============================================================
-        if (!EMAILJS_CONFIGURED) {
-            console.log('📧 EmailJS not configured — using mailto fallback for all notifications.');
-            // Add a subtle indicator on the page
-            var note = document.createElement('div');
-            note.style.cssText =
-                'background:rgba(201,122,43,0.12);border:1px solid rgba(201,122,43,0.3);border-radius:6px;padding:8px 16px;margin:10px auto;max-width:1120px;font-size:0.82rem;color:var(--ink-soft);text-align:center;';
-            note.innerHTML =
-                '📧 <strong>Email notifications:</strong> Your email client will open with pre-filled booking details. For automatic notifications, <a href="https://www.emailjs.com/" target="_blank" style="color:var(--teal-dark);font-weight:600;">set up EmailJS</a> and update the keys in the code.';
-            var wrap = document.querySelector('.wrap');
-            if (wrap) {
-                wrap.parentNode.insertBefore(note, wrap);
-            }
-        }
     </script>
 
 </body>
