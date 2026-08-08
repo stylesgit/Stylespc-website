@@ -134,97 +134,6 @@
             padding: 6px 12px;
             font-size: 0.78rem;
         }
-
-        /* Admin tabs */
-        .admin-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 18px;
-            border-bottom: 1px solid var(--rule);
-        }
-        .admin-tab-btn {
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid transparent;
-            padding: 10px 4px;
-            margin-right: 18px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--ink-soft);
-            cursor: pointer;
-        }
-        .admin-tab-btn.active {
-            color: var(--teal-dark);
-            border-bottom-color: var(--teal-dark);
-        }
-
-        /* Client row cards */
-        .row-card {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: 14px;
-            flex-wrap: wrap;
-            padding: 14px 16px;
-            border: 1px solid var(--rule);
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-        .row-main {
-            min-width: 200px;
-        }
-        .row-title {
-            font-weight: 600;
-        }
-        .row-sub {
-            font-size: 0.82rem;
-            color: var(--ink-soft);
-            margin-top: 2px;
-        }
-        .row-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .empty-state {
-            font-size: 0.88rem;
-            color: var(--ink-soft);
-            padding: 20px 0;
-        }
-
-        /* Simple admin modal (client add/edit) */
-        .admin-modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(20, 22, 19, 0.55);
-            z-index: 70;
-            display: none;
-            align-items: flex-start;
-            justify-content: center;
-            padding: 40px 20px;
-            overflow-y: auto;
-        }
-        .admin-modal-overlay:not([hidden]) {
-            display: flex;
-        }
-        .admin-modal {
-            background: var(--white);
-            border-radius: 8px;
-            padding: 26px;
-            width: 100%;
-            max-width: 420px;
-        }
-        .admin-modal h3 {
-            font-size: 1.05rem;
-            margin-bottom: 16px;
-        }
-        .admin-modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            justify-content: flex-end;
-        }
         .btn-email {
             background: var(--teal);
             color: var(--white);
@@ -341,15 +250,6 @@
         }
         .nav-cta:hover {
             background: var(--teal-dark);
-        }
-
-        /* Admin area is discreet — hidden from normal scrolling, only
-           shown via the small floating link or a direct #admin visit */
-        #admin {
-            display: none;
-        }
-        #admin.revealed {
-            display: block;
         }
 
         /* ============================================================
@@ -1074,7 +974,8 @@
         #formStatus,
         #buildFormStatus,
         #refurbFormStatus,
-        #bankFormStatus {
+        #bankFormStatus,
+        #tvFormStatus {
             font-size: 0.88rem;
             font-weight: 600;
         }
@@ -1762,8 +1663,8 @@
                     </thead>
                     <tbody>
                         <tr><td>Booking Fee (to arrange &amp; facilitate) — due upfront</td><td class="amt">$1,000</td></tr>
-                        <tr><td>Assessment Fee (technician diagnoses the issue)</td><td class="amt">$2,500</td></tr>
                     </tbody>
+
                 </table>
                 <p class="price-note">The $1,000 booking fee is required upfront by bank transfer to confirm your request. The assessment fee is charged separately by our repair partner; repair cost is quoted once the issue is confirmed.</p>
 
@@ -1872,7 +1773,6 @@
                         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟠 <strong>Far zone — per km:</strong> Papine &amp; other outlying Saint Andrew areas</p>
                         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0;">⚡ <strong>Expedited service:</strong> +25% on top of the pickup fee</p>
                     </div>
-                    <!-- Temporary WhatsApp disclaimer -->
                     <div style="margin-top:24px;padding:16px 20px;background:rgba(201,122,43,0.08);border:1px solid rgba(201,122,43,0.25);border-radius:6px;">
                         <p style="font-size:0.88rem;color:var(--ink-soft);margin:0;display:flex;align-items:flex-start;gap:10px;">
                             <span style="font-size:1.2rem;">📧</span>
@@ -1937,100 +1837,6 @@
             </div>
         </section>
 
-        <!-- ============================================================
-        ADMIN (staff only — not linked from main nav)
-        ============================================================ -->
-        <section id="admin" class="alt">
-            <div class="wrap" style="max-width:820px;">
-                <div class="section-head">
-                    <span class="eyebrow">Admin</span>
-                    <h2>Admin Sign In</h2>
-                    <p>Staff access only — sign in to manage tickets and clients.</p>
-                </div>
-
-                <div id="adminLoginBox">
-                    <form id="adminLoginForm" class="mini-form">
-                        <div class="field">
-                            <label for="adminEmail">Email</label>
-                            <input type="email" id="adminEmail" name="email" required autocomplete="username">
-                        </div>
-                        <div class="field">
-                            <label for="adminPassword">Password</label>
-                            <input type="password" id="adminPassword" name="password" required autocomplete="current-password">
-                        </div>
-                        <button type="submit" class="btn btn-primary" id="adminLoginBtn">Sign In</button>
-                        <p id="adminLoginStatus" role="status"></p>
-                    </form>
-                </div>
-
-                <div id="adminDashboard" hidden>
-                    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:16px;">
-                        <p style="margin:0;">Signed in as <strong id="adminEmailDisplay"></strong></p>
-                        <div style="display:flex;gap:10px;">
-                            <button type="button" class="btn btn-ghost" id="adminRefreshBtn">↻ Refresh</button>
-                            <button type="button" class="btn btn-ghost" id="adminLogoutBtn">Sign Out</button>
-                        </div>
-                    </div>
-
-                    <div class="admin-tabs">
-                        <button type="button" class="admin-tab-btn active" data-admin-tab="tickets">Tickets</button>
-                        <button type="button" class="admin-tab-btn" data-admin-tab="clients">Clients</button>
-                    </div>
-
-                    <div id="adminTicketsPanel">
-                        <div id="adminBookingsWrap" style="overflow-x:auto;">
-                            <p id="adminBookingsStatus" role="status">Loading bookings…</p>
-                            <table class="price-table" id="adminBookingsTable" style="display:none;">
-                                <thead><tr id="adminTableHead"></tr></thead>
-                                <tbody id="adminTableBody"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div id="adminClientsPanel" hidden>
-                        <div style="display:flex;justify-content:flex-end;margin-bottom:14px;">
-                            <button type="button" class="btn btn-primary" id="newClientBtn">+ New Client</button>
-                        </div>
-                        <p id="adminClientsStatus" role="status">Loading clients…</p>
-                        <div id="adminClientList"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ============================================================
-        ADMIN — CLIENT ADD/EDIT MODAL
-        ============================================================ -->
-        <div class="admin-modal-overlay" id="clientModalOverlay" hidden>
-            <div class="admin-modal">
-                <h3 id="clientModalTitle">New client</h3>
-                <form id="clientForm" class="mini-form">
-                    <input type="hidden" id="clientFormId">
-                    <div class="field">
-                        <label for="clientNameInput">Full name</label>
-                        <input type="text" id="clientNameInput" required>
-                    </div>
-                    <div class="field">
-                        <label for="clientPhoneInput">Phone / WhatsApp (digits + country code)</label>
-                        <input type="tel" id="clientPhoneInput" placeholder="18765551234" inputmode="numeric" pattern="[0-9]{7,15}" required>
-                    </div>
-                    <div class="field">
-                        <label for="clientEmailInput">Email (optional)</label>
-                        <input type="email" id="clientEmailInput">
-                    </div>
-                    <div class="field">
-                        <label for="clientNotesInput">Notes (optional)</label>
-                        <textarea id="clientNotesInput" rows="2"></textarea>
-                    </div>
-                    <p id="clientFormError" class="form-note" style="color:#a33;"></p>
-                    <div class="admin-modal-actions">
-                        <button type="button" class="btn btn-ghost" id="clientCancelBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Client</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
     </main>
 
     <!-- ============================================================
@@ -2051,8 +1857,8 @@
         </div>
     </footer>
 
-    <!-- Discreet admin access — intentionally not in the main nav or footer -->
-    <a href="#admin" id="adminDiscreetLink" style="position:fixed;bottom:12px;right:14px;font-size:0.68rem;color:var(--ink-soft);opacity:0.35;text-decoration:none;z-index:60;letter-spacing:0.02em;font-family:'IBM Plex Mono';">Admin</a>
+    <!-- Admin link – points to separate admin.html -->
+    <a href="admin.html" id="adminDiscreetLink" style="position:fixed;bottom:12px;right:14px;font-size:0.68rem;color:var(--ink-soft);opacity:0.35;text-decoration:none;z-index:60;letter-spacing:0.02em;font-family:'IBM Plex Mono';">Admin</a>
 
     <!-- ============================================================
     DISCLAIMER MODAL (WhatsApp unavailable)
@@ -2108,16 +1914,9 @@
     <script>
         // =============================================================
         //  EMAIL NOTIFICATIONS — via Formspree (silent background POST)
-        //  Endpoint: https://formspree.io/f/mbgrrzja
-        //  Falls back to opening the visitor's own email client (mailto)
-        //  only if the Formspree request itself fails.
         // =============================================================
         const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja';
 
-        /**
-         * Send an email by POSTing to Formspree in the background.
-         * Falls back to mailto only if the Formspree request fails.
-         */
         function sendEmail(templateParams) {
             return new Promise(function(resolve) {
                 var plainMessage = (templateParams.message_html || '')
@@ -2135,20 +1934,21 @@
                 };
 
                 fetch(FORMSPREE_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                })
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    })
                     .then(function(res) {
                         if (res.ok) {
                             console.log('✅ Sent via Formspree');
                             resolve({ status: 'sent' });
                         } else {
                             return res.json().then(function(data) {
-                                throw new Error((data && data.error) || 'Formspree request failed (' + res.status + ')');
+                                throw new Error((data && data.error) || 'Formspree request failed (' + res
+                                .status + ')');
                             });
                         }
                     })
@@ -2160,23 +1960,69 @@
             });
         }
 
-        /**
-         * Open the user's email client with pre-filled details
-         * (used only as a fallback if Formspree itself fails)
-         */
         function openMailTo(params) {
             var to = params.to_email || 'ajstyleg@gmail.com';
             var subject = encodeURIComponent(params.subject || 'New Enquiry');
             var body = encodeURIComponent(
-                (params.message_html || '').replace(/<[^>]*>/g, '\n') // strip HTML tags for plain text
+                (params.message_html || '').replace(/<[^>]*>/g, '\n')
                 .replace(/&nbsp;/g, ' ')
                 .replace(/\s+/g, ' ')
                 .trim() +
                 '\n\n---\nSent from StylesPC website'
             );
-            var mailto = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
-            window.location.href = mailto;
+            window.location.href = 'mailto:' + to + '?subject=' + subject + '&body=' + body;
         }
+
+
+        // =============================================================
+        //  DESIGN SETTINGS (localStorage) – loaded from admin.html
+        // =============================================================
+        const DESIGN_STORAGE_KEY = 'stylespc_design_settings';
+        const DEFAULT_DESIGN = {
+            paper: '#F3EFE7',
+            teal: '#2F6F63',
+            amber: '#C97A2B',
+            ink: '#1F2421',
+            fontFamily: 'IBM Plex Sans',
+        };
+
+        function loadDesignSettings() {
+            let settings = DEFAULT_DESIGN;
+            try {
+                const stored = localStorage.getItem(DESIGN_STORAGE_KEY);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    settings = { ...DEFAULT_DESIGN, ...parsed };
+                }
+            } catch (_) {}
+            return settings;
+        }
+
+        function darken(hex, percent) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c[0] + c[0] + c[1] + c[1] + c[2] + c[2];
+            let r = parseInt(c.substring(0, 2), 16),
+                g = parseInt(c.substring(2, 4), 16),
+                b = parseInt(c.substring(4, 6), 16);
+            r = Math.max(0, r - percent);
+            g = Math.max(0, g - percent);
+            b = Math.max(0, b - percent);
+            return '#' + [r, g, b].map(x => Math.round(x).toString(16).padStart(2, '0')).join('');
+        }
+
+        function applyDesignSettings(settings) {
+            const root = document.documentElement;
+            root.style.setProperty('--paper', settings.paper);
+            root.style.setProperty('--teal', settings.teal);
+            root.style.setProperty('--teal-dark', darken(settings.teal, 15));
+            root.style.setProperty('--amber', settings.amber);
+            root.style.setProperty('--ink', settings.ink);
+            document.body.style.fontFamily = settings.fontFamily + ', sans-serif';
+        }
+
+        // Apply design on load
+        const initialDesign = loadDesignSettings();
+        applyDesignSettings(initialDesign);
 
 
         // =============================================================
@@ -2232,8 +2078,6 @@
 
         // =============================================================
         //  BANK TRANSFER DISCLAIMER MODAL (TV Repair booking fee)
-        //  Account details only reveal after the customer checks the
-        //  "I agree" box — nothing is shown by default.
         // =============================================================
         (function() {
             var viewBtn = document.getElementById('viewBankDetailsBtn');
@@ -2374,7 +2218,7 @@
 
 
         // =============================================================
-        //  FIRESTICK – Email Enquiry (with fallback)
+        //  FIRESTICK – Email Enquiry
         // =============================================================
         var firestickBtn = document.getElementById('firestickBtn');
         if (firestickBtn) {
@@ -2391,7 +2235,6 @@
                     .then(function(sendResult) {
                         if (sendResult && sendResult.status === 'fallback') {
                             // mailto fallback was used, user's email client opened
-                            // no alert needed since the email client opens
                         } else {
                             alert('Enquiry sent! We\'ll get back to you shortly.');
                         }
@@ -2405,7 +2248,7 @@
 
 
         // =============================================================
-        //  CUSTOM BUILT — Email Enquiry (with fallback)
+        //  CUSTOM BUILT — Email Enquiry
         // =============================================================
         (function() {
             var buildLabels = {
@@ -2473,7 +2316,6 @@
                         buildNameInput.value = '';
                         buildPhoneInput.value = '';
                         if (sendResult && sendResult.status === 'fallback') {
-                            // mailto fallback was used, email client opened
                             status.textContent =
                             'Please check your email client — we\'ve opened a draft for you.';
                         }
@@ -2488,7 +2330,7 @@
 
 
         // =============================================================
-        //  REFURBISHED — Email Enquiry (with fallback)
+        //  REFURBISHED — Email Enquiry
         // =============================================================
         (function() {
             var refurbLabels = {
@@ -2594,7 +2436,7 @@
 
 
         // =============================================================
-        //  BANK TRANSFER — Email Request (with fallback)
+        //  BANK TRANSFER — Email Request
         // =============================================================
         var bankForm = document.getElementById('bankForm');
         if (bankForm) {
@@ -2653,9 +2495,7 @@
 
 
         // =============================================================
-        //  TV REPAIR REFERRAL — Email Request (with fallback)
-        //  Note: this facilitates a booking with our repair partner —
-        //  we are not the ones repairing the TV.
+        //  TV REPAIR REFERRAL — Email Request
         // =============================================================
         var tvForm = document.getElementById('tvForm');
         if (tvForm) {
@@ -2867,463 +2707,31 @@
         );
 
         // =============================================================
-        //  ⚠️ ADMIN SIGN-IN — SETUP REQUIRED IN SUPABASE ⚠️
-        //  This form itself works out of the box (it's just Supabase
-        //  Auth), but a few things need doing on your end first:
-        //
-        //  1. Create YOUR admin login: Supabase Dashboard → Authentication
-        //     → Users → Add user (email + password). Do this yourself —
-        //     there's no public sign-up form here on purpose, so random
-        //     visitors can't create accounts.
-        //
-        //  2. Lock the tickets/clients tables down so only signed-in
-        //     staff can read AND write them — run this in the Supabase
-        //     SQL editor. (Skip any "alter table ... enable row level
-        //     security" line if you already ran it for admin.html —
-        //     running it twice just errors harmlessly.)
-        //       alter table public.tickets enable row level security;
-        //       create policy "Admins can read tickets"
-        //         on public.tickets for select
-        //         using (auth.role() = 'authenticated');
-        //       create policy "Admins can update tickets"
-        //         on public.tickets for update
-        //         using (auth.role() = 'authenticated')
-        //         with check (auth.role() = 'authenticated');
-        //       alter table public.clients enable row level security;
-        //       create policy "Admins can read clients"
-        //         on public.clients for select
-        //         using (auth.role() = 'authenticated');
-        //       create policy "Admins can insert clients"
-        //         on public.clients for insert
-        //         with check (auth.role() = 'authenticated');
-        //       create policy "Admins can update clients"
-        //         on public.clients for update
-        //         using (auth.role() = 'authenticated')
-        //         with check (auth.role() = 'authenticated');
-        //       create policy "Admins can delete clients"
-        //         on public.clients for delete
-        //         using (auth.role() = 'authenticated');
-        //     Your existing booking form still works after this — it
-        //     only calls the book_repair() function, it never reads or
-        //     writes the tables directly.
-        //
-        //  Note: this reads/writes the same "tickets" and "clients"
-        //  tables as your admin.html panel. "Mark Complimentary" sets
-        //  amount = 0 and payment_status = 'paid' on the ticket — there's
-        //  no separate "complimentary" status in this schema, so this is
-        //  the equivalent within your existing columns.
-        // =============================================================
-        var ADMIN_TICKETS_TABLE = 'tickets';
-        var ADMIN_ID_COLUMN = 'id';
-
-        // Reveal the admin section only via the discreet link or a direct #admin visit
-        (function() {
-            var adminSection = document.getElementById('admin');
-            if (!adminSection) return;
-            function sync() {
-                if (window.location.hash === '#admin') {
-                    adminSection.classList.add('revealed');
-                    adminSection.scrollIntoView({ behavior: 'instant' });
-                }
-            }
-            window.addEventListener('hashchange', sync);
-            sync();
-        })();
-
-        (function() {
-            var loginBox = document.getElementById('adminLoginBox');
-            var dashboard = document.getElementById('adminDashboard');
-            var loginForm = document.getElementById('adminLoginForm');
-            var loginStatus = document.getElementById('adminLoginStatus');
-            var loginBtn = document.getElementById('adminLoginBtn');
-            var emailDisplay = document.getElementById('adminEmailDisplay');
-            var refreshBtn = document.getElementById('adminRefreshBtn');
-            var logoutBtn = document.getElementById('adminLogoutBtn');
-            var bookingsStatus = document.getElementById('adminBookingsStatus');
-            var bookingsTable = document.getElementById('adminBookingsTable');
-            var tableHead = document.getElementById('adminTableHead');
-            var tableBody = document.getElementById('adminTableBody');
-            var ticketsCache = [];
-            if (!loginForm) return;
-
-            function escapeHtml(str) {
-                return String(str == null ? '' : str)
-                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-            }
-
-            function showDashboard(session) {
-                loginBox.hidden = true;
-                dashboard.hidden = false;
-                emailDisplay.textContent = session.user.email;
-                loadBookings();
-            }
-
-            function showLogin() {
-                dashboard.hidden = true;
-                loginBox.hidden = false;
-            }
-
-            // Columns shown, in order, with a friendly label + how to read the value off a row
-            var DISPLAY_COLUMNS = [
-                { label: 'Ticket #', get: function(r) { return r.ticket_number || r.id; } },
-                { label: 'Client', get: function(r) { return (r.clients && r.clients.name) || r.client_id || ''; } },
-                { label: 'Phone', get: function(r) { return (r.clients && r.clients.phone) || ''; } },
-                { label: 'Device', get: function(r) { return r.device || ''; } },
-                { label: 'Issue', get: function(r) { return r.issue || ''; } },
-                { label: 'Status', get: function(r) { return r.status || ''; } },
-                { label: 'Amount', get: function(r) { return (r.amount === null || r.amount === undefined) ? '' : '$' + r.amount; } },
-                { label: 'Payment', get: function(r) { return r.payment_status || ''; } },
-                { label: 'Booked', get: function(r) { return r.created_at ? new Date(r.created_at).toLocaleString() : ''; } }
-            ];
-
-            function loadBookings() {
-                bookingsStatus.style.color = '';
-                bookingsStatus.textContent = 'Loading bookings…';
-                bookingsTable.style.display = 'none';
-
-                // Try to pull the linked client's name/phone/email along with each ticket.
-                // Falls back to a plain select if the tickets→clients relationship
-                // isn't set up as a real foreign key in Supabase.
-                sbPublic.from(ADMIN_TICKETS_TABLE)
-                    .select('*, clients(name, phone, email)')
-                    .order('created_at', { ascending: false })
-                    .then(function(res) {
-                        if (res.error) {
-                            // Fallback: plain select without the client join
-                            return sbPublic.from(ADMIN_TICKETS_TABLE).select('*').order('created_at', { ascending: false });
-                        }
-                        return res;
-                    })
-                    .then(function(res) {
-                        if (res.error) {
-                            bookingsStatus.style.color = '#a33';
-                            bookingsStatus.textContent = 'Error loading bookings: ' + res.error.message +
-                                ' — check that a read policy exists on "tickets" (and "clients") for signed-in users.';
-                            return;
-                        }
-                        var rows = res.data || [];
-                        ticketsCache = rows;
-                        if (!rows.length) {
-                            bookingsStatus.textContent = 'No bookings yet.';
-                            return;
-                        }
-
-                        tableHead.innerHTML = DISPLAY_COLUMNS.map(function(c) { return '<th>' + c.label + '</th>'; }).join('') +
-                            '<th>Actions</th>';
-
-                        tableBody.innerHTML = rows.map(function(row) {
-                            var cells = DISPLAY_COLUMNS.map(function(c) {
-                                var val = c.get(row);
-                                return '<td>' + (val === null || val === undefined ? '' : String(val)) + '</td>';
-                            }).join('');
-                            var isComplimentary = row.payment_status === 'paid' && Number(row.amount) === 0;
-                            var actionCell = '<td>' + (isComplimentary ?
-                                '<span style="font-size:0.78rem;color:var(--teal-dark);">✓ Complimentary</span>' :
-                                '<button type="button" class="btn btn-ghost admin-action-btn" style="font-size:0.78rem;padding:6px 10px;" ' +
-                                    'data-id="' + row[ADMIN_ID_COLUMN] + '">Mark Complimentary</button>') +
-                                '</td>';
-                            return '<tr>' + cells + actionCell + '</tr>';
-                        }).join('');
-                        bookingsStatus.textContent = '';
-                        bookingsTable.style.display = '';
-                    })
-                    .catch(function(err) {
-                        bookingsStatus.style.color = '#a33';
-                        bookingsStatus.textContent = 'Error loading bookings: ' + err.message;
-                    });
-            }
-
-            // Delegated click handler for the dynamically-rendered "Mark Complimentary" buttons.
-            // Sets amount = 0 and payment_status = 'paid' — there's no separate
-            // "complimentary" status in this schema, so this is the equivalent.
-            tableBody.addEventListener('click', function(e) {
-                var btn = e.target.closest('.admin-action-btn');
-                if (!btn) return;
-                var id = btn.getAttribute('data-id');
-
-                if (!confirm('Mark this ticket as complimentary? This sets the amount to $0 and payment status to Paid — it overwrites any existing amount.')) {
-                    return;
-                }
-
-                btn.disabled = true;
-                var originalText = btn.textContent;
-                btn.textContent = 'Saving…';
-
-                sbPublic.from(ADMIN_TICKETS_TABLE).update({ amount: 0, payment_status: 'paid' }).eq(ADMIN_ID_COLUMN, id)
-                    .then(function(res) {
-                        if (res.error) {
-                            btn.disabled = false;
-                            btn.textContent = originalText;
-                            bookingsStatus.style.color = '#a33';
-                            bookingsStatus.textContent = 'Error updating booking: ' + res.error.message +
-                                ' — make sure an UPDATE policy exists on "tickets" for signed-in users (see setup notes in the code).';
-                            return;
-                        }
-                        loadBookings();
-                    })
-                    .catch(function(err) {
-                        btn.disabled = false;
-                        btn.textContent = originalText;
-                        bookingsStatus.style.color = '#a33';
-                        bookingsStatus.textContent = 'Error updating booking: ' + err.message;
-                    });
-            });
-
-
-            // =============================================================
-            //  ADMIN TABS (Tickets / Clients)
-            // =============================================================
-            var ticketsPanel = document.getElementById('adminTicketsPanel');
-            var clientsPanel = document.getElementById('adminClientsPanel');
-            var adminTabBtns = document.querySelectorAll('.admin-tab-btn');
-            adminTabBtns.forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    adminTabBtns.forEach(function(b) { b.classList.remove('active'); });
-                    btn.classList.add('active');
-                    var tab = btn.getAttribute('data-admin-tab');
-                    ticketsPanel.hidden = tab !== 'tickets';
-                    clientsPanel.hidden = tab !== 'clients';
-                    if (tab === 'clients') loadClients();
-                });
-            });
-
-            // =============================================================
-            //  ADMIN — CLIENT MANAGEMENT (mirrors admin.html's Clients tab)
-            // =============================================================
-            var clientsCache = [];
-            var clientsStatus = document.getElementById('adminClientsStatus');
-            var clientList = document.getElementById('adminClientList');
-            var clientModalOverlay = document.getElementById('clientModalOverlay');
-            var clientForm = document.getElementById('clientForm');
-            var clientFormError = document.getElementById('clientFormError');
-            var newClientBtn = document.getElementById('newClientBtn');
-            var clientCancelBtn = document.getElementById('clientCancelBtn');
-
-            function openClientModal() { clientModalOverlay.hidden = false; }
-            function closeClientModal() { clientModalOverlay.hidden = true; }
-
-            function loadClients() {
-                clientsStatus.style.color = '';
-                clientsStatus.textContent = 'Loading clients…';
-                clientList.innerHTML = '';
-                sbPublic.from('clients').select('*').order('created_at', { ascending: false })
-                    .then(function(res) {
-                        if (res.error) {
-                            clientsStatus.style.color = '#a33';
-                            clientsStatus.textContent = 'Error loading clients: ' + res.error.message +
-                                ' — make sure a read policy exists on "clients" for signed-in users.';
-                            return;
-                        }
-                        clientsCache = res.data || [];
-                        renderClients();
-                    })
-                    .catch(function(err) {
-                        clientsStatus.style.color = '#a33';
-                        clientsStatus.textContent = 'Error loading clients: ' + err.message;
-                    });
-            }
-
-            function renderClients() {
-                if (!clientsCache.length) {
-                    clientsStatus.textContent = '';
-                    clientList.innerHTML = '<div class="empty-state">No clients yet. Add your first one with "+ New Client".</div>';
-                    return;
-                }
-                clientsStatus.textContent = '';
-                clientList.innerHTML = clientsCache.map(function(c) {
-                    var ticketCount = ticketsCache.filter(function(t) { return t.client_id === c.id; }).length;
-                    return (
-                        '<div class="row-card">' +
-                            '<div class="row-main">' +
-                                '<div class="row-title">' + escapeHtml(c.name) + '</div>' +
-                                '<div class="row-sub">' + escapeHtml(c.phone) + (c.email ? ' · ' + escapeHtml(c.email) : '') + '</div>' +
-                                (c.notes ? '<div class="row-sub">' + escapeHtml(c.notes) + '</div>' : '') +
-                                '<div class="row-sub">' + ticketCount + ' ticket' + (ticketCount === 1 ? '' : 's') + '</div>' +
-                            '</div>' +
-                            '<div class="row-actions">' +
-                                '<button type="button" class="btn btn-amber btn-sm client-whatsapp-btn" data-id="' + c.id + '">WhatsApp</button>' +
-                                '<button type="button" class="btn btn-ghost btn-sm client-edit-btn" data-id="' + c.id + '">Edit</button>' +
-                                '<button type="button" class="btn btn-danger btn-sm client-delete-btn" data-id="' + c.id + '">Delete</button>' +
-                            '</div>' +
-                        '</div>'
-                    );
-                }).join('');
-            }
-
-            // Delegated handlers for the dynamically-rendered client row buttons
-            clientList.addEventListener('click', function(e) {
-                var waBtn = e.target.closest('.client-whatsapp-btn');
-                var editBtn = e.target.closest('.client-edit-btn');
-                var delBtn = e.target.closest('.client-delete-btn');
-
-                if (waBtn) {
-                    var c1 = clientsCache.find(function(x) { return x.id === waBtn.getAttribute('data-id'); });
-                    if (!c1) return;
-                    var msg = 'Hi ' + c1.name + ', this is StylesPC reaching out about your service.';
-                    window.open('https://wa.me/' + c1.phone + '?text=' + encodeURIComponent(msg), '_blank');
-                    return;
-                }
-
-                if (editBtn) {
-                    var c2 = clientsCache.find(function(x) { return x.id === editBtn.getAttribute('data-id'); });
-                    if (!c2) return;
-                    document.getElementById('clientModalTitle').textContent = 'Edit client';
-                    document.getElementById('clientFormId').value = c2.id;
-                    document.getElementById('clientNameInput').value = c2.name;
-                    document.getElementById('clientPhoneInput').value = c2.phone;
-                    document.getElementById('clientEmailInput').value = c2.email || '';
-                    document.getElementById('clientNotesInput').value = c2.notes || '';
-                    clientFormError.textContent = '';
-                    openClientModal();
-                    return;
-                }
-
-                if (delBtn) {
-                    var id = delBtn.getAttribute('data-id');
-                    if (!confirm('Delete this client? Their tickets will stay but lose the client link.')) return;
-                    delBtn.disabled = true;
-                    sbPublic.from('clients').delete().eq('id', id)
-                        .then(function(res) {
-                            if (res.error) {
-                                clientsStatus.style.color = '#a33';
-                                clientsStatus.textContent = 'Error deleting client: ' + res.error.message;
-                                delBtn.disabled = false;
-                                return;
-                            }
-                            loadClients();
-                        })
-                        .catch(function(err) {
-                            clientsStatus.style.color = '#a33';
-                            clientsStatus.textContent = 'Error deleting client: ' + err.message;
-                            delBtn.disabled = false;
-                        });
-                }
-            });
-
-            if (newClientBtn) {
-                newClientBtn.addEventListener('click', function() {
-                    document.getElementById('clientModalTitle').textContent = 'New client';
-                    clientForm.reset();
-                    document.getElementById('clientFormId').value = '';
-                    clientFormError.textContent = '';
-                    openClientModal();
-                });
-            }
-            if (clientCancelBtn) clientCancelBtn.addEventListener('click', closeClientModal);
-            if (clientModalOverlay) {
-                clientModalOverlay.addEventListener('click', function(e) {
-                    if (e.target === clientModalOverlay) closeClientModal();
-                });
-            }
-
-            if (clientForm) {
-                clientForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    var id = document.getElementById('clientFormId').value;
-                    var payload = {
-                        name: document.getElementById('clientNameInput').value.trim(),
-                        phone: document.getElementById('clientPhoneInput').value.replace(/\D/g, ''),
-                        email: document.getElementById('clientEmailInput').value.trim() || null,
-                        notes: document.getElementById('clientNotesInput').value.trim() || null
-                    };
-                    clientFormError.textContent = '';
-                    var query = id ? sbPublic.from('clients').update(payload).eq('id', id) : sbPublic.from('clients').insert(payload);
-                    query.then(function(res) {
-                        if (res.error) {
-                            clientFormError.textContent = res.error.message;
-                            return;
-                        }
-                        closeClientModal();
-                        loadClients();
-                    }).catch(function(err) {
-                        clientFormError.textContent = err.message;
-                    });
-                });
-            }
-
-            loginForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                var email = document.getElementById('adminEmail').value.trim();
-                var password = document.getElementById('adminPassword').value;
-                loginStatus.classList.remove('ok', 'err');
-                loginStatus.textContent = 'Signing in…';
-                loginBtn.disabled = true;
-
-                sbPublic.auth.signInWithPassword({ email: email, password: password })
-                    .then(function(res) {
-                        loginBtn.disabled = false;
-                        if (res.error) {
-                            loginStatus.textContent = res.error.message;
-                            loginStatus.classList.add('err');
-                            return;
-                        }
-                        loginStatus.textContent = '';
-                        loginForm.reset();
-                        showDashboard(res.data.session);
-                    })
-                    .catch(function(err) {
-                        loginBtn.disabled = false;
-                        loginStatus.textContent = 'Sign-in error: ' + err.message;
-                        loginStatus.classList.add('err');
-                    });
-            });
-
-            if (refreshBtn) refreshBtn.addEventListener('click', loadBookings);
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function() {
-                    sbPublic.auth.signOut().then(function() { showLogin(); });
-                });
-            }
-
-            // Restore session if already signed in (e.g. after a page refresh)
-            sbPublic.auth.getSession().then(function(res) {
-                if (res.data && res.data.session) {
-                    showDashboard(res.data.session);
-                }
-            });
-        })();
-
-        var serviceTypeEl = document.getElementById('serviceType');
-        var addressField = document.getElementById('address');
-        var addressHint = document.getElementById('addressHint');
-
-        // =============================================================
         //  PICKUP SERVICE AREA + DISTANCE FARE ESTIMATE
-        //  ⚠️ CONFIGURE THESE BEFORE GOING LIVE ⚠️
-        //  - SHOP_LOCATION: replace with your real home‑workshop lat/lng
-        //    (search your address on openstreetmap.org, right-click the
-        //    pin → "Show address" gives you the coordinates)
-        //  - FREE_AREAS / STANDARD_AREAS / FAR_AREAS: edit these lists to
-        //    match the exact neighbourhoods you serve in each zone
-        //  - PICKUP_STANDARD_FARE / FAR_RATE_PER_KM / EXPEDITE_MULTIPLIER:
-        //    adjust to your real pricing
         // =============================================================
-        var SHOP_LOCATION = { lat: 17.9784, lng: -76.7831 }; // TODO: set real shop coordinates
-        var PICKUP_STANDARD_FARE = 1500;   // flat rate for the "standard" zone
-        var FAR_RATE_PER_KM = 150;         // JMD per km, "far" zone (no flat fee — pure distance rate)
-        var EXPEDITE_MULTIPLIER = 1.25;    // +25% when expedited service is checked
-        var ROAD_FACTOR = 1.3;             // fudge factor: straight-line → approx. road distance
+        var SHOP_LOCATION = { lat: 17.9784, lng: -76.7831 };
+        var PICKUP_STANDARD_FARE = 1500;
+        var FAR_RATE_PER_KM = 150;
+        var EXPEDITE_MULTIPLIER = 1.25;
+        var ROAD_FACTOR = 1.3;
 
-        // Free pickup — no charge at all
         var FREE_AREAS = ['franklintown', 'rae town', 'raetown'];
-
-        // Standard flat-rate zone — most of Kingston + close-in Saint Andrew
         var STANDARD_AREAS = [
             'half way tree', 'liguanea', 'new kingston', 'barbican',
             'constant spring', 'cross roads', 'havendale', 'meadowbrook',
             'hope pastures', 'kingston 6', 'kingston 8', 'kingston 10'
-        ]; // TODO: confirm/expand — anywhere in Kingston not listed above also defaults here
-
-        // Far zone — charged per km instead of a flat fee
-        var FAR_AREAS = ['papine', 'mona']; // TODO: add any other outlying Saint Andrew areas you cover
+        ];
+        var FAR_AREAS = ['papine', 'mona'];
 
         var pickupMapWrap = document.getElementById('pickupMapWrap');
         var pickupMapEl = document.getElementById('pickupMap');
         var pickupEstimateEl = document.getElementById('pickupEstimate');
         var expediteCheckbox = document.getElementById('expediteCheckbox');
-        var leafletMap = null, shopMarker = null, pickupMarker = null, routeLine = null;
-        var currentPickupEstimate = null; // read by the submit handler
+        var leafletMap = null,
+            shopMarker = null,
+            pickupMarker = null,
+            routeLine = null;
+        var currentPickupEstimate = null;
         var geocodeTimer = null;
 
         function haversineKm(lat1, lon1, lat2, lon2) {
@@ -3349,21 +2757,17 @@
             return leafletMap;
         }
 
-        // Returns 'free' | 'standard' | 'far' | 'unserviced'
         function detectZone(addr, displayName) {
             var county = ((addr.county || addr.state_district || '') + '').toLowerCase();
             var display = (displayName || '').toLowerCase();
             var inList = function(list) {
                 return list.some(function(area) { return display.indexOf(area) !== -1; });
             };
-
             if (inList(FREE_AREAS)) return 'free';
             if (inList(FAR_AREAS)) return 'far';
             if (inList(STANDARD_AREAS)) return 'standard';
-
-            // Not matched to a specific named area — fall back to parish.
             if (county.indexOf('kingston') !== -1) return 'standard';
-            if (county.indexOf('andrew') !== -1) return 'unserviced'; // unnamed St Andrew area — not pre-approved
+            if (county.indexOf('andrew') !== -1) return 'unserviced';
             return 'unserviced';
         }
 
@@ -3390,15 +2794,19 @@
             if (pickupMarker) { map.removeLayer(pickupMarker); }
             if (routeLine) { map.removeLayer(routeLine); }
             pickupMarker = L.marker(pt).addTo(map).bindPopup('Pickup point').openPopup();
-            routeLine = L.polyline([[SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt], { color: '#2F6F63', weight: 3, dashArray: '6,6' }).addTo(map);
-            map.fitBounds(L.latLngBounds([[SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt]).pad(0.3));
+            routeLine = L.polyline([
+                [SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt
+            ], { color: '#2F6F63', weight: 3, dashArray: '6,6' }).addTo(map);
+            map.fitBounds(L.latLngBounds([
+                [SHOP_LOCATION.lat, SHOP_LOCATION.lng], pt
+            ]).pad(0.3));
         }
 
         function computeFare(zone, km) {
             var base;
             if (zone === 'free') base = 0;
             else if (zone === 'far') base = km * FAR_RATE_PER_KM;
-            else base = PICKUP_STANDARD_FARE; // standard
+            else base = PICKUP_STANDARD_FARE;
             var expedited = !!(expediteCheckbox && expediteCheckbox.checked);
             var fare = expedited ? base * EXPEDITE_MULTIPLIER : base;
             return { fare: Math.round(fare / 50) * 50, expedited: expedited };
@@ -3416,7 +2824,7 @@
             pickupEstimateEl.textContent = 'Locating address…';
 
             fetch('https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&countrycodes=jm&limit=1&q=' +
-                encodeURIComponent(address + ', Jamaica'))
+                    encodeURIComponent(address + ', Jamaica'))
                 .then(function(res) { return res.json(); })
                 .then(function(data) {
                     if (!data || !data.length) {
@@ -3425,7 +2833,8 @@
                         return;
                     }
                     var hit = data[0];
-                    var lat = parseFloat(hit.lat), lon = parseFloat(hit.lon);
+                    var lat = parseFloat(hit.lat),
+                        lon = parseFloat(hit.lon);
                     var zone = detectZone(hit.address || {}, hit.display_name || '');
                     if (zone === 'unserviced') {
                         renderEstimate({ serviceable: false });
@@ -3434,8 +2843,14 @@
                     var km = haversineKm(SHOP_LOCATION.lat, SHOP_LOCATION.lng, lat, lon) * ROAD_FACTOR;
                     var priced = computeFare(zone, km);
                     renderEstimate({
-                        serviceable: true, lat: lat, lon: lon, zone: zone,
-                        km: km, fare: priced.fare, expedited: priced.expedited, address: hit.display_name
+                        serviceable: true,
+                        lat: lat,
+                        lon: lon,
+                        zone: zone,
+                        km: km,
+                        fare: priced.fare,
+                        expedited: priced.expedited,
+                        address: hit.display_name
                     });
                 })
                 .catch(function(err) {
@@ -3444,6 +2859,10 @@
                     currentPickupEstimate = null;
                 });
         }
+
+        var serviceTypeEl = document.getElementById('serviceType');
+        var addressField = document.getElementById('address');
+        var addressHint = document.getElementById('addressHint');
 
         serviceTypeEl.addEventListener('change', function() {
             var isPickup = serviceTypeEl.value === 'Pickup';
@@ -3457,7 +2876,6 @@
             }
         });
 
-        // Geocode when the user finishes typing (debounced) or leaves the field
         addressField.addEventListener('input', function() {
             clearTimeout(geocodeTimer);
             geocodeTimer = setTimeout(geocodeAndEstimate, 900);
@@ -3531,7 +2949,6 @@
                     status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
                     status.classList.add('err');
                     console.error(res.error);
-                    // Still try to open mailto as fallback
                     var fallbackParams = {
                         to_email: 'ajstyleg@gmail.com',
                         subject: 'Repair Booking (Fallback — DB Error)',
@@ -3551,7 +2968,6 @@
                         '\nEst. pickup fee: $' + currentPickupEstimate.fare.toLocaleString() +
                         (currentPickupEstimate.expedited ? ' (incl. expedited +25%)' : '')) : '';
 
-                // Send email via Formspree, with mailto fallback only if that fails
                 var templateParams = {
                     to_email: 'ajstyleg@gmail.com',
                     subject: 'New Repair Booking — ' + ticketNumber,
@@ -3587,7 +3003,6 @@
                     })
                     .catch(function(error) {
                         console.error(error);
-                        // Fallback: mailto already opened by sendEmail
                         status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                             '. Please check your email client — we\'ve opened a draft for you.';
                         status.classList.add('ok');
@@ -3600,7 +3015,6 @@
                 status.textContent = "Error saving booking. Please email us directly at ajstyleg@gmail.com";
                 status.classList.add('err');
                 console.error(err);
-                // Open mailto as emergency fallback
                 var fallbackParams = {
                     to_email: 'ajstyleg@gmail.com',
                     subject: 'Repair Booking (Emergency Fallback)',
@@ -3613,7 +3027,6 @@
             });
         });
 
-
         // =============================================================
         //  FLOATING WHATSAPP BUTTON → Show Disclaimer
         // =============================================================
@@ -3625,7 +3038,6 @@
             });
         }
 
-        // Also catch any other WhatsApp button clicks
         document.querySelectorAll('[href*="whatsapp"]').forEach(function(el) {
             el.addEventListener('click', function(e) {
                 e.preventDefault();
