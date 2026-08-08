@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StylesPC — Admin Enterprise Dashboard</title>
+    <title>StylesPC — Admin Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -26,10 +26,11 @@
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
             background: var(--paper);
             color: var(--ink);
             font-family: 'IBM Plex Sans', sans-serif;
@@ -86,6 +87,54 @@
             font-weight: 600;
         }
 
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.86rem;
+            border: 1px solid transparent;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--teal);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--teal-dark);
+        }
+
+        .btn-amber {
+            background: var(--amber);
+            color: white;
+        }
+
+        .btn-amber:hover {
+            background: #a9631e;
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid rgba(163, 55, 42, 0.4);
+        }
+
+        .btn-danger:hover {
+            background: rgba(163, 55, 42, 0.08);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+        }
+
         .nav-tabs {
             display: flex;
             gap: 8px;
@@ -104,6 +153,7 @@
             border-bottom: 3px solid transparent;
             margin-bottom: -2px;
             transition: all 0.2s;
+            font-family: inherit;
         }
 
         .nav-tab:hover {
@@ -144,53 +194,7 @@
             border: 1px solid var(--rule);
             border-radius: var(--radius);
             font-size: 0.9rem;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 10px 16px;
-            border-radius: var(--radius);
-            font-weight: 600;
-            font-size: 0.86rem;
-            border: 1px solid transparent;
-            cursor: pointer;
-            text-decoration: none;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: var(--teal);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--teal-dark);
-        }
-
-        .btn-amber {
-            background: var(--amber);
-            color: white;
-        }
-
-        .btn-amber:hover {
-            background: #a9631e;
-        }
-
-        .btn-danger {
-            background: transparent;
-            color: var(--red);
-            border: 1px solid rgba(163, 55, 42, 0.4);
-        }
-
-        .btn-danger:hover {
-            background: rgba(163, 55, 42, 0.08);
-        }
-
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.75rem;
+            font-family: inherit;
         }
 
         .list-container {
@@ -258,10 +262,6 @@
             font-weight: 600;
         }
 
-        .detail-tag .value {
-            color: var(--ink);
-        }
-
         .status-badge {
             font-family: 'IBM Plex Mono';
             font-size: 0.7rem;
@@ -285,6 +285,16 @@
         .status-closed {
             background: rgba(76, 175, 80, 0.12);
             color: #388E3C;
+        }
+
+        .status-admin {
+            background: rgba(47, 111, 99, 0.15);
+            color: var(--teal-dark);
+        }
+
+        .status-user {
+            background: var(--paper-2);
+            color: var(--ink-soft);
         }
 
         .list-item-actions {
@@ -356,6 +366,7 @@
             border-radius: var(--radius);
             font-family: inherit;
             font-size: 0.9rem;
+            background: var(--white);
         }
 
         .form-group textarea {
@@ -404,6 +415,75 @@
             margin-top: 6px;
         }
 
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            font-weight: 400;
+            font-size: 0.9rem;
+            color: var(--ink);
+            cursor: pointer;
+        }
+
+        /* Login overlay */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 22, 19, 0.8);
+            z-index: 200;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-overlay.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 40px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-box h1 {
+            margin-bottom: 8px;
+        }
+
+        .login-box p {
+            color: var(--ink-soft);
+            margin-bottom: 24px;
+        }
+
+        .login-box .form-group {
+            margin-bottom: 16px;
+        }
+
+        .login-box .btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .login-error {
+            color: var(--red);
+            font-size: 0.85rem;
+            margin-top: 12px;
+        }
+
         @media (max-width: 768px) {
             .list-item {
                 grid-template-columns: 1fr;
@@ -422,14 +502,38 @@
             }
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+    </script>
 </head>
 <body>
 
-    <div class="container">
+    <!-- LOGIN OVERLAY -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h1>StylesPC Admin</h1>
+            <p>Sign in to manage your repair shop.</p>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" required placeholder="admin@stylespc.com">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+                <div id="loginError" class="login-error"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN DASHBOARD -->
+    <div class="container" id="mainApp" style="display: none;">
         <div class="header">
             <h1><span class="dot"></span>StylesPC Admin</h1>
             <div class="user-menu">
-                <div class="user-pill">👤 Admin User</div>
+                <span class="user-pill" id="userDisplay">👤 <span id="userNameDisplay"></span></span>
+                <button class="btn btn-amber btn-sm" onclick="changeMyPassword()">🔑 Change Password</button>
                 <button class="btn btn-amber btn-sm" onclick="logout()">Logout</button>
             </div>
         </div>
@@ -474,7 +578,7 @@
                 <div class="search-box">
                     <input type="text" id="ticketSearch" placeholder="Search tickets..." onkeyup="filterTickets()">
                 </div>
-                <select id="ticketStatus" onchange="filterTickets()">
+                <select id="ticketStatusFilter" onchange="filterTickets()">
                     <option value="">All Status</option>
                     <option value="Open">Open</option>
                     <option value="In Progress">In Progress</option>
@@ -501,9 +605,9 @@
         </div>
 
         <div id="users" class="section">
-            <h2>Users & Admins</h2>
+            <h2>User Management</h2>
             <div class="toolbar">
-                <button class="btn btn-primary" onclick="openUserModal('new')">+ Add User/Admin</button>
+                <button class="btn btn-primary" onclick="openUserModal('new')">+ Add User</button>
             </div>
             <div class="list-container" id="usersList">
                 <div class="empty-state"><h3>No users yet</h3></div>
@@ -529,6 +633,8 @@
         </div>
     </div>
 
+    <!-- ======== MODALS ======== -->
+    <!-- Ticket Modal -->
     <div class="modal-overlay" id="ticketModal">
         <div class="modal">
             <h2 id="ticketModalTitle">New Ticket</h2>
@@ -579,6 +685,7 @@
         </div>
     </div>
 
+    <!-- Client Modal -->
     <div class="modal-overlay" id="clientModal">
         <div class="modal">
             <h2 id="clientModalTitle">New Client</h2>
@@ -613,61 +720,552 @@
         </div>
     </div>
 
+    <!-- User Modal -->
     <div class="modal-overlay" id="userModal">
         <div class="modal">
-            <h2 id="userModalTitle">Add User/Admin</h2>
-            <div class="form-group">
-                <label>Name</label>
-                <input type="text" id="userName" required>
-            </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="userEmail" required>
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select id="userRole">
-                    <option value="User">User</option>
-                    <option value="Admin">Admin</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
-                <button class="btn btn-primary" onclick="saveUser()">Save User</button>
-            </div>
+            <h2 id="userModalTitle">Add User</h2>
+            <form id="userForm" onsubmit="saveUser(event)">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="userName" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="userPassword" placeholder="Leave blank to skip if editing">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select id="userRole">
+                            <option value="User">User</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Password Expiry (days)</label>
+                        <input type="number" id="userExpiryDays" value="30" min="1" max="365">
+                    </div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="userMustChange" checked>
+                    <label for="userMustChange">User must change password at next login</label>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal (for self) -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal">
+            <h2>Change Password</h2>
+            <form id="changePasswordForm" onsubmit="handleChangePassword(event)">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="currentPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPassword" required>
+                </div>
+                <div class="form-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmPassword" required>
+                </div>
+                <div id="changePasswordError" class="login-error"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
+        // =============================================================
+        //  SUPABASE SETUP
+        // =============================================================
+        const supabase = supabase.createClient(
+            'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
+            'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
+        );
+
+        // =============================================================
+        //  STATE
+        // =============================================================
+        let currentUser = null; // { id, email, role, must_change_password, password_expiry }
         let tickets = JSON.parse(localStorage.getItem('tickets')) || [];
         let clients = JSON.parse(localStorage.getItem('clients')) || [];
-        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let profiles = JSON.parse(localStorage.getItem('profiles')) || {}; // keyed by user id
         let currentEditId = null;
 
-        function init() {
-            if (users.length === 0) {
-                users = [{
-                    id: 'u001',
-                    name: 'Admin User',
-                    email: 'admin@stylespc.com',
-                    role: 'Admin',
-                    createdAt: new Date().toISOString()
-                }];
-                saveData();
+        // =============================================================
+        //  DOM REFS
+        // =============================================================
+        const loginOverlay = document.getElementById('loginOverlay');
+        const mainApp = document.getElementById('mainApp');
+        const userDisplay = document.getElementById('userNameDisplay');
+        const loginError = document.getElementById('loginError');
+
+        // =============================================================
+        //  AUTH HELPERS
+        // =============================================================
+        async function checkSession() {
+            const { data, error } = await supabase.auth.getSession();
+            if (error || !data.session) {
+                showLogin();
+                return;
             }
-            updateDashboard();
-            renderTickets();
-            renderClients();
-            renderUsers();
+            // Get profile
+            const user = data.session.user;
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError || !profile) {
+                // Create default profile if missing
+                const newProfile = {
+                    id: user.id,
+                    role: 'User',
+                    must_change_password: true,
+                    password_expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                };
+                const { error: insertError } = await supabase
+                    .from('profiles')
+                    .insert([newProfile]);
+                if (insertError) {
+                    console.error('Failed to create profile:', insertError);
+                    showLogin();
+                    return;
+                }
+                currentUser = { ...user, ...newProfile };
+            } else {
+                currentUser = { ...user, ...profile };
+            }
+
+            // Check password expiry or must_change
+            const now = new Date();
+            const expiry = new Date(currentUser.password_expiry);
+            if (currentUser.must_change_password || expiry < now) {
+                // Force password change
+                alert('Your password has expired or must be changed. Please set a new password.');
+                openChangePasswordModal(true);
+            }
+
+            // Show app
+            showApp();
+            loadData();
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(tab).classList.add('active');
-            event.target.classList.add('active');
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            loginError.textContent = '';
+
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password
+            });
+
+            if (error) {
+                loginError.textContent = error.message;
+                return;
+            }
+
+            // Fetch profile
+            const user = data.user;
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', user.id)
+                .single();
+
+            if (profileError || !profile) {
+                // Create default profile
+                const newProfile = {
+                    id: user.id,
+                    role: 'User',
+                    must_change_password: false,
+                    password_expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+                };
+                await supabase.from('profiles').insert([newProfile]);
+                currentUser = { ...user, ...newProfile };
+            } else {
+                currentUser = { ...user, ...profile };
+            }
+
+            // Check password policies
+            const now = new Date();
+            const expiry = new Date(currentUser.password_expiry);
+            if (currentUser.must_change_password || expiry < now) {
+                openChangePasswordModal(true);
+            }
+
+            showApp();
+            loadData();
         }
 
+        async function logout() {
+            await supabase.auth.signOut();
+            showLogin();
+            location.reload();
+        }
+
+        function showLogin() {
+            loginOverlay.classList.remove('hidden');
+            mainApp.style.display = 'none';
+        }
+
+        function showApp() {
+            loginOverlay.classList.add('hidden');
+            mainApp.style.display = 'block';
+            userDisplay.textContent = currentUser.email;
+        }
+
+        // =============================================================
+        //  PASSWORD CHANGE (self)
+        // =============================================================
+        function openChangePasswordModal(force = false) {
+            document.getElementById('changePasswordModal').classList.add('active');
+            document.getElementById('changePasswordError').textContent = '';
+            if (force) {
+                document.getElementById('changePasswordError').textContent = '⚠️ Your password must be changed.';
+                document.getElementById('changePasswordError').style.color = 'var(--red)';
+            }
+        }
+
+        async function handleChangePassword(e) {
+            e.preventDefault();
+            const current = document.getElementById('currentPassword').value;
+            const newPw = document.getElementById('newPassword').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+            const errorEl = document.getElementById('changePasswordError');
+
+            if (newPw.length < 6) {
+                errorEl.textContent = 'Password must be at least 6 characters.';
+                return;
+            }
+            if (newPw !== confirmPw) {
+                errorEl.textContent = 'Passwords do not match.';
+                return;
+            }
+
+            // Verify current password by re-authenticating
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: currentUser.email,
+                password: current,
+            });
+
+            if (signInError) {
+                errorEl.textContent = 'Current password is incorrect.';
+                return;
+            }
+
+            // Update password
+            const { error: updateError } = await supabase.auth.updateUser({
+                password: newPw,
+            });
+
+            if (updateError) {
+                errorEl.textContent = updateError.message;
+                return;
+            }
+
+            // Update profile: clear must_change_password, extend expiry by 30 days
+            const newExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .update({
+                    must_change_password: false,
+                    password_expiry: newExpiry,
+                })
+                .eq('id', currentUser.id);
+
+            if (profileError) {
+                errorEl.textContent = 'Failed to update profile: ' + profileError.message;
+                return;
+            }
+
+            currentUser.must_change_password = false;
+            currentUser.password_expiry = newExpiry;
+            closeModal('changePasswordModal');
+            alert('Password updated successfully.');
+        }
+
+        function changeMyPassword() {
+            openChangePasswordModal(false);
+        }
+
+        // =============================================================
+        //  USER MANAGEMENT (Admin)
+        // =============================================================
+        async function loadUsers() {
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*');
+
+            if (error) {
+                console.error('Failed to load users:', error);
+                return;
+            }
+
+            // Also get auth users to show email
+            const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+            if (authError) {
+                console.error('Failed to list auth users:', authError);
+                // Fallback: use profiles only
+                renderUsersFromProfiles(data);
+                return;
+            }
+
+            // Merge
+            const userMap = {};
+            authUsers.users.forEach(u => {
+                userMap[u.id] = u.email;
+            });
+
+            const merged = data.map(p => ({
+                ...p,
+                email: userMap[p.id] || 'Unknown',
+            }));
+
+            renderUsers(merged);
+        }
+
+        function renderUsersFromProfiles(profiles) {
+            renderUsers(profiles.map(p => ({ ...p, email: 'N/A' })));
+        }
+
+        function renderUsers(userList) {
+            const container = document.getElementById('usersList');
+            if (userList.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No users</h3></div>';
+                return;
+            }
+
+            container.innerHTML = userList.map(u => {
+                const isSelf = u.id === currentUser.id;
+                const expiry = new Date(u.password_expiry);
+                const expired = expiry < new Date();
+                return `
+                    <div class="list-item">
+                        <div class="list-item-main">
+                            <div class="list-item-header">
+                                <span class="list-item-title">${u.email}</span>
+                                <span class="status-badge status-${u.role.toLowerCase()}">${u.role}</span>
+                                ${u.must_change_password ? '<span class="status-badge" style="background: rgba(201,122,43,0.15); color: #a9631e;">Must Change</span>' : ''}
+                                ${expired ? '<span class="status-badge" style="background: rgba(163,55,42,0.12); color: var(--red);">Expired</span>' : ''}
+                            </div>
+                            <div class="list-item-details">
+                                <div class="detail-tag"><span class="label">Expiry:</span><span class="value">${expiry.toLocaleDateString()}</span></div>
+                            </div>
+                        </div>
+                        <div class="list-item-actions">
+                            ${isSelf ? '<span style="font-size:0.75rem;color:var(--ink-soft);">(You)</span>' : ''}
+                            ${!isSelf ? `<button class="btn btn-amber btn-sm" onclick="openUserModal('edit', '${u.id}')">✏️ Edit</button>` : ''}
+                            ${!isSelf ? `<button class="btn btn-amber btn-sm" onclick="resetUserPassword('${u.id}')">🔑 Reset Password</button>` : ''}
+                            ${!isSelf ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑️ Delete</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function openUserModal(mode, userId = null) {
+            currentEditId = userId;
+            const title = document.getElementById('userModalTitle');
+            const form = document.getElementById('userForm');
+            form.reset();
+
+            if (mode === 'new') {
+                title.textContent = 'Add New User';
+                document.getElementById('userPassword').required = true;
+                document.getElementById('userPassword').placeholder = 'Set a password';
+                document.getElementById('userExpiryDays').value = 30;
+                document.getElementById('userMustChange').checked = true;
+                document.getElementById('userRole').value = 'User';
+                document.getElementById('userModal').classList.add('active');
+                return;
+            }
+
+            // Edit mode
+            title.textContent = 'Edit User';
+            document.getElementById('userPassword').required = false;
+            document.getElementById('userPassword').placeholder = 'Leave blank to keep current';
+
+            // Fetch user profile
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .single();
+
+            if (error) {
+                alert('Failed to load user: ' + error.message);
+                return;
+            }
+
+            // Get email from auth
+            const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+            let email = '';
+            if (!authError && authData) {
+                email = authData.user.email;
+            }
+
+            document.getElementById('userName').value = ''; // not used in this schema
+            document.getElementById('userEmail').value = email;
+            document.getElementById('userRole').value = data.role;
+            document.getElementById('userExpiryDays').value = Math.max(1, Math.round((new Date(data.password_expiry) - new Date()) / (24 * 60 * 60 * 1000)));
+            document.getElementById('userMustChange').checked = data.must_change_password;
+
+            document.getElementById('userModal').classList.add('active');
+        }
+
+        async function saveUser(e) {
+            e.preventDefault();
+            const email = document.getElementById('userEmail').value.trim();
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+            const expiryDays = parseInt(document.getElementById('userExpiryDays').value) || 30;
+            const mustChange = document.getElementById('userMustChange').checked;
+
+            if (!email) {
+                alert('Email is required.');
+                return;
+            }
+
+            // If editing existing user
+            if (currentEditId) {
+                // Update profile only
+                const newExpiry = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({
+                        role: role,
+                        must_change_password: mustChange,
+                        password_expiry: newExpiry,
+                    })
+                    .eq('id', currentEditId);
+
+                if (updateError) {
+                    alert('Failed to update user: ' + updateError.message);
+                    return;
+                }
+
+                // If password provided, update it
+                if (password) {
+                    // We need to use admin API to update password – not available client-side.
+                    // We'll send a reset email instead.
+                    alert('To set a new password, use the "Reset Password" button on the user list.');
+                }
+
+                alert('User updated successfully!');
+                closeModal('userModal');
+                loadUsers();
+                return;
+            }
+
+            // New user: sign up
+            if (!password) {
+                alert('Password is required for new users.');
+                return;
+            }
+
+            const { data, error } = await supabase.auth.signUp({
+                email: email,
+                password: password,
+                options: {
+                    emailRedirectTo: window.location.origin,
+                }
+            });
+
+            if (error) {
+                alert('Failed to create user: ' + error.message);
+                return;
+            }
+
+            if (!data.user) {
+                alert('User created but no user object returned.');
+                return;
+            }
+
+            // Create profile
+            const newExpiry = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .insert([{
+                    id: data.user.id,
+                    role: role,
+                    must_change_password: mustChange,
+                    password_expiry: newExpiry,
+                }]);
+
+            if (profileError) {
+                alert('User created but profile failed: ' + profileError.message);
+                // We should delete the auth user? Not possible client-side.
+                return;
+            }
+
+            alert('User created successfully!');
+            closeModal('userModal');
+            loadUsers();
+        }
+
+        async function resetUserPassword(userId) {
+            if (!confirm('Send a password reset email to this user?')) return;
+
+            // Get user email from auth
+            const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+            if (authError || !authData) {
+                alert('Could not find user.');
+                return;
+            }
+
+            const email = authData.user.email;
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin,
+            });
+
+            if (error) {
+                alert('Failed to send reset email: ' + error.message);
+            } else {
+                alert('Password reset email sent to ' + email);
+            }
+        }
+
+        async function deleteUser(userId) {
+            if (!confirm('Delete this user permanently?')) return;
+
+            // Delete profile
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', userId);
+
+            if (profileError) {
+                alert('Failed to delete user profile: ' + profileError.message);
+                return;
+            }
+
+            // Delete auth user (requires admin API – not available client-side)
+            // We'll just remove profile and leave auth user orphaned; better to use admin API via function.
+            alert('Profile deleted. Auth user remains (manual cleanup may be needed).');
+            loadUsers();
+        }
+
+        // =============================================================
+        //  TICKET & CLIENT CRUD (unchanged, but use localStorage)
+        // =============================================================
         function openTicketModal(mode, id = null) {
             currentEditId = id;
             document.getElementById('ticketModalTitle').textContent = mode === 'new' ? 'New Ticket' : 'Edit Ticket';
@@ -692,51 +1290,6 @@
                 }
             }
             document.getElementById('ticketModal').classList.add('active');
-        }
-
-        function openClientModal(mode, id = null) {
-            currentEditId = id;
-            document.getElementById('clientModalTitle').textContent = mode === 'new' ? 'New Client' : 'Edit Client';
-            if (mode === 'new') {
-                document.getElementById('clientFirstName').value = '';
-                document.getElementById('clientLastName').value = '';
-                document.getElementById('clientPhone').value = '';
-                document.getElementById('clientEmail').value = '';
-                document.getElementById('clientAddress').value = '';
-            } else {
-                const client = clients.find(c => c.id === id);
-                if (client) {
-                    document.getElementById('clientFirstName').value = client.firstName;
-                    document.getElementById('clientLastName').value = client.lastName;
-                    document.getElementById('clientPhone').value = client.phone;
-                    document.getElementById('clientEmail').value = client.email || '';
-                    document.getElementById('clientAddress').value = client.address || '';
-                }
-            }
-            document.getElementById('clientModal').classList.add('active');
-        }
-
-        function openUserModal(mode, id = null) {
-            currentEditId = id;
-            document.getElementById('userModalTitle').textContent = mode === 'new' ? 'Add User/Admin' : 'Edit User/Admin';
-            if (mode === 'new') {
-                document.getElementById('userName').value = '';
-                document.getElementById('userEmail').value = '';
-                document.getElementById('userRole').value = 'User';
-            } else {
-                const user = users.find(u => u.id === id);
-                if (user) {
-                    document.getElementById('userName').value = user.name;
-                    document.getElementById('userEmail').value = user.email;
-                    document.getElementById('userRole').value = user.role;
-                }
-            }
-            document.getElementById('userModal').classList.add('active');
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-            currentEditId = null;
         }
 
         function saveTicket() {
@@ -765,52 +1318,12 @@
             alert('Ticket saved!');
         }
 
-        function saveClient() {
-            const id = currentEditId || 'c' + Date.now();
-            const client = {
-                id: id,
-                firstName: document.getElementById('clientFirstName').value,
-                lastName: document.getElementById('clientLastName').value,
-                phone: document.getElementById('clientPhone').value,
-                email: document.getElementById('clientEmail').value,
-                address: document.getElementById('clientAddress').value,
-                createdAt: currentEditId ? (clients.find(c => c.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
-            };
-
-            if (currentEditId) {
-                const index = clients.findIndex(c => c.id === currentEditId);
-                if (index !== -1) clients[index] = client;
-            } else {
-                clients.push(client);
+        function deleteTicket(id) {
+            if (confirm('Delete this ticket?')) {
+                tickets = tickets.filter(t => t.id !== id);
+                saveData();
+                renderTickets();
             }
-
-            saveData();
-            renderClients();
-            closeModal('clientModal');
-            alert('Client saved!');
-        }
-
-        function saveUser() {
-            const id = currentEditId || 'u' + Date.now();
-            const user = {
-                id: id,
-                name: document.getElementById('userName').value,
-                email: document.getElementById('userEmail').value,
-                role: document.getElementById('userRole').value,
-                createdAt: currentEditId ? (users.find(u => u.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
-            };
-
-            if (currentEditId) {
-                const index = users.findIndex(u => u.id === currentEditId);
-                if (index !== -1) users[index] = user;
-            } else {
-                users.push(user);
-            }
-
-            saveData();
-            renderUsers();
-            closeModal('userModal');
-            alert('User saved!');
         }
 
         function renderTickets() {
@@ -842,6 +1355,112 @@
             `).join('');
         }
 
+        function filterTickets() {
+            const search = document.getElementById('ticketSearch').value.toLowerCase();
+            const status = document.getElementById('ticketStatusFilter').value;
+            const filtered = tickets.filter(t =>
+                (t.clientName.toLowerCase().includes(search) || t.device.toLowerCase().includes(search) || t.id.toLowerCase().includes(search)) &&
+                (!status || t.status === status)
+            );
+
+            const container = document.getElementById('ticketsList');
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
+                return;
+            }
+            container.innerHTML = filtered.map(ticket => `
+                <div class="list-item">
+                    <div class="list-item-main">
+                        <div class="list-item-header">
+                            <span class="list-item-id">${ticket.id}</span>
+                            <span class="list-item-title">${ticket.device}</span>
+                            <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
+                        </div>
+                        <div class="list-item-subtitle">${ticket.clientName}</div>
+                    </div>
+                    <div class="list-item-actions">
+                        <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit', '${ticket.id}')">✏️ Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${ticket.id}')">🗑️ Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function printTicket(id) {
+            const ticket = tickets.find(t => t.id === id);
+            if (!ticket) return;
+
+            const html = `
+                <html>
+                <head><style>body { font-family: Arial; margin: 20px; } .header { border-bottom: 2px solid #2F6F63; margin-bottom: 20px; padding-bottom: 10px; } .label { font-weight: bold; color: #666; }</style></head>
+                <body>
+                    <div class="header"><h1>StylesPC Service Ticket</h1><p>Service Tag: <strong>${ticket.id}</strong></p></div>
+                    <div><div class="label">Client:</div><div>${ticket.clientName}</div><div class="label">Phone:</div><div>${ticket.phone}</div><div class="label">Device:</div><div>${ticket.device}</div></div>
+                    <div><div class="label">Issue:</div><div>${ticket.issue}</div></div>
+                    <div><div class="label">Status:</div><div>${ticket.status}</div><div class="label">Priority:</div><div>${ticket.priority}</div></div>
+                    <hr><p style="color:#666;">StylesPC — ajstyleg@gmail.com · (876) 334-1156</p>
+                </body>
+                </html>
+            `;
+            html2pdf().set({ margin: 10, filename: `ticket-${ticket.id}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' } }).from(html).save();
+        }
+
+        // === CLIENT CRUD ===
+        function openClientModal(mode, id = null) {
+            currentEditId = id;
+            document.getElementById('clientModalTitle').textContent = mode === 'new' ? 'New Client' : 'Edit Client';
+            if (mode === 'new') {
+                document.getElementById('clientFirstName').value = '';
+                document.getElementById('clientLastName').value = '';
+                document.getElementById('clientPhone').value = '';
+                document.getElementById('clientEmail').value = '';
+                document.getElementById('clientAddress').value = '';
+            } else {
+                const client = clients.find(c => c.id === id);
+                if (client) {
+                    document.getElementById('clientFirstName').value = client.firstName;
+                    document.getElementById('clientLastName').value = client.lastName;
+                    document.getElementById('clientPhone').value = client.phone;
+                    document.getElementById('clientEmail').value = client.email || '';
+                    document.getElementById('clientAddress').value = client.address || '';
+                }
+            }
+            document.getElementById('clientModal').classList.add('active');
+        }
+
+        function saveClient() {
+            const id = currentEditId || 'c' + Date.now();
+            const client = {
+                id: id,
+                firstName: document.getElementById('clientFirstName').value,
+                lastName: document.getElementById('clientLastName').value,
+                phone: document.getElementById('clientPhone').value,
+                email: document.getElementById('clientEmail').value,
+                address: document.getElementById('clientAddress').value,
+                createdAt: currentEditId ? (clients.find(c => c.id === currentEditId)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+            };
+
+            if (currentEditId) {
+                const index = clients.findIndex(c => c.id === currentEditId);
+                if (index !== -1) clients[index] = client;
+            } else {
+                clients.push(client);
+            }
+
+            saveData();
+            renderClients();
+            closeModal('clientModal');
+            alert('Client saved!');
+        }
+
+        function deleteClient(id) {
+            if (confirm('Delete this client?')) {
+                clients = clients.filter(c => c.id !== id);
+                saveData();
+                renderClients();
+            }
+        }
+
         function renderClients() {
             const container = document.getElementById('clientsList');
             if (clients.length === 0) {
@@ -867,111 +1486,21 @@
             `).join('');
         }
 
-        function renderUsers() {
-            const container = document.getElementById('usersList');
-            if (users.length === 0) {
-                container.innerHTML = '<div class="empty-state"><h3>No users</h3></div>';
-                return;
-            }
-            container.innerHTML = users.map(user => `
-                <div class="list-item">
-                    <div class="list-item-main">
-                        <div class="list-item-header">
-                            <span class="list-item-title">${user.name}</span>
-                            <span class="status-badge status-${user.role.toLowerCase()}">${user.role}</span>
-                        </div>
-                        <div class="list-item-details">
-                            <div class="detail-tag"><span class="label">📧</span><span class="value">${user.email}</span></div>
-                        </div>
-                    </div>
-                    <div class="list-item-actions">
-                        <button class="btn btn-amber btn-sm" onclick="openUserModal('edit', '${user.id}')">✏️ Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user.id}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function deleteTicket(id) {
-            if (confirm('Delete this ticket?')) {
-                tickets = tickets.filter(t => t.id !== id);
-                saveData();
-                renderTickets();
-            }
-        }
-
-        function deleteClient(id) {
-            if (confirm('Delete this client?')) {
-                clients = clients.filter(c => c.id !== id);
-                saveData();
-                renderClients();
-            }
-        }
-
-        function deleteUser(id) {
-            if (users.length === 1) {
-                alert('Cannot delete the last user!');
-                return;
-            }
-            if (confirm('Delete this user?')) {
-                users = users.filter(u => u.id !== id);
-                saveData();
-                renderUsers();
-            }
-        }
-
-        function filterTickets() {
-            const search = document.getElementById('ticketSearch').value.toLowerCase();
-            const status = document.getElementById('ticketStatus').value;
-            const filtered = tickets.filter(t => 
-                (t.clientName.toLowerCase().includes(search) || t.device.toLowerCase().includes(search) || t.id.toLowerCase().includes(search)) &&
-                (!status || t.status === status)
-            );
-
-            const container = document.getElementById('ticketsList');
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
-                return;
-            }
-
-            container.innerHTML = filtered.map(ticket => `
-                <div class="list-item">
-                    <div class="list-item-main">
-                        <div class="list-item-header">
-                            <span class="list-item-id">${ticket.id}</span>
-                            <span class="list-item-title">${ticket.device}</span>
-                            <span class="status-badge status-${ticket.status.toLowerCase().replace(' ', '-')}">${ticket.status}</span>
-                        </div>
-                        <div class="list-item-subtitle">${ticket.clientName}</div>
-                    </div>
-                    <div class="list-item-actions">
-                        <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit', '${ticket.id}')">✏️ Edit</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteTicket('${ticket.id}')">🗑️ Delete</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
         function filterClients() {
             const search = document.getElementById('clientSearch').value.toLowerCase();
-            const filtered = clients.filter(c => 
+            const filtered = clients.filter(c =>
                 c.firstName.toLowerCase().includes(search) || c.lastName.toLowerCase().includes(search) || c.phone.includes(search)
             );
-
             const container = document.getElementById('clientsList');
             if (filtered.length === 0) {
                 container.innerHTML = '<div class="empty-state"><h3>No results</h3></div>';
                 return;
             }
-
             container.innerHTML = filtered.map(client => `
                 <div class="list-item">
                     <div class="list-item-main">
                         <div class="list-item-header">
                             <span class="list-item-title">${client.firstName} ${client.lastName}</span>
-                        </div>
-                        <div class="list-item-details">
-                            <div class="detail-tag"><span class="label">📱</span><span class="value">${client.phone}</span></div>
                         </div>
                     </div>
                     <div class="list-item-actions">
@@ -982,69 +1511,20 @@
             `).join('');
         }
 
-        function printTicket(id) {
-            const ticket = tickets.find(t => t.id === id);
-            if (!ticket) return;
-
-            const html = `
-                <html>
-                <head>
-                    <style>
-                        body { font-family: Arial; margin: 20px; }
-                        .header { border-bottom: 2px solid #2F6F63; margin-bottom: 20px; padding-bottom: 10px; }
-                        .section { margin-bottom: 20px; }
-                        .label { font-weight: bold; color: #666; }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>StylesPC Service Ticket</h1>
-                        <p>Service Tag: <strong>${ticket.id}</strong></p>
-                    </div>
-                    <div class="section">
-                        <div class="label">Client Name:</div>
-                        <div>${ticket.clientName}</div>
-                        <div class="label">Phone:</div>
-                        <div>${ticket.phone}</div>
-                        <div class="label">Device:</div>
-                        <div>${ticket.device}</div>
-                    </div>
-                    <div class="section">
-                        <div class="label">Issue:</div>
-                        <div>${ticket.issue}</div>
-                    </div>
-                    <div class="section">
-                        <div class="label">Status:</div>
-                        <div>${ticket.status}</div>
-                        <div class="label">Priority:</div>
-                        <div>${ticket.priority}</div>
-                    </div>
-                    <hr>
-                    <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
-                        StylesPC — Computer & Laptop Repair
-                        <br>
-                        ajstyleg@gmail.com · (876) 334-1156
-                    </p>
-                </body>
-                </html>
-            `;
-
-            const opt = {
-                margin: 10,
-                filename: `ticket-${ticket.id}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
-            };
-
-            html2pdf().set(opt).from(html).save();
-        }
-
+        // =============================================================
+        //  DASHBOARD / DATA
+        // =============================================================
         function updateDashboard() {
             document.getElementById('totalTickets').textContent = tickets.length;
             document.getElementById('openTickets').textContent = tickets.filter(t => t.status === 'Open').length;
             document.getElementById('totalClients').textContent = clients.length;
-            document.getElementById('totalAdmins').textContent = users.filter(u => u.role === 'Admin').length;
+            // Count admins from profiles
+            supabase.from('profiles').select('role').then(res => {
+                if (!res.error) {
+                    const admins = res.data.filter(p => p.role === 'Admin').length;
+                    document.getElementById('totalAdmins').textContent = admins;
+                }
+            });
 
             const allActivity = [
                 ...tickets.map(t => ({ type: 'ticket', name: `Ticket ${t.id}`, date: t.createdAt })),
@@ -1069,12 +1549,20 @@
         function saveData() {
             localStorage.setItem('tickets', JSON.stringify(tickets));
             localStorage.setItem('clients', JSON.stringify(clients));
-            localStorage.setItem('users', JSON.stringify(users));
+            updateDashboard();
+        }
+
+        function loadData() {
+            tickets = JSON.parse(localStorage.getItem('tickets')) || [];
+            clients = JSON.parse(localStorage.getItem('clients')) || [];
+            renderTickets();
+            renderClients();
+            loadUsers();
             updateDashboard();
         }
 
         function exportData() {
-            const data = { tickets, clients, users, exportDate: new Date().toISOString() };
+            const data = { tickets, clients, profiles: currentUser };
             const json = JSON.stringify(data, null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
@@ -1087,21 +1575,36 @@
         function clearAllData() {
             tickets = [];
             clients = [];
-            users = [];
             saveData();
             renderTickets();
             renderClients();
-            renderUsers();
             alert('All data cleared!');
         }
 
-        function logout() {
-            if (confirm('Logout?')) {
-                window.location.href = '/';
-            }
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab).classList.add('active');
+            // toggle nav tab active state
+            document.querySelectorAll('.nav-tab').forEach(t => {
+                if (t.textContent.includes(tab.charAt(0).toUpperCase() + tab.slice(1))) {
+                    t.classList.add('active');
+                }
+            });
         }
 
-        init();
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+            currentEditId = null;
+        }
+
+        // =============================================================
+        //  INIT
+        // =============================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            checkSession();
+        });
     </script>
+
 </body>
 </html>
