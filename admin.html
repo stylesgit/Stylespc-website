@@ -792,7 +792,7 @@
         // =============================================================
         //  SUPABASE SETUP
         // =============================================================
-        const supabase = supabase.createClient(
+        const sb = supabase.createClient(
             'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
             'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
         );
@@ -818,7 +818,7 @@
         //  AUTH HELPERS
         // =============================================================
         async function checkSession() {
-            const { data, error } = await supabase.auth.getSession();
+            const { data, error } = await sb.auth.getSession();
             if (error || !data.session) {
                 showLogin();
                 return;
@@ -872,7 +872,7 @@
             const password = document.getElementById('loginPassword').value;
             loginError.textContent = '';
 
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { data, error } = await sb.auth.signInWithPassword({
                 email,
                 password
             });
@@ -898,7 +898,7 @@
                     must_change_password: false,
                     password_expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
                 };
-                await supabase.from('profiles').insert([newProfile]);
+                await sb.from('profiles').insert([newProfile]);
                 currentUser = { ...user, ...newProfile };
             } else {
                 currentUser = { ...user, ...profile };
@@ -916,7 +916,7 @@
         }
 
         async function logout() {
-            await supabase.auth.signOut();
+            await sb.auth.signOut();
             showLogin();
             location.reload();
         }
@@ -961,7 +961,7 @@
             }
 
             // Verify current password by re-authenticating
-            const { error: signInError } = await supabase.auth.signInWithPassword({
+            const { error: signInError } = await sb.auth.signInWithPassword({
                 email: currentUser.email,
                 password: current,
             });
@@ -972,7 +972,7 @@
             }
 
             // Update password
-            const { error: updateError } = await supabase.auth.updateUser({
+            const { error: updateError } = await sb.auth.updateUser({
                 password: newPw,
             });
 
@@ -1020,7 +1020,7 @@
             }
 
             // Also get auth users to show email
-            const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+            const { data: authUsers, error: authError } = await sb.auth.admin.listUsers();
             if (authError) {
                 console.error('Failed to list auth users:', authError);
                 // Fallback: use profiles only
@@ -1116,7 +1116,7 @@
             }
 
             // Get email from auth
-            const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+            const { data: authData, error: authError } = await sb.auth.admin.getUserById(userId);
             let email = '';
             if (!authError && authData) {
                 email = authData.user.email;
@@ -1181,7 +1181,7 @@
                 return;
             }
 
-            const { data, error } = await supabase.auth.signUp({
+            const { data, error } = await sb.auth.signUp({
                 email: email,
                 password: password,
                 options: {
@@ -1225,14 +1225,14 @@
             if (!confirm('Send a password reset email to this user?')) return;
 
             // Get user email from auth
-            const { data: authData, error: authError } = await supabase.auth.admin.getUserById(userId);
+            const { data: authData, error: authError } = await sb.auth.admin.getUserById(userId);
             if (authError || !authData) {
                 alert('Could not find user.');
                 return;
             }
 
             const email = authData.user.email;
-            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            const { error } = await sb.auth.resetPasswordForEmail(email, {
                 redirectTo: window.location.origin,
             });
 
@@ -1519,7 +1519,7 @@
             document.getElementById('openTickets').textContent = tickets.filter(t => t.status === 'Open').length;
             document.getElementById('totalClients').textContent = clients.length;
             // Count admins from profiles
-            supabase.from('profiles').select('role').then(res => {
+            sb.from('profiles').select('role').then(res => {
                 if (!res.error) {
                     const admins = res.data.filter(p => p.role === 'Admin').length;
                     document.getElementById('totalAdmins').textContent = admins;
