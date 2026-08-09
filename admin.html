@@ -7,11 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-    <!-- Chart.js & html2pdf (don't depend on Supabase) -->
+    <!-- Chart.js & html2pdf -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Supabase – loaded with onload callback -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js" id="supabaseScript"></script>
     <style>
-        /* ===== STYLES (same as before) ===== */
+        /* ===== STYLES (full) ===== */
         :root {
             --paper: #F3EFE7;
             --paper-2: #EAE3D3;
@@ -122,11 +124,10 @@
             .bulk-bar { flex-wrap: wrap; }
         }
         @media (max-width: 480px) { .modal { padding: 20px; } }
-        /* Loading indicator */
-        #loader { display: none; text-align: center; padding: 20px; color: var(--ink-soft); }
-        #loader.show { display: block; }
-        #loader .spinner { border: 4px solid var(--rule); border-top: 4px solid var(--teal); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 12px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status-msg { padding: 20px; text-align: center; color: var(--ink-soft); }
+        .status-msg.err { color: var(--red); }
+        .empty-state { text-align: center; padding: 40px; color: var(--ink-soft); }
+        .empty-state h3 { color: var(--ink); }
     </style>
 </head>
 <body>
@@ -136,8 +137,8 @@
     <div class="login-box">
         <h1>StylesPC Admin</h1>
         <p class="sub">Enterprise management portal</p>
-        <div id="scriptStatus" style="background:#2F6F63;color:white;padding:6px;border-radius:4px;margin-bottom:12px;text-align:center;">⏳ Loading Supabase...</div>
-        <div id="loader" class="show"><div class="spinner"></div>Loading...</div>
+        <div id="scriptStatus" style="background:#f0c040;color:#1F2421;padding:6px;border-radius:4px;margin-bottom:12px;text-align:center;">⏳ Loading Supabase...</div>
+        <div id="loader" style="text-align:center;padding:10px;"><div style="border:4px solid var(--rule);border-top:4px solid var(--teal);border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto;"></div></div>
         <form id="loginForm" style="display:none;" onsubmit="handleLogin(event)">
             <div class="form-group">
                 <label for="loginEmail">Email</label>
@@ -153,9 +154,8 @@
     </div>
 </div>
 
-<!-- ===== MAIN APP (hidden until login) ===== -->
+<!-- ===== MAIN APP ===== -->
 <div class="container" id="mainApp" style="display:none;">
-    <!-- ... same as before ... -->
     <div class="header">
         <h1><span class="dot"></span>StylesPC Enterprise</h1>
         <div class="user-menu">
@@ -198,23 +198,11 @@
         <h2 style="margin-bottom:20px;">Tickets</h2>
         <div class="toolbar">
             <div class="search-box"><input type="text" id="ticketSearch" placeholder="Search…" oninput="filterTickets()"></div>
-            <select id="ticketStatusFilter" onchange="filterTickets()">
-                <option value="">All Status</option>
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Closed">Closed</option>
-            </select>
-            <select id="ticketPriorityFilter" onchange="filterTickets()">
-                <option value="">All Priority</option>
-                <option value="High">High</option>
-                <option value="Medium">Medium</option>
-                <option value="Low">Low</option>
-            </select>
-            <select id="ticketAssigneeFilter" onchange="filterTickets()">
-                <option value="">All Assignees</option>
-            </select>
-            <input type="date" id="ticketDateFrom" onchange="filterTickets()" placeholder="From">
-            <input type="date" id="ticketDateTo" onchange="filterTickets()" placeholder="To">
+            <select id="ticketStatusFilter" onchange="filterTickets()"><option value="">All Status</option><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Closed">Closed</option></select>
+            <select id="ticketPriorityFilter" onchange="filterTickets()"><option value="">All Priority</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select>
+            <select id="ticketAssigneeFilter" onchange="filterTickets()"><option value="">All Assignees</option></select>
+            <input type="date" id="ticketDateFrom" onchange="filterTickets()">
+            <input type="date" id="ticketDateTo" onchange="filterTickets()">
             <button class="btn btn-primary" onclick="openTicketModal('new')">+ New Ticket</button>
         </div>
         <div id="ticketCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
@@ -223,11 +211,7 @@
             <button class="btn btn-sm btn-ghost" onclick="bulkAction('delete')">🗑️ Delete</button>
             <button class="btn btn-sm btn-ghost" onclick="bulkAction('status')">📌 Change Status</button>
             <button class="btn btn-sm btn-ghost" onclick="bulkAction('assign')">👤 Assign</button>
-            <select id="bulkStatusSelect" style="display:none;padding:4px 8px;border:1px solid var(--rule);border-radius:var(--radius);">
-                <option value="Open">Open</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Closed">Closed</option>
-            </select>
+            <select id="bulkStatusSelect" style="display:none;padding:4px 8px;border:1px solid var(--rule);border-radius:var(--radius);"><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Closed">Closed</option></select>
             <select id="bulkAssigneeSelect" style="display:none;padding:4px 8px;border:1px solid var(--rule);border-radius:var(--radius);"></select>
             <button class="btn btn-sm btn-primary" id="bulkConfirmBtn" style="display:none;" onclick="executeBulkAction()">Apply</button>
         </div>
@@ -273,20 +257,14 @@
         <h2 style="margin-bottom:20px;">Settings</h2>
         <div class="list-container">
             <div class="list-item">
-                <div class="list-item-main">
-                    <div class="list-item-title">Company Name</div>
-                    <div class="list-item-subtitle">Displayed on invoices and emails</div>
-                </div>
+                <div class="list-item-main"><div class="list-item-title">Company Name</div><div class="list-item-subtitle">Displayed on invoices and emails</div></div>
                 <div class="list-item-actions">
                     <input type="text" id="companyName" value="StylesPC" style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);font-family:inherit;">
                     <button class="btn btn-primary btn-sm" onclick="saveCompanyName()">Save</button>
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main">
-                    <div class="list-item-title">Password Policy</div>
-                    <div class="list-item-subtitle">Minimum length, expiry days, require special chars</div>
-                </div>
+                <div class="list-item-main"><div class="list-item-title">Password Policy</div><div class="list-item-subtitle">Minimum length, expiry days, require special chars</div></div>
                 <div class="list-item-actions">
                     <div style="display:grid;gap:6px;">
                         <label>Min length: <input type="number" id="pwMinLen" value="6" style="width:60px;"></label>
@@ -297,10 +275,7 @@
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main">
-                    <div class="list-item-title">Notification Settings</div>
-                    <div class="list-item-subtitle">Email notifications for ticket events</div>
-                </div>
+                <div class="list-item-main"><div class="list-item-title">Notification Settings</div><div class="list-item-subtitle">Email notifications for ticket events</div></div>
                 <div class="list-item-actions">
                     <label><input type="checkbox" id="notifyAssign" checked> On Assignment</label>
                     <label><input type="checkbox" id="notifyStatus" checked> On Status Change</label>
@@ -308,10 +283,7 @@
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main">
-                    <div class="list-item-title">Export All Data</div>
-                    <div class="list-item-subtitle">Download tickets, clients, users, activity as JSON</div>
-                </div>
+                <div class="list-item-main"><div class="list-item-title">Export All Data</div><div class="list-item-subtitle">Download tickets, clients, users, activity as JSON</div></div>
                 <div class="list-item-actions">
                     <button class="btn btn-amber btn-sm" onclick="exportFullData()">📦 Export JSON</button>
                 </div>
@@ -320,88 +292,74 @@
     </div>
 </div>
 
-<!-- ===== MODALS ===== (same as before, omitted for brevity – but they are in the full code) ===== -->
-<!-- ... include all modal divs from the previous version ... -->
+<!-- ===== MODALS ===== -->
+<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Closed">Closed</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button></div></div> <div id="ticketModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
+
+<div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
+
+<div class="modal-overlay" id="userModal"> <div class="modal"> <h2 id="userModalTitle">Add User</h2> <form id="userForm" onsubmit="saveUser(event)"> <div class="form-group"><label>Email *</label><input type="email" id="userEmail" required placeholder="staff@stylespc.com"></div> <div class="form-group"><label>Password <span id="pwLabel">(required)</span></label><input type="password" id="userPassword" placeholder="Min. 6 characters"></div> <div class="form-row"><div class="form-group"><label>Role</label><select id="userRole"><option value="User">User</option><option value="Manager">Manager</option><option value="Technician">Technician</option><option value="Admin">Admin</option></select></div><div class="form-group"><label>Password Expiry (days)</label><input type="number" id="userExpiryDays" value="30" min="1" max="365"></div></div> <div class="checkbox-group"><input type="checkbox" id="userMustChange" checked><label for="userMustChange">Must change password at next login</label></div> <div id="userModalError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button type="submit" class="btn btn-primary">Save User</button></div> </form> </div></div>
+
+<div class="modal-overlay" id="changePasswordModal"> <div class="modal"> <h2>Change Password</h2> <form id="changePasswordForm" onsubmit="handleChangePassword(event)"> <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword" required></div> <div class="form-group"><label>New Password</label><input type="password" id="newPassword" required placeholder="Min. 6 characters"></div> <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPassword" required></div> <div id="changePasswordError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button><button type="submit" class="btn btn-primary">Update Password</button></div> </form> </div></div>
 
 <!-- ============================================================ -->
-<!-- JAVASCRIPT – DYNAMIC SUPABASE LOADER                         -->
+<!-- JAVASCRIPT – Waits for Supabase to load                     -->
 <!-- ============================================================ -->
 <script>
 // =============================================================
-// 0. LOAD SUPABASE LIBRARY DYNAMICALLY
+// WAIT FOR SUPABASE TO BE DEFINED
 // =============================================================
-(function loadSupabase() {
+(function waitForSupabase() {
     const statusEl = document.getElementById('scriptStatus');
     const loaderEl = document.getElementById('loader');
     const formEl = document.getElementById('loginForm');
+    let attempts = 0;
+    const maxAttempts = 30; // 5 seconds max (150ms per check)
 
-    function showError(msg) {
-        statusEl.textContent = '❌ ' + msg;
-        statusEl.style.background = '#a3372a';
-        loaderEl.classList.remove('show');
-    }
-
-    function onSupabaseReady() {
-        statusEl.textContent = '✅ Supabase loaded';
-        statusEl.style.background = '#2F6F63';
-        loaderEl.classList.remove('show');
-        formEl.style.display = 'block';
-        // Now start the app
-        initApp();
-    }
-
-    // If already defined, use it
-    if (typeof supabase !== 'undefined') {
-        onSupabaseReady();
-        return;
-    }
-
-    // Try multiple CDN sources
-    const sources = [
-        'https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js',
-        'https://unpkg.com/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
-    ];
-
-    let current = 0;
-
-    function tryLoad() {
-        if (current >= sources.length) {
-            showError('Failed to load Supabase from all sources. Check internet.');
+    function checkSupabase() {
+        attempts++;
+        if (typeof supabase !== 'undefined') {
+            // Supabase is ready
+            statusEl.textContent = '✅ Supabase loaded';
+            statusEl.style.background = '#2F6F63';
+            statusEl.style.color = 'white';
+            loaderEl.style.display = 'none';
+            formEl.style.display = 'block';
+            // Start the app
+            initApp();
             return;
         }
-        const script = document.createElement('script');
-        script.src = sources[current];
-        script.onload = function() {
-            if (typeof supabase !== 'undefined') {
-                onSupabaseReady();
-            } else {
-                // loaded but not defined? try next
-                current++;
-                tryLoad();
-            }
-        };
-        script.onerror = function() {
-            current++;
-            tryLoad();
-        };
-        document.head.appendChild(script);
+        if (attempts >= maxAttempts) {
+            // Timeout
+            statusEl.textContent = '❌ Failed to load Supabase. Please refresh or check your internet.';
+            statusEl.style.background = '#a3372a';
+            statusEl.style.color = 'white';
+            loaderEl.style.display = 'none';
+            // Show a retry button
+            const retryBtn = document.createElement('button');
+            retryBtn.textContent = 'Retry';
+            retryBtn.className = 'btn btn-primary';
+            retryBtn.style.marginTop = '12px';
+            retryBtn.onclick = function() {
+                location.reload();
+            };
+            const box = document.querySelector('.login-box');
+            box.appendChild(retryBtn);
+            return;
+        }
+        setTimeout(checkSupabase, 150);
     }
 
-    // Start loading
-    loaderEl.classList.add('show');
-    statusEl.textContent = '⏳ Loading Supabase...';
-    tryLoad();
+    // Start checking after the script tag has had time to load
+    // The script tag is in the head, so we can start checking immediately.
+    checkSupabase();
 })();
 
 // =============================================================
-// 1. APP INIT – called when Supabase is ready
+// APP INIT – called when Supabase is ready
 // =============================================================
 function initApp() {
     console.log('🚀 App initializing with Supabase');
 
-    // =============================================================
-    // SUPABASE CLIENT
-    // =============================================================
     const sb = supabase.createClient(
         'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
         'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
@@ -424,15 +382,15 @@ function initApp() {
     function genTag() { return 'SPC-' + Math.floor(1000 + Math.random() * 9000); }
 
     // =============================================================
-    // AUTH FUNCTIONS
+    // AUTH
     // =============================================================
     async function handleLogin(e) {
         e.preventDefault();
         alert('🔐 Login handler triggered');
-        const errorEl = document.getElementById('loginError');
+        const errorEl = $('loginError');
         errorEl.textContent = '';
-        const email = document.getElementById('loginEmail').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
+        const email = $('loginEmail').value.trim();
+        const password = $('loginPassword').value.trim();
         if (!email || !password) {
             errorEl.textContent = 'Please enter both email and password.';
             return;
@@ -462,10 +420,10 @@ function initApp() {
                 profile = newProfile;
             }
             currentUser = { ...user, ...profile };
-            document.getElementById('userNameDisplay').textContent = user.email;
-            document.getElementById('userRoleDisplay').textContent = profile.role || 'User';
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('mainApp').style.display = 'block';
+            $('userNameDisplay').textContent = user.email;
+            $('userRoleDisplay').textContent = profile.role || 'User';
+            $('loginOverlay').classList.add('hidden');
+            $('mainApp').style.display = 'block';
             await loadUsersForSelects();
             await loadAll();
             alert('✅ Dashboard ready');
@@ -477,13 +435,13 @@ function initApp() {
     async function logout() {
         await sb.auth.signOut();
         currentUser = null;
-        document.getElementById('loginOverlay').classList.remove('hidden');
-        document.getElementById('mainApp').style.display = 'none';
+        $('loginOverlay').classList.remove('hidden');
+        $('mainApp').style.display = 'none';
     }
 
     function showLogin() {
-        document.getElementById('loginOverlay').classList.remove('hidden');
-        document.getElementById('mainApp').style.display = 'none';
+        $('loginOverlay').classList.remove('hidden');
+        $('mainApp').style.display = 'none';
     }
 
     async function checkSession() {
@@ -493,9 +451,594 @@ function initApp() {
             await afterLogin(data.session.user);
         } catch (err) {
             showLogin();
-            document.getElementById('loginError').textContent = 'Session error: ' + err.message;
+            $('loginError').textContent = 'Session error: ' + err.message;
         }
     }
+
+    // =============================================================
+    // LOAD ALL DATA
+    // =============================================================
+    async function loadAll() {
+        await Promise.all([loadTickets(), loadClients(), loadUsers()]);
+        updateDashboard();
+        populateAssigneeFilters();
+    }
+
+    // =============================================================
+    // TICKETS (full CRUD + comments)
+    // =============================================================
+    async function loadTickets() {
+        const listEl = $('ticketsList');
+        listEl.innerHTML = '<div class="status-msg">Loading tickets…</div>';
+        try {
+            const { data, error } = await sb.from('tickets').select('*').order('created_at', { ascending: false });
+            if (error) throw error;
+            allTickets = data || [];
+            renderTickets(allTickets);
+        } catch (e) {
+            listEl.innerHTML = '<div class="status-msg err">Error: ' + e.message + '</div>';
+        }
+    }
+
+    function renderTickets(list) {
+        $('ticketCount').textContent = list.length + ' ticket' + (list.length === 1 ? '' : 's');
+        if (list.length === 0) {
+            $('ticketsList').innerHTML = '<div class="empty-state"><h3>No tickets found</h3></div>';
+            return;
+        }
+        $('ticketsList').innerHTML = list.map(t => {
+            const status = t.status || 'Open';
+            const sClass = status.toLowerCase().replace(/\s+/g,'-');
+            return `
+            <div class="list-item" data-id="${t.id}">
+                <div class="list-item-main">
+                    <div class="list-item-header">
+                        <input type="checkbox" class="ticket-checkbox" data-id="${t.id}" onchange="toggleSelect('${t.id}')">
+                        <span class="list-item-id">${esc(t.ticket_number||t.id)}</span>
+                        <span class="list-item-title">${esc(t.device||'—')}</span>
+                        <span class="status-badge status-${sClass}">${esc(status)}</span>
+                        <span style="font-size:0.72rem;font-weight:700;${t.priority==='High'?'color:var(--red)':t.priority==='Medium'?'color:var(--amber)':'color:var(--ink-soft)'}">${esc(t.priority||'')}</span>
+                    </div>
+                    <div class="list-item-subtitle">${esc(t.client_name||'—')}</div>
+                    <div class="list-item-details">
+                        <div class="detail-tag"><span class="label">📱</span><span class="value">${esc(t.phone||'—')}</span></div>
+                        ${t.amount ? `<div class="detail-tag"><span class="label">💰</span><span class="value">$${t.amount} · ${esc(t.payment_status||'')}</span></div>` : ''}
+                        ${t.created_at ? `<div class="detail-tag"><span class="label">📅</span><span class="value">${new Date(t.created_at).toLocaleDateString()}</span></div>` : ''}
+                    </div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit','${t.id}')">✏️ Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTicket('${t.id}')">🗑️ Delete</button>
+                </div>
+            </div>`;
+        }).join('');
+        updateSelectedCount();
+    }
+
+    async function saveTicket() {
+        const tag = $('ticketTag').value.trim();
+        const name = $('ticketClientName').value.trim();
+        const phone = $('ticketPhone').value.trim();
+        const device = $('ticketDevice').value.trim();
+        const issue = $('ticketIssue').value.trim();
+        const errorEl = $('ticketModalError');
+        errorEl.textContent = '';
+        if (!name || !phone || !device || !issue) { errorEl.textContent = 'Please fill all required fields.'; return; }
+        const payload = {
+            ticket_number: tag,
+            client_name: name,
+            phone: phone,
+            email: $('ticketEmail').value.trim() || null,
+            device: device,
+            issue: issue,
+            status: $('ticketStatus').value,
+            priority: $('ticketPriority').value,
+            amount: parseFloat($('ticketAmount').value) || 0,
+            payment_status: $('ticketPayment').value,
+            notes: $('ticketNotes').value.trim() || null,
+            assignee: $('ticketAssignee').value || null,
+            due_date: $('ticketDueDate').value || null,
+        };
+        let error;
+        if (currentEditId) {
+            ({ error } = await sb.from('tickets').update(payload).eq('id', currentEditId));
+        } else {
+            ({ error } = await sb.from('tickets').insert([payload]));
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        closeModal('ticketModal');
+        await loadTickets();
+        updateDashboard();
+    }
+
+    async function deleteTicket(id) {
+        if (!confirm('Delete this ticket?')) return;
+        await sb.from('tickets').delete().eq('id', id);
+        await loadTickets();
+        updateDashboard();
+    }
+
+    function openTicketModal(mode, id = null) {
+        currentEditId = id;
+        $('ticketModalTitle').textContent = mode === 'new' ? 'New Ticket' : 'Edit Ticket';
+        $('ticketModalError').textContent = '';
+        $('ticketCommentsSection').style.display = 'none';
+        if (mode === 'new') {
+            $('ticketTag').value = genTag();
+            ['ticketClientName','ticketPhone','ticketEmail','ticketDevice','ticketIssue','ticketNotes'].forEach(f => $(f).value = '');
+            $('ticketStatus').value = 'Open';
+            $('ticketPriority').value = 'Medium';
+            $('ticketAmount').value = '';
+            $('ticketPayment').value = 'unpaid';
+            $('ticketAssignee').value = '';
+            $('ticketDueDate').value = '';
+        } else {
+            const t = allTickets.find(x => x.id === id);
+            if (!t) return;
+            $('ticketTag').value = t.ticket_number || t.id;
+            $('ticketClientName').value = t.client_name || '';
+            $('ticketPhone').value = t.phone || '';
+            $('ticketEmail').value = t.email || '';
+            $('ticketDevice').value = t.device || '';
+            $('ticketIssue').value = t.issue || '';
+            $('ticketStatus').value = t.status || 'Open';
+            $('ticketPriority').value = t.priority || 'Medium';
+            $('ticketAmount').value = t.amount || '';
+            $('ticketPayment').value = t.payment_status || 'unpaid';
+            $('ticketNotes').value = t.notes || '';
+            $('ticketAssignee').value = t.assignee || '';
+            $('ticketDueDate').value = t.due_date ? t.due_date.split('T')[0] : '';
+            loadComments(id);
+            $('ticketCommentsSection').style.display = 'block';
+        }
+        populateAssigneeSelect($('ticketAssignee'));
+        $('ticketModal').classList.add('active');
+    }
+
+    // ---- Comments ----
+    async function loadComments(ticketId) {
+        const { data } = await sb.from('comments').select('*, profiles(email)').eq('ticket_id', ticketId).order('created_at', { ascending: true });
+        const container = $('commentThread');
+        container.innerHTML = (data || []).map(c => `
+            <div class="comment">
+                <div class="meta"><span>${esc(c.profiles ? c.profiles.email : 'Unknown')}</span><span>${new Date(c.created_at).toLocaleString()}</span></div>
+                <div class="body">${esc(c.content)}</div>
+                ${c.attachment_url ? `<div><a href="${esc(c.attachment_url)}" target="_blank">📎 Attachment</a></div>` : ''}
+            </div>
+        `).join('');
+    }
+    async function addComment() {
+        const ticketId = currentEditId;
+        if (!ticketId) return;
+        const content = $('newComment').value.trim();
+        if (!content) return;
+        await sb.from('comments').insert([{ ticket_id: ticketId, user_id: currentUser.id, content }]);
+        $('newComment').value = '';
+        loadComments(ticketId);
+    }
+    async function uploadAttachment() {
+        const ticketId = currentEditId;
+        if (!ticketId) return;
+        const fileInput = $('fileInput');
+        if (!fileInput.files.length) return;
+        const file = fileInput.files[0];
+        const path = `tickets/${ticketId}/${Date.now()}_${file.name}`;
+        const { error } = await sb.storage.from('attachments').upload(path, file);
+        if (error) { alert('Upload failed: ' + error.message); return; }
+        const { data: urlData } = sb.storage.from('attachments').getPublicUrl(path);
+        await sb.from('comments').insert([{ ticket_id: ticketId, user_id: currentUser.id, content: `📎 Attachment: ${file.name}`, attachment_url: urlData.publicUrl }]);
+        loadComments(ticketId);
+        fileInput.value = '';
+    }
+
+    // ---- Bulk actions ----
+    function toggleSelect(id) {
+        if (selectedTicketIds.has(id)) selectedTicketIds.delete(id);
+        else selectedTicketIds.add(id);
+        updateSelectedCount();
+    }
+    function updateSelectedCount() {
+        $('selectedCount').textContent = selectedTicketIds.size + ' selected';
+    }
+    function bulkAction(action) {
+        if (selectedTicketIds.size === 0) { alert('Select at least one ticket.'); return; }
+        if (action === 'delete') {
+            if (!confirm(`Delete ${selectedTicketIds.size} tickets?`)) return;
+            const ids = Array.from(selectedTicketIds);
+            Promise.all(ids.map(id => sb.from('tickets').delete().eq('id', id))).then(() => { selectedTicketIds.clear(); loadTickets(); updateDashboard(); });
+        } else if (action === 'status') {
+            $('bulkStatusSelect').style.display = 'inline-block';
+            $('bulkAssigneeSelect').style.display = 'none';
+            $('bulkConfirmBtn').style.display = 'inline-block';
+            $('bulkConfirmBtn').dataset.action = 'status';
+        } else if (action === 'assign') {
+            $('bulkAssigneeSelect').style.display = 'inline-block';
+            $('bulkStatusSelect').style.display = 'none';
+            $('bulkConfirmBtn').style.display = 'inline-block';
+            $('bulkConfirmBtn').dataset.action = 'assign';
+            populateAssigneeSelect($('bulkAssigneeSelect'));
+        }
+    }
+    function executeBulkAction() {
+        const action = $('bulkConfirmBtn').dataset.action;
+        const ids = Array.from(selectedTicketIds);
+        if (action === 'status') {
+            const status = $('bulkStatusSelect').value;
+            Promise.all(ids.map(id => sb.from('tickets').update({ status }).eq('id', id))).then(() => { selectedTicketIds.clear(); loadTickets(); updateDashboard(); });
+        } else if (action === 'assign') {
+            const assignee = $('bulkAssigneeSelect').value;
+            Promise.all(ids.map(id => sb.from('tickets').update({ assignee }).eq('id', id))).then(() => { selectedTicketIds.clear(); loadTickets(); updateDashboard(); });
+        }
+        $('bulkStatusSelect').style.display = 'none';
+        $('bulkAssigneeSelect').style.display = 'none';
+        $('bulkConfirmBtn').style.display = 'none';
+    }
+
+    // =============================================================
+    // CLIENTS
+    // =============================================================
+    async function loadClients() {
+        const listEl = $('clientsList');
+        listEl.innerHTML = '<div class="status-msg">Loading clients…</div>';
+        const { data, error } = await sb.from('clients').select('*').order('created_at', { ascending: false });
+        if (error) { listEl.innerHTML = '<div class="status-msg err">Error: ' + error.message + '</div>'; return; }
+        allClients = data || [];
+        renderClients(allClients);
+        $('totalClients').textContent = allClients.length;
+    }
+    function renderClients(list) {
+        $('clientCount').textContent = list.length + ' client' + (list.length === 1 ? '' : 's');
+        if (list.length === 0) { $('clientsList').innerHTML = '<div class="empty-state"><h3>No clients</h3></div>'; return; }
+        $('clientsList').innerHTML = list.map(c => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header"><span class="list-item-title">${esc(c.name||'—')}</span></div>
+                    <div class="list-item-details">
+                        <div class="detail-tag"><span class="label">📱</span><span class="value">${esc(c.phone||'—')}</span></div>
+                        ${c.email ? `<div class="detail-tag"><span class="label">📧</span><span class="value">${esc(c.email)}</span></div>` : ''}
+                    </div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-amber btn-sm" onclick="openClientModal('edit','${c.id}')">✏️ Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')">🗑️ Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    async function saveClient() {
+        const first = $('clientFirstName').value.trim();
+        const last = $('clientLastName').value.trim();
+        const phone = $('clientPhone').value.trim();
+        const errorEl = $('clientModalError');
+        if (!first || !last || !phone) { errorEl.textContent = 'First name, last name, and phone are required.'; return; }
+        const payload = { name: first + ' ' + last, phone, email: $('clientEmail').value.trim() || null, address: $('clientAddress').value.trim() || null, notes: $('clientNotes').value.trim() || null };
+        let error;
+        if (currentEditId) {
+            ({ error } = await sb.from('clients').update(payload).eq('id', currentEditId));
+        } else {
+            ({ error } = await sb.from('clients').insert([payload]));
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        closeModal('clientModal');
+        await loadClients();
+        updateDashboard();
+    }
+    async function deleteClient(id) {
+        if (!confirm('Delete this client?')) return;
+        await sb.from('clients').delete().eq('id', id);
+        await loadClients();
+        updateDashboard();
+    }
+    function openClientModal(mode, id = null) {
+        currentEditId = id;
+        $('clientModalTitle').textContent = mode === 'new' ? 'New Client' : 'Edit Client';
+        if (mode === 'new') {
+            ['clientFirstName','clientLastName','clientPhone','clientEmail','clientAddress','clientNotes'].forEach(f => $(f).value = '');
+        } else {
+            const c = allClients.find(x => x.id === id);
+            if (!c) return;
+            const parts = (c.name || '').split(' ');
+            $('clientFirstName').value = parts[0] || '';
+            $('clientLastName').value = parts.slice(1).join(' ') || '';
+            $('clientPhone').value = c.phone || '';
+            $('clientEmail').value = c.email || '';
+            $('clientAddress').value = c.address || '';
+            $('clientNotes').value = c.notes || '';
+        }
+        $('clientModal').classList.add('active');
+    }
+    function filterClients() {
+        const q = $('clientSearch').value.toLowerCase();
+        const filtered = allClients.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
+        renderClients(filtered);
+    }
+    function exportClientsCSV() {
+        let csv = 'Name,Phone,Email,Address,Notes,Created\n';
+        allClients.forEach(c => { csv += `"${c.name||''}","${c.phone||''}","${c.email||''}","${c.address||''}","${c.notes||''}","${c.created_at||''}"\n`; });
+        const blob = new Blob([csv], { type:'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'clients.csv';
+        a.click();
+    }
+
+    // =============================================================
+    // USERS
+    // =============================================================
+    async function loadUsers() {
+        const listEl = $('usersList');
+        listEl.innerHTML = '<div class="status-msg">Loading users…</div>';
+        const { data, error } = await sb.from('profiles').select('*');
+        if (error) { listEl.innerHTML = '<div class="status-msg err">Error: ' + error.message + '</div>'; return; }
+        allUsers = data || [];
+        renderUsers(allUsers);
+        $('totalAdmins').textContent = allUsers.filter(u => u.role === 'Admin' || u.role === 'Manager').length;
+    }
+    function renderUsers(list) {
+        if (list.length === 0) { $('usersList').innerHTML = '<div class="empty-state"><h3>No users</h3></div>'; return; }
+        $('usersList').innerHTML = list.map(u => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header">
+                        <span class="list-item-title">${esc(u.email||u.id)}</span>
+                        <span class="status-badge status-${(u.role||'user').toLowerCase()}">${esc(u.role||'User')}</span>
+                        ${u.id === currentUser?.id ? '<span class="status-badge" style="background:rgba(47,111,99,0.1);color:var(--teal-dark);">You</span>' : ''}
+                    </div>
+                </div>
+                <div class="list-item-actions">
+                    ${u.id !== currentUser?.id ? `<button class="btn btn-amber btn-sm" onclick="openUserModal('edit','${u.id}')">✏️ Edit</button>` : ''}
+                    ${u.id !== currentUser?.id ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}')">🗑️ Delete</button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    async function openUserModal(mode, userId = null) {
+        currentEditId = userId;
+        $('userModalTitle').textContent = mode === 'new' ? 'Add New User' : 'Edit User';
+        $('userModalError').textContent = '';
+        $('userForm').reset();
+        $('pwLabel').textContent = mode === 'new' ? '(required)' : '(leave blank to keep current)';
+        $('userPassword').required = mode === 'new';
+        if (mode === 'edit' && userId) {
+            const { data } = await sb.from('profiles').select('*').eq('id', userId).single();
+            if (data) {
+                $('userRole').value = data.role || 'User';
+                $('userExpiryDays').value = data.password_expiry ? Math.max(1, Math.round((new Date(data.password_expiry) - new Date()) / 864e5)) : 30;
+                $('userMustChange').checked = !!data.must_change_password;
+            }
+        }
+        $('userModal').classList.add('active');
+    }
+    async function saveUser(e) {
+        e.preventDefault();
+        const email = $('userEmail').value.trim();
+        const password = $('userPassword').value;
+        const role = $('userRole').value;
+        const days = parseInt($('userExpiryDays').value) || 30;
+        const must = $('userMustChange').checked;
+        const errorEl = $('userModalError');
+        const expiry = new Date(Date.now() + days * 864e5).toISOString();
+        if (currentEditId) {
+            const { error } = await sb.from('profiles').update({ role, must_change_password: must, password_expiry: expiry }).eq('id', currentEditId);
+            if (error) { errorEl.textContent = error.message; return; }
+            alert('User updated!');
+            closeModal('userModal');
+            loadUsers();
+            return;
+        }
+        if (!password) { errorEl.textContent = 'Password is required for new users.'; return; }
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error) { errorEl.textContent = error.message; return; }
+        if (data.user) {
+            await sb.from('profiles').insert([{ id: data.user.id, role, must_change_password: must, password_expiry: expiry }]);
+        }
+        alert('User created!');
+        closeModal('userModal');
+        loadUsers();
+    }
+    async function deleteUser(userId) {
+        if (!confirm('Delete this user?')) return;
+        await sb.from('profiles').delete().eq('id', userId);
+        loadUsers();
+    }
+
+    // =============================================================
+    // ACTIVITY LOG
+    // =============================================================
+    async function loadActivity() {
+        const from = $('activityFrom').value;
+        const to = $('activityTo').value;
+        let query = sb.from('activity_logs').select('*, profiles(email)').order('created_at', { ascending: false }).limit(200);
+        if (from) query = query.gte('created_at', from);
+        if (to) query = query.lte('created_at', to + 'T23:59:59');
+        const { data, error } = await query;
+        if (error) { $('activityList').innerHTML = '<div class="status-msg err">Error loading activity.</div>'; return; }
+        $('activityList').innerHTML = (data || []).map(a => `
+            <div class="log-entry">
+                <span class="time">${new Date(a.created_at).toLocaleString()}</span>
+                <span class="user">${esc(a.profiles ? a.profiles.email : 'System')}</span>
+                <span>${esc(a.action)} — ${esc(a.description)}</span>
+            </div>
+        `).join('');
+    }
+    function exportActivityCSV() { alert('Export activity CSV – implement as needed'); }
+
+    // =============================================================
+    // DASHBOARD & CHARTS
+    // =============================================================
+    function updateDashboard() {
+        $('totalTickets').textContent = allTickets.length;
+        $('openTickets').textContent = allTickets.filter(t => t.status === 'Open').length;
+        $('inProgressTickets').textContent = allTickets.filter(t => t.status === 'In Progress').length;
+        const statusCounts = { Open:0, 'In Progress':0, Closed:0 };
+        const priorityCounts = { High:0, Medium:0, Low:0 };
+        allTickets.forEach(t => {
+            if (t.status in statusCounts) statusCounts[t.status]++;
+            if (t.priority in priorityCounts) priorityCounts[t.priority]++;
+        });
+        if (statusChart) statusChart.destroy();
+        if (priorityChart) priorityChart.destroy();
+        const ctx1 = $('statusChart').getContext('2d');
+        statusChart = new Chart(ctx1, {
+            type: 'doughnut',
+            data: { labels: ['Open', 'In Progress', 'Closed'], datasets: [{ data: [statusCounts.Open, statusCounts['In Progress'], statusCounts.Closed], backgroundColor: ['#2F6F63', '#C97A2B', '#2e7d32'] }] },
+            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+        });
+        const ctx2 = $('priorityChart').getContext('2d');
+        priorityChart = new Chart(ctx2, {
+            type: 'bar',
+            data: { labels: ['High', 'Medium', 'Low'], datasets: [{ data: [priorityCounts.High, priorityCounts.Medium, priorityCounts.Low], backgroundColor: ['#a3372a', '#C97A2B', '#4A4F49'] }] },
+            options: { responsive: true, plugins: { legend: { display: false } } }
+        });
+        const recent = allTickets.slice(0, 5);
+        $('recentActivity').innerHTML = recent.map(t => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header">
+                        <span class="list-item-id">${esc(t.ticket_number||t.id)}</span>
+                        <span class="list-item-title">${esc(t.device||'—')}</span>
+                        <span class="status-badge status-${(t.status||'Open').toLowerCase().replace(/\s+/g,'-')}">${esc(t.status||'Open')}</span>
+                    </div>
+                    <div class="list-item-subtitle">${esc(t.client_name||'—')}</div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit','${t.id}')">✏️ Edit</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // =============================================================
+    // SETTINGS
+    // =============================================================
+    function saveCompanyName() {
+        const name = $('companyName').value.trim();
+        localStorage.setItem('stylespc_company_name', name);
+        alert('Saved!');
+    }
+    function savePasswordPolicy() {
+        const policy = { minLen: parseInt($('pwMinLen').value) || 6, expiryDays: parseInt($('pwExpiryDays').value) || 30, special: $('pwSpecial').checked };
+        localStorage.setItem('stylespc_password_policy', JSON.stringify(policy));
+        alert('Password policy saved!');
+    }
+    function saveNotificationSettings() {
+        const settings = { notifyAssign: $('notifyAssign').checked, notifyStatus: $('notifyStatus').checked };
+        localStorage.setItem('stylespc_notification_settings', JSON.stringify(settings));
+        alert('Notification settings saved!');
+    }
+    function exportFullData() {
+        const data = { tickets: allTickets, clients: allClients, users: allUsers, exported: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `stylespc-full-backup-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+    }
+
+    // =============================================================
+    // MISC
+    // =============================================================
+    async function loadUsersForSelects() {
+        const { data } = await sb.from('profiles').select('id, email, role');
+        window._usersForSelect = data || [];
+    }
+    function populateAssigneeSelect(selectEl) {
+        if (!selectEl) return;
+        const current = selectEl.value;
+        selectEl.innerHTML = '<option value="">Unassigned</option>';
+        (window._usersForSelect || []).forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.id;
+            opt.textContent = u.email + (u.role ? ` (${u.role})` : '');
+            selectEl.appendChild(opt);
+        });
+        selectEl.value = current;
+    }
+    function populateAssigneeFilters() {
+        const filter = $('ticketAssigneeFilter');
+        if (!filter) return;
+        filter.innerHTML = '<option value="">All Assignees</option>';
+        (window._usersForSelect || []).forEach(u => {
+            const opt = document.createElement('option');
+            opt.value = u.id;
+            opt.textContent = u.email;
+            filter.appendChild(opt);
+        });
+    }
+    function toggleDarkMode() {
+        const root = document.documentElement;
+        const current = root.style.getPropertyValue('--paper');
+        if (current === '#F3EFE7' || !current) {
+            root.style.setProperty('--paper', '#1A1D1B');
+            root.style.setProperty('--paper-2', '#262B28');
+            root.style.setProperty('--ink', '#EDEBE4');
+            root.style.setProperty('--ink-soft', '#9EA39C');
+            root.style.setProperty('--white', '#2A2F2C');
+            root.style.setProperty('--rule', '#3A403B');
+            localStorage.setItem('stylespc_dark_mode', 'true');
+        } else {
+            root.style.setProperty('--paper', '#F3EFE7');
+            root.style.setProperty('--paper-2', '#EAE3D3');
+            root.style.setProperty('--ink', '#1F2421');
+            root.style.setProperty('--ink-soft', '#4A4F49');
+            root.style.setProperty('--white', '#FFFDF8');
+            root.style.setProperty('--rule', '#C9C2B2');
+            localStorage.setItem('stylespc_dark_mode', 'false');
+        }
+    }
+    function changeMyPassword() { $('changePasswordModal').classList.add('active'); }
+    async function handleChangePassword(e) {
+        e.preventDefault();
+        const current = $('currentPassword').value;
+        const nw = $('newPassword').value;
+        const confirm = $('confirmPassword').value;
+        const errEl = $('changePasswordError');
+        if (nw.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+        if (nw !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
+        const { error: reAuthErr } = await sb.auth.signInWithPassword({ email: currentUser.email, password: current });
+        if (reAuthErr) { errEl.textContent = 'Current password is incorrect.'; return; }
+        const { error } = await sb.auth.updateUser({ password: nw });
+        if (error) { errEl.textContent = error.message; return; }
+        const newExpiry = new Date(Date.now() + 30 * 864e5).toISOString();
+        await sb.from('profiles').update({ must_change_password: false, password_expiry: newExpiry }).eq('id', currentUser.id);
+        closeModal('changePasswordModal');
+        alert('Password updated!');
+    }
+
+    function switchTab(tab, btn) {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        $(tab).classList.add('active');
+        if (btn) btn.classList.add('active');
+        if (tab === 'users') loadUsers();
+        if (tab === 'activity') loadActivity();
+        if (tab === 'dashboard') updateDashboard();
+    }
+    function closeModal(id) { $(id).classList.remove('active'); currentEditId = null; }
+    function filterTickets() {
+        const q = $('ticketSearch').value.toLowerCase();
+        const status = $('ticketStatusFilter').value;
+        const priority = $('ticketPriorityFilter').value;
+        const assignee = $('ticketAssigneeFilter').value;
+        const from = $('ticketDateFrom').value;
+        const to = $('ticketDateTo').value;
+        let filtered = allTickets.filter(t => {
+            const hay = [(t.client_name||''), (t.device||''), (t.ticket_number||t.id||'')].join(' ').toLowerCase();
+            if (!hay.includes(q)) return false;
+            if (status && t.status !== status) return false;
+            if (priority && t.priority !== priority) return false;
+            if (assignee && t.assignee !== assignee) return false;
+            if (from && new Date(t.created_at) < new Date(from)) return false;
+            if (to && new Date(t.created_at) > new Date(to + 'T23:59:59')) return false;
+            return true;
+        });
+        renderTickets(filtered);
+    }
+
+    // =============================================================
+    // START
+    // =============================================================
+    checkSession();
 }
 </script>
 </body>
