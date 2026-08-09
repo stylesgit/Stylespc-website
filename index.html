@@ -10,6 +10,9 @@
     <!-- Leaflet (map + pickup distance/fare estimate) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- EmailJS SDK — used ONLY to send customers a confirmation email.
+         Formspree (below) still handles the notification that comes to you. -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         /* ============================================================
            ROOT & RESET
@@ -1914,6 +1917,56 @@
     ============================================================ -->
     <script>
         // =============================================================
+        //  ⚠️ CUSTOMER CONFIRMATION EMAIL — SETUP REQUIRED (EmailJS) ⚠️
+        //  This sends the CUSTOMER a "we received your request" email.
+        //  It's separate from Formspree below, which still notifies YOU.
+        //
+        //  To activate, create a free account at https://www.emailjs.com/
+        //  (200 emails/month free), then:
+        //   1. Email → Add New Service (connect your Gmail) → get a
+        //      Service ID
+        //   2. Email Templates → create one addressed To Email:
+        //      {{to_email}}, using variables {{to_name}}, {{subject}},
+        //      {{message}} in the body → get a Template ID
+        //   3. Account → copy your Public Key
+        //   4. Paste all three below, replacing the placeholders
+        // =============================================================
+        const EMAILJS_PUBLIC_KEY = 'YOUR_EMAILJS_PUBLIC_KEY';
+        const EMAILJS_SERVICE_ID = 'YOUR_EMAILJS_SERVICE_ID';
+        const EMAILJS_TEMPLATE_ID = 'YOUR_EMAILJS_TEMPLATE_ID';
+        const EMAILJS_CONFIGURED = EMAILJS_PUBLIC_KEY !== 'YOUR_EMAILJS_PUBLIC_KEY' &&
+            EMAILJS_SERVICE_ID !== 'YOUR_EMAILJS_SERVICE_ID' &&
+            EMAILJS_TEMPLATE_ID !== 'YOUR_EMAILJS_TEMPLATE_ID';
+
+        if (EMAILJS_CONFIGURED && window.emailjs) {
+            emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+        }
+
+        /**
+         * Send the CUSTOMER a confirmation email. Silently does nothing
+         * if EmailJS hasn't been configured yet — never blocks the
+         * booking itself, and never shown as an error to the customer.
+         */
+        function sendCustomerConfirmation(toEmail, toName, subject, message) {
+            if (!EMAILJS_CONFIGURED || !toEmail || !window.emailjs) {
+                if (!EMAILJS_CONFIGURED) console.log('ℹ️ Customer confirmation skipped — EmailJS not configured yet.');
+                return Promise.resolve({ status: 'skipped' });
+            }
+            return emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_email: toEmail,
+                to_name: toName || 'there',
+                subject: subject,
+                message: message,
+            }).then(function(res) {
+                console.log('✅ Customer confirmation sent:', res);
+                return { status: 'sent' };
+            }).catch(function(err) {
+                console.error('❌ Customer confirmation failed:', err);
+                return { status: 'error', error: err };
+            });
+        }
+
+        // =============================================================
         //  EMAIL NOTIFICATIONS — via Formspree (silent background POST)
         // =============================================================
         const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja';
@@ -2598,6 +2651,16 @@
                         if (sendResult && sendResult.status === 'fallback') {
                             status.textContent = 'Please check your email client — we\'ve opened a draft for you.';
                         }
+                        sendCustomerConfirmation(
+                            email, name,
+                            'We received your TV repair referral request — StylesPC',
+                            'Hi ' + name + ',\n\nThanks for your TV repair referral request! Here\'s a summary:\n\n' +
+                                'TV / Issue: ' + issue + '\n' +
+                                'Booking fee: $1,000 (reference: ' + transferRef + ')\n' +
+                                'Assessment fee: $2,500 (charged separately by our repair partner)\n\n' +
+                                'We\'ll verify your payment and pass your details to our repair partner, who will ' +
+                                'reach out to arrange the assessment. Questions? Reply to this email or call (876) 334-1156.\n\nThanks,\nStylesPC'
+                        );
                     })
                     .catch(function(error) {
                         console.error(error);
@@ -3040,6 +3103,20 @@
                             status.textContent = '✅ Booked! Ticket ' + ticketNumber +
                                 '. Please check your email client — we\'ve opened a draft for you.';
                         }
+                        // Send the customer their own confirmation (separate from the notification above)
+                        sendCustomerConfirmation(
+                            email, name,
+                            'Your StylesPC booking is confirmed — Ticket ' + ticketNumber,
+                            'Hi ' + name + ',\n\nThanks for booking with StylesPC! Here are your details:\n\n' +
+                                'Ticket: ' + ticketNumber + '\n' +
+                                'Device: ' + device + '\n' +
+                                'Service: ' + serviceType + '\n' +
+                                (address ? 'Address: ' + address + '\n' : '') +
+                                pickupNote + '\n' +
+                                'Issue: ' + issue + '\n\n' +
+                                'We\'ll be in touch shortly to confirm next steps. If you have any questions, ' +
+                                'just reply to this email or reach us at (876) 334-1156.\n\nThanks,\nStylesPC'
+                        );
                     })
                     .catch(function(error) {
                         console.error(error);
