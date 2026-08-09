@@ -386,7 +386,6 @@ function initApp() {
     // =============================================================
     async function handleLogin(e) {
         e.preventDefault();
-        alert('🔐 Login handler triggered');
         const errorEl = $('loginError');
         errorEl.textContent = '';
         const email = $('loginEmail').value.trim();
@@ -399,14 +398,11 @@ function initApp() {
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
             if (error) {
                 errorEl.textContent = '❌ ' + error.message;
-                alert('Login error: ' + error.message);
                 return;
             }
-            alert('✅ Login successful');
             await afterLogin(data.user);
         } catch (err) {
             errorEl.textContent = '💥 ' + err.message;
-            alert('Error: ' + err.message);
         }
     }
 
@@ -416,7 +412,7 @@ function initApp() {
             if (!profile) {
                 const newProfile = { id: user.id, role: 'User', must_change_password: false, password_expiry: new Date(Date.now() + 30*864e5).toISOString() };
                 const { error: insErr } = await sb.from('profiles').insert([newProfile]);
-                if (insErr) { alert('Profile create error: ' + insErr.message); return; }
+                if (insErr) { $('loginError').textContent = 'Profile create error: ' + insErr.message; return; }
                 profile = newProfile;
             }
             currentUser = { ...user, ...profile };
@@ -426,9 +422,8 @@ function initApp() {
             $('mainApp').style.display = 'block';
             await loadUsersForSelects();
             await loadAll();
-            alert('✅ Dashboard ready');
         } catch (err) {
-            alert('afterLogin error: ' + err.message);
+            $('loginError').textContent = 'afterLogin error: ' + err.message;
         }
     }
 
@@ -827,10 +822,24 @@ function initApp() {
             return;
         }
         if (!password) { errorEl.textContent = 'Password is required for new users.'; return; }
+
+        // ⚠️ Supabase quirk: calling auth.signUp() from an already-signed-in
+        // session replaces that session with the newly created user's session.
+        // Capture the admin's own session first so we can restore it right
+        // after — otherwise creating a staff account would silently log the
+        // admin out and log them in as the brand-new user instead.
+        const { data: { session: adminSession } } = await sb.auth.getSession();
+
         const { data, error } = await sb.auth.signUp({ email, password });
         if (error) { errorEl.textContent = error.message; return; }
         if (data.user) {
             await sb.from('profiles').insert([{ id: data.user.id, role, must_change_password: must, password_expiry: expiry }]);
+        }
+        if (adminSession) {
+            await sb.auth.setSession({
+                access_token: adminSession.access_token,
+                refresh_token: adminSession.refresh_token,
+            });
         }
         alert('User created!');
         closeModal('userModal');
@@ -1034,6 +1043,46 @@ function initApp() {
         });
         renderTickets(filtered);
     }
+
+    // =============================================================
+    // EXPOSE FUNCTIONS GLOBALLY
+    // Every button/form above uses inline onclick="..."/onsubmit="..."
+    // attributes, which the browser resolves against the GLOBAL scope —
+    // but all these functions are declared as local functions inside
+    // initApp(), so without this block, EVERY button in this panel
+    // (including the login form itself) throws "X is not defined" and
+    // does nothing when clicked.
+    // =============================================================
+    window.handleLogin = handleLogin;
+    window.logout = logout;
+    window.switchTab = switchTab;
+    window.openTicketModal = openTicketModal;
+    window.saveTicket = saveTicket;
+    window.deleteTicket = deleteTicket;
+    window.closeModal = closeModal;
+    window.filterTickets = filterTickets;
+    window.toggleSelect = toggleSelect;
+    window.bulkAction = bulkAction;
+    window.executeBulkAction = executeBulkAction;
+    window.openClientModal = openClientModal;
+    window.saveClient = saveClient;
+    window.deleteClient = deleteClient;
+    window.exportClientsCSV = exportClientsCSV;
+    window.openUserModal = openUserModal;
+    window.saveUser = saveUser;
+    window.deleteUser = deleteUser;
+    window.loadUsers = loadUsers;
+    window.loadActivity = loadActivity;
+    window.exportActivityCSV = exportActivityCSV;
+    window.saveCompanyName = saveCompanyName;
+    window.savePasswordPolicy = savePasswordPolicy;
+    window.saveNotificationSettings = saveNotificationSettings;
+    window.exportFullData = exportFullData;
+    window.uploadAttachment = uploadAttachment;
+    window.addComment = addComment;
+    window.toggleDarkMode = toggleDarkMode;
+    window.changeMyPassword = changeMyPassword;
+    window.handleChangePassword = handleChangePassword;
 
     // =============================================================
     // START
