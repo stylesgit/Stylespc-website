@@ -1663,6 +1663,7 @@
                     </thead>
                     <tbody>
                         <tr><td>Booking Fee (to arrange &amp; facilitate) — due upfront</td><td class="amt">$1,000</td></tr>
+                        <tr><td>Assessment Fee (technician diagnoses the issue)</td><td class="amt">$2,500</td></tr>
                     </tbody>
 
                 </table>
@@ -1975,15 +1976,29 @@
 
 
         // =============================================================
-        //  DESIGN SETTINGS (localStorage) – loaded from admin.html
+        // =============================================================
+        //  DESIGN SETTINGS (localStorage) – set via designer.html
+        //  NOTE: localStorage is per-browser — this only reflects saved
+        //  settings on the SAME device/browser that used designer.html.
+        //  It does NOT change what real site visitors see. To make a
+        //  design change permanent for everyone, the chosen values need
+        //  to be applied directly to this file's CSS.
         // =============================================================
         const DESIGN_STORAGE_KEY = 'stylespc_design_settings';
         const DEFAULT_DESIGN = {
             paper: '#F3EFE7',
+            paper2: '#EAE3D3',
             teal: '#2F6F63',
             amber: '#C97A2B',
             ink: '#1F2421',
+            rule: '#C9C2B2',
             fontFamily: 'IBM Plex Sans',
+            fontSize: 16,
+            lineHeight: 1.55,
+            letterSpacing: 0,
+            borderRadius: 4,
+            componentPadding: 20,
+            customCSS: '',
         };
 
         function loadDesignSettings() {
@@ -2013,16 +2028,41 @@
         function applyDesignSettings(settings) {
             const root = document.documentElement;
             root.style.setProperty('--paper', settings.paper);
+            root.style.setProperty('--paper-2', settings.paper2);
             root.style.setProperty('--teal', settings.teal);
             root.style.setProperty('--teal-dark', darken(settings.teal, 15));
             root.style.setProperty('--amber', settings.amber);
             root.style.setProperty('--ink', settings.ink);
+            root.style.setProperty('--ink-soft', darken(settings.ink, 20));
+            root.style.setProperty('--rule', settings.rule);
             document.body.style.fontFamily = settings.fontFamily + ', sans-serif';
+            document.body.style.fontSize = settings.fontSize + 'px';
+            document.body.style.lineHeight = settings.lineHeight;
+            document.body.style.letterSpacing = settings.letterSpacing + 'px';
+            document.querySelectorAll('.list-item, .stat-card, .work-card, .build-card, .service-card')
+                .forEach(function(el) { el.style.padding = settings.componentPadding + 'px'; });
+            let styleTag = document.getElementById('designer-custom-css');
+            if (!styleTag) {
+                styleTag = document.createElement('style');
+                styleTag.id = 'designer-custom-css';
+                document.head.appendChild(styleTag);
+            }
+            styleTag.textContent = settings.customCSS || '';
         }
 
         // Apply design on load
         const initialDesign = loadDesignSettings();
         applyDesignSettings(initialDesign);
+
+        // Let designer.html's live preview iframe push updates without a full reload
+        window.addEventListener('message', function(e) {
+            if (e.data && e.data.type === 'APPLY_DESIGN' && e.data.settings) {
+                applyDesignSettings({ ...DEFAULT_DESIGN, ...e.data.settings });
+            }
+        });
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'DESIGN_READY' }, '*');
+        }
 
 
         // =============================================================
