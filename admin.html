@@ -793,7 +793,7 @@
         //  SUPABASE SETUP
         // =============================================================
         const sb = supabase.createClient(
-            'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
+            'https://gtfqasmqbgxjfnwlvxjp.sb.co',
             'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
         );
 
@@ -825,7 +825,7 @@
             }
             // Get profile
             const user = data.session.user;
-            const { data: profile, error: profileError } = await supabase
+            const { data: profile, error: profileError } = await sb
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
@@ -839,7 +839,7 @@
                     must_change_password: true,
                     password_expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
                 };
-                const { error: insertError } = await supabase
+                const { error: insertError } = await sb
                     .from('profiles')
                     .insert([newProfile]);
                 if (insertError) {
@@ -884,7 +884,7 @@
 
             // Fetch profile
             const user = data.user;
-            const { data: profile, error: profileError } = await supabase
+            const { data: profile, error: profileError } = await sb
                 .from('profiles')
                 .select('*')
                 .eq('id', user.id)
@@ -983,7 +983,7 @@
 
             // Update profile: clear must_change_password, extend expiry by 30 days
             const newExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-            const { error: profileError } = await supabase
+            const { error: profileError } = await sb
                 .from('profiles')
                 .update({
                     must_change_password: false,
@@ -1010,7 +1010,7 @@
         //  USER MANAGEMENT (Admin)
         // =============================================================
         async function loadUsers() {
-            const { data, error } = await supabase
+            const { data, error } = await sb
                 .from('profiles')
                 .select('*');
 
@@ -1104,7 +1104,7 @@
             document.getElementById('userPassword').placeholder = 'Leave blank to keep current';
 
             // Fetch user profile
-            const { data, error } = await supabase
+            const { data, error } = await sb
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
@@ -1148,7 +1148,7 @@
             if (currentEditId) {
                 // Update profile only
                 const newExpiry = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
-                const { error: updateError } = await supabase
+                const { error: updateError } = await sb
                     .from('profiles')
                     .update({
                         role: role,
@@ -1201,7 +1201,7 @@
 
             // Create profile
             const newExpiry = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000).toISOString();
-            const { error: profileError } = await supabase
+            const { error: profileError } = await sb
                 .from('profiles')
                 .insert([{
                     id: data.user.id,
@@ -1247,7 +1247,7 @@
             if (!confirm('Delete this user permanently?')) return;
 
             // Delete profile
-            const { error: profileError } = await supabase
+            const { error: profileError } = await sb
                 .from('profiles')
                 .delete()
                 .eq('id', userId);
