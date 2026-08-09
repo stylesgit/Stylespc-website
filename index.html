@@ -1768,7 +1768,7 @@
                     </div>
                     <div style="margin-top:16px;padding:16px 20px;background:rgba(47,111,99,0.06);border:1px solid rgba(47,111,99,0.2);border-radius:6px;">
                         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 8px;font-weight:600;">Pickup pricing zones</p>
-                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟢 <strong>Free pickup:</strong> Franklintown &amp; Rae Town</p>
+                        <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟢 <strong>Free pickup:</strong> Franklintown &amp; Rollington Town</p>
                         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🔵 <strong>Standard — $1,500:</strong> rest of Kingston &amp; nearby Saint Andrew</p>
                         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0 0 4px;">🟠 <strong>Far zone — per km:</strong> Papine &amp; other outlying Saint Andrew areas</p>
                         <p style="font-size:0.85rem;color:var(--ink-soft);margin:0;">⚡ <strong>Expedited service:</strong> +25% on top of the pickup fee</p>
@@ -1814,7 +1814,7 @@
                         <div class="field">
                             <label for="address">Address / pickup point <span id="addressHint">(optional)</span></label>
                             <input type="text" id="address" name="address" placeholder="e.g. 12 Hope Road, Kingston 6" autocomplete="off">
-                            <p class="form-note" id="areaNote" style="margin-top:6px;">Free pickup in Franklintown &amp; Rae Town. $1,500 flat rate for the rest of Kingston &amp; nearby Saint Andrew. Per‑km rate for outlying Saint Andrew areas (e.g. Papine).</p>
+                            <p class="form-note" id="areaNote" style="margin-top:6px;">Free pickup in Franklintown &amp; Rollington Town. $1,500 flat rate for the rest of Kingston &amp; nearby Saint Andrew. Per‑km rate for outlying Saint Andrew areas (e.g. Papine).</p>
                         </div>
                     </div>
                     <div id="pickupMapWrap" style="display:none; margin:4px 0 18px;">
@@ -2715,7 +2715,7 @@
         var EXPEDITE_MULTIPLIER = 1.25;
         var ROAD_FACTOR = 1.3;
 
-        var FREE_AREAS = ['franklintown', 'rae town', 'raetown'];
+        var FREE_AREAS = ['franklintown', 'Rollington town', 'Rollingtontown'];
         var STANDARD_AREAS = [
             'half way tree', 'liguanea', 'new kingston', 'barbican',
             'constant spring', 'cross roads', 'havendale', 'meadowbrook',
@@ -2775,7 +2775,7 @@
             currentPickupEstimate = result;
             if (!result.serviceable) {
                 pickupEstimateEl.innerHTML = '⚠️ Sorry — we don\'t currently collect from this address. ' +
-                    'Pickup covers Kingston and select Saint Andrew areas (Franklintown, Rae Town, Half Way Tree, ' +
+                    'Pickup covers Kingston and select Saint Andrew areas (Franklintown, Rollington Town, Half Way Tree, ' +
                     'Liguanea, New Kingston, Papine, Mona and nearby). Please choose Drop‑off instead, or adjust the address.';
                 pickupEstimateEl.style.color = '#a33';
                 return;
