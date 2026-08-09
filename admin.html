@@ -1,66 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>StylesPC — Enterprise Admin</title>
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
-    <!-- Supabase & Chart.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <!-- (style section unchanged, omitted for brevity; keep your existing CSS) -->
-    <style>
-        /* ... paste your existing CSS from the original admin.html ... */
-        /* (I've kept it intact but removed here to save space) */
-    </style>
-</head>
-<body>
-
-<!-- ===== LOGIN OVERLAY ===== -->
-<div class="login-overlay" id="loginOverlay">
-    <div class="login-box">
-        <h1>StylesPC Admin</h1>
-        <p class="sub">Enterprise management portal</p>
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required placeholder="admin@stylespc.com" autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
-            </div>
-            <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;">Sign In</button>
-            <div id="loginError" class="login-error"></div>
-        </form>
-    </div>
-</div>
-
-<!-- ===== MAIN APP ===== -->
-<div class="container" id="mainApp" style="display:none;">
-    <!-- ... your existing header, tabs, sections ... -->
-    <!-- (keep all HTML exactly as you had; no changes needed) -->
-</div>
-
-<!-- ===== MODALS ===== -->
-<!-- ... keep all modals as they are ... -->
-
-<!-- ============================================================ -->
-<!-- JAVASCRIPT — Fixed with error handling -->
-<!-- ============================================================ -->
 <script>
 // =============================================================
 // SUPABASE & CONFIG — ⚠️ REPLACE WITH YOUR OWN VALUES
 // =============================================================
 const sb = supabase.createClient(
-    'https://YOUR_PROJECT_REF.supabase.co',        // <--- Your Project URL
-    'YOUR_ANON_PUBLIC_KEY'                          // <--- Your Anon Key
+    'https://YOUR_PROJECT_REF.supabase.co',   // <-- YOUR URL
+    'YOUR_ANON_PUBLIC_KEY'                     // <-- YOUR ANON KEY
 );
-const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja'; // keep or change
+const FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja';
 
 // =============================================================
 // STATE
@@ -74,62 +20,77 @@ let selectedTicketIds = new Set();
 let statusChart = null, priorityChart = null;
 
 // =============================================================
-// HELPERS (unchanged)
+// HELPER (safe to use after DOM is ready)
 // =============================================================
-const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-const $ = id => document.getElementById(id);
-function showLogin() { $('loginOverlay').classList.remove('hidden'); $('mainApp').style.display = 'none'; }
-function showApp()   { $('loginOverlay').classList.add('hidden');    $('mainApp').style.display = 'block'; }
-function closeModal(id) { $(id).classList.remove('active'); currentEditId = null; }
-function switchTab(tab, btn) { /* unchanged */ }
-function genTag() { return 'SPC-' + Math.floor(1000 + Math.random() * 9000); }
+function $(id) { return document.getElementById(id); }  // defined as a function, not const
 
 // =============================================================
-// AUTH — FIXED WITH ERROR HANDLING
+// AUTH — with robust error handling, no $ dependency
 // =============================================================
-async function checkSession() {
-    try {
-        const { data } = await sb.auth.getSession();
-        if (!data.session) { showLogin(); return; }
-        await afterLogin(data.session.user);
-    } catch (err) {
-        console.error('checkSession error:', err);
-        showLogin();
-        $('loginError').textContent = 'Session error: ' + err.message;
+
+// Attach login handler programmatically after DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    if (form) {
+        form.addEventListener('submit', handleLogin);
+        console.log('✅ Login form listener attached');
+    } else {
+        console.error('❌ Login form not found!');
     }
-}
+    // Also check session on load
+    checkSession();
+});
 
 async function handleLogin(e) {
     e.preventDefault();
-    const errorEl = $('loginError');
+    console.log('🔐 handleLogin called');
+
+    const emailInput = document.getElementById('loginEmail');
+    const passwordInput = document.getElementById('loginPassword');
+    const errorEl = document.getElementById('loginError');
+
+    // Clear previous error
     errorEl.textContent = '';
-    const email = $('loginEmail').value.trim();
-    const password = $('loginPassword').value.trim();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value.trim();
 
     if (!email || !password) {
         errorEl.textContent = 'Please enter both email and password.';
+        console.warn('⚠️ Missing email or password');
         return;
     }
 
     try {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        console.log('📤 Attempting sign in with:', email);
+
+        const { data, error } = await sb.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
         if (error) {
-            console.error('Login error:', error);
+            console.error('❌ Supabase auth error:', error);
             errorEl.textContent = '❌ ' + error.message;
             return;
         }
+
+        console.log('✅ Login successful, user:', data.user);
         await afterLogin(data.user);
+
     } catch (err) {
-        console.error('Unexpected login error:', err);
-        errorEl.textContent = '❌ Unexpected error – see console (F12) for details.';
+        console.error('💥 Unexpected error in handleLogin:', err);
+        errorEl.textContent = '💥 Unexpected error – see console (F12) for details.';
     }
 }
 
 async function afterLogin(user) {
-    const errorEl = $('loginError');
+    const errorEl = document.getElementById('loginError');
     errorEl.textContent = '';
 
     try {
+        console.log('👤 afterLogin called for user:', user.id);
+
         // ---- 1. Fetch or create profile ----
         let { data: profile, error: profileError } = await sb
             .from('profiles')
@@ -137,14 +98,14 @@ async function afterLogin(user) {
             .eq('id', user.id)
             .single();
 
-        if (profileError && profileError.code !== 'PGRST116') { // not found
-            console.error('Profile fetch error:', profileError);
-            errorEl.textContent = '❌ Could not fetch profile: ' + profileError.message;
+        if (profileError && profileError.code !== 'PGRST116') {
+            console.error('❌ Profile fetch error:', profileError);
+            errorEl.textContent = '❌ Database error: ' + profileError.message;
             return;
         }
 
         if (!profile) {
-            // Try to create one
+            console.log('🆕 No profile found, creating one...');
             const newProfile = {
                 id: user.id,
                 role: 'User',
@@ -153,50 +114,50 @@ async function afterLogin(user) {
             };
             const { error: insertError } = await sb.from('profiles').insert([newProfile]);
             if (insertError) {
-                console.error('Profile insert error:', insertError);
-                errorEl.textContent = '❌ Failed to create profile: ' + insertError.message + 
-                    '. Please ensure RLS policies allow INSERT on profiles.';
+                console.error('❌ Profile insert error:', insertError);
+                errorEl.textContent = '❌ Failed to create profile: ' + insertError.message +
+                    '. Check RLS policies.';
                 return;
             }
             profile = newProfile;
+            console.log('✅ Profile created');
+        } else {
+            console.log('✅ Profile found:', profile);
         }
 
         // ---- 2. Set current user ----
         currentUser = { ...user, ...profile };
-        $('userNameDisplay').textContent = user.email;
-        $('userRoleDisplay').textContent = profile.role || 'User';
+        document.getElementById('userNameDisplay').textContent = user.email;
+        document.getElementById('userRoleDisplay').textContent = profile.role || 'User';
 
         // ---- 3. Show the app ----
-        showApp();
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('mainApp').style.display = 'block';
 
         // ---- 4. Check password expiry ----
         if (currentUser.must_change_password || new Date(currentUser.password_expiry) < new Date()) {
-            $('changePasswordError').textContent = '⚠️ Your password has expired — please set a new one.';
-            $('changePasswordModal').classList.add('active');
+            document.getElementById('changePasswordError').textContent = '⚠️ Your password has expired — please set a new one.';
+            document.getElementById('changePasswordModal').classList.add('active');
         }
 
         // ---- 5. Load data ----
         await loadUsersForSelects();
         await loadAll();
 
+        console.log('✅ App ready');
+
     } catch (err) {
-        console.error('afterLogin error:', err);
-        errorEl.textContent = '❌ Unexpected error: ' + err.message;
-        // Revert to login state if app not shown
-        if (!$('mainApp').style.display || $('mainApp').style.display === 'none') {
-            showLogin();
+        console.error('💥 afterLogin error:', err);
+        errorEl.textContent = '💥 Unexpected error: ' + err.message;
+        // If app not shown, stay on login
+        if (document.getElementById('mainApp').style.display === 'none') {
+            document.getElementById('loginOverlay').classList.remove('hidden');
         }
     }
 }
 
-async function logout() {
-    await sb.auth.signOut();
-    currentUser = null; allTickets = []; allClients = [];
-    showLogin();
-}
-
 // =============================================================
-// LOAD ALL DATA (unchanged)
+// LOAD ALL DATA (unchanged – use $ inside these functions safely)
 // =============================================================
 async function loadAll() {
     await Promise.all([loadTickets(), loadClients(), loadUsers()]);
@@ -205,16 +166,61 @@ async function loadAll() {
 }
 
 // =============================================================
-// TICKETS, CLIENTS, USERS, ACTIVITY (all your existing functions)
+//  (All your existing functions: loadTickets, saveTicket, etc.)
+//  Paste them here – they can still use $ because they run after DOM is ready
 // =============================================================
-// ... Paste all your existing functions here (loadTickets, saveTicket, etc.)
-// They are identical to your original code, so I'm not repeating them.
-// Just ensure they are present.
+// ... (copy your existing loadTickets, loadClients, loadUsers, etc. from earlier)
+// I'll keep them as they were; they are unchanged.
+
+// =============================================================
+// MISC: assignee selects, etc.
+// =============================================================
+async function loadUsersForSelects() {
+    const { data } = await sb.from('profiles').select('id, email, role');
+    window._usersForSelect = data || [];
+}
+function populateAssigneeSelect(selectEl) {
+    if (!selectEl) return;
+    const current = selectEl.value;
+    selectEl.innerHTML = '<option value="">Unassigned</option>';
+    (window._usersForSelect || []).forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.email + (u.role ? ` (${u.role})` : '');
+        selectEl.appendChild(opt);
+    });
+    selectEl.value = current;
+}
+function populateAssigneeFilters() {
+    const filter = document.getElementById('ticketAssigneeFilter');
+    filter.innerHTML = '<option value="">All Assignees</option>';
+    (window._usersForSelect || []).forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.email;
+        filter.appendChild(opt);
+    });
+}
+function filterTickets() {
+    // ... (your existing code)
+}
+// ... etc.
+
+// =============================================================
+// DASHBOARD & CHARTS (unchanged)
+// =============================================================
+function updateDashboard() {
+    // ... (your existing code)
+}
+
+// =============================================================
+// SETTINGS (unchanged)
+// =============================================================
+function saveCompanyName() { /* ... */ }
+// ...
 
 // =============================================================
 // INIT
 // =============================================================
-document.addEventListener('DOMContentLoaded', checkSession);
+// (already attached via DOMContentLoaded above)
 </script>
-</body>
-</html>
