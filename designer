@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StylesPC — Design Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <style>
+        /* ----- Designer Styles ----- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --designer-bg: #1A1D1B;
+            --designer-surface: #262B28;
+            --designer-border: #3A403B;
+            --designer-text: #EDEBE4;
+            --designer-text-soft: #9EA39C;
+            --designer-accent: #2F6F63;
+            --designer-accent-hover: #3D8A7A;
+            --designer-radius: 6px;
+            --designer-font: 'IBM Plex Sans', sans-serif;
+        }
+        body {
+            background: var(--designer-bg);
+            color: var(--designer-text);
+            font-family: var(--designer-font);
+            line-height: 1.5;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 380px;
+            min-width: 380px;
+            background: var(--designer-surface);
+            border-right: 1px solid var(--designer-border);
+            padding: 24px 20px;
+            overflow-y: auto;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            flex-shrink: 0;
+        }
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: var(--designer-border); border-radius: 4px; }
+        .sidebar h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.4rem; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
+        .sidebar h1 .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--designer-accent); display: inline-block; }
+        .sidebar .sub { color: var(--designer-text-soft); font-size: 0.78rem; margin-bottom: 24px; border-bottom: 1px solid var(--designer-border); padding-bottom: 16px; }
+        .control-group { margin-bottom: 22px; }
+        .control-group label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--designer-text-soft); font-weight: 600; margin-bottom: 6px; }
+        .control-group .hint { font-size: 0.7rem; color: var(--designer-text-soft); opacity: 0.6; margin-top: 2px; }
+        .color-row { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+        .color-row input[type="color"] { width: 40px; height: 40px; border: 2px solid var(--designer-border); border-radius: var(--designer-radius); padding: 0; cursor: pointer; background: transparent; flex-shrink: 0; }
+        .color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 2px; }
+        .color-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 3px; }
+        .color-row input[type="text"] { flex: 1; background: var(--designer-bg); border: 1px solid var(--designer-border); border-radius: var(--designer-radius); padding: 8px 10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--designer-text); }
+        .color-row input[type="text"]:focus { outline: 2px solid var(--designer-accent); outline-offset: 1px; }
+        .font-select { width: 100%; background: var(--designer-bg); border: 1px solid var(--designer-border); border-radius: var(--designer-radius); padding: 9px 12px; font-family: var(--designer-font); font-size: 0.88rem; color: var(--designer-text); cursor: pointer; }
+        .font-select:focus { outline: 2px solid var(--designer-accent); }
+        .range-row { display: flex; gap: 12px; align-items: center; }
+        .range-row input[type="range"] { flex: 1; accent-color: var(--designer-accent); height: 4px; cursor: pointer; }
+        .range-row .val { font-family: 'IBM Plex Mono', monospace; font-size: 0.82rem; color: var(--designer-text-soft); min-width: 36px; text-align: right; }
+        .btn-designer { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 18px; border-radius: var(--designer-radius); font-weight: 600; font-size: 0.82rem; border: none; cursor: pointer; font-family: var(--designer-font); transition: all 0.15s; width: 100%; }
+        .btn-designer-primary { background: var(--designer-accent); color: #fff; }
+        .btn-designer-primary:hover { background: var(--designer-accent-hover); }
+        .btn-designer-ghost { background: transparent; color: var(--designer-text); border: 1px solid var(--designer-border); }
+        .btn-designer-ghost:hover { background: rgba(255,255,255,0.05); }
+        .btn-designer-danger { background: #8A2E2E; color: #fff; }
+        .btn-designer-danger:hover { background: #A33A3A; }
+        .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+        .preset-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+        .preset-btn { padding: 8px 4px; border-radius: var(--designer-radius); border: 2px solid var(--designer-border); background: var(--designer-bg); color: var(--designer-text); font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer; transition: border-color 0.15s; font-family: var(--designer-font); text-align: center; }
+        .preset-btn:hover { border-color: var(--designer-accent); }
+        .preset-btn.active { border-color: var(--designer-accent); background: rgba(47,111,99,0.15); }
+        .status-toast { margin-top: 12px; padding: 10px 14px; border-radius: var(--designer-radius); font-size: 0.82rem; display: none; border-left: 3px solid var(--designer-accent); background: rgba(47,111,99,0.12); color: var(--designer-text); }
+        .status-toast.show { display: block; }
+        .status-toast.error { border-left-color: #A33; background: rgba(163,51,51,0.12); }
+        .preview-area { flex: 1; background: var(--designer-bg); padding: 24px 32px; overflow-y: auto; height: 100vh; display: flex; flex-direction: column; }
+        .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+        .preview-header h2 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 500; color: var(--designer-text-soft); }
+        .preview-header .badge { font-size: 0.7rem; font-family: 'IBM Plex Mono', monospace; color: var(--designer-text-soft); opacity: 0.5; background: var(--designer-surface); padding: 4px 12px; border-radius: 20px; }
+        .preview-iframe-wrap { flex: 1; background: var(--designer-surface); border-radius: 10px; border: 1px solid var(--designer-border); overflow: hidden; position: relative; min-height: 400px; }
+        .preview-iframe-wrap iframe { width: 100%; height: 100%; border: none; display: block; background: #F3EFE7; }
+        .preview-iframe-wrap .loading-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--designer-surface); color: var(--designer-text-soft); font-size: 0.9rem; z-index: 2; pointer-events: none; transition: opacity 0.3s; }
+        .preview-iframe-wrap .loading-overlay.hidden { opacity: 0; }
+        .preview-controls { display: flex; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+        .preview-controls .btn-designer { width: auto; padding: 8px 16px; font-size: 0.75rem; }
+        .custom-css-area { margin-top: 12px; }
+        .custom-css-area textarea { width: 100%; background: var(--designer-bg); border: 1px solid var(--designer-border); border-radius: var(--designer-radius); padding: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; color: var(--designer-text); resize: vertical; min-height: 60px; }
+        @media (max-width: 820px) {
+            body { flex-direction: column; overflow: auto; height: auto; }
+            .sidebar { width: 100%; min-width: unset; height: auto; border-right: none; border-bottom: 1px solid var(--designer-border); position: static; padding: 16px; }
+            .preview-area { height: auto; padding: 16px; }
+            .preview-iframe-wrap { min-height: 320px; height: 60vh; }
+            .action-row { grid-template-columns: 1fr; }
+            .preset-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .color-row { flex-wrap: wrap; }
+            .preview-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <h1><span class="dot"></span>Design Studio</h1>
+        <div class="sub">Full visual control — changes saved to localStorage</div>
+
+        <!-- Colors -->
+        <div class="control-group">
+            <label>Color Palette</label>
+            <div class="color-row"><input type="color" id="cPaper" value="#F3EFE7" /><input type="text" id="cPaperText" value="#F3EFE7" /><span style="font-size:0.7rem;color:var(--designer-text-soft);opacity:0.6;">Paper</span></div>
+            <div class="color-row"><input type="color" id="cTeal" value="#2F6F63" /><input type="text" id="cTealText" value="#2F6F63" /><span style="font-size:0.7rem;color:var(--designer-text-soft);opacity:0.6;">Teal</span></div>
+            <div class="color-row"><input type="color" id="cAmber" value="#C97A2B" /><input type="text" id="cAmberText" value="#C97A2B" /><span style="font-size:0.7rem;color:var(--designer-text-soft);opacity:0.6;">Amber</span></div>
+            <div class="color-row"><input type="color" id="cInk" value="#1F2421" /><input type="text" id="cInkText" value="#1F2421" /><span style="font-size:0.7rem;color:var(--designer-text-soft);opacity:0.6;">Ink</span></div>
+            <div class="color-row"><input type="color" id="cPaper2" value="#EAE3D3" /><input type="text" id="cPaper2Text" value="#EAE3D3" /><span style="font-size:0.7rem;color:var(--designer-text-soft);opacity:0.6;">Paper-2</span></div>
+            <div class="color-row"><input type="color" id="cRule" value="#C9C2B2" /><input type="text" id="cRuleText" value="#C9C2B2" /><span style="font-size:0.7rem;color:var(--designer-text-soft);opacity:0.6;">Rule</span></div>
+        </div>
+
+        <!-- Typography -->
+        <div class="control-group">
+            <label>Typography</label>
+            <select class="font-select" id="fontSelect">
+                <option value="IBM Plex Sans">IBM Plex Sans</option>
+                <option value="Inter">Inter</option>
+                <option value="Open Sans">Open Sans</option>
+                <option value="Roboto">Roboto</option>
+                <option value="Nunito">Nunito</option>
+                <option value="Lato">Lato</option>
+                <option value="Poppins">Poppins</option>
+                <option value="Work Sans">Work Sans</option>
+                <option value="Space Grotesk">Space Grotesk</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Merriweather">Merriweather</option>
+                <option value="Playfair Display">Playfair Display</option>
+            </select>
+            <div class="range-row" style="margin-top:6px;"><label style="font-size:0.7rem;min-width:60px;">Size</label><input type="range" id="fontSize" min="14" max="24" value="16" /><span class="val" id="fontSizeVal">16px</span></div>
+            <div class="range-row"><label style="font-size:0.7rem;min-width:60px;">Line Ht</label><input type="range" id="lineHeight" min="1.2" max="2.0" step="0.1" value="1.55" /><span class="val" id="lineHeightVal">1.55</span></div>
+            <div class="range-row"><label style="font-size:0.7rem;min-width:60px;">Letter-spacing</label><input type="range" id="letterSpacing" min="-0.5" max="1.0" step="0.05" value="0" /><span class="val" id="letterSpacingVal">0</span></div>
+        </div>
+
+        <!-- Spacing / Radius -->
+        <div class="control-group">
+            <label>Border Radius</label>
+            <div class="range-row"><input type="range" id="radiusRange" min="0" max="20" value="4" /><span class="val" id="radiusVal">4px</span></div>
+            <label style="margin-top:8px;">Component Padding</label>
+            <div class="range-row"><input type="range" id="componentPadding" min="8" max="32" value="20" /><span class="val" id="componentPaddingVal">20px</span></div>
+        </div>
+
+        <!-- Custom CSS -->
+        <div class="control-group custom-css-area">
+            <label>Custom CSS Overrides</label>
+            <textarea id="customCSS" placeholder="/* Add your custom CSS here */"></textarea>
+        </div>
+
+        <!-- Presets -->
+        <div class="control-group">
+            <label>Presets</label>
+            <div class="preset-grid">
+                <button class="preset-btn" data-preset="default">Default</button>
+                <button class="preset-btn" data-preset="dark">Dark</button>
+                <button class="preset-btn" data-preset="warm">Warm</button>
+                <button class="preset-btn" data-preset="cool">Cool</button>
+                <button class="preset-btn" data-preset="minimal">Minimal</button>
+                <button class="preset-btn" data-preset="vintage">Vintage</button>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="control-group">
+            <label>Actions</label>
+            <button class="btn-designer btn-designer-primary" id="applyBtn">✨ Apply to Site</button>
+            <div class="action-row">
+                <button class="btn-designer btn-designer-ghost" id="exportBtn">📦 Export</button>
+                <button class="btn-designer btn-designer-ghost" id="importBtn">📥 Import</button>
+            </div>
+            <div class="action-row">
+                <button class="btn-designer btn-designer-ghost" id="resetBtn">↺ Reset</button>
+                <button class="btn-designer btn-designer-danger" id="clearBtn">🗑️ Clear</button>
+            </div>
+            <input type="file" id="importFile" accept=".json" style="display:none;" />
+            <div class="status-toast" id="toast"></div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--designer-border);font-size:0.68rem;color:var(--designer-text-soft);opacity:0.5;">
+            Settings saved to <code>localStorage</code> and applied to <code>index.html</code> on load.
+        </div>
+    </aside>
+
+    <!-- Preview -->
+    <main class="preview-area">
+        <div class="preview-header">
+            <h2>Live Preview</h2>
+            <span class="badge" id="liveBadge">● live</span>
+        </div>
+        <div class="preview-iframe-wrap">
+            <div class="loading-overlay" id="previewLoading">Loading preview…</div>
+            <iframe id="previewIframe" src="index.html"></iframe>
+        </div>
+        <div class="preview-controls">
+            <button class="btn-designer btn-designer-ghost" id="refreshPreviewBtn">⟳ Refresh</button>
+            <button class="btn-designer btn-designer-ghost" id="openSiteBtn">↗ Open Site</button>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            'use strict';
+            const STORAGE_KEY = 'stylespc_design_settings';
+            const DEFAULT = {
+                paper: '#F3EFE7', paper2: '#EAE3D3', teal: '#2F6F63', amber: '#C97A2B', ink: '#1F2421', rule: '#C9C2B2',
+                fontFamily: 'IBM Plex Sans', fontSize: 16, lineHeight: 1.55, letterSpacing: 0,
+                borderRadius: 4, componentPadding: 20,
+                customCSS: ''
+            };
+            const PRESETS = {
+                default: { ...DEFAULT },
+                dark: { paper: '#1A1D1B', paper2: '#262B28', teal: '#3D8A7A', amber: '#D68B3A', ink: '#EDEBE4', rule: '#3A403B', fontFamily: 'IBM Plex Sans', fontSize: 16, lineHeight: 1.55, letterSpacing: 0, borderRadius: 6, componentPadding: 20, customCSS: '' },
+                warm: { paper: '#F5EDE3', paper2: '#E8DDD0', teal: '#8B6B4A', amber: '#C97A2B', ink: '#3A2C24', rule: '#D4C5B0', fontFamily: 'Georgia', fontSize: 17, lineHeight: 1.6, letterSpacing: 0.05, borderRadius: 6, componentPadding: 22, customCSS: '' },
+                cool: { paper: '#E8EEF2', paper2: '#D5DEE5', teal: '#3A6B7A', amber: '#8A9AA8', ink: '#1F2C34', rule: '#BCC8D0', fontFamily: 'Inter', fontSize: 15, lineHeight: 1.5, letterSpacing: -0.02, borderRadius: 4, componentPadding: 18, customCSS: '' },
+                minimal: { paper: '#F8F8F8', paper2: '#EEEEEE', teal: '#333333', amber: '#666666', ink: '#111111', rule: '#DDDDDD', fontFamily: 'IBM Plex Sans', fontSize: 16, lineHeight: 1.5, letterSpacing: 0, borderRadius: 0, componentPadding: 16, customCSS: '' },
+                vintage: { paper: '#F2E8D5', paper2: '#E6DCC5', teal: '#8B6B4A', amber: '#A67B5B', ink: '#2C241A', rule: '#D6C8B0', fontFamily: 'Merriweather', fontSize: 17, lineHeight: 1.7, letterSpacing: 0.1, borderRadius: 8, componentPadding: 24, customCSS: '' }
+            };
+            const $ = id => document.getElementById(id);
+            const els = {
+                cPaper: $('cPaper'), cPaperText: $('cPaperText'),
+                cPaper2: $('cPaper2'), cPaper2Text: $('cPaper2Text'),
+                cTeal: $('cTeal'), cTealText: $('cTealText'),
+                cAmber: $('cAmber'), cAmberText: $('cAmberText'),
+                cInk: $('cInk'), cInkText: $('cInkText'),
+                cRule: $('cRule'), cRuleText: $('cRuleText'),
+                fontSelect: $('fontSelect'),
+                fontSize: $('fontSize'), fontSizeVal: $('fontSizeVal'),
+                lineHeight: $('lineHeight'), lineHeightVal: $('lineHeightVal'),
+                letterSpacing: $('letterSpacing'), letterSpacingVal: $('letterSpacingVal'),
+                radiusRange: $('radiusRange'), radiusVal: $('radiusVal'),
+                componentPadding: $('componentPadding'), componentPaddingVal: $('componentPaddingVal'),
+                customCSS: $('customCSS'),
+                applyBtn: $('applyBtn'),
+                exportBtn: $('exportBtn'), importBtn: $('importBtn'), importFile: $('importFile'),
+                resetBtn: $('resetBtn'), clearBtn: $('clearBtn'),
+                toast: $('toast'),
+                previewIframe: $('previewIframe'), previewLoading: $('previewLoading'),
+                refreshPreviewBtn: $('refreshPreviewBtn'), openSiteBtn: $('openSiteBtn'),
+                liveBadge: $('liveBadge'),
+                presetBtns: document.querySelectorAll('.preset-btn'),
+            };
+            let currentSettings = { ...DEFAULT };
+
+            function isValidHex(str) { return /^#([0-9A-F]{3}){1,2}$/i.test(str); }
+            function normalizeHex(str) {
+                let s = (str || '').trim();
+                if (!s.startsWith('#')) s = '#' + s;
+                if (s.length === 4) { const c = s.slice(1); s = '#' + c[0]+c[0]+c[1]+c[1]+c[2]+c[2]; }
+                if (s.length === 7 && /^#[0-9A-F]{6}$/i.test(s)) return s;
+                return '#000000';
+            }
+            function darken(hex, p) {
+                const c = hex.replace('#','');
+                const r = Math.max(0, parseInt(c.substr(0,2),16)-p);
+                const g = Math.max(0, parseInt(c.substr(2,2),16)-p);
+                const b = Math.max(0, parseInt(c.substr(4,2),16)-p);
+                return '#' + [r,g,b].map(x=>Math.round(x).toString(16).padStart(2,'0')).join('');
+            }
+
+            function loadSettings() {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        currentSettings = { ...DEFAULT, ...parsed };
+                        return true;
+                    }
+                } catch(_) {}
+                currentSettings = { ...DEFAULT };
+                return false;
+            }
+            function saveSettings() {
+                try { localStorage.setItem(STORAGE_KEY, JSON.stringify(currentSettings)); return true; } catch(_) { return false; }
+            }
+            function getSettingsFromUI() {
+                return {
+                    paper: normalizeHex(els.cPaperText.value),
+                    paper2: normalizeHex(els.cPaper2Text.value),
+                    teal: normalizeHex(els.cTealText.value),
+                    amber: normalizeHex(els.cAmberText.value),
+                    ink: normalizeHex(els.cInkText.value),
+                    rule: normalizeHex(els.cRuleText.value),
+                    fontFamily: els.fontSelect.value,
+                    fontSize: parseInt(els.fontSize.value, 10) || 16,
+                    lineHeight: parseFloat(els.lineHeight.value) || 1.55,
+                    letterSpacing: parseFloat(els.letterSpacing.value) || 0,
+                    borderRadius: parseInt(els.radiusRange.value, 10) || 4,
+                    componentPadding: parseInt(els.componentPadding.value, 10) || 20,
+                    customCSS: els.customCSS.value || '',
+                };
+            }
+            function syncUItoSettings() {
+                const fromUI = getSettingsFromUI();
+                currentSettings = { ...currentSettings, ...fromUI };
+                // Update pickers to validated hex
+                els.cPaper.value = currentSettings.paper; els.cPaperText.value = currentSettings.paper;
+                els.cPaper2.value = currentSettings.paper2; els.cPaper2Text.value = currentSettings.paper2;
+                els.cTeal.value = currentSettings.teal; els.cTealText.value = currentSettings.teal;
+                els.cAmber.value = currentSettings.amber; els.cAmberText.value = currentSettings.amber;
+                els.cInk.value = currentSettings.ink; els.cInkText.value = currentSettings.ink;
+                els.cRule.value = currentSettings.rule; els.cRuleText.value = currentSettings.rule;
+                els.fontSizeVal.textContent = currentSettings.fontSize + 'px';
+                els.lineHeightVal.textContent = currentSettings.lineHeight.toFixed(1);
+                els.letterSpacingVal.textContent = currentSettings.letterSpacing.toFixed(2);
+                els.radiusVal.textContent = currentSettings.borderRadius + 'px';
+                els.componentPaddingVal.textContent = currentSettings.componentPadding + 'px';
+            }
+            function applySettingsToUI() {
+                const s = currentSettings;
+                els.cPaper.value = s.paper; els.cPaperText.value = s.paper;
+                els.cPaper2.value = s.paper2; els.cPaper2Text.value = s.paper2;
+                els.cTeal.value = s.teal; els.cTealText.value = s.teal;
+                els.cAmber.value = s.amber; els.cAmberText.value = s.amber;
+                els.cInk.value = s.ink; els.cInkText.value = s.ink;
+                els.cRule.value = s.rule; els.cRuleText.value = s.rule;
+                els.fontSelect.value = s.fontFamily;
+                els.fontSize.value = s.fontSize; els.fontSizeVal.textContent = s.fontSize + 'px';
+                els.lineHeight.value = s.lineHeight; els.lineHeightVal.textContent = s.lineHeight.toFixed(1);
+                els.letterSpacing.value = s.letterSpacing; els.letterSpacingVal.textContent = s.letterSpacing.toFixed(2);
+                els.radiusRange.value = s.borderRadius; els.radiusVal.textContent = s.borderRadius + 'px';
+                els.componentPadding.value = s.componentPadding; els.componentPaddingVal.textContent = s.componentPadding + 'px';
+                els.customCSS.value = s.customCSS || '';
+                // Highlight preset
+                const key = findMatchingPreset(s);
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === key));
+            }
+            function findMatchingPreset(settings) {
+                for (const [key, preset] of Object.entries(PRESETS)) {
+                    let match = true;
+                    for (const k of Object.keys(DEFAULT)) {
+                        if (preset[k] !== settings[k]) { match = false; break; }
+                    }
+                    if (match) return key;
+                }
+                return null;
+            }
+            function showToast(msg, err) {
+                const el = els.toast;
+                el.textContent = msg;
+                el.className = 'status-toast show' + (err ? ' error' : '');
+                clearTimeout(el._timer);
+                el._timer = setTimeout(() => el.className = 'status-toast', 4000);
+            }
+
+            // ---- Preview communication ----
+            function applyToPreview() {
+                const s = currentSettings;
+                const payload = { type: 'APPLY_DESIGN', settings: s };
+                try {
+                    const iframe = els.previewIframe;
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(payload, '*');
+                        // Direct DOM injection fallback
+                        try {
+                            const doc = iframe.contentDocument || iframe.contentWindow.document;
+                            if (doc) {
+                                const root = doc.documentElement;
+                                root.style.setProperty('--paper', s.paper);
+                                root.style.setProperty('--paper-2', s.paper2);
+                                root.style.setProperty('--teal', s.teal);
+                                root.style.setProperty('--teal-dark', darken(s.teal, 15));
+                                root.style.setProperty('--amber', s.amber);
+                                root.style.setProperty('--ink', s.ink);
+                                root.style.setProperty('--ink-soft', darken(s.ink, 20));
+                                root.style.setProperty('--rule', s.rule);
+                                root.style.setProperty('--radius', s.borderRadius + 'px');
+                                doc.body.style.fontFamily = s.fontFamily + ', sans-serif';
+                                doc.body.style.fontSize = s.fontSize + 'px';
+                                doc.body.style.lineHeight = s.lineHeight;
+                                doc.body.style.letterSpacing = s.letterSpacing + 'px';
+                                // Component padding
+                                const cards = doc.querySelectorAll('.list-item, .stat-card, .work-card, .build-card, .service-card');
+                                cards.forEach(el => el.style.padding = s.componentPadding + 'px');
+                                // Custom CSS
+                                let styleTag = doc.getElementById('designer-custom-css');
+                                if (!styleTag) {
+                                    styleTag = doc.createElement('style');
+                                    styleTag.id = 'designer-custom-css';
+                                    doc.head.appendChild(styleTag);
+                                }
+                                styleTag.textContent = s.customCSS || '';
+                            }
+                        } catch(_) {}
+                    }
+                } catch(_) {}
+                els.liveBadge.textContent = '● applied';
+                els.liveBadge.style.color = '#3D8A7A';
+                setTimeout(() => { els.liveBadge.textContent = '● live'; els.liveBadge.style.color = ''; }, 1200);
+            }
+            function reloadPreview() {
+                const iframe = els.previewIframe;
+                const loading = els.previewLoading;
+                loading.classList.remove('hidden');
+                iframe.src = 'index.html?t=' + Date.now();
+                iframe.onload = function() {
+                    loading.classList.add('hidden');
+                    setTimeout(applyToPreview, 300);
+                };
+                setTimeout(() => loading.classList.add('hidden'), 3000);
+            }
+            window.addEventListener('message', function(e) {
+                if (e.data && e.data.type === 'DESIGN_READY') {
+                    els.previewLoading.classList.add('hidden');
+                    applyToPreview();
+                }
+            });
+
+            // ---- Apply to site ----
+            function applyToSite() {
+                syncUItoSettings();
+                saveSettings();
+                showToast('✅ Settings saved! Open index.html to see changes.');
+                applyToPreview();
+                const key = findMatchingPreset(currentSettings);
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === key));
+            }
+
+            // ---- Presets ----
+            function loadPreset(name) {
+                const preset = PRESETS[name];
+                if (!preset) return;
+                currentSettings = { ...DEFAULT, ...preset };
+                applySettingsToUI();
+                saveSettings();
+                applyToPreview();
+                showToast('✅ Loaded "' + name + '" preset');
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === name));
+            }
+
+            // ---- Export / Import ----
+            function exportSettings() {
+                syncUItoSettings();
+                const data = { version: '2.0', exported: new Date().toISOString(), settings: currentSettings };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = 'stylespc-design-' + new Date().toISOString().split('T')[0] + '.json';
+                a.click(); URL.revokeObjectURL(url);
+                showToast('📦 Exported design settings');
+            }
+            function importSettings(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (data.settings) {
+                            currentSettings = { ...DEFAULT, ...data.settings };
+                            applySettingsToUI();
+                            saveSettings();
+                            applyToPreview();
+                            showToast('✅ Imported successfully');
+                        } else showToast('❌ Invalid file: missing "settings"', true);
+                    } catch(err) { showToast('❌ Error: ' + err.message, true); }
+                };
+                reader.readAsText(file);
+            }
+            function resetToDefaults() {
+                currentSettings = { ...DEFAULT };
+                applySettingsToUI();
+                saveSettings();
+                applyToPreview();
+                showToast('↺ Reset to defaults');
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === 'default'));
+            }
+            function clearSettings() {
+                if (!confirm('Delete all design settings?')) return;
+                localStorage.removeItem(STORAGE_KEY);
+                currentSettings = { ...DEFAULT };
+                applySettingsToUI();
+                saveSettings();
+                applyToPreview();
+                showToast('🗑️ Settings cleared');
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === 'default'));
+            }
+
+            // ---- Event binding ----
+            function bindColor(picker, text) {
+                picker.addEventListener('input', () => { text.value = picker.value; syncUItoSettings(); saveSettings(); applyToPreview(); });
+                text.addEventListener('input', function() {
+                    let val = this.value.trim();
+                    if (val.startsWith('#')) { if (isValidHex(val)) { picker.value = val; syncUItoSettings(); saveSettings(); applyToPreview(); } }
+                    else { const test = '#' + val; if (isValidHex(test)) { picker.value = test; this.value = test; syncUItoSettings(); saveSettings(); applyToPreview(); } }
+                });
+                text.addEventListener('blur', function() {
+                    let val = this.value.trim();
+                    if (!isValidHex(val)) {
+                        const key = picker.id.replace('c','').toLowerCase();
+                        const fallback = currentSettings[key] || DEFAULT[key];
+                        this.value = fallback; picker.value = fallback;
+                        syncUItoSettings(); saveSettings(); applyToPreview();
+                    }
+                });
+            }
+            bindColor(els.cPaper, els.cPaperText);
+            bindColor(els.cPaper2, els.cPaper2Text);
+            bindColor(els.cTeal, els.cTealText);
+            bindColor(els.cAmber, els.cAmberText);
+            bindColor(els.cInk, els.cInkText);
+            bindColor(els.cRule, els.cRuleText);
+
+            els.fontSelect.addEventListener('change', function() {
+                currentSettings.fontFamily = this.value;
+                saveSettings(); applyToPreview();
+                const key = findMatchingPreset(currentSettings);
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === key));
+            });
+            function bindRange(range, valEl, key, suffix='') {
+                range.addEventListener('input', function() {
+                    let v = parseFloat(this.value);
+                    valEl.textContent = v + suffix;
+                    currentSettings[key] = v;
+                    saveSettings(); applyToPreview();
+                    const k = findMatchingPreset(currentSettings);
+                    els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === k));
+                });
+            }
+            bindRange(els.fontSize, els.fontSizeVal, 'fontSize', 'px');
+            bindRange(els.lineHeight, els.lineHeightVal, 'lineHeight', '');
+            bindRange(els.letterSpacing, els.letterSpacingVal, 'letterSpacing', '');
+            bindRange(els.radiusRange, els.radiusVal, 'borderRadius', 'px');
+            bindRange(els.componentPadding, els.componentPaddingVal, 'componentPadding', 'px');
+
+            els.customCSS.addEventListener('input', function() {
+                currentSettings.customCSS = this.value;
+                saveSettings(); applyToPreview();
+            });
+
+            els.applyBtn.addEventListener('click', applyToSite);
+            els.presetBtns.forEach(b => b.addEventListener('click', function() { loadPreset(this.dataset.preset); }));
+            els.exportBtn.addEventListener('click', exportSettings);
+            els.importBtn.addEventListener('click', () => els.importFile.click());
+            els.importFile.addEventListener('change', function(e) { if (this.files && this.files[0]) { importSettings(this.files[0]); this.value = ''; } });
+            els.resetBtn.addEventListener('click', resetToDefaults);
+            els.clearBtn.addEventListener('click', clearSettings);
+            els.refreshPreviewBtn.addEventListener('click', reloadPreview);
+            els.openSiteBtn.addEventListener('click', () => window.open('index.html', '_blank'));
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); applyToSite(); }
+                if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'R') { e.preventDefault(); reloadPreview(); }
+            });
+
+            // Init
+            function init() {
+                const loaded = loadSettings();
+                applySettingsToUI();
+                if (!loaded) saveSettings();
+                reloadPreview();
+                showToast(loaded ? '🔄 Loaded saved settings' : '✨ Using defaults');
+                const key = findMatchingPreset(currentSettings);
+                els.presetBtns.forEach(b => b.classList.toggle('active', b.dataset.preset === key));
+            }
+            init();
+            console.log('🎨 StylesPC Design Studio loaded');
+        })();
+    </script>
+</body>
+</html>
