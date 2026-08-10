@@ -217,6 +217,7 @@
     <div class="header">
         <h1><span class="dot"></span>StylesPC Enterprise</h1>
         <div class="user-menu">
+            <a href="index.html" class="btn btn-ghost btn-sm" style="text-decoration:none;">🏠 Home</a>
             <span class="user-pill">👤 <span id="userNameDisplay"></span> (<span id="userRoleDisplay">User</span>)</span>
             <button class="btn btn-ghost btn-sm" onclick="changeMyPassword()">🔑 Change Password</button>
             <button class="btn btn-ghost btn-sm" onclick="toggleDarkMode()">🌙 Dark</button>
@@ -765,8 +766,7 @@ function initApp() {
     async function logout() {
         await sb.auth.signOut();
         currentUser = null;
-        $('loginOverlay').classList.remove('hidden');
-        $('mainApp').style.display = 'none';
+        window.location.href = 'index.html';
     }
 
     function showLogin() {
