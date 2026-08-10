@@ -129,9 +129,66 @@
         .status-msg.err { color: var(--red); }
         .empty-state { text-align: center; padding: 40px; color: var(--ink-soft); }
         .empty-state h3 { color: var(--ink); }
+
+        /* ---- Billing / Invoices ---- */
+        .inv-badge { display:inline-block; font-size:0.72rem; font-weight:700; padding:3px 9px; border-radius:12px; text-transform:uppercase; letter-spacing:.02em; }
+        .inv-badge.unpaid { background:#fbeaea; color:var(--red); }
+        .inv-badge.paid { background:#e3efe9; color:var(--teal-dark); }
+        .inv-badge.partial { background:#fdf1e2; color:var(--amber); }
+        .inv-badge.complimentary { background:#e8ecfb; color:#3b4fb0; }
+        .items-table { width:100%; border-collapse:collapse; margin:10px 0; font-size:0.86rem; }
+        .items-table th { text-align:left; background:var(--paper-2); padding:8px; font-size:0.76rem; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); }
+        .items-table td { padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:middle; }
+        .items-table td.amt, .items-table th.amt { text-align:right; }
+        .items-table input, .items-table select { width:100%; padding:5px 6px; border:1px solid var(--rule); border-radius:var(--radius); font-family:inherit; font-size:0.85rem; }
+        .items-table input[type=number] { text-align:right; }
+        .totals-box { margin-left:auto; width:280px; font-size:0.88rem; margin-top:10px; }
+        .totals-box .trow { display:flex; justify-content:space-between; padding:4px 0; }
+        .totals-box .grand { font-weight:700; font-size:1.02rem; border-top:2px solid var(--teal); margin-top:4px; padding-top:8px; }
+        .totals-box .balance { font-weight:700; color:var(--red); }
+        .comp-box { background:#f4f6fd; border:1px solid #dde3f7; border-radius:6px; padding:16px; margin-top:10px; }
+        .modal.modal-wide { max-width: 760px; }
+
+        /* ---- Accounting / P&L ---- */
+        .pl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
+        .pl-card { background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:16px 18px; box-shadow:var(--shadow); }
+        .pl-card .pl-label { font-size:0.74rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:4px; }
+        .pl-card .pl-value { font-size:1.35rem; font-weight:700; }
+        .pl-card.positive .pl-value { color:var(--teal-dark); }
+        .pl-card.negative .pl-value { color:var(--red); }
+
+        /* ---- Pricelist manager ---- */
+        .price-row { display:grid; grid-template-columns:1fr 120px 130px 90px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--rule); }
+        .price-row input, .price-row select { padding:6px 8px; border:1px solid var(--rule); border-radius:var(--radius); font-family:inherit; font-size:0.85rem; }
+        @media (max-width:700px) { .price-row { grid-template-columns:1fr; } }
+
+        /* ---- Offscreen PDF render template ---- */
+        .invoice-print-wrap { position:absolute; left:-10000px; top:0; width:800px; background:#fff; color:#1a1a1a; font-family:'IBM Plex Sans',Arial,sans-serif; padding:42px; }
+        .inv-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #2F6F63; padding-bottom:16px; margin-bottom:20px; }
+        .inv-header h1 { font-size:20px; color:#2F6F63; margin:0 0 4px; letter-spacing:.02em; }
+        .inv-header .biz-sub { font-size:11px; color:#555; line-height:1.5; }
+        .inv-doctitle { text-align:right; }
+        .inv-doctitle .doclabel { font-size:22px; font-weight:700; color:#1a1a1a; letter-spacing:.06em; }
+        .inv-meta-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:20px; font-size:12px; }
+        .inv-meta-grid b { display:block; margin-bottom:2px; color:#333; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; }
+        .inv-meta-grid .row { margin-bottom:6px; }
+        table.pdf-items { width:100%; border-collapse:collapse; font-size:12px; margin-bottom:14px; }
+        table.pdf-items th { background:#2F6F63; color:#fff; text-align:left; padding:8px; font-weight:600; }
+        table.pdf-items td { padding:7px 8px; border-bottom:1px solid #e2ded1; }
+        table.pdf-items td.amt, table.pdf-items th.amt { text-align:right; }
+        .pdf-totals { margin-left:auto; width:280px; font-size:12px; }
+        .pdf-totals div { display:flex; justify-content:space-between; padding:4px 0; }
+        .pdf-totals .grand { font-weight:700; font-size:14px; border-top:2px solid #2F6F63; margin-top:4px; padding-top:8px; }
+        .pdf-totals .balance { font-weight:700; color:#a3372a; }
+        .pdf-footer { margin-top:26px; font-size:10.5px; color:#666; border-top:1px solid #e2ded1; padding-top:12px; line-height:1.6; }
+        .comp-card-pdf { text-align:center; padding:70px 40px; }
+        .comp-card-pdf h1 { color:#2F6F63; font-size:24px; margin-bottom:8px; }
+        .comp-card-pdf .comp-tag { display:inline-block; background:#e8ecfb; color:#3b4fb0; padding:6px 18px; border-radius:20px; font-weight:700; font-size:12px; margin-bottom:26px; letter-spacing:.03em; }
+        .comp-card-pdf p { font-size:14px; color:#333; max-width:520px; margin:0 auto 10px; line-height:1.6; }
     </style>
 </head>
 <body>
+<div id="invoicePrintTemplate" class="invoice-print-wrap"></div>
 
 <!-- ===== LOGIN OVERLAY ===== -->
 <div class="login-overlay" id="loginOverlay">
@@ -171,6 +228,8 @@
         <button class="nav-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
         <button class="nav-tab" onclick="switchTab('tickets',this)">🎫 Tickets</button>
         <button class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</button>
+        <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
+        <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
         <button class="nav-tab" onclick="switchTab('users',this)">🔐 Users</button>
         <button class="nav-tab" onclick="switchTab('activity',this)">📜 Activity</button>
         <button class="nav-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
@@ -231,6 +290,53 @@
         <div class="list-container" id="clientsList"><div class="status-msg">Loading…</div></div>
     </div>
 
+    <!-- BILLING -->
+    <div id="billing" class="section">
+        <h2 style="margin-bottom:20px;">Billing</h2>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="invoiceSearch" placeholder="Search invoice #, client…" oninput="filterInvoices()"></div>
+            <select id="invoiceStatusFilter" onchange="filterInvoices()">
+                <option value="">All Status</option>
+                <option value="unpaid">Unpaid</option>
+                <option value="partial">Partial</option>
+                <option value="paid">Paid</option>
+                <option value="complimentary">Complimentary</option>
+            </select>
+            <button class="btn btn-primary" onclick="openInvoiceModal('new')">+ New Invoice</button>
+        </div>
+        <div id="invoiceCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="invoicesList"><div class="status-msg">Loading…</div></div>
+    </div>
+
+    <!-- ACCOUNTING / P&L -->
+    <div id="accounting" class="section">
+        <h2 style="margin-bottom:20px;">Accounting — Profit &amp; Loss</h2>
+        <div class="toolbar">
+            <label style="font-size:0.82rem;">From <input type="date" id="plFrom" onchange="loadAccounting()"></label>
+            <label style="font-size:0.82rem;">To <input type="date" id="plTo" onchange="loadAccounting()"></label>
+            <button class="btn btn-ghost btn-sm" onclick="setPLThisMonth()">This Month</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadAccounting()">⟳ Refresh</button>
+        </div>
+        <div class="pl-grid" id="plGrid">
+            <div class="pl-card"><div class="pl-label">Revenue Collected</div><div class="pl-value" id="plRevenue">—</div></div>
+            <div class="pl-card"><div class="pl-label">Outstanding (A/R)</div><div class="pl-value" id="plOutstanding">—</div></div>
+            <div class="pl-card"><div class="pl-label">Tax Collected (GCT)</div><div class="pl-value" id="plTax">—</div></div>
+            <div class="pl-card"><div class="pl-label">Discounts Given</div><div class="pl-value" id="plDiscounts">—</div></div>
+            <div class="pl-card"><div class="pl-label">Complimentary Value</div><div class="pl-value" id="plComp">—</div></div>
+            <div class="pl-card"><div class="pl-label">Total Expenses</div><div class="pl-value" id="plExpenses">—</div></div>
+            <div class="pl-card" id="plNetCard"><div class="pl-label">Net Profit</div><div class="pl-value" id="plNet">—</div></div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px;">
+            <h3 style="margin:0;">Expenses</h3>
+            <div>
+                <button class="btn btn-ghost btn-sm" onclick="exportExpensesCSV()">📥 Export CSV</button>
+                <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add Expense</button>
+            </div>
+        </div>
+        <div class="list-container" id="expensesList"><div class="status-msg">Loading…</div></div>
+    </div>
+
     <!-- USERS -->
     <div id="users" class="section">
         <h2 style="margin-bottom:20px;">User Management</h2>
@@ -257,6 +363,13 @@
     <div id="settings" class="section">
         <h2 style="margin-bottom:20px;">Settings</h2>
         <div class="list-container">
+            <div class="list-item" style="grid-template-columns:1fr;">
+                <div>
+                    <div class="list-item-main" style="margin-bottom:10px;"><div class="list-item-title">Pricelist</div><div class="list-item-subtitle">Edit prices here — updates instantly in Billing, no code changes or GitHub upload needed.</div></div>
+                    <div id="priceListManager"><div class="status-msg">Loading…</div></div>
+                    <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openPriceModal()">+ Add Price Item</button>
+                </div>
+            </div>
             <div class="list-item">
                 <div class="list-item-main"><div class="list-item-title">Company Name</div><div class="list-item-subtitle">Displayed on invoices and emails</div></div>
                 <div class="list-item-actions">
@@ -297,6 +410,105 @@
 <div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
 <div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
+
+<!-- INVOICE MODAL -->
+<div class="modal-overlay" id="invoiceModal"> <div class="modal modal-wide">
+    <h2 id="invoiceModalTitle">New Invoice</h2>
+    <div class="form-row">
+        <div class="form-group"><label>Invoice #</label><input type="text" id="invNumber" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';"></div>
+        <div class="form-group"><label>Link to Ticket (optional)</label><select id="invTicketLink" onchange="onInvoiceTicketLink()"><option value="">— None / walk-in —</option></select></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Client Name *</label><input type="text" id="invClientName" required></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="invPhone"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="invEmail"></div>
+        <div class="form-group"><label>Address</label><input type="text" id="invAddress"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Invoice Date</label><input type="date" id="invDate"></div>
+        <div class="form-group"><label>Due Date</label><input type="date" id="invDueDate"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Reference</label><input type="text" id="invReference" placeholder="Ticket tag, PO#, etc."></div>
+        <div class="form-group"><label>Status</label><select id="invStatus"><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option></select></div>
+    </div>
+
+    <div class="checkbox-group" style="margin:12px 0;"><input type="checkbox" id="invComplimentary" onchange="toggleComplimentary()"><label for="invComplimentary"><strong>🎁 Mark as Complimentary (no charge)</strong></label></div>
+
+    <div id="invBillableSection">
+        <h4 style="margin:14px 0 6px;">Line Items</h4>
+        <table class="items-table">
+            <thead><tr><th style="width:38%;">Service / Item</th><th style="width:10%;">Qty</th><th style="width:16%;">Unit Price</th><th style="width:10%;">Disc %</th><th class="amt" style="width:16%;">Line Total</th><th></th></tr></thead>
+            <tbody id="invItemsBody"></tbody>
+        </table>
+        <button class="btn btn-sm btn-ghost" onclick="addInvoiceItemRow()">+ Add Line</button>
+
+        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:14px;">
+            <label style="font-size:0.85rem;">Overall Discount:</label>
+            <select id="invDiscountPct" onchange="recalcInvoiceTotals()" style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);">
+                <option value="0">None</option>
+                <option value="5">5%</option><option value="10">10%</option><option value="15">15%</option>
+                <option value="20">20%</option><option value="25">25%</option><option value="30">30%</option>
+                <option value="35">35%</option><option value="40">40%</option><option value="45">45%</option>
+                <option value="50">50%</option>
+            </select>
+        </div>
+
+        <div class="totals-box">
+            <div class="trow"><span>Subtotal</span><span id="invSubtotalOut">$0.00</span></div>
+            <div class="trow"><span id="invDiscountLabel">Discount</span><span id="invDiscountOut">-$0.00</span></div>
+            <div class="trow"><span>Tax (GCT 15%)</span><span id="invTaxOut">$0.00</span></div>
+            <div class="trow grand"><span>Grand Total</span><span id="invGrandOut">$0.00</span></div>
+            <div class="trow"><span>Amount Paid</span><span><input type="number" id="invAmountPaid" min="0" value="0" style="width:110px;text-align:right;padding:4px 6px;" oninput="recalcInvoiceTotals()"></span></div>
+            <div class="trow balance"><span>Balance Due</span><span id="invBalanceOut">$0.00</span></div>
+        </div>
+    </div>
+
+    <div id="invComplimentarySection" style="display:none;">
+        <div class="comp-box">
+            <label style="font-size:0.8rem;font-weight:600;">Complimentary Note (shown to client)</label>
+            <textarea id="invCompNote" rows="3" style="width:100%;margin-top:6px;">This is a one-time complimentary service. Any other service may incur charges. Thank you.</textarea>
+        </div>
+    </div>
+
+    <div class="form-group" style="margin-top:12px;"><label>Notes / Warranty</label><textarea id="invNotes" rows="2">Repairs carry a 30-day warranty on parts and labour.</textarea></div>
+
+    <div id="invoiceModalError" class="modal-error"></div>
+    <div id="invoicePdfStatus" style="font-size:12px;margin-top:4px;"></div>
+    <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
+        <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
+        <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+    </div>
+</div></div>
+
+<!-- PRICE ITEM MODAL -->
+<div class="modal-overlay" id="priceModal"> <div class="modal">
+    <h2 id="priceModalTitle">New Price Item</h2>
+    <div class="form-group"><label>Service / Item Name *</label><input type="text" id="priceName" required></div>
+    <div class="form-row">
+        <div class="form-group"><label>Price (JMD) *</label><input type="number" id="priceAmount" min="0" required></div>
+        <div class="form-group"><label>Category</label><input type="text" id="priceCategory" placeholder="Repairs, Firestick, etc."></div>
+    </div>
+    <div class="checkbox-group"><input type="checkbox" id="priceActive" checked><label for="priceActive">Active (shown in Billing dropdown)</label></div>
+    <div id="priceModalError" class="modal-error"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('priceModal')">Cancel</button><button class="btn btn-primary" onclick="savePriceItem()">Save</button></div>
+</div></div>
+
+<!-- EXPENSE MODAL -->
+<div class="modal-overlay" id="expenseModal"> <div class="modal">
+    <h2 id="expenseModalTitle">New Expense</h2>
+    <div class="form-group"><label>Description *</label><input type="text" id="expDescription" required placeholder="e.g. Parts purchase — SSD drives"></div>
+    <div class="form-row">
+        <div class="form-group"><label>Amount (JMD) *</label><input type="number" id="expAmount" min="0" required></div>
+        <div class="form-group"><label>Category</label><select id="expCategory"><option>Parts & Inventory</option><option>Rent</option><option>Utilities</option><option>Wages</option><option>Marketing</option><option>Transport</option><option>Other</option></select></div>
+    </div>
+    <div class="form-group"><label>Date</label><input type="date" id="expDate"></div>
+    <div id="expenseModalError" class="modal-error"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
+</div></div>
 
 <div class="modal-overlay" id="userModal"> <div class="modal"> <h2 id="userModalTitle">Add User</h2> <form id="userForm" onsubmit="saveUser(event)"> <div class="form-group"><label>Email *</label><input type="email" id="userEmail" required placeholder="staff@stylespc.com"></div> <div class="form-group"><label>Password <span id="pwLabel">(required)</span></label><input type="password" id="userPassword" placeholder="Min. 6 characters"></div> <div class="form-row"><div class="form-group"><label>Role</label><select id="userRole"><option value="User">User</option><option value="Manager">Manager</option><option value="Technician">Technician</option><option value="Admin">Admin</option></select></div><div class="form-group"><label>Password Expiry (days)</label><input type="number" id="userExpiryDays" value="30" min="1" max="365"></div></div> <div class="checkbox-group"><input type="checkbox" id="userMustChange" checked><label for="userMustChange">Must change password at next login</label></div> <div id="userModalError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button type="submit" class="btn btn-primary">Save User</button></div> </form> </div></div>
 
@@ -460,13 +672,31 @@ function initApp() {
     let allTickets = [];
     let allClients = [];
     let allUsers = [];
+    let allInvoices = [];
+    let allPriceList = [];
+    let allExpenses = [];
     let currentEditId = null;
+    let currentInvoiceEditId = null;
+    let currentPriceEditId = null;
     let selectedTicketIds = new Set();
     let statusChart = null, priorityChart = null;
 
     function $(id) { return document.getElementById(id); }
     function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function genTag() { return 'SPC-' + Math.floor(1000 + Math.random() * 9000); }
+
+    // ---- Business info (used on printed invoices / complimentary cards) ----
+    const BIZ_NAME = 'StylesPC';
+    const BIZ_PARENT = 'Lightfire Partners';
+    const BIZ_ADDRESS = 'Portmore, St. Catherine, Jamaica';
+    const BIZ_PHONE = '(876) 334-1156';
+    const BIZ_EMAIL = 'info@lightfirepartners.com';
+    const GCT_RATE = 0.15;
+
+    function fmtMoney(n) {
+        n = Number(n) || 0;
+        return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
     // =============================================================
     // AUTH
@@ -541,7 +771,7 @@ function initApp() {
     // LOAD ALL DATA
     // =============================================================
     async function loadAll() {
-        await Promise.all([loadTickets(), loadClients(), loadUsers()]);
+        await Promise.all([loadTickets(), loadClients(), loadUsers(), loadPriceList()]);
         updateDashboard();
         populateAssigneeFilters();
     }
@@ -1006,6 +1236,540 @@ function initApp() {
     }
 
     // =============================================================
+    // PRICELIST (Settings) — edit prices without touching code
+    // =============================================================
+    async function loadPriceList() {
+        const { data, error } = await sb.from('price_list').select('*').order('category').order('name');
+        if (!error) allPriceList = data || [];
+        renderPriceListManager();
+    }
+    function renderPriceListManager() {
+        const el = $('priceListManager');
+        if (!el) return;
+        if (!allPriceList.length) { el.innerHTML = '<div class="status-msg">No price items yet — add your first one below.</div>'; return; }
+        el.innerHTML = allPriceList.map(p => `
+            <div class="price-row">
+                <div><strong>${esc(p.name)}</strong>${p.category ? ` <span style="color:var(--ink-soft);font-size:0.78rem;">(${esc(p.category)})</span>` : ''}</div>
+                <div>${fmtMoney(p.price)}</div>
+                <div>${p.active ? '<span style="color:var(--teal-dark);">● Active</span>' : '<span style="color:var(--ink-soft);">○ Inactive</span>'}</div>
+                <div></div>
+                <div style="display:flex;gap:6px;"><button class="btn btn-sm btn-ghost" onclick="openPriceModal('${p.id}')">Edit</button><button class="btn btn-sm btn-danger" onclick="deletePriceItem('${p.id}')">Delete</button></div>
+            </div>
+        `).join('');
+    }
+    function openPriceModal(id = null) {
+        currentPriceEditId = id;
+        $('priceModalError').textContent = '';
+        if (id) {
+            const p = allPriceList.find(x => x.id === id);
+            if (!p) return;
+            $('priceModalTitle').textContent = 'Edit Price Item';
+            $('priceName').value = p.name;
+            $('priceAmount').value = p.price;
+            $('priceCategory').value = p.category || '';
+            $('priceActive').checked = !!p.active;
+        } else {
+            $('priceModalTitle').textContent = 'New Price Item';
+            $('priceName').value = '';
+            $('priceAmount').value = '';
+            $('priceCategory').value = '';
+            $('priceActive').checked = true;
+        }
+        $('priceModal').classList.add('active');
+    }
+    async function savePriceItem() {
+        const name = $('priceName').value.trim();
+        const price = parseFloat($('priceAmount').value);
+        const errorEl = $('priceModalError');
+        if (!name || isNaN(price) || price < 0) { errorEl.textContent = 'Enter a valid name and price.'; return; }
+        const payload = { name, price, category: $('priceCategory').value.trim() || 'General', active: $('priceActive').checked };
+        let error;
+        if (currentPriceEditId) {
+            ({ error } = await sb.from('price_list').update(payload).eq('id', currentPriceEditId));
+        } else {
+            ({ error } = await sb.from('price_list').insert([payload]));
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        logActivity('Pricelist Updated', `${name} — ${fmtMoney(price)}`);
+        closeModal('priceModal');
+        await loadPriceList();
+    }
+    async function deletePriceItem(id) {
+        if (!confirm('Delete this price item? Existing invoices are unaffected.')) return;
+        const p = allPriceList.find(x => x.id === id);
+        await sb.from('price_list').delete().eq('id', id);
+        logActivity('Pricelist Item Deleted', p ? p.name : id);
+        await loadPriceList();
+    }
+    window.openPriceModal = openPriceModal;
+    window.savePriceItem = savePriceItem;
+    window.deletePriceItem = deletePriceItem;
+
+    // =============================================================
+    // BILLING / INVOICES
+    // =============================================================
+    async function loadInvoices() {
+        const listEl = $('invoicesList');
+        listEl.innerHTML = '<div class="status-msg">Loading invoices…</div>';
+        const { data, error } = await sb.from('invoices').select('*').order('created_at', { ascending: false });
+        if (error) { listEl.innerHTML = '<div class="status-msg err">Error loading invoices.</div>'; return; }
+        allInvoices = data || [];
+        renderInvoices(allInvoices);
+    }
+    function renderInvoices(list) {
+        const listEl = $('invoicesList');
+        $('invoiceCount').textContent = `${list.length} invoice${list.length === 1 ? '' : 's'}`;
+        if (!list.length) { listEl.innerHTML = '<div class="empty-state"><h3>No invoices yet</h3><p>Create your first invoice to get started.</p></div>'; return; }
+        listEl.innerHTML = list.map(inv => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-title">${esc(inv.invoice_number)} — ${esc(inv.client_name)} <span class="inv-badge ${inv.is_complimentary ? 'complimentary' : esc(inv.status)}">${inv.is_complimentary ? 'Complimentary' : esc(inv.status)}</span></div>
+                    <div class="list-item-subtitle">${new Date(inv.invoice_date).toLocaleDateString()}${inv.due_date ? ' · Due ' + new Date(inv.due_date).toLocaleDateString() : ''} ${inv.is_complimentary ? '' : '· ' + fmtMoney(inv.grand_total) + (inv.balance_due > 0 ? ' · Balance ' + fmtMoney(inv.balance_due) : '')}</div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-ghost" onclick="openInvoiceModal('edit','${inv.id}')">View / Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteInvoice('${inv.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    function filterInvoices() {
+        const q = $('invoiceSearch').value.toLowerCase();
+        const status = $('invoiceStatusFilter').value;
+        renderInvoices(allInvoices.filter(inv => {
+            const matchesQ = !q || (inv.invoice_number || '').toLowerCase().includes(q) || (inv.client_name || '').toLowerCase().includes(q);
+            const matchesStatus = !status || (status === 'complimentary' ? inv.is_complimentary : (!inv.is_complimentary && inv.status === status));
+            return matchesQ && matchesStatus;
+        }));
+    }
+
+    function populateInvoiceTicketSelect() {
+        const sel = $('invTicketLink');
+        sel.innerHTML = '<option value="">— None / walk-in —</option>' + allTickets.map(t => `<option value="${t.id}">${esc(t.ticket_number || t.id)} — ${esc(t.client_name)}</option>`).join('');
+    }
+    function onInvoiceTicketLink() {
+        const id = $('invTicketLink').value;
+        if (!id) return;
+        const t = allTickets.find(x => x.id === id);
+        if (!t) return;
+        $('invClientName').value = t.client_name || '';
+        $('invPhone').value = t.phone || '';
+        $('invEmail').value = t.email || '';
+        $('invReference').value = t.ticket_number || '';
+    }
+
+    function invoiceItemRowHTML(item) {
+        item = item || { description: '', qty: 1, unit_price: 0, disc_pct: 0 };
+        const options = ['<option value="">Custom item…</option>'].concat(
+            allPriceList.filter(p => p.active).map(p => `<option value="${esc(p.name)}" data-price="${p.price}" ${p.name === item.description ? 'selected' : ''}>${esc(p.name)} — ${fmtMoney(p.price)}</option>`)
+        ).join('');
+        const isCustom = !allPriceList.some(p => p.name === item.description);
+        return `<tr class="inv-item-row">
+            <td>
+                <select onchange="onInvoiceItemPick(this)">${options}</select>
+                <input type="text" class="inv-item-desc" placeholder="Custom description…" value="${isCustom ? esc(item.description) : ''}" style="margin-top:4px;display:${isCustom && item.description ? 'block' : (item.description ? 'none' : 'block')};" oninput="recalcInvoiceTotals()">
+            </td>
+            <td><input type="number" class="inv-item-qty" min="0" step="1" value="${item.qty}" oninput="recalcInvoiceTotals()"></td>
+            <td><input type="number" class="inv-item-price" min="0" step="0.01" value="${item.unit_price}" oninput="recalcInvoiceTotals()"></td>
+            <td><input type="number" class="inv-item-disc" min="0" max="100" step="1" value="${item.disc_pct || 0}" oninput="recalcInvoiceTotals()"></td>
+            <td class="amt inv-item-total">${fmtMoney(0)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); recalcInvoiceTotals();">✕</button></td>
+        </tr>`;
+    }
+    function onInvoiceItemPick(selectEl) {
+        const row = selectEl.closest('tr');
+        const opt = selectEl.selectedOptions[0];
+        const descInput = row.querySelector('.inv-item-desc');
+        if (!selectEl.value) { descInput.style.display = 'block'; descInput.focus(); }
+        else {
+            descInput.style.display = 'none';
+            descInput.value = '';
+            row.querySelector('.inv-item-price').value = opt.dataset.price || 0;
+        }
+        recalcInvoiceTotals();
+    }
+    function addInvoiceItemRow(item) {
+        $('invItemsBody').insertAdjacentHTML('beforeend', invoiceItemRowHTML(item));
+        recalcInvoiceTotals();
+    }
+    function collectInvoiceItems() {
+        return Array.from(document.querySelectorAll('#invItemsBody tr')).map(row => {
+            const sel = row.querySelector('select');
+            const descInput = row.querySelector('.inv-item-desc');
+            const description = sel.value || descInput.value.trim();
+            const qty = parseFloat(row.querySelector('.inv-item-qty').value) || 0;
+            const unit_price = parseFloat(row.querySelector('.inv-item-price').value) || 0;
+            const disc_pct = parseFloat(row.querySelector('.inv-item-disc').value) || 0;
+            return { description, qty, unit_price, disc_pct };
+        }).filter(i => i.description);
+    }
+    function recalcInvoiceTotals() {
+        document.querySelectorAll('#invItemsBody tr').forEach(row => {
+            const qty = parseFloat(row.querySelector('.inv-item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.inv-item-price').value) || 0;
+            const disc = parseFloat(row.querySelector('.inv-item-disc').value) || 0;
+            const total = qty * price * (1 - disc / 100);
+            row.querySelector('.inv-item-total').textContent = fmtMoney(total);
+        });
+        const items = collectInvoiceItems();
+        const subtotal = items.reduce((s, i) => s + i.qty * i.unit_price * (1 - i.disc_pct / 100), 0);
+        const discPct = parseFloat($('invDiscountPct').value) || 0;
+        const discountAmount = subtotal * (discPct / 100);
+        const afterDiscount = subtotal - discountAmount;
+        const tax = afterDiscount * GCT_RATE;
+        const grand = afterDiscount + tax;
+        const paid = parseFloat($('invAmountPaid').value) || 0;
+        const balance = grand - paid;
+
+        $('invSubtotalOut').textContent = fmtMoney(subtotal);
+        $('invDiscountLabel').textContent = `Discount (${discPct}%)`;
+        $('invDiscountOut').textContent = '-' + fmtMoney(discountAmount);
+        $('invTaxOut').textContent = fmtMoney(tax);
+        $('invGrandOut').textContent = fmtMoney(grand);
+        $('invBalanceOut').textContent = fmtMoney(balance);
+
+        return { items, subtotal, discPct, discountAmount, tax, grand, paid, balance };
+    }
+    function toggleComplimentary() {
+        const isComp = $('invComplimentary').checked;
+        $('invBillableSection').style.display = isComp ? 'none' : 'block';
+        $('invComplimentarySection').style.display = isComp ? 'block' : 'none';
+    }
+
+    async function nextInvoiceNumber() {
+        const { count } = await sb.from('invoices').select('id', { count: 'exact', head: true });
+        return 'INV-' + (1001 + (count || 0));
+    }
+
+    async function openInvoiceModal(mode, id = null) {
+        currentInvoiceEditId = mode === 'edit' ? id : null;
+        $('invoiceModalError').textContent = '';
+        $('invoicePdfStatus').textContent = '';
+        populateInvoiceTicketSelect();
+        $('invItemsBody').innerHTML = '';
+        if (mode === 'new') {
+            $('invoiceModalTitle').textContent = 'New Invoice';
+            $('invNumber').value = await nextInvoiceNumber();
+            $('invTicketLink').value = '';
+            ['invClientName','invPhone','invEmail','invAddress','invReference'].forEach(f => $(f).value = '');
+            $('invDate').value = new Date().toISOString().slice(0, 10);
+            $('invDueDate').value = '';
+            $('invStatus').value = 'unpaid';
+            $('invDiscountPct').value = '0';
+            $('invAmountPaid').value = '0';
+            $('invComplimentary').checked = false;
+            $('invCompNote').value = 'This is a one-time complimentary service. Any other service may incur charges. Thank you.';
+            $('invNotes').value = 'Repairs carry a 30-day warranty on parts and labour.';
+            toggleComplimentary();
+            addInvoiceItemRow();
+        } else {
+            const inv = allInvoices.find(x => x.id === id);
+            if (!inv) return;
+            $('invoiceModalTitle').textContent = 'Edit Invoice';
+            $('invNumber').value = inv.invoice_number;
+            $('invTicketLink').value = inv.ticket_id || '';
+            $('invClientName').value = inv.client_name || '';
+            $('invPhone').value = inv.phone || '';
+            $('invEmail').value = inv.email || '';
+            $('invAddress').value = inv.address || '';
+            $('invDate').value = inv.invoice_date ? inv.invoice_date.slice(0, 10) : '';
+            $('invDueDate').value = inv.due_date ? inv.due_date.slice(0, 10) : '';
+            $('invReference').value = inv.reference || '';
+            $('invStatus').value = inv.status || 'unpaid';
+            $('invDiscountPct').value = String(inv.discount_pct || 0);
+            $('invAmountPaid').value = inv.amount_paid || 0;
+            $('invNotes').value = inv.notes || '';
+            $('invComplimentary').checked = !!inv.is_complimentary;
+            $('invCompNote').value = inv.notes && inv.is_complimentary ? inv.notes : 'This is a one-time complimentary service. Any other service may incur charges. Thank you.';
+            toggleComplimentary();
+            (inv.items || []).forEach(it => addInvoiceItemRow(it));
+            if (!inv.items || !inv.items.length) addInvoiceItemRow();
+        }
+        recalcInvoiceTotals();
+        $('invoiceModal').classList.add('active');
+    }
+
+    async function saveInvoice() {
+        const errorEl = $('invoiceModalError');
+        errorEl.textContent = '';
+        const clientName = $('invClientName').value.trim();
+        if (!clientName) { errorEl.textContent = 'Client name is required.'; return; }
+        const isComp = $('invComplimentary').checked;
+        const totals = recalcInvoiceTotals();
+
+        const payload = {
+            invoice_number: $('invNumber').value,
+            ticket_id: $('invTicketLink').value || null,
+            client_name: clientName,
+            phone: $('invPhone').value.trim() || null,
+            email: $('invEmail').value.trim() || null,
+            address: $('invAddress').value.trim() || null,
+            invoice_date: $('invDate').value || new Date().toISOString().slice(0, 10),
+            due_date: $('invDueDate').value || null,
+            reference: $('invReference').value.trim() || null,
+            is_complimentary: isComp,
+            items: isComp ? [] : totals.items,
+            subtotal: isComp ? 0 : totals.subtotal,
+            discount_pct: isComp ? 0 : totals.discPct,
+            discount_amount: isComp ? 0 : totals.discountAmount,
+            tax_amount: isComp ? 0 : totals.tax,
+            grand_total: isComp ? 0 : totals.grand,
+            amount_paid: isComp ? 0 : totals.paid,
+            balance_due: isComp ? 0 : totals.balance,
+            status: isComp ? 'complimentary' : $('invStatus').value,
+            notes: isComp ? $('invCompNote').value.trim() : $('invNotes').value.trim(),
+        };
+
+        let error;
+        if (currentInvoiceEditId) {
+            ({ error } = await sb.from('invoices').update(payload).eq('id', currentInvoiceEditId));
+        } else {
+            ({ error } = await sb.from('invoices').insert([payload]));
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        logActivity(currentInvoiceEditId ? 'Invoice Updated' : 'Invoice Created', `${payload.invoice_number} — ${clientName}${isComp ? ' (Complimentary)' : ' — ' + fmtMoney(payload.grand_total)}`);
+        closeModal('invoiceModal');
+        await loadInvoices();
+    }
+
+    async function deleteInvoice(id) {
+        if (!confirm('Delete this invoice?')) return;
+        const inv = allInvoices.find(x => x.id === id);
+        await sb.from('invoices').delete().eq('id', id);
+        logActivity('Invoice Deleted', inv ? inv.invoice_number : id);
+        await loadInvoices();
+    }
+
+    // ---- PDF generation (html2pdf, matches the printed invoice template) ----
+    function buildInvoicePdfHtml() {
+        const isComp = $('invComplimentary').checked;
+        const invNumber = $('invNumber').value;
+        const clientName = esc($('invClientName').value);
+        const phone = esc($('invPhone').value);
+        const email = esc($('invEmail').value);
+        const address = esc($('invAddress').value);
+        const date = $('invDate').value ? new Date($('invDate').value).toLocaleDateString() : '';
+        const due = $('invDueDate').value ? new Date($('invDueDate').value).toLocaleDateString() : '';
+        const reference = esc($('invReference').value);
+
+        if (isComp) {
+            return `
+                <div class="inv-header">
+                    <div><h1>${BIZ_NAME}</h1><div class="biz-sub">${BIZ_PARENT}<br>${BIZ_ADDRESS}<br>Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}</div></div>
+                    <div class="inv-doctitle"><div class="doclabel">NO CHARGE</div></div>
+                </div>
+                <div class="comp-card-pdf">
+                    <div class="comp-tag">🎁 COMPLIMENTARY SERVICE</div>
+                    <h1>${clientName}</h1>
+                    <p>${esc($('invCompNote').value)}</p>
+                    <p style="margin-top:20px;font-size:12px;color:#777;">Reference: ${reference || invNumber} &nbsp;·&nbsp; ${date}</p>
+                </div>
+                <div class="pdf-footer">${BIZ_NAME} · ${BIZ_ADDRESS} · Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}</div>
+            `;
+        }
+
+        const totals = recalcInvoiceTotals();
+        const status = $('invStatus').value;
+        const rows = totals.items.map((it, i) => `
+            <tr>
+                <td>${i + 1}. ${esc(it.description)}</td>
+                <td class="amt">${it.qty}</td>
+                <td class="amt">${fmtMoney(it.unit_price)}</td>
+                <td class="amt">${it.disc_pct || 0}%</td>
+                <td class="amt">${fmtMoney(it.qty * it.unit_price * (1 - it.disc_pct / 100))}</td>
+            </tr>`).join('');
+
+        return `
+            <div class="inv-header">
+                <div><h1>${BIZ_NAME}</h1><div class="biz-sub">${BIZ_PARENT}<br>${BIZ_ADDRESS}<br>Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}</div></div>
+                <div class="inv-doctitle"><div class="doclabel">INVOICE</div><div style="font-size:12px;margin-top:6px;">${esc(invNumber)}</div></div>
+            </div>
+            <div class="inv-meta-grid">
+                <div>
+                    <div class="row"><b>Bill To</b>${clientName}</div>
+                    ${phone ? `<div class="row"><b>Phone</b>${phone}</div>` : ''}
+                    ${email ? `<div class="row"><b>Email</b>${email}</div>` : ''}
+                    ${address ? `<div class="row"><b>Address</b>${address}</div>` : ''}
+                </div>
+                <div>
+                    <div class="row"><b>Invoice Date</b>${date}</div>
+                    ${due ? `<div class="row"><b>Due Date</b>${due}</div>` : ''}
+                    <div class="row"><b>Status</b>${esc(status)}</div>
+                    ${reference ? `<div class="row"><b>Reference</b>${reference}</div>` : ''}
+                </div>
+            </div>
+            <table class="pdf-items">
+                <thead><tr><th>Description</th><th class="amt">Qty</th><th class="amt">Unit Price</th><th class="amt">Disc %</th><th class="amt">Line Total</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="pdf-totals">
+                <div><span>Subtotal</span><span>${fmtMoney(totals.subtotal)}</span></div>
+                <div><span>Discount (${totals.discPct}%)</span><span>-${fmtMoney(totals.discountAmount)}</span></div>
+                <div><span>Tax (GCT 15%)</span><span>${fmtMoney(totals.tax)}</span></div>
+                <div class="grand"><span>Grand Total</span><span>${fmtMoney(totals.grand)}</span></div>
+                <div><span>Amount Paid</span><span>${fmtMoney(totals.paid)}</span></div>
+                <div class="balance"><span>Balance Due</span><span>${fmtMoney(totals.balance)}</span></div>
+            </div>
+            <div class="pdf-footer">
+                ${esc($('invNotes').value)}<br>
+                Payment Methods: Cash | Bank Transfer | Online Payment<br>
+                ${BIZ_NAME} · ${BIZ_ADDRESS} · Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}
+            </div>
+        `;
+    }
+    async function downloadInvoicePdf() {
+        const statusEl = $('invoicePdfStatus');
+        const btn = $('invPdfBtn');
+        if (!$('invClientName').value.trim()) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+        btn.disabled = true;
+        statusEl.textContent = 'Generating PDF…';
+        statusEl.style.color = '';
+        try {
+            const el = $('invoicePrintTemplate');
+            el.innerHTML = buildInvoicePdfHtml();
+            const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value + '.pdf';
+            await html2pdf().set({
+                margin: 0,
+                filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
+            }).from(el).save();
+            statusEl.textContent = '✅ PDF downloaded.';
+            statusEl.style.color = 'var(--teal-dark)';
+        } catch (err) {
+            console.error('PDF error:', err);
+            statusEl.textContent = '❌ Failed to generate PDF.';
+            statusEl.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    window.openInvoiceModal = openInvoiceModal;
+    window.onInvoiceTicketLink = onInvoiceTicketLink;
+    window.onInvoiceItemPick = onInvoiceItemPick;
+    window.addInvoiceItemRow = addInvoiceItemRow;
+    window.recalcInvoiceTotals = recalcInvoiceTotals;
+    window.toggleComplimentary = toggleComplimentary;
+    window.saveInvoice = saveInvoice;
+    window.deleteInvoice = deleteInvoice;
+    window.downloadInvoicePdf = downloadInvoicePdf;
+    window.filterInvoices = filterInvoices;
+
+    // =============================================================
+    // ACCOUNTING / PROFIT & LOSS
+    // =============================================================
+    function setPLThisMonth() {
+        const now = new Date();
+        const from = new Date(now.getFullYear(), now.getMonth(), 1);
+        $('plFrom').value = from.toISOString().slice(0, 10);
+        $('plTo').value = now.toISOString().slice(0, 10);
+        loadAccounting();
+    }
+    async function loadAccounting() {
+        const from = $('plFrom').value;
+        const to = $('plTo').value;
+
+        let invQuery = sb.from('invoices').select('*');
+        if (from) invQuery = invQuery.gte('invoice_date', from);
+        if (to) invQuery = invQuery.lte('invoice_date', to);
+        const { data: invoices } = await invQuery;
+
+        let expQuery = sb.from('expenses').select('*').order('expense_date', { ascending: false });
+        if (from) expQuery = expQuery.gte('expense_date', from);
+        if (to) expQuery = expQuery.lte('expense_date', to);
+        const { data: expenses } = await expQuery;
+        allExpenses = expenses || [];
+
+        const billable = (invoices || []).filter(i => !i.is_complimentary);
+        const comp = (invoices || []).filter(i => i.is_complimentary);
+
+        const revenueCollected = billable.reduce((s, i) => s + (Number(i.amount_paid) || 0), 0);
+        const outstanding = billable.reduce((s, i) => s + Math.max(0, Number(i.balance_due) || 0), 0);
+        const taxCollected = billable.reduce((s, i) => s + (Number(i.tax_amount) || 0), 0);
+        const discountsGiven = billable.reduce((s, i) => s + (Number(i.discount_amount) || 0), 0);
+        // Complimentary "value" = what they would have charged, estimated at average invoice grand_total (0 if no billable data)
+        const avgTicket = billable.length ? billable.reduce((s, i) => s + (Number(i.grand_total) || 0), 0) / billable.length : 0;
+        const compValue = comp.length * avgTicket;
+        const totalExpenses = allExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
+        const netProfit = revenueCollected - totalExpenses;
+
+        $('plRevenue').textContent = fmtMoney(revenueCollected);
+        $('plOutstanding').textContent = fmtMoney(outstanding);
+        $('plTax').textContent = fmtMoney(taxCollected);
+        $('plDiscounts').textContent = fmtMoney(discountsGiven);
+        $('plComp').textContent = comp.length + ' job' + (comp.length === 1 ? '' : 's') + ' · ~' + fmtMoney(compValue);
+        $('plExpenses').textContent = fmtMoney(totalExpenses);
+        $('plNet').textContent = fmtMoney(netProfit);
+        $('plNetCard').className = 'pl-card ' + (netProfit >= 0 ? 'positive' : 'negative');
+
+        renderExpenses(allExpenses);
+    }
+    function renderExpenses(list) {
+        const el = $('expensesList');
+        if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No expenses logged</h3><p>Add an expense to track it against revenue.</p></div>'; return; }
+        el.innerHTML = list.map(e => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-title">${esc(e.description)} — ${fmtMoney(e.amount)}</div>
+                    <div class="list-item-subtitle">${esc(e.category || 'General')} · ${new Date(e.expense_date).toLocaleDateString()}</div>
+                </div>
+                <div class="list-item-actions"><button class="btn btn-sm btn-danger" onclick="deleteExpense('${e.id}')">Delete</button></div>
+            </div>
+        `).join('');
+    }
+    function openExpenseModal() {
+        $('expenseModalError').textContent = '';
+        $('expDescription').value = '';
+        $('expAmount').value = '';
+        $('expCategory').value = 'Parts & Inventory';
+        $('expDate').value = new Date().toISOString().slice(0, 10);
+        $('expenseModal').classList.add('active');
+    }
+    async function saveExpense() {
+        const description = $('expDescription').value.trim();
+        const amount = parseFloat($('expAmount').value);
+        const errorEl = $('expenseModalError');
+        if (!description || isNaN(amount) || amount <= 0) { errorEl.textContent = 'Enter a description and a valid amount.'; return; }
+        const payload = {
+            description, amount,
+            category: $('expCategory').value,
+            expense_date: $('expDate').value || new Date().toISOString().slice(0, 10),
+            created_by: currentUser.id,
+        };
+        const { error } = await sb.from('expenses').insert([payload]);
+        if (error) { errorEl.textContent = error.message; return; }
+        logActivity('Expense Added', `${description} — ${fmtMoney(amount)}`);
+        closeModal('expenseModal');
+        await loadAccounting();
+    }
+    async function deleteExpense(id) {
+        if (!confirm('Delete this expense?')) return;
+        const e = allExpenses.find(x => x.id === id);
+        await sb.from('expenses').delete().eq('id', id);
+        logActivity('Expense Deleted', e ? e.description : id);
+        await loadAccounting();
+    }
+    function exportExpensesCSV() {
+        if (!allExpenses.length) { alert('No expenses to export.'); return; }
+        const rows = [['Date', 'Description', 'Category', 'Amount']];
+        allExpenses.forEach(e => rows.push([new Date(e.expense_date).toLocaleDateString(), e.description, e.category || '', e.amount]));
+        const csv = rows.map(r => r.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = `expenses_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+        URL.revokeObjectURL(url);
+    }
+    window.setPLThisMonth = setPLThisMonth;
+    window.loadAccounting = loadAccounting;
+    window.openExpenseModal = openExpenseModal;
+    window.saveExpense = saveExpense;
+    window.deleteExpense = deleteExpense;
+    window.exportExpensesCSV = exportExpensesCSV;
+
+    // =============================================================
     // ACTIVITY LOG
     // =============================================================
     async function logActivity(action, description) {
@@ -1198,6 +1962,9 @@ function initApp() {
         if (tab === 'users') loadUsers();
         if (tab === 'activity') loadActivity();
         if (tab === 'dashboard') updateDashboard();
+        if (tab === 'billing') loadInvoices();
+        if (tab === 'accounting') loadAccounting();
+        if (tab === 'settings') renderPriceListManager();
     }
     function closeModal(id) { $(id).classList.remove('active'); currentEditId = null; }
     function filterTickets() {
