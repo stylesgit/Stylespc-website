@@ -435,6 +435,7 @@ function initApp() {
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                 to_email: email,
                 to_name: name,
+                subject: `StylesPC — Confirmation for Ticket ${tag}`,
                 ticket_number: tag,
                 device: device,
                 message: `Hi ${name}, we've received your ${device} (Ticket ${tag}). We'll WhatsApp you at ${phone || 'the number on file'} as soon as we have an update. Thank you for choosing us.`
