@@ -1509,6 +1509,37 @@
             }
         }
     </style>
+    <script>
+        // Theme engine — shared with admin.html via localStorage (same domain).
+        var THEMES = {
+            light:  { paper:'#F3EFE7', paper2:'#EAE3D3', ink:'#1F2421', inkSoft:'#4A4F49', teal:'#2F6F63', tealDark:'#204b43', amber:'#C97A2B', rule:'#C9C2B2', white:'#FFFDF8' },
+            dark:   { paper:'#1A1D1B', paper2:'#262B28', ink:'#EDEBE4', inkSoft:'#9EA39C', teal:'#3D8B7A', tealDark:'#2F6F63', amber:'#D98F42', rule:'#3A403B', white:'#2A2F2C' },
+            spring: { paper:'#F1F7EA', paper2:'#E1EFD0', ink:'#24321F', inkSoft:'#55694A', teal:'#4E9B5E', tealDark:'#397548', amber:'#E0A23B', rule:'#C7DAB3', white:'#FCFEF8' },
+            summer: { paper:'#FEF6E4', paper2:'#FCE8C2', ink:'#2B2416', inkSoft:'#6B5D3A', teal:'#1E8FA3', tealDark:'#146877', amber:'#E8762C', rule:'#F0D6A0', white:'#FFFDF6' },
+            autumn: { paper:'#F7EDE2', paper2:'#EFD9BC', ink:'#2E1F16', inkSoft:'#6B4A32', teal:'#A8562B', tealDark:'#7C3E1D', amber:'#C9862F', rule:'#E0C09A', white:'#FFF9F0' },
+            winter: { paper:'#EEF3F7', paper2:'#DCE6EE', ink:'#1B2530', inkSoft:'#4E6577', teal:'#2E6FA6', tealDark:'#1F4F7A', amber:'#C0392B', rule:'#C9D6E0', white:'#FFFFFF' },
+        };
+        function applyTheme(name) {
+            var t = THEMES[name] || THEMES.light;
+            var root = document.documentElement.style;
+            root.setProperty('--paper', t.paper);
+            root.setProperty('--paper-2', t.paper2);
+            root.setProperty('--ink', t.ink);
+            root.setProperty('--ink-soft', t.inkSoft);
+            root.setProperty('--teal', t.teal);
+            root.setProperty('--teal-dark', t.tealDark);
+            root.setProperty('--amber', t.amber);
+            root.setProperty('--rule', t.rule);
+            root.setProperty('--white', t.white);
+        }
+        function setTheme(name) {
+            localStorage.setItem('stylespc_theme', name);
+            applyTheme(name);
+            var sel = document.getElementById('themeSelect');
+            if (sel) sel.value = name;
+        }
+        applyTheme(localStorage.getItem('stylespc_theme') || 'light');
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
     </script>
@@ -1544,6 +1575,15 @@
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#faq">FAQ</a></li>
             </ul>
+            <select id="themeSelect" onchange="setTheme(this.value)" style="padding:6px 9px;border:1px solid var(--rule);border-radius:4px;font-family:inherit;font-size:0.82rem;background:var(--white);color:var(--ink);cursor:pointer;">
+                <option value="light">☀️ Light</option>
+                <option value="dark">🌙 Dark</option>
+                <option value="spring">🌸 Spring</option>
+                <option value="summer">🌞 Summer</option>
+                <option value="autumn">🍂 Autumn</option>
+                <option value="winter">❄️ Winter</option>
+            </select>
+            <script>document.getElementById('themeSelect').value = localStorage.getItem('stylespc_theme') || 'light';</script>
             <a href="#contact" class="nav-cta">Book a Repair</a>
         </nav>
     </header>
