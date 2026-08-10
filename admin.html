@@ -11,7 +11,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Supabase – loaded with onload callback -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.39.0/supabase.min.js" id="supabaseScript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" id="supabaseScript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
         /* ===== STYLES (full) ===== */
         :root {
@@ -198,7 +199,7 @@
         <h2 style="margin-bottom:20px;">Tickets</h2>
         <div class="toolbar">
             <div class="search-box"><input type="text" id="ticketSearch" placeholder="Search…" oninput="filterTickets()"></div>
-            <select id="ticketStatusFilter" onchange="filterTickets()"><option value="">All Status</option><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Closed">Closed</option></select>
+            <select id="ticketStatusFilter" onchange="filterTickets()"><option value="">All Status</option><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
             <select id="ticketPriorityFilter" onchange="filterTickets()"><option value="">All Priority</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select>
             <select id="ticketAssigneeFilter" onchange="filterTickets()"><option value="">All Assignees</option></select>
             <input type="date" id="ticketDateFrom" onchange="filterTickets()">
@@ -211,7 +212,7 @@
             <button class="btn btn-sm btn-ghost" onclick="bulkAction('delete')">🗑️ Delete</button>
             <button class="btn btn-sm btn-ghost" onclick="bulkAction('status')">📌 Change Status</button>
             <button class="btn btn-sm btn-ghost" onclick="bulkAction('assign')">👤 Assign</button>
-            <select id="bulkStatusSelect" style="display:none;padding:4px 8px;border:1px solid var(--rule);border-radius:var(--radius);"><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Closed">Closed</option></select>
+            <select id="bulkStatusSelect" style="display:none;padding:4px 8px;border:1px solid var(--rule);border-radius:var(--radius);"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select>
             <select id="bulkAssigneeSelect" style="display:none;padding:4px 8px;border:1px solid var(--rule);border-radius:var(--radius);"></select>
             <button class="btn btn-sm btn-primary" id="bulkConfirmBtn" style="display:none;" onclick="executeBulkAction()">Apply</button>
         </div>
@@ -293,7 +294,7 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="Open">Open</option><option value="In Progress">In Progress</option><option value="Closed">Closed</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button></div></div> <div id="ticketModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
+<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
 <div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
 
@@ -312,46 +313,76 @@
     const statusEl = document.getElementById('scriptStatus');
     const loaderEl = document.getElementById('loader');
     const formEl = document.getElementById('loginForm');
-    let attempts = 0;
-    const maxAttempts = 30; // 5 seconds max (150ms per check)
+    let settled = false;
 
-    function checkSupabase() {
+    function onReady() {
+        if (settled) return;
+        settled = true;
+        statusEl.textContent = '✅ Supabase loaded';
+        statusEl.style.background = '#2F6F63';
+        statusEl.style.color = 'white';
+        loaderEl.style.display = 'none';
+        formEl.style.display = 'block';
+        initApp();
+    }
+
+    function onFail(message) {
+        if (settled) return;
+        settled = true;
+        statusEl.textContent = '❌ ' + (message || 'Failed to load Supabase. Please refresh or check your internet.');
+        statusEl.style.background = '#a3372a';
+        statusEl.style.color = 'white';
+        loaderEl.style.display = 'none';
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = 'Retry';
+        retryBtn.className = 'btn btn-primary';
+        retryBtn.style.marginTop = '12px';
+        retryBtn.onclick = function() {
+            location.reload();
+        };
+        const box = document.querySelector('.login-box');
+        box.appendChild(retryBtn);
+    }
+
+    // If it's already loaded by the time this runs, don't wait at all.
+    if (typeof supabase !== 'undefined') {
+        onReady();
+        return;
+    }
+
+    // React the instant the script tag itself finishes (fast connections)
+    // or errors out (blocked/offline — real failure, no need to wait).
+    const scriptTag = document.getElementById('supabaseScript');
+    if (scriptTag) {
+        scriptTag.addEventListener('load', function() {
+            // Give the SDK a tick to attach the global, then check.
+            setTimeout(function() {
+                if (typeof supabase !== 'undefined') onReady();
+                else onFail('Supabase script loaded but did not initialize. Please refresh.');
+            }, 50);
+        });
+        scriptTag.addEventListener('error', function() {
+            onFail('Could not reach the Supabase CDN. Check your internet connection and refresh.');
+        });
+    }
+
+    // Safety-net poll for slow connections where events above are unreliable —
+    // generous window (20s) instead of failing after just a few seconds.
+    let attempts = 0;
+    const maxAttempts = 133; // ~20 seconds at 150ms per check
+    (function poll() {
+        if (settled) return;
         attempts++;
         if (typeof supabase !== 'undefined') {
-            // Supabase is ready
-            statusEl.textContent = '✅ Supabase loaded';
-            statusEl.style.background = '#2F6F63';
-            statusEl.style.color = 'white';
-            loaderEl.style.display = 'none';
-            formEl.style.display = 'block';
-            // Start the app
-            initApp();
+            onReady();
             return;
         }
         if (attempts >= maxAttempts) {
-            // Timeout
-            statusEl.textContent = '❌ Failed to load Supabase. Please refresh or check your internet.';
-            statusEl.style.background = '#a3372a';
-            statusEl.style.color = 'white';
-            loaderEl.style.display = 'none';
-            // Show a retry button
-            const retryBtn = document.createElement('button');
-            retryBtn.textContent = 'Retry';
-            retryBtn.className = 'btn btn-primary';
-            retryBtn.style.marginTop = '12px';
-            retryBtn.onclick = function() {
-                location.reload();
-            };
-            const box = document.querySelector('.login-box');
-            box.appendChild(retryBtn);
+            onFail('Failed to load Supabase. Please refresh or check your internet.');
             return;
         }
-        setTimeout(checkSupabase, 150);
-    }
-
-    // Start checking after the script tag has had time to load
-    // The script tag is in the head, so we can start checking immediately.
-    checkSupabase();
+        setTimeout(poll, 150);
+    })();
 })();
 
 // =============================================================
@@ -365,6 +396,60 @@ function initApp() {
         'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
     );
     console.log('✅ Supabase client created');
+
+    // =============================================================
+    // EMAILJS (customer confirmation)
+    // =============================================================
+    const EMAILJS_PUBLIC_KEY = 'yAQ2vxUuGMjz2TAvq';
+    const EMAILJS_SERVICE_ID = 'service_x983hzs';
+    const EMAILJS_TEMPLATE_ID = 'template_h9k8p8f';
+    if (window.emailjs) {
+        emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    }
+
+    async function sendConfirmationEmail() {
+        const statusEl = $('confirmEmailStatus');
+        const btn = $('sendConfirmBtn');
+        const name = $('ticketClientName').value.trim();
+        const email = $('ticketEmail').value.trim();
+        const phone = $('ticketPhone').value.trim();
+        const device = $('ticketDevice').value.trim();
+        const tag = $('ticketTag').value.trim();
+
+        if (!email) {
+            statusEl.textContent = '⚠️ No email on file for this client — cannot send.';
+            statusEl.style.color = '#a3372a';
+            return;
+        }
+        if (!window.emailjs) {
+            statusEl.textContent = '⚠️ EmailJS failed to load — check your connection and refresh.';
+            statusEl.style.color = '#a3372a';
+            return;
+        }
+
+        btn.disabled = true;
+        statusEl.textContent = 'Sending…';
+        statusEl.style.color = '';
+
+        try {
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_email: email,
+                to_name: name,
+                ticket_number: tag,
+                device: device,
+                message: `Hi ${name}, we've received your ${device} (Ticket ${tag}). We'll WhatsApp you at ${phone || 'the number on file'} as soon as we have an update. Thank you for choosing us.`
+            });
+            statusEl.textContent = '✅ Confirmation email sent to ' + email;
+            statusEl.style.color = '#2e7d32';
+        } catch (err) {
+            console.error('EmailJS error:', err);
+            statusEl.textContent = '❌ Failed to send — ' + (err?.text || err?.message || 'check EmailJS template/service ID');
+            statusEl.style.color = '#a3372a';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+    window.sendConfirmationEmail = sendConfirmationEmail;
 
     // =============================================================
     // STATE
@@ -482,7 +567,7 @@ function initApp() {
             return;
         }
         $('ticketsList').innerHTML = list.map(t => {
-            const status = t.status || 'Open';
+            const status = t.status || 'received';
             const sClass = status.toLowerCase().replace(/\s+/g,'-');
             return `
             <div class="list-item" data-id="${t.id}">
@@ -557,11 +642,12 @@ function initApp() {
         currentEditId = id;
         $('ticketModalTitle').textContent = mode === 'new' ? 'New Ticket' : 'Edit Ticket';
         $('ticketModalError').textContent = '';
+        $('confirmEmailStatus').textContent = '';
         $('ticketCommentsSection').style.display = 'none';
         if (mode === 'new') {
             $('ticketTag').value = genTag();
             ['ticketClientName','ticketPhone','ticketEmail','ticketDevice','ticketIssue','ticketNotes'].forEach(f => $(f).value = '');
-            $('ticketStatus').value = 'Open';
+            $('ticketStatus').value = 'received';
             $('ticketPriority').value = 'Medium';
             $('ticketAmount').value = '';
             $('ticketPayment').value = 'unpaid';
@@ -576,7 +662,7 @@ function initApp() {
             $('ticketEmail').value = t.email || '';
             $('ticketDevice').value = t.device || '';
             $('ticketIssue').value = t.issue || '';
-            $('ticketStatus').value = t.status || 'Open';
+            $('ticketStatus').value = t.status || 'received';
             $('ticketPriority').value = t.priority || 'Medium';
             $('ticketAmount').value = t.amount || '';
             $('ticketPayment').value = t.payment_status || 'unpaid';
@@ -877,9 +963,9 @@ function initApp() {
     // =============================================================
     function updateDashboard() {
         $('totalTickets').textContent = allTickets.length;
-        $('openTickets').textContent = allTickets.filter(t => t.status === 'Open').length;
-        $('inProgressTickets').textContent = allTickets.filter(t => t.status === 'In Progress').length;
-        const statusCounts = { Open:0, 'In Progress':0, Closed:0 };
+        $('openTickets').textContent = allTickets.filter(t => t.status === 'received').length;
+        $('inProgressTickets').textContent = allTickets.filter(t => t.status === 'in_progress' || t.status === 'diagnosing').length;
+        const statusCounts = { received:0, diagnosing:0, in_progress:0, ready:0, delivered:0, cancelled:0 };
         const priorityCounts = { High:0, Medium:0, Low:0 };
         allTickets.forEach(t => {
             if (t.status in statusCounts) statusCounts[t.status]++;
@@ -890,7 +976,7 @@ function initApp() {
         const ctx1 = $('statusChart').getContext('2d');
         statusChart = new Chart(ctx1, {
             type: 'doughnut',
-            data: { labels: ['Open', 'In Progress', 'Closed'], datasets: [{ data: [statusCounts.Open, statusCounts['In Progress'], statusCounts.Closed], backgroundColor: ['#2F6F63', '#C97A2B', '#2e7d32'] }] },
+            data: { labels: ['Received', 'Diagnosing', 'In Progress', 'Ready', 'Delivered', 'Cancelled'], datasets: [{ data: [statusCounts.received, statusCounts.diagnosing, statusCounts.in_progress, statusCounts.ready, statusCounts.delivered, statusCounts.cancelled], backgroundColor: ['#2F6F63', '#4A6FA5', '#C97A2B', '#7A5FA0', '#2e7d32', '#a3372a'] }] },
             options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
         });
         const ctx2 = $('priorityChart').getContext('2d');
@@ -906,7 +992,7 @@ function initApp() {
                     <div class="list-item-header">
                         <span class="list-item-id">${esc(t.ticket_number||t.id)}</span>
                         <span class="list-item-title">${esc(t.device||'—')}</span>
-                        <span class="status-badge status-${(t.status||'Open').toLowerCase().replace(/\s+/g,'-')}">${esc(t.status||'Open')}</span>
+                        <span class="status-badge status-${(t.status||'received').toLowerCase().replace(/\s+/g,'-')}">${esc(t.status||'received')}</span>
                     </div>
                     <div class="list-item-subtitle">${esc(t.client_name||'—')}</div>
                 </div>
