@@ -163,7 +163,7 @@
         @media (max-width:700px) { .price-row { grid-template-columns:1fr; } }
 
         /* ---- Offscreen PDF render template ---- */
-        .invoice-print-wrap { position:absolute; left:-10000px; top:0; width:800px; background:#fff; color:#1a1a1a; font-family:'IBM Plex Sans',Arial,sans-serif; padding:42px; }
+        .invoice-print-wrap { display:none; position:fixed; left:0; top:0; width:800px; background:#fff; color:#1a1a1a; font-family:'IBM Plex Sans',Arial,sans-serif; padding:42px; z-index:99999; }
         .inv-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #2F6F63; padding-bottom:16px; margin-bottom:20px; }
         .inv-header h1 { font-size:20px; color:#2F6F63; margin:0 0 4px; letter-spacing:.02em; }
         .inv-header .biz-sub { font-size:11px; color:#555; line-height:1.5; }
@@ -407,9 +407,9 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
+<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith" onblur="titleCaseField(this)"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
-<div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
+<div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
 
 <!-- INVOICE MODAL -->
 <div class="modal-overlay" id="invoiceModal"> <div class="modal modal-wide">
@@ -419,7 +419,7 @@
         <div class="form-group"><label>Link to Ticket (optional)</label><select id="invTicketLink" onchange="onInvoiceTicketLink()"><option value="">— None / walk-in —</option></select></div>
     </div>
     <div class="form-row">
-        <div class="form-group"><label>Client Name *</label><input type="text" id="invClientName" required></div>
+        <div class="form-group"><label>Client Name *</label><input type="text" id="invClientName" required onblur="titleCaseField(this)"></div>
         <div class="form-group"><label>Phone</label><input type="tel" id="invPhone"></div>
     </div>
     <div class="form-row">
@@ -480,6 +480,7 @@
     <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
         <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
+        <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
         <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
     </div>
 </div></div>
@@ -697,6 +698,14 @@ function initApp() {
         n = Number(n) || 0;
         return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
+    // Auto-corrects casing on name fields, e.g. "andrew johnson" -> "Andrew Johnson", "o'brien" -> "O'Brien"
+    function toTitleCase(str) {
+        return String(str || '').trim().replace(/\s+/g, ' ')
+            .toLowerCase()
+            .replace(/(^|[\s'-])([a-z])/g, (m, sep, ch) => sep + ch.toUpperCase());
+    }
+    function titleCaseField(el) { el.value = toTitleCase(el.value); }
+    window.titleCaseField = titleCaseField;
 
     // =============================================================
     // AUTH
@@ -829,7 +838,7 @@ function initApp() {
 
     async function saveTicket() {
         const tag = $('ticketTag').value.trim();
-        const name = $('ticketClientName').value.trim();
+        const name = toTitleCase($('ticketClientName').value.trim());
         const phone = $('ticketPhone').value.trim();
         const device = $('ticketDevice').value.trim();
         const issue = $('ticketIssue').value.trim();
@@ -1085,8 +1094,8 @@ function initApp() {
         `).join('');
     }
     async function saveClient() {
-        const first = $('clientFirstName').value.trim();
-        const last = $('clientLastName').value.trim();
+        const first = toTitleCase($('clientFirstName').value.trim());
+        const last = toTitleCase($('clientLastName').value.trim());
         const phone = $('clientPhone').value.trim();
         const errorEl = $('clientModalError');
         if (!first || !last || !phone) { errorEl.textContent = 'First name, last name, and phone are required.'; return; }
@@ -1492,7 +1501,7 @@ function initApp() {
     async function saveInvoice() {
         const errorEl = $('invoiceModalError');
         errorEl.textContent = '';
-        const clientName = $('invClientName').value.trim();
+        const clientName = toTitleCase($('invClientName').value.trim());
         if (!clientName) { errorEl.textContent = 'Client name is required.'; return; }
         const isComp = $('invComplimentary').checked;
         const totals = recalcInvoiceTotals();
@@ -1624,15 +1633,17 @@ function initApp() {
         btn.disabled = true;
         statusEl.textContent = 'Generating PDF…';
         statusEl.style.color = '';
+        const el = $('invoicePrintTemplate');
         try {
-            const el = $('invoicePrintTemplate');
             el.innerHTML = buildInvoicePdfHtml();
+            el.style.display = 'block';
+            await new Promise(r => setTimeout(r, 50)); // let layout settle before capture
             const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value + '.pdf';
             await html2pdf().set({
                 margin: 0,
                 filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
             }).from(el).save();
             statusEl.textContent = '✅ PDF downloaded.';
@@ -1642,11 +1653,61 @@ function initApp() {
             statusEl.textContent = '❌ Failed to generate PDF.';
             statusEl.style.color = 'var(--red)';
         } finally {
+            el.style.display = 'none';
+            btn.disabled = false;
+        }
+    }
+
+    async function emailInvoiceToClient() {
+        const statusEl = $('invoicePdfStatus');
+        const btn = $('invEmailBtn');
+        const email = $('invEmail').value.trim();
+        const clientName = $('invClientName').value.trim();
+        if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!email) { statusEl.textContent = '⚠️ Enter a client email first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS failed to load — refresh and try again.'; statusEl.style.color = 'var(--red)'; return; }
+
+        btn.disabled = true;
+        statusEl.textContent = 'Sending…';
+        statusEl.style.color = '';
+        try {
+            const isComp = $('invComplimentary').checked;
+            const invNumber = $('invNumber').value;
+            let subject, message;
+            if (isComp) {
+                subject = `${BIZ_NAME} — Complimentary Service Notice`;
+                message = $('invCompNote').value.trim();
+            } else {
+                const totals = recalcInvoiceTotals();
+                const lines = totals.items.map((it, i) =>
+                    `${i + 1}. ${it.description} — Qty ${it.qty} x ${fmtMoney(it.unit_price)}${it.disc_pct ? ` (${it.disc_pct}% off)` : ''} = ${fmtMoney(it.qty * it.unit_price * (1 - it.disc_pct / 100))}`
+                );
+                subject = `Invoice ${invNumber} — ${BIZ_NAME}`;
+                message = `Invoice: ${invNumber}\nDate: ${$('invDate').value}\n\n${lines.join('\n')}\n\n` +
+                    `Subtotal: ${fmtMoney(totals.subtotal)}\nDiscount (${totals.discPct}%): -${fmtMoney(totals.discountAmount)}\n` +
+                    `Tax (GCT 15%): ${fmtMoney(totals.tax)}\nGrand Total: ${fmtMoney(totals.grand)}\nAmount Paid: ${fmtMoney(totals.paid)}\nBalance Due: ${fmtMoney(totals.balance)}\n\n` +
+                    `${$('invNotes').value.trim()}`;
+            }
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_email: email,
+                to_name: clientName,
+                subject,
+                message,
+            });
+            logActivity('Invoice Emailed', `${invNumber} sent to ${email}`);
+            statusEl.textContent = '✅ Sent to ' + email;
+            statusEl.style.color = 'var(--teal-dark)';
+        } catch (err) {
+            console.error('Invoice email error:', err);
+            statusEl.textContent = '❌ Failed to send — ' + (err?.text || err?.message || 'check EmailJS config');
+            statusEl.style.color = 'var(--red)';
+        } finally {
             btn.disabled = false;
         }
     }
 
     window.openInvoiceModal = openInvoiceModal;
+    window.emailInvoiceToClient = emailInvoiceToClient;
     window.onInvoiceTicketLink = onInvoiceTicketLink;
     window.onInvoiceItemPick = onInvoiceItemPick;
     window.addInvoiceItemRow = addInvoiceItemRow;
