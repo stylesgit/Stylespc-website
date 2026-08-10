@@ -481,6 +481,7 @@
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
         <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
         <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
+        <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
         <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
     </div>
 </div></div>
@@ -617,6 +618,7 @@ function initApp() {
     const EMAILJS_SERVICE_ID = 'service_x983hzs';
     const EMAILJS_TEMPLATE_ID = 'template_h9k8p8f';
     const EMAILJS_SUMMARY_TEMPLATE_ID = 'iw6dpn9';
+    const EMAILJS_INVOICE_TEMPLATE_ID = ''; // ← paste your "Client Invoice" template ID here once created
     if (window.emailjs) {
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
     }
@@ -1658,6 +1660,40 @@ function initApp() {
         }
     }
 
+    async function generateInvoicePdfDataUri() {
+        const el = $('invoicePrintTemplate');
+        el.innerHTML = buildInvoicePdfHtml();
+        el.style.display = 'block';
+        await new Promise(r => setTimeout(r, 50)); // let layout settle before capture
+        try {
+            const dataUri = await html2pdf().set({
+                margin: 0,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
+            }).from(el).outputPdf('datauristring');
+            return dataUri; // "data:application/pdf;filename=....;base64,JVBERi0..."
+        } finally {
+            el.style.display = 'none';
+        }
+    }
+
+    function buildInvoiceEmailText(clientName) {
+        const isComp = $('invComplimentary').checked;
+        const invNumber = $('invNumber').value;
+        let subject, message;
+        if (isComp) {
+            subject = `Your Complimentary Service — ${BIZ_NAME}`;
+            message = `Hi ${clientName}, thank you for choosing ${BIZ_NAME}. Please find attached confirmation of your complimentary service. ${$('invCompNote').value.trim()} If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+        } else {
+            const totals = recalcInvoiceTotals();
+            const balanceLine = totals.balance > 0.005 ? ` A balance of ${fmtMoney(totals.balance)} remains outstanding.` : ' This invoice has been paid in full.';
+            subject = `Invoice ${invNumber} — ${BIZ_NAME}`;
+            message = `Hi ${clientName}, thank you for choosing ${BIZ_NAME}. Please find attached your invoice ${invNumber}, totalling ${fmtMoney(totals.grand)}.${balanceLine} If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+        }
+        return { subject, message };
+    }
+
     async function emailInvoiceToClient() {
         const statusEl = $('invoicePdfStatus');
         const btn = $('invEmailBtn');
@@ -1666,41 +1702,63 @@ function initApp() {
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!email) { statusEl.textContent = '⚠️ Enter a client email first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS failed to load — refresh and try again.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!EMAILJS_INVOICE_TEMPLATE_ID) { statusEl.textContent = '⚠️ Invoice email template not set up yet — see setup steps.'; statusEl.style.color = 'var(--red)'; return; }
 
         btn.disabled = true;
-        statusEl.textContent = 'Sending…';
+        statusEl.textContent = 'Preparing PDF & sending…';
         statusEl.style.color = '';
         try {
             const isComp = $('invComplimentary').checked;
             const invNumber = $('invNumber').value;
-            let subject, message;
-            if (isComp) {
-                subject = `${BIZ_NAME} — Complimentary Service Notice`;
-                message = $('invCompNote').value.trim();
-            } else {
-                const totals = recalcInvoiceTotals();
-                const lines = totals.items.map((it, i) =>
-                    `${i + 1}. ${it.description} — Qty ${it.qty} x ${fmtMoney(it.unit_price)}${it.disc_pct ? ` (${it.disc_pct}% off)` : ''} = ${fmtMoney(it.qty * it.unit_price * (1 - it.disc_pct / 100))}`
-                );
-                subject = `Invoice ${invNumber} — ${BIZ_NAME}`;
-                message = `Invoice: ${invNumber}\nDate: ${$('invDate').value}\n\n${lines.join('\n')}\n\n` +
-                    `Subtotal: ${fmtMoney(totals.subtotal)}\nDiscount (${totals.discPct}%): -${fmtMoney(totals.discountAmount)}\n` +
-                    `Tax (GCT 15%): ${fmtMoney(totals.tax)}\nGrand Total: ${fmtMoney(totals.grand)}\nAmount Paid: ${fmtMoney(totals.paid)}\nBalance Due: ${fmtMoney(totals.balance)}\n\n` +
-                    `${$('invNotes').value.trim()}`;
-            }
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            const filename = (isComp ? 'Complimentary_' : 'Invoice_') + invNumber + '.pdf';
+            const pdfDataUri = await generateInvoicePdfDataUri();
+            const { subject, message } = buildInvoiceEmailText(clientName);
+
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, {
                 to_email: email,
                 to_name: clientName,
                 subject,
                 message,
+                attachment_name: filename,
+                invoice_pdf: pdfDataUri,
             });
-            logActivity('Invoice Emailed', `${invNumber} sent to ${email}`);
-            statusEl.textContent = '✅ Sent to ' + email;
+            logActivity('Invoice Emailed', `${invNumber} sent to ${email} with PDF attached`);
+            statusEl.textContent = '✅ Sent to ' + email + ' with PDF attached.';
             statusEl.style.color = 'var(--teal-dark)';
         } catch (err) {
             console.error('Invoice email error:', err);
-            statusEl.textContent = '❌ Failed to send — ' + (err?.text || err?.message || 'check EmailJS config');
+            const isQuota = /quota|limit|429/i.test(err?.text || err?.message || '');
+            statusEl.innerHTML = isQuota
+                ? '❌ EmailJS monthly limit reached. Try "✉️ Compose in My Email App" instead.'
+                : '❌ Failed to send — ' + esc(err?.text || err?.message || 'check EmailJS config');
             statusEl.style.color = 'var(--red)';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
+    // Fallback that never touches EmailJS quota: downloads the PDF, then opens the client's
+    // own email app (Gmail/Outlook/etc.) with subject & body pre-filled. They attach the
+    // just-downloaded file manually — browsers block any web page from auto-attaching files
+    // to a mailto link, so this one small step is unavoidable no matter which app is used.
+    async function composeInvoiceEmailFallback() {
+        const statusEl = $('invoicePdfStatus');
+        const btn = $('invMailtoBtn');
+        const email = $('invEmail').value.trim();
+        const clientName = $('invClientName').value.trim();
+        if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+
+        btn.disabled = true;
+        statusEl.textContent = 'Downloading PDF…';
+        statusEl.style.color = '';
+        try {
+            await downloadInvoicePdf();
+            const { subject, message } = buildInvoiceEmailText(clientName);
+            const body = message + '\n\n(Attach the PDF that just downloaded before sending.)';
+            const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailto, '_blank');
+            statusEl.textContent = '✅ PDF downloaded — attach it in the email draft that opened.';
+            statusEl.style.color = 'var(--teal-dark)';
         } finally {
             btn.disabled = false;
         }
@@ -1708,6 +1766,7 @@ function initApp() {
 
     window.openInvoiceModal = openInvoiceModal;
     window.emailInvoiceToClient = emailInvoiceToClient;
+    window.composeInvoiceEmailFallback = composeInvoiceEmailFallback;
     window.onInvoiceTicketLink = onInvoiceTicketLink;
     window.onInvoiceItemPick = onInvoiceItemPick;
     window.addInvoiceItemRow = addInvoiceItemRow;
