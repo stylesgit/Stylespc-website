@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
     <!-- Chart.js & html2pdf -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
     <!-- Supabase – loaded with onload callback -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" id="supabaseScript"></script>
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -482,6 +482,7 @@
         <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
         <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
         <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
+        <button class="btn btn-ghost" id="invWhatsappBtn" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
         <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
     </div>
 </div></div>
@@ -618,7 +619,7 @@ function initApp() {
     const EMAILJS_SERVICE_ID = 'service_x983hzs';
     const EMAILJS_TEMPLATE_ID = 'template_h9k8p8f';
     const EMAILJS_SUMMARY_TEMPLATE_ID = 'iw6dpn9';
-    const EMAILJS_INVOICE_TEMPLATE_ID = ''; // ← paste your "Client Invoice" template ID here once created
+    const EMAILJS_INVOICE_TEMPLATE_ID = 'iw6dpn9'; // reusing the Internal Summary template — now also has an Attachment field
     if (window.emailjs) {
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
     }
@@ -708,6 +709,12 @@ function initApp() {
     }
     function titleCaseField(el) { el.value = toTitleCase(el.value); }
     window.titleCaseField = titleCaseField;
+    // Normalizes a local Jamaican number ("876 334-1156") to WhatsApp's required format ("18763341156")
+    function normalizeWhatsAppNumber(phone) {
+        let digits = String(phone || '').replace(/\D/g, '');
+        if (digits.length === 10) digits = '1' + digits; // add NANP country code
+        return digits;
+    }
 
     // =============================================================
     // AUTH
@@ -1639,13 +1646,14 @@ function initApp() {
         try {
             el.innerHTML = buildInvoicePdfHtml();
             el.style.display = 'block';
-            await new Promise(r => setTimeout(r, 50)); // let layout settle before capture
+            window.scrollTo(0, 0);
+            await new Promise(r => setTimeout(r, 100)); // let layout settle before capture
             const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value + '.pdf';
             await html2pdf().set({
                 margin: 0,
                 filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
                 jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
             }).from(el).save();
             statusEl.textContent = '✅ PDF downloaded.';
@@ -1664,12 +1672,13 @@ function initApp() {
         const el = $('invoicePrintTemplate');
         el.innerHTML = buildInvoicePdfHtml();
         el.style.display = 'block';
-        await new Promise(r => setTimeout(r, 50)); // let layout settle before capture
+        window.scrollTo(0, 0);
+        await new Promise(r => setTimeout(r, 100)); // let layout settle before capture
         try {
             const dataUri = await html2pdf().set({
                 margin: 0,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
                 jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
             }).from(el).outputPdf('datauristring');
             return dataUri; // "data:application/pdf;filename=....;base64,JVBERi0..."
@@ -1764,9 +1773,77 @@ function initApp() {
         }
     }
 
+    // Sends the invoice via WhatsApp. On phones/tablets that support the native Share sheet,
+    // the PDF is shared directly into WhatsApp in one tap. Everywhere else, it downloads the
+    // PDF and opens the WhatsApp chat with the message ready — the PDF is attached manually,
+    // the same unavoidable limitation as the email fallback (no web page can auto-attach a
+    // file into another app).
+    async function sendInvoiceViaWhatsApp() {
+        const statusEl = $('invoicePdfStatus');
+        const btn = $('invWhatsappBtn');
+        const phone = $('invPhone').value.trim();
+        const clientName = $('invClientName').value.trim();
+        if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!phone) { statusEl.textContent = '⚠️ Enter a client phone number first.'; statusEl.style.color = 'var(--red)'; return; }
+
+        btn.disabled = true;
+        statusEl.textContent = 'Preparing PDF…';
+        statusEl.style.color = '';
+        const el = $('invoicePrintTemplate');
+        try {
+            const isComp = $('invComplimentary').checked;
+            const invNumber = $('invNumber').value;
+            const filename = (isComp ? 'Complimentary_' : 'Invoice_') + invNumber + '.pdf';
+            const { message } = buildInvoiceEmailText(clientName);
+            const waNumber = normalizeWhatsAppNumber(phone);
+
+            el.innerHTML = buildInvoicePdfHtml();
+            el.style.display = 'block';
+            window.scrollTo(0, 0);
+            await new Promise(r => setTimeout(r, 100));
+            const blob = await html2pdf().set({
+                margin: 0,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
+            }).from(el).outputPdf('blob');
+            el.style.display = 'none';
+
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: filename, text: message });
+                logActivity('Invoice Sent via WhatsApp', `${invNumber} shared to ${phone}`);
+                statusEl.textContent = '✅ Share sheet opened — pick WhatsApp to send.';
+                statusEl.style.color = 'var(--teal-dark)';
+            } else {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = filename; a.click();
+                URL.revokeObjectURL(url);
+                const waText = encodeURIComponent(message + '\n\n(Attach the PDF that just downloaded before sending.)');
+                window.open(`https://wa.me/${waNumber}?text=${waText}`, '_blank');
+                logActivity('Invoice WhatsApp Opened', `${invNumber} — chat opened for ${phone}`);
+                statusEl.textContent = '✅ PDF downloaded — attach it in the WhatsApp chat that opened.';
+                statusEl.style.color = 'var(--teal-dark)';
+            }
+        } catch (err) {
+            if (err.name === 'AbortError') {
+                statusEl.textContent = ''; // user closed the share sheet — not an error
+            } else {
+                console.error('WhatsApp send error:', err);
+                statusEl.textContent = '❌ Failed to prepare PDF for WhatsApp.';
+                statusEl.style.color = 'var(--red)';
+            }
+        } finally {
+            el.style.display = 'none';
+            btn.disabled = false;
+        }
+    }
+
     window.openInvoiceModal = openInvoiceModal;
     window.emailInvoiceToClient = emailInvoiceToClient;
     window.composeInvoiceEmailFallback = composeInvoiceEmailFallback;
+    window.sendInvoiceViaWhatsApp = sendInvoiceViaWhatsApp;
     window.onInvoiceTicketLink = onInvoiceTicketLink;
     window.onInvoiceItemPick = onInvoiceItemPick;
     window.addInvoiceItemRow = addInvoiceItemRow;
