@@ -403,6 +403,7 @@ function initApp() {
     const EMAILJS_PUBLIC_KEY = 'yAQ2vxUuGMjz2TAvq';
     const EMAILJS_SERVICE_ID = 'service_x983hzs';
     const EMAILJS_TEMPLATE_ID = 'template_h9k8p8f';
+    const EMAILJS_SUMMARY_TEMPLATE_ID = 'template_iw6dpn9';
     if (window.emailjs) {
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
     }
@@ -746,8 +747,7 @@ function initApp() {
             );
             const body = `Ticket: ${tag}\nClient: ${name}\nDevice: ${device}\nOriginal issue: ${issue}\n\n--- Comment log ---\n${lines.length ? lines.join('\n') : '(no comments logged)'}`;
 
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                to_email: SUMMARY_TO_EMAIL,
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_SUMMARY_TEMPLATE_ID, {
                 to_name: 'Andrew',
                 subject: `Ticket ${tag} — Comment Summary (${name})`,
                 ticket_number: tag,
