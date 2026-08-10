@@ -606,6 +606,8 @@ function initApp() {
         const errorEl = $('ticketModalError');
         errorEl.textContent = '';
         if (!name || !phone || !device || !issue) { errorEl.textContent = 'Please fill all required fields.'; return; }
+        const newStatus = $('ticketStatus').value;
+        const newAssignee = $('ticketAssignee').value || null;
         const payload = {
             ticket_number: tag,
             client_name: name,
@@ -613,19 +615,27 @@ function initApp() {
             email: $('ticketEmail').value.trim() || null,
             device: device,
             issue: issue,
-            status: $('ticketStatus').value,
+            status: newStatus,
             priority: $('ticketPriority').value,
             amount: parseFloat($('ticketAmount').value) || 0,
             payment_status: $('ticketPayment').value,
             notes: $('ticketNotes').value.trim() || null,
-            assignee: $('ticketAssignee').value || null,
+            assignee: newAssignee,
             due_date: $('ticketDueDate').value || null,
         };
         let error;
         if (currentEditId) {
+            const before = allTickets.find(x => x.id === currentEditId);
             ({ error } = await sb.from('tickets').update(payload).eq('id', currentEditId));
+            if (!error) {
+                const changes = [];
+                if (before && before.status !== newStatus) changes.push(`status ${before.status} → ${newStatus}`);
+                if (before && (before.assignee || '') !== (newAssignee || '')) changes.push(`assignee ${before.assignee || 'none'} → ${newAssignee || 'none'}`);
+                logActivity('Ticket Updated', `${tag} — ${name}${changes.length ? ' — ' + changes.join(', ') : ''}`);
+            }
         } else {
             ({ error } = await sb.from('tickets').insert([payload]));
+            if (!error) logActivity('Ticket Created', `${tag} — ${name} (${device})`);
         }
         if (error) { errorEl.textContent = error.message; return; }
         closeModal('ticketModal');
@@ -635,7 +645,9 @@ function initApp() {
 
     async function deleteTicket(id) {
         if (!confirm('Delete this ticket?')) return;
+        const t = allTickets.find(x => x.id === id);
         await sb.from('tickets').delete().eq('id', id);
+        logActivity('Ticket Deleted', t ? `${t.ticket_number || id} — ${t.client_name || ''}` : `Ticket ${id}`);
         await loadTickets();
         updateDashboard();
     }
@@ -696,6 +708,8 @@ function initApp() {
         const content = $('newComment').value.trim();
         if (!content) return;
         await sb.from('comments').insert([{ ticket_id: ticketId, user_id: currentUser.id, content }]);
+        const t = allTickets.find(x => x.id === ticketId);
+        logActivity('Comment Added', `${t ? (t.ticket_number || ticketId) : ticketId} — "${content.slice(0, 80)}${content.length > 80 ? '…' : ''}"`);
         $('newComment').value = '';
         loadComments(ticketId);
     }
@@ -994,6 +1008,15 @@ function initApp() {
     // =============================================================
     // ACTIVITY LOG
     // =============================================================
+    async function logActivity(action, description) {
+        try {
+            await sb.from('activity_logs').insert([{ user_id: currentUser.id, action, description }]);
+        } catch (err) {
+            console.error('Activity log error:', err);
+        }
+    }
+    window.logActivity = logActivity;
+
     async function loadActivity() {
         const from = $('activityFrom').value;
         const to = $('activityTo').value;
@@ -1010,7 +1033,20 @@ function initApp() {
             </div>
         `).join('');
     }
-    function exportActivityCSV() { alert('Export activity CSV – implement as needed'); }
+    async function exportActivityCSV() {
+        const { data, error } = await sb.from('activity_logs').select('*, profiles(email)').order('created_at', { ascending: false }).limit(1000);
+        if (error || !data || !data.length) { alert('No activity to export.'); return; }
+        const rows = [['Date', 'User', 'Action', 'Description']];
+        data.forEach(a => rows.push([new Date(a.created_at).toLocaleString(), a.profiles ? a.profiles.email : 'System', a.action, a.description]));
+        const csv = rows.map(r => r.map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `activity_log_${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
 
     // =============================================================
     // DASHBOARD & CHARTS
