@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Your Repair — StylesPC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/es-module-shims/1.10.0/es-module-shims.js" crossorigin="anonymous"></script>
+<style>
+  :root{
+    --ink:#17242A;
+    --ink-soft:#4A5A60;
+    --paper:#F7F5F0;
+    --paper-raised:#FFFFFF;
+    --teal:#1F6F6B;
+    --teal-deep:#153F3D;
+    --line:#E1DBCB;
+    --amber:#C98A2E;
+    --blue:#2E6FA7;
+    --green:#2E8B57;
+    --green-bright:#1F8F63;
+    --red:#A63D31;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 20px 60px;
+  }
+  .trace-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:42px 42px;
+    opacity:.35;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 90%);
+  }
+  header{
+    width:100%; max-width:640px;
+    position:relative; z-index:1;
+    padding-top:48px;
+    text-align:center;
+  }
+  .brand{
+    display:inline-flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700; font-size:15px;
+    letter-spacing:.06em;
+    color:var(--teal-deep);
+    text-transform:uppercase;
+  }
+  .brand .dot{
+    width:8px; height:8px; border-radius:50%;
+    background:var(--teal);
+    box-shadow:0 0 0 4px rgba(31,111,107,0.15);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(28px,5vw,38px);
+    line-height:1.15;
+    margin:18px 0 8px;
+    color:var(--ink);
+  }
+  .sub{
+    color:var(--ink-soft);
+    font-size:15.5px;
+    line-height:1.5;
+    max-width:440px;
+    margin:0 auto;
+  }
+
+  main{ width:100%; max-width:640px; position:relative; z-index:1; margin-top:34px; }
+
+  .lookup{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 1px 2px rgba(23,36,42,0.04), 0 8px 24px rgba(23,36,42,0.05);
+  }
+  .lookup label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .lookup-row{ display:flex; gap:10px; }
+  #ticketInput{
+    flex:1;
+    font-family:'JetBrains Mono',monospace;
+    font-size:16px;
+    font-weight:500;
+    letter-spacing:.02em;
+    padding:13px 14px;
+    border-radius:9px;
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--ink);
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    text-transform:uppercase;
+  }
+  #ticketInput::placeholder{ color:#9CA8AC; text-transform:none; font-weight:400; }
+  #ticketInput:focus{
+    border-color:var(--teal);
+    box-shadow:0 0 0 3px rgba(31,111,107,0.15);
+  }
+  #lookupBtn{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:0 22px;
+    border-radius:9px;
+    border:none;
+    background:var(--teal);
+    color:#fff;
+    cursor:pointer;
+    transition:background .15s ease, transform .1s ease;
+  }
+  #lookupBtn:hover{ background:var(--teal-deep); }
+  #lookupBtn:active{ transform:scale(0.97); }
+  #lookupBtn:disabled{ opacity:.6; cursor:default; }
+  #lookupBtn:focus-visible, #ticketInput:focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
+
+  .hint{ margin-top:10px; font-size:13px; color:var(--ink-soft); }
+
+  #errorBox{
+    display:none;
+    margin-top:16px;
+    padding:13px 15px;
+    border-radius:9px;
+    background:#FBEEEA;
+    border:1px solid #EAC7BC;
+    color:var(--red);
+    font-size:14px;
+    line-height:1.5;
+  }
+
+  /* ---- Result card ---- */
+  #result{ display:none; margin-top:26px; }
+
+  .card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 26px 24px;
+    box-shadow:0 1px 2px rgba(23,36,42,0.04), 0 8px 24px rgba(23,36,42,0.05);
+  }
+  .card-top{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    gap:16px; flex-wrap:wrap;
+  }
+  .ticket-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.04em;
+    color:var(--ink-soft);
+  }
+  .device{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:21px;
+    font-weight:600;
+    color:var(--ink);
+    margin-top:3px;
+  }
+  .status-pill{
+    display:inline-flex; align-items:center; gap:7px;
+    padding:7px 13px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.02em;
+    white-space:nowrap;
+  }
+  .status-pill .dot{ width:7px; height:7px; border-radius:50%; }
+
+  /* ---- Circuit trace progress rail (signature element) ---- */
+  .rail-wrap{ margin-top:30px; padding:4px 6px 0; }
+  .rail{
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+  }
+  .rail::before{
+    content:'';
+    position:absolute;
+    top:11px; left:16px; right:16px;
+    height:2px;
+    background:var(--line);
+    z-index:0;
+  }
+  .rail-fill{
+    position:absolute;
+    top:11px; left:16px;
+    height:2px;
+    background:var(--teal);
+    z-index:1;
+    transition:width .5s ease;
+    width:0%;
+  }
+  .node{
+    position:relative; z-index:2;
+    display:flex; flex-direction:column; align-items:center;
+    width:64px;
+    text-align:center;
+  }
+  .node .pt{
+    width:22px; height:22px;
+    border-radius:50%;
+    background:var(--paper-raised);
+    border:2.5px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .node .pt::after{
+    content:'';
+    width:8px; height:8px;
+    border-radius:50%;
+    background:transparent;
+    transition:background .3s ease;
+  }
+  .node.done .pt{ border-color:var(--teal); background:var(--teal); }
+  .node.done .pt::after{ background:#fff; }
+  .node.current .pt{
+    border-color:var(--teal);
+    background:var(--paper-raised);
+    box-shadow:0 0 0 5px rgba(31,111,107,0.15);
+  }
+  .node.current .pt::after{ background:var(--teal); animation:pulse 1.6s ease-in-out infinite; }
+  .node.cancelled .pt{ border-color:var(--red); background:var(--red); }
+  .node.cancelled .pt::after{ background:#fff; }
+  @keyframes pulse{
+    0%,100%{ transform:scale(1); opacity:1; }
+    50%{ transform:scale(1.35); opacity:.6; }
+  }
+  .node-label{
+    margin-top:9px;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    line-height:1.3;
+  }
+  .node.done .node-label, .node.current .node-label{ color:var(--ink); }
+
+  .message-box{
+    margin-top:28px;
+    padding:16px 18px;
+    border-radius:10px;
+    background:var(--paper);
+    border:1px solid var(--line);
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--ink);
+  }
+  .message-box strong{ color:var(--teal-deep); }
+
+  .meta-row{
+    margin-top:18px;
+    display:flex; gap:22px; flex-wrap:wrap;
+    font-size:12.5px;
+    color:var(--ink-soft);
+  }
+  .meta-row span b{ color:var(--ink); font-weight:600; }
+
+  .contact-row{
+    margin-top:22px;
+    display:flex; gap:10px; flex-wrap:wrap;
+  }
+  .contact-row a{
+    flex:1; min-width:160px;
+    text-align:center;
+    font-size:14px; font-weight:600;
+    padding:11px 14px;
+    border-radius:9px;
+    text-decoration:none;
+    transition:opacity .15s ease;
+  }
+  .contact-row a:hover{ opacity:.85; }
+  .btn-whatsapp{ background:#25D366; color:#fff; }
+  .btn-newlookup{ background:transparent; color:var(--teal-deep); border:1.5px solid var(--line); }
+
+  #loading{
+    display:none;
+    margin-top:26px;
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+
+  footer{
+    margin-top:48px;
+    position:relative; z-index:1;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .node.current .pt::after{ animation:none; }
+    .rail-fill{ transition:none; }
+  }
+
+  @media (max-width:480px){
+    .lookup-row{ flex-direction:column; }
+    #lookupBtn{ padding:13px; }
+    .node{ width:auto; flex:1; }
+    .node-label{ font-size:10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="trace-bg"></div>
+
+<header>
+  <div class="brand"><span class="dot"></span> StylesPC</div>
+  <h1>Track your repair</h1>
+  <p class="sub">Enter your ticket number to see where things stand — no account needed.</p>
+</header>
+
+<main>
+  <div class="lookup">
+    <label for="ticketInput">Ticket number</label>
+    <div class="lookup-row">
+      <input id="ticketInput" type="text" placeholder="e.g. SPC-0154" autocomplete="off" spellcheck="false" />
+      <button id="lookupBtn">Track</button>
+    </div>
+    <div class="hint">Your ticket number was included in your confirmation email or WhatsApp message.</div>
+    <div id="errorBox"></div>
+  </div>
+
+  <div id="loading">Looking up your ticket…</div>
+
+  <div id="result">
+    <div class="card">
+      <div class="card-top">
+        <div>
+          <div class="ticket-num" id="rTicketNum">SPC-0000</div>
+          <div class="device" id="rDevice">Device</div>
+        </div>
+        <span class="status-pill" id="rStatusPill"><span class="dot"></span><span id="rStatusText">Status</span></span>
+      </div>
+
+      <div class="rail-wrap">
+        <div class="rail" id="rail">
+          <div class="rail-fill" id="railFill"></div>
+          <!-- nodes injected by JS -->
+        </div>
+      </div>
+
+      <div class="message-box" id="rMessage"></div>
+
+      <div class="meta-row">
+        <span>Last updated: <b id="rUpdated">—</b></span>
+      </div>
+
+      <div class="contact-row">
+        <a href="#" id="rWhatsapp" class="btn-whatsapp" target="_blank" rel="noopener">Message us on WhatsApp</a>
+        <a href="#" id="rNewLookup" class="btn-newlookup">Track another ticket</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>StylesPC — Lightfire Partners · Portmore, Jamaica</footer>
+
+<script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+  // ===== ASSUMED FROM PRIOR SETUP — confirm these three lines match your project =====
+  const SUPABASE_URL = 'https://gtfqasmqbgxjfnwlvxjp.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1';
+  const WHATSAPP_NUMBER = '18760000000'; // TODO: replace with your real WhatsApp number, digits only, country code first
+  // ====================================================================================
+
+  const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const STAGES = [
+    { key: 'received',    label: 'Received' },
+    { key: 'diagnosing',  label: 'Diagnosing' },
+    { key: 'in_progress', label: 'In Progress' },
+    { key: 'ready',       label: 'Ready' },
+    { key: 'delivered',   label: 'Delivered' },
+  ];
+
+  const STATUS_STYLE = {
+    received:    { color: '#4A5A60', bg: '#EEEBE2', label: 'Received' },
+    diagnosing:  { color: '#C98A2E', bg: '#FBF0DD', label: 'Diagnosing' },
+    in_progress: { color: '#2E6FA7', bg: '#E6F0F8', label: 'In Progress' },
+    ready:       { color: '#1F8F63', bg: '#E4F5EC', label: 'Ready for Pickup' },
+    delivered:   { color: '#2E8B57', bg: '#E7F3EB', label: 'Delivered' },
+    cancelled:   { color: '#A63D31', bg: '#FBEEEA', label: 'Cancelled' },
+  };
+
+  const STATUS_MESSAGE = {
+    received:    'We\'ve logged your device and it\'s in the queue for diagnosis.',
+    diagnosing:  'A technician is currently diagnosing the issue with your device.',
+    in_progress: 'Your repair is actively underway.',
+    ready:       'Great news — your device is repaired and ready for pickup!',
+    delivered:   'This repair is complete and the device has been delivered to you.',
+    cancelled:   'This ticket has been cancelled. Contact us if you believe this is a mistake.',
+  };
+
+  const input = document.getElementById('ticketInput');
+  const btn = document.getElementById('lookupBtn');
+  const errorBox = document.getElementById('errorBox');
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+  const rail = document.getElementById('rail');
+  const railFill = document.getElementById('railFill');
+
+  function showError(msg){
+    errorBox.textContent = msg;
+    errorBox.style.display = 'block';
+    result.style.display = 'none';
+  }
+  function clearError(){
+    errorBox.style.display = 'none';
+  }
+
+  function buildRail(currentKey){
+    // clear existing nodes (keep the fill div)
+    rail.querySelectorAll('.node').forEach(n => n.remove());
+
+    if (currentKey === 'cancelled'){
+      railFill.style.width = '0%';
+      const stage = { key:'cancelled', label:'Cancelled' };
+      const node = document.createElement('div');
+      node.className = 'node cancelled';
+      node.style.width = '100%';
+      node.innerHTML = `<div class="pt"></div><div class="node-label">Cancelled</div>`;
+      rail.appendChild(node);
+      return;
+    }
+
+    const idx = STAGES.findIndex(s => s.key === currentKey);
+    STAGES.forEach((s, i) => {
+      const node = document.createElement('div');
+      node.className = 'node' + (i < idx ? ' done' : i === idx ? ' current' : '');
+      node.innerHTML = `<div class="pt"></div><div class="node-label">${s.label}</div>`;
+      rail.appendChild(node);
+    });
+    const pct = idx <= 0 ? 0 : (idx / (STAGES.length - 1)) * 100;
+    railFill.style.width = pct + '%';
+  }
+
+  function formatDate(iso){
+    if(!iso) return '—';
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) +
+           ' · ' + d.toLocaleTimeString('en-US', { hour:'numeric', minute:'2-digit' });
+  }
+
+  async function lookupTicket(){
+    const raw = input.value.trim();
+    if (!raw){
+      showError('Please enter your ticket number.');
+      return;
+    }
+    clearError();
+    result.style.display = 'none';
+    loading.style.display = 'block';
+    btn.disabled = true;
+
+    try {
+      // Calls a Postgres function `get_ticket_status(p_ticket_number text)`
+      // that returns only public-safe fields — see accompanying SQL.
+      const { data, error } = await sb.rpc('get_ticket_status', { p_ticket_number: raw.toUpperCase() });
+
+      loading.style.display = 'none';
+      btn.disabled = false;
+
+      if (error || !data || data.length === 0){
+        showError("We couldn't find a ticket with that number. Double-check it and try again, or message us on WhatsApp for help.");
+        return;
+      }
+
+      const t = Array.isArray(data) ? data[0] : data;
+      renderResult(t);
+    } catch (err){
+      loading.style.display = 'none';
+      btn.disabled = false;
+      showError('Something went wrong looking up your ticket. Please try again in a moment.');
+      console.error(err);
+    }
+  }
+
+  function renderResult(t){
+    document.getElementById('rTicketNum').textContent = t.ticket_number;
+    document.getElementById('rDevice').textContent = t.device || 'Device';
+
+    const style = STATUS_STYLE[t.status] || STATUS_STYLE.received;
+    const pill = document.getElementById('rStatusPill');
+    pill.style.background = style.bg;
+    pill.style.color = style.color;
+    pill.querySelector('.dot').style.background = style.color;
+    document.getElementById('rStatusText').textContent = style.label;
+
+    document.getElementById('rMessage').innerHTML =
+      `<strong>Status update:</strong> ${STATUS_MESSAGE[t.status] || ''}`;
+
+    document.getElementById('rUpdated').textContent = formatDate(t.updated_at);
+
+    buildRail(t.status);
+
+    const waMsg = encodeURIComponent(`Hi, I'm checking in on ticket ${t.ticket_number}.`);
+    document.getElementById('rWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
+
+    result.style.display = 'block';
+    result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  btn.addEventListener('click', lookupTicket);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') lookupTicket(); });
+  document.getElementById('rNewLookup').addEventListener('click', (e) => {
+    e.preventDefault();
+    result.style.display = 'none';
+    input.value = '';
+    input.focus();
+  });
+
+  // Auto-lookup if a ticket number is passed via ?ticket=SPC-0154
+  const params = new URLSearchParams(window.location.search);
+  const preset = params.get('ticket');
+  if (preset){
+    input.value = preset;
+    lookupTicket();
+  }
+</script>
+
+</body>
+</html>
