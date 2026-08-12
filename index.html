@@ -3096,11 +3096,10 @@
                         sendCustomerConfirmation(
                             email, name,
                             'We received your TV repair referral request — StylesPC',
-                            'Hi ' + name + ',\n\nThanks for your TV repair referral request! Here\'s a summary:\n\n' +
-                                'TV / Issue: ' + issue + '\n' +
+                            'TV / Issue: ' + issue + '\n' +
                                 'Booking fee: $1,000 (reference: ' + transferRef + ')\n' +
                                 'We\'ll verify your payment and pass your details to our repair partner, who will ' +
-                                'reach out to arrange the repair. No additional assessment fee applies. Questions? Reply to this email or call (876) 334-1156.\n\nThanks,\nStylesPC'
+                                'reach out to arrange the repair. No additional assessment fee applies.'
                         );
                     })
                     .catch(function(error) {
@@ -3579,15 +3578,13 @@
                         sendCustomerConfirmation(
                             email, name,
                             'Your StylesPC booking is confirmed — Ticket ' + ticketNumber,
-                            'Hi ' + name + ',\n\nThanks for booking with StylesPC! Here are your details:\n\n' +
-                                'Ticket: ' + ticketNumber + '\n' +
+                            'Ticket: ' + ticketNumber + '\n' +
                                 'Device: ' + device + '\n' +
                                 'Service: ' + serviceType + '\n' +
                                 (address ? 'Address: ' + address + '\n' : '') +
                                 pickupNote + '\n' +
                                 'Issue: ' + issue + '\n\n' +
-                                'We\'ll be in touch shortly to confirm next steps. If you have any questions, ' +
-                                'just reply to this email or reach us at (876) 334-1156.\n\nThanks,\nStylesPC'
+                                'We\'ll be in touch shortly to confirm next steps.'
                         );
                     })
                     .catch(function(error) {
