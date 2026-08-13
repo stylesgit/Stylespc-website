@@ -255,6 +255,23 @@
             background: var(--teal-dark);
         }
 
+        .nav-track {
+            border: 1.5px solid var(--ink);
+            color: var(--ink);
+            padding: 8.5px 16px;
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 0.88rem;
+            font-family: 'IBM Plex Mono';
+            letter-spacing: 0.02em;
+            transition: background 0.15s, color 0.15s;
+            margin-left: 12px;
+        }
+        .nav-track:hover {
+            background: var(--ink);
+            color: var(--white);
+        }
+
         /* ============================================================
            DISCLAIMER MODAL (WhatsApp unavailable)
            ============================================================ */
@@ -1190,6 +1207,10 @@
                 order: 2;
                 margin-left: auto;
             }
+            .nav-track {
+                order: 2;
+                margin-left: 8px;
+            }
             .navlinks {
                 order: 3;
                 flex-basis: 100%;
@@ -1575,6 +1596,7 @@
                 <li><a href="#testimonials">Reviews</a></li>
                 <li><a href="#faq">FAQ</a></li>
             </ul>
+            <a href="status.html" class="nav-track">Track Repair</a>
             <a href="#contact" class="nav-cta">Book a Repair</a>
         </nav>
     </header>
@@ -1593,6 +1615,7 @@
                     <div class="hero-ctas">
                         <a href="#pay" class="btn btn-ghost">Pay for a Service</a>
                         <a href="#contact" class="btn btn-primary">Book a Repair</a>
+                        <a href="status.html" class="btn btn-ghost">Track Your Repair</a>
                     </div>
                 </div>
                 <div class="ticket-wrap">
