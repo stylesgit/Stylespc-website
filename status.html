@@ -47,9 +47,23 @@
   header{
     width:100%; max-width:640px;
     position:relative; z-index:1;
-    padding-top:48px;
+    padding-top:32px;
     text-align:center;
   }
+  .header-top{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:16px;
+  }
+  .home-link{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:5px;
+    transition:color .15s ease;
+  }
+  .home-link:hover{ color:var(--teal-deep); }
   .brand{
     display:inline-flex; align-items:center; gap:10px;
     font-family:'Space Grotesk',sans-serif;
@@ -319,6 +333,7 @@
     #lookupBtn{ padding:13px; }
     .node{ width:auto; flex:1; }
     .node-label{ font-size:10px; }
+    .home-link span{ display:none; }
   }
 </style>
 </head>
@@ -327,7 +342,10 @@
 <div class="trace-bg"></div>
 
 <header>
-  <div class="brand"><span class="dot"></span> StylesPC</div>
+  <div class="header-top">
+    <div class="brand"><span class="dot"></span> StylesPC</div>
+    <a href="index.html" class="home-link">&larr; <span>Back to StylesPC</span></a>
+  </div>
   <h1>Track your repair</h1>
   <p class="sub">Enter your ticket number to see where things stand — no account needed.</p>
 </header>
