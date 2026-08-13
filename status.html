@@ -291,7 +291,6 @@
     transition:opacity .15s ease;
   }
   .contact-row a:hover{ opacity:.85; }
-  .btn-whatsapp{ background:#25D366; color:#fff; }
   .btn-newlookup{ background:transparent; color:var(--teal-deep); border:1.5px solid var(--line); }
 
   #loading{
@@ -370,8 +369,7 @@
       </div>
 
       <div class="contact-row">
-        <a href="#" id="rWhatsapp" class="btn-whatsapp" target="_blank" rel="noopener">Message us on WhatsApp</a>
-        <a href="#" id="rNewLookup" class="btn-newlookup">Track another ticket</a>
+        <a href="#" id="rNewLookup" class="btn-newlookup" style="flex:1;">Track another ticket</a>
       </div>
     </div>
   </div>
@@ -382,10 +380,9 @@
 <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  // ===== ASSUMED FROM PRIOR SETUP — confirm these three lines match your project =====
+  // ===== ASSUMED FROM PRIOR SETUP — confirm these two lines match your project =====
   const SUPABASE_URL = 'https://gtfqasmqbgxjfnwlvxjp.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1';
-  const WHATSAPP_NUMBER = '18760000000'; // TODO: replace with your real WhatsApp number, digits only, country code first
   // ====================================================================================
 
   const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -517,9 +514,6 @@
     document.getElementById('rUpdated').textContent = formatDate(t.updated_at);
 
     buildRail(t.status);
-
-    const waMsg = encodeURIComponent(`Hi, I'm checking in on ticket ${t.ticket_number}.`);
-    document.getElementById('rWhatsapp').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMsg}`;
 
     result.style.display = 'block';
     result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
