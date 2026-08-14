@@ -1741,13 +1741,23 @@ function initApp() {
         }
         const html = buildInvoicePdfHtml();
         const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value;
-        const printWin = window.open('', '_blank', 'width=850,height=1100');
-        if (!printWin) {
-            $('invoicePdfStatus').textContent = '⚠️ Please allow popups to print the invoice.';
-            $('invoicePdfStatus').style.color = 'var(--red)';
-            return;
+
+        let iframe = document.getElementById('invPrintFrame');
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'invPrintFrame';
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
         }
-        printWin.document.write(`<!DOCTYPE html><html><head><title>${filename}</title><style>
+
+        const doc = iframe.contentWindow.document;
+        doc.open();
+        doc.write(`<!DOCTYPE html><html><head><title>${filename}</title><style>
             body{ font-family:'IBM Plex Sans',Arial,sans-serif; color:#1a1a1a; margin:0; padding:42px; }
             .inv-header{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #2F6F63; padding-bottom:16px; margin-bottom:20px; }
             .inv-header h1{ font-size:20px; color:#2F6F63; margin:0 0 4px; letter-spacing:.02em; }
@@ -1772,11 +1782,14 @@ function initApp() {
             .comp-card-pdf p{ font-size:14px; color:#333; max-width:520px; margin:0 auto 10px; line-height:1.6; }
             @media print { body{ padding:20px; } }
         </style></head><body>${html}</body></html>`);
-        printWin.document.close();
-        printWin.onload = () => {
-            printWin.focus();
-            printWin.print();
-        };
+        doc.close();
+
+        // Small delay ensures layout/fonts settle before print() fires —
+        // onload alone can race ahead of paint in some browsers.
+        setTimeout(() => {
+            iframe.contentWindow.focus();
+            iframe.contentWindow.print();
+        }, 300);
     }
 
     async function generateInvoicePdfDataUri() {
