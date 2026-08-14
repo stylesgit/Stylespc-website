@@ -514,7 +514,7 @@
     </div>
     <div class="form-row">
         <div class="form-group"><label>Reference</label><input type="text" id="invReference" placeholder="Ticket tag, PO#, etc."></div>
-        <div class="form-group"><label>Status</label><select id="invStatus"><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option></select></div>
+        <div class="form-group"><label>Status</label><select id="invStatus" onchange="updatePaidBadge()"><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option></select><span id="invPaidBadge" style="display:none;margin-left:8px;background:#1F8F4D;color:#fff;font-weight:700;font-size:11px;letter-spacing:1px;padding:3px 9px;border-radius:4px;vertical-align:middle;">✓ PAID</span></div>
     </div>
 
     <div class="checkbox-group" style="margin:12px 0;"><input type="checkbox" id="invComplimentary" onchange="toggleComplimentary()"><label for="invComplimentary"><strong>🎁 Mark as Complimentary (no charge)</strong></label></div>
@@ -1512,6 +1512,12 @@ function initApp() {
             return { description, qty, unit_price, disc_pct };
         }).filter(i => i.description);
     }
+    function updatePaidBadge() {
+        const badge = $('invPaidBadge');
+        if (!badge) return;
+        badge.style.display = $('invStatus').value === 'paid' ? 'inline-block' : 'none';
+    }
+
     function recalcInvoiceTotals() {
         document.querySelectorAll('#invItemsBody tr').forEach(row => {
             const qty = parseFloat(row.querySelector('.inv-item-qty').value) || 0;
@@ -1602,6 +1608,7 @@ function initApp() {
             if (!inv.items || !inv.items.length) addInvoiceItemRow();
         }
         recalcInvoiceTotals();
+        updatePaidBadge();
         $('invoiceModal').classList.add('active');
     }
 
