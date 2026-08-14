@@ -533,8 +533,7 @@
     <div id="invoicePdfStatus" style="font-size:12px;margin-top:4px;"></div>
     <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
-        <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
-        <button class="btn btn-ghost" id="invPrintBtn" onclick="printInvoice()">🖨️ Print</button>
+        <button class="btn btn-ghost" id="invPrintBtn" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
         <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
         <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
         <button class="btn btn-ghost" id="invWhatsappBtn" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
@@ -1713,9 +1712,9 @@ function initApp() {
     }
     async function downloadInvoicePdf() {
         const statusEl = $('invoicePdfStatus');
-        const btn = $('invPdfBtn');
+        const btn = $('invPdfBtn'); // no longer a visible button; guarded below since composeInvoiceEmailFallback() still calls this internally
         if (!$('invClientName').value.trim()) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
-        btn.disabled = true;
+        if (btn) btn.disabled = true;
         statusEl.textContent = 'Generating PDF…';
         statusEl.style.color = '';
         const el = $('invoicePrintTemplate');
@@ -1740,7 +1739,7 @@ function initApp() {
             statusEl.style.color = 'var(--red)';
         } finally {
             el.style.display = 'none';
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
         }
     }
 
@@ -1754,9 +1753,21 @@ function initApp() {
         el.innerHTML = buildInvoicePdfHtml();
         document.body.classList.add('printing-invoice');
         el.style.display = 'block';
+
+        // IMPORTANT: window.print() does not reliably block until the print
+        // dialog closes in every browser/version — hiding the content right
+        // after calling it can race ahead of the actual print capture and
+        // produce a blank page. Wait for the real afterprint event instead.
+        function cleanup() {
+            document.body.classList.remove('printing-invoice');
+            el.style.display = 'none';
+            window.removeEventListener('afterprint', cleanup);
+        }
+        window.addEventListener('afterprint', cleanup);
         window.print();
-        document.body.classList.remove('printing-invoice');
-        el.style.display = 'none';
+        // Generous fallback only for the rare case afterprint never fires —
+        // long enough not to race ahead of a normal print/save interaction.
+        setTimeout(cleanup, 60000);
     }
 
     async function generateInvoicePdfDataUri() {
