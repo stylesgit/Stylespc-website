@@ -309,6 +309,7 @@
         <button class="nav-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
         <button class="nav-tab" onclick="switchTab('tickets',this)">🎫 Tickets</button>
         <button class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</button>
+        <button class="nav-tab" onclick="switchTab('devices',this)">🖥️ Devices</button>
         <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
         <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
         <button class="nav-tab" onclick="switchTab('users',this)">🔐 Users</button>
@@ -369,6 +370,18 @@
         </div>
         <div id="clientCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
         <div class="list-container" id="clientsList"><div class="status-msg">Loading…</div></div>
+    </div>
+
+    <!-- DEVICES -->
+    <div id="devices" class="section">
+        <h2 style="margin-bottom:20px;">Devices</h2>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="deviceSearch" placeholder="Search client, brand, model, tag/serial…" oninput="filterDevices()"></div>
+            <button class="btn btn-primary" onclick="openDeviceModal('new')">+ Log Device</button>
+            <button class="btn btn-amber btn-sm" onclick="exportDevicesCSV()">📥 Export CSV</button>
+        </div>
+        <div id="deviceCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="devicesList"><div class="status-msg">Loading…</div></div>
     </div>
 
     <!-- BILLING -->
@@ -490,6 +503,7 @@
 <!-- ===== MODALS ===== -->
 <div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith" onblur="titleCaseField(this)"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
+<div class="modal-overlay" id="deviceModal"> <div class="modal"> <h2 id="deviceModalTitle">Log Device</h2> <div class="form-group"><label>Client *</label><select id="deviceClientId" required><option value="">Select client…</option></select></div> <div class="form-row"><div class="form-group"><label>Device Type *</label><select id="deviceType" required><option value="Laptop">Laptop</option><option value="Desktop">Desktop</option><option value="All-in-One">All-in-One</option><option value="Tablet">Tablet</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div><div class="form-group"><label>Tag / Serial # (optional)</label><input type="text" id="deviceTagSerial" placeholder="Leave blank if unavailable"></div></div> <div class="form-row"><div class="form-group"><label>Brand / Manufacturer *</label><input type="text" id="deviceBrand" required placeholder="Dell, HP, Apple…"></div><div class="form-group"><label>Model</label><input type="text" id="deviceModel" placeholder="Inspiron 15 3000"></div></div> <div class="form-row"><div class="form-group"><label>Operating System</label><input type="text" id="deviceOS" placeholder="Windows 11 Home"></div><div class="form-group"><label>Specs</label><input type="text" id="deviceSpecs" placeholder="i5, 8GB RAM, 256GB SSD"></div></div> <div class="form-group"><label>Condition / Intake Notes</label><textarea id="deviceNotes" rows="3" placeholder="Scratches on lid, missing a key, password provided…"></textarea></div> <div id="deviceModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('deviceModal')">Cancel</button><button class="btn btn-primary" onclick="saveDevice()">Save Device</button></div> </div></div>
 <div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
 
 <!-- INVOICE MODAL -->
@@ -757,6 +771,7 @@ function initApp() {
     let currentUser = null;
     let allTickets = [];
     let allClients = [];
+    let allDevices = [];
     let allUsers = [];
     let allInvoices = [];
     let allPriceList = [];
@@ -869,7 +884,7 @@ function initApp() {
     // LOAD ALL DATA
     // =============================================================
     async function loadAll() {
-        await Promise.all([loadTickets(), loadClients(), loadUsers(), loadPriceList()]);
+        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadUsers(), loadPriceList()]);
         updateDashboard();
         populateAssigneeFilters();
     }
@@ -1227,6 +1242,116 @@ function initApp() {
         const q = $('clientSearch').value.toLowerCase();
         const filtered = allClients.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
         renderClients(filtered);
+    }
+
+    // =============================================================
+    // DEVICES
+    // =============================================================
+    async function loadDevices() {
+        const listEl = $('devicesList');
+        listEl.innerHTML = '<div class="status-msg">Loading devices…</div>';
+        const { data, error } = await sb.from('devices').select('*, clients(name)').order('created_at', { ascending: false });
+        if (error) { listEl.innerHTML = '<div class="status-msg err">Error: ' + error.message + '</div>'; return; }
+        allDevices = data || [];
+        renderDevices(allDevices);
+    }
+    function renderDevices(list) {
+        $('deviceCount').textContent = list.length + ' device' + (list.length === 1 ? '' : 's');
+        if (list.length === 0) { $('devicesList').innerHTML = '<div class="empty-state"><h3>No devices logged</h3></div>'; return; }
+        $('devicesList').innerHTML = list.map(d => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header"><span class="list-item-title">${esc(d.brand||'—')} ${esc(d.model||'')}</span></div>
+                    <div class="list-item-details">
+                        <div class="detail-tag"><span class="label">👤</span><span class="value">${esc((d.clients && d.clients.name) || '—')}</span></div>
+                        <div class="detail-tag"><span class="label">🖥️</span><span class="value">${esc(d.device_type||'—')}</span></div>
+                        <div class="detail-tag"><span class="label">🏷️</span><span class="value">${esc(d.tag_serial || 'No tag/serial')}</span></div>
+                        ${d.os ? `<div class="detail-tag"><span class="label">💽</span><span class="value">${esc(d.os)}</span></div>` : ''}
+                    </div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-amber btn-sm" onclick="openDeviceModal('edit','${d.id}')">✏️ Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDevice('${d.id}')">🗑️ Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    async function saveDevice() {
+        const clientId = $('deviceClientId').value;
+        const brand = $('deviceBrand').value.trim();
+        const errorEl = $('deviceModalError');
+        if (!clientId || !brand) { errorEl.textContent = 'Client and brand/manufacturer are required.'; return; }
+        const payload = {
+            client_id: clientId,
+            device_type: $('deviceType').value,
+            tag_serial: $('deviceTagSerial').value.trim() || null,
+            brand,
+            model: $('deviceModel').value.trim() || null,
+            os: $('deviceOS').value.trim() || null,
+            specs: $('deviceSpecs').value.trim() || null,
+            notes: $('deviceNotes').value.trim() || null
+        };
+        let error;
+        if (currentEditId) {
+            ({ error } = await sb.from('devices').update(payload).eq('id', currentEditId));
+        } else {
+            ({ error } = await sb.from('devices').insert([payload]));
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        closeModal('deviceModal');
+        await loadDevices();
+    }
+    async function deleteDevice(id) {
+        if (!confirm('Delete this device record?')) return;
+        await sb.from('devices').delete().eq('id', id);
+        await loadDevices();
+    }
+    function populateClientSelect(sel) {
+        const current = sel.value;
+        sel.innerHTML = '<option value="">Select client…</option>' + allClients.map(c => `<option value="${c.id}">${esc(c.name||'—')}</option>`).join('');
+        sel.value = current;
+    }
+    function openDeviceModal(mode, id = null) {
+        currentEditId = id;
+        $('deviceModalTitle').textContent = mode === 'new' ? 'Log Device' : 'Edit Device';
+        populateClientSelect($('deviceClientId'));
+        if (mode === 'new') {
+            $('deviceClientId').value = '';
+            $('deviceType').value = 'Laptop';
+            ['deviceTagSerial','deviceBrand','deviceModel','deviceOS','deviceSpecs','deviceNotes'].forEach(f => $(f).value = '');
+        } else {
+            const d = allDevices.find(x => x.id === id);
+            if (!d) return;
+            $('deviceClientId').value = d.client_id || '';
+            $('deviceType').value = d.device_type || 'Laptop';
+            $('deviceTagSerial').value = d.tag_serial || '';
+            $('deviceBrand').value = d.brand || '';
+            $('deviceModel').value = d.model || '';
+            $('deviceOS').value = d.os || '';
+            $('deviceSpecs').value = d.specs || '';
+            $('deviceNotes').value = d.notes || '';
+        }
+        $('deviceModalError').textContent = '';
+        $('deviceModal').classList.add('active');
+    }
+    function filterDevices() {
+        const q = $('deviceSearch').value.toLowerCase();
+        const filtered = allDevices.filter(d => [
+            (d.clients && d.clients.name) || '', d.brand||'', d.model||'', d.tag_serial||'', d.device_type||''
+        ].join(' ').toLowerCase().includes(q));
+        renderDevices(filtered);
+    }
+    function exportDevicesCSV() {
+        const rows = [['Client','Device Type','Brand','Model','Tag/Serial','OS','Specs','Notes','Logged']];
+        allDevices.forEach(d => rows.push([
+            (d.clients && d.clients.name) || '', d.device_type||'', d.brand||'', d.model||'', d.tag_serial||'', d.os||'', d.specs||'', d.notes||'', d.created_at||''
+        ]));
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'devices.csv';
+        a.click();
     }
     function exportClientsCSV() {
         let csv = 'Name,Phone,Email,Address,Notes,Created\n';
@@ -2248,6 +2373,7 @@ function initApp() {
         if (tab === 'activity') loadActivity();
         if (tab === 'dashboard') updateDashboard();
         if (tab === 'billing') loadInvoices();
+        if (tab === 'devices') loadDevices();
         if (tab === 'accounting') loadAccounting();
         if (tab === 'settings') renderPriceListManager();
     }
