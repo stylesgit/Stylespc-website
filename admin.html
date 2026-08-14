@@ -10,11 +10,12 @@
     <!-- Chart.js & html2pdf -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
-    <!-- Supabase – loaded with onload callback -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" id="supabaseScript"></script>
+    <!-- EmailJS -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <style>
-        /* ===== STYLES (full) ===== */
+        /* ===== ROOT ===== */
         :root {
             --paper: #F3EFE7;
             --paper-2: #EAE3D3;
@@ -32,24 +33,41 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; line-height: 1.5; }
         h1,h2,h3 { font-family: 'Space Grotesk', sans-serif; margin: 0 0 0.3em; letter-spacing: -0.01em; }
+
+        /* ===== LOGIN ===== */
         .login-overlay { position: fixed; inset: 0; background: rgba(20,22,19,0.82); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .login-overlay.hidden { display: none; }
         .login-box { background: var(--white); border-radius: 10px; padding: 42px 38px; max-width: 420px; width: 100%; box-shadow: 0 24px 60px rgba(0,0,0,0.3); }
         .login-box h1 { margin-bottom: 6px; }
         .login-box .sub { color: var(--ink-soft); font-size: 0.9rem; margin-bottom: 28px; }
         .login-error { color: var(--red); font-size: 0.84rem; margin-top: 10px; min-height: 20px; }
+        .status-badge { font-family: 'IBM Plex Mono'; font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+        .status-open { background: rgba(47,111,99,0.12); color: var(--teal-dark); }
+        .status-in-progress { background: rgba(201,122,43,0.14); color: #a9631e; }
+        .status-closed { background: rgba(76,175,80,0.12); color: #2e7d32; }
+        .status-admin { background: rgba(47,111,99,0.12); color: var(--teal-dark); }
+        .status-user { background: var(--paper-2); color: var(--ink-soft); }
+        .status-manager { background: rgba(201,122,43,0.12); color: #a9631e; }
+        .status-technician { background: rgba(47,111,99,0.08); color: var(--teal-dark); }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== MAIN APP ===== */
         .container { max-width: 1600px; margin: 0 auto; padding: 24px; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 20px; border-bottom: 2px solid var(--rule); flex-wrap: wrap; gap: 12px; }
         .header h1 { display: flex; align-items: center; gap: 10px; font-size: 1.7rem; }
         .header .dot { width: 11px; height: 11px; background: var(--teal); border-radius: 50%; box-shadow: 0 0 0 3px rgba(47,111,99,0.18); }
         .user-menu { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .user-pill { background: rgba(47,111,99,0.11); color: var(--teal-dark); padding: 7px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; }
+
         .nav-tabs { display: flex; gap: 4px; margin-bottom: 28px; border-bottom: 2px solid var(--rule); flex-wrap: wrap; }
         .nav-tab { background: transparent; border: none; padding: 11px 18px; font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: all 0.15s; font-family: 'IBM Plex Sans'; }
         .nav-tab:hover { color: var(--ink); }
         .nav-tab.active { color: var(--ink); border-color: var(--amber); }
+
         .section { display: none; }
         .section.active { display: block; }
+
         .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: var(--radius); font-weight: 600; font-size: 0.84rem; border: 1px solid transparent; cursor: pointer; font-family: 'IBM Plex Sans'; transition: all 0.15s; text-decoration: none; }
         .btn-primary { background: var(--teal); color: white; }
         .btn-primary:hover { background: var(--teal-dark); }
@@ -60,17 +78,21 @@
         .btn-ghost { background: transparent; color: var(--ink); border: 1px solid var(--rule); }
         .btn-ghost:hover { background: var(--paper-2); }
         .btn-sm { padding: 5px 11px; font-size: 0.74rem; }
+
         .toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; align-items: center; }
         .search-box { flex: 1; min-width: 180px; }
         .search-box input { width: 100%; padding: 9px 13px; border: 1px solid var(--rule); border-radius: var(--radius); font-size: 0.88rem; font-family: inherit; background: var(--white); }
         .toolbar select, .toolbar input[type="date"] { padding: 9px 12px; border: 1px solid var(--rule); border-radius: var(--radius); font-size: 0.88rem; font-family: inherit; background: var(--white); cursor: pointer; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 28px; }
         .stat-card { background: var(--white); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; text-align: center; box-shadow: var(--shadow); }
         .stat-number { font-size: 2.6rem; font-weight: 700; color: var(--teal); font-family: 'Space Grotesk'; line-height: 1; }
         .stat-label { font-size: 0.82rem; color: var(--ink-soft); margin-top: 6px; }
+
         .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
         .chart-card { background: var(--white); border: 1px solid var(--rule); border-radius: 6px; padding: 20px; box-shadow: var(--shadow); }
         .chart-card h3 { font-size: 1rem; margin-bottom: 12px; }
+
         .list-container { display: grid; gap: 10px; }
         .list-item { background: var(--white); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 22px; display: grid; grid-template-columns: 1fr auto; gap: 20px; align-items: start; box-shadow: var(--shadow); transition: background 0.15s; }
         .list-item:hover { background: #faf8f4; }
@@ -84,74 +106,62 @@
         .detail-tag .label { color: var(--ink-soft); font-weight: 600; }
         .detail-tag .value { color: var(--ink); }
         .list-item-actions { display: flex; gap: 6px; flex-direction: column; }
-        .status-badge { font-family: 'IBM Plex Mono'; font-size: 0.68rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
-        .status-open { background: rgba(47,111,99,0.12); color: var(--teal-dark); }
-        .status-in-progress { background: rgba(201,122,43,0.14); color: #a9631e; }
-        .status-closed { background: rgba(76,175,80,0.12); color: #2e7d32; }
-        .status-admin { background: rgba(47,111,99,0.12); color: var(--teal-dark); }
-        .status-user { background: var(--paper-2); color: var(--ink-soft); }
-        .status-manager { background: rgba(201,122,43,0.12); color: #a9631e; }
-        .status-technician { background: rgba(47,111,99,0.08); color: var(--teal-dark); }
+
         .bulk-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 10px 16px; background: var(--paper-2); border-radius: var(--radius); border: 1px solid var(--rule); margin-bottom: 16px; }
         .bulk-bar .count { font-size: 0.82rem; color: var(--ink-soft); }
+
         .modal-overlay { position: fixed; inset: 0; background: rgba(20,22,19,0.6); z-index: 100; display: none; align-items: flex-start; justify-content: center; padding: 40px 20px; overflow-y: auto; }
         .modal-overlay.active { display: flex; }
         .modal { background: var(--white); border-radius: 8px; padding: 32px; width: 100%; max-width: 680px; box-shadow: 0 20px 60px rgba(20,22,19,0.18); max-height: 90vh; overflow-y: auto; }
         .modal h2 { margin-bottom: 22px; font-size: 1.3rem; }
+        .modal.modal-wide { max-width: 760px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
+
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-weight: 600; font-size: 0.82rem; color: var(--ink-soft); margin-bottom: 5px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 9px 13px; border: 1px solid var(--rule); border-radius: var(--radius); font-family: inherit; font-size: 0.9rem; background: var(--white); }
         .form-group textarea { resize: vertical; min-height: 90px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
         .checkbox-group { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
         .checkbox-group input[type=checkbox] { width: auto; }
         .checkbox-group label { font-weight: 400; font-size: 0.88rem; cursor: pointer; margin: 0; }
         .modal-error { color: var(--red); font-size: 0.83rem; margin-top: 8px; }
-        .modal .file-upload { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
         .comment-thread { margin-top: 16px; max-height: 200px; overflow-y: auto; border-top: 1px solid var(--rule); padding-top: 12px; }
         .comment { background: var(--paper); padding: 10px 14px; border-radius: var(--radius); margin-bottom: 8px; border-left: 3px solid var(--teal); }
         .comment .meta { font-size: 0.7rem; color: var(--ink-soft); display: flex; gap: 12px; margin-bottom: 4px; }
         .comment .body { font-size: 0.88rem; }
+
         .log-entry { font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid var(--rule); display: flex; gap: 12px; }
         .log-entry .time { color: var(--ink-soft); min-width: 120px; font-family: 'IBM Plex Mono'; font-size: 0.72rem; }
         .log-entry .user { font-weight: 600; min-width: 100px; }
-        @media (max-width: 768px) {
-            .list-item { grid-template-columns: 1fr; }
-            .list-item-actions { flex-direction: row; flex-wrap: wrap; }
-            .form-row { grid-template-columns: 1fr; }
-            .header { flex-direction: column; align-items: flex-start; }
-            .charts-row { grid-template-columns: 1fr; }
-            .bulk-bar { flex-wrap: wrap; }
-            .modal-actions { flex-direction: column; }
-            .modal-actions .btn { justify-content: center; }
-        }
-        @media (max-width: 480px) { .modal { padding: 20px; } }
+
         .status-msg { padding: 20px; text-align: center; color: var(--ink-soft); }
         .status-msg.err { color: var(--red); }
         .empty-state { text-align: center; padding: 40px; color: var(--ink-soft); }
         .empty-state h3 { color: var(--ink); }
 
-        /* ---- Billing / Invoices ---- */
+        /* ---- Billing ---- */
         .inv-badge { display:inline-block; font-size:0.72rem; font-weight:700; padding:3px 9px; border-radius:12px; text-transform:uppercase; letter-spacing:.02em; }
         .inv-badge.unpaid { background:#fbeaea; color:var(--red); }
         .inv-badge.paid { background:#e3efe9; color:var(--teal-dark); }
         .inv-badge.partial { background:#fdf1e2; color:var(--amber); }
         .inv-badge.complimentary { background:#e8ecfb; color:#3b4fb0; }
+
         .items-table { width:100%; border-collapse:collapse; margin:10px 0; font-size:0.86rem; }
         .items-table th { text-align:left; background:var(--paper-2); padding:8px; font-size:0.76rem; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); }
         .items-table td { padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:middle; }
         .items-table td.amt, .items-table th.amt { text-align:right; }
         .items-table input, .items-table select { width:100%; padding:5px 6px; border:1px solid var(--rule); border-radius:var(--radius); font-family:inherit; font-size:0.85rem; }
         .items-table input[type=number] { text-align:right; }
+
         .totals-box { margin-left:auto; width:280px; font-size:0.88rem; margin-top:10px; }
         .totals-box .trow { display:flex; justify-content:space-between; padding:4px 0; }
         .totals-box .grand { font-weight:700; font-size:1.02rem; border-top:2px solid var(--teal); margin-top:4px; padding-top:8px; }
         .totals-box .balance { font-weight:700; color:var(--red); }
         .comp-box { background:#f4f6fd; border:1px solid #dde3f7; border-radius:6px; padding:16px; margin-top:10px; }
-        .modal.modal-wide { max-width: 760px; }
 
-        /* ---- Accounting / P&L ---- */
+        /* ---- Accounting ---- */
         .pl-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:24px; }
         .pl-card { background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:16px 18px; box-shadow:var(--shadow); }
         .pl-card .pl-label { font-size:0.74rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:4px; }
@@ -159,12 +169,12 @@
         .pl-card.positive .pl-value { color:var(--teal-dark); }
         .pl-card.negative .pl-value { color:var(--red); }
 
-        /* ---- Pricelist manager ---- */
+        /* ---- Pricelist ---- */
         .price-row { display:grid; grid-template-columns:1fr 120px 130px 90px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--rule); }
         .price-row input, .price-row select { padding:6px 8px; border:1px solid var(--rule); border-radius:var(--radius); font-family:inherit; font-size:0.85rem; }
         @media (max-width:700px) { .price-row { grid-template-columns:1fr; } }
 
-        /* ---- Offscreen PDF render template ---- */
+        /* ---- PDF template ---- */
         .invoice-print-wrap { display:none; position:fixed; left:0; top:0; width:800px; background:#fff; color:#1a1a1a; font-family:'IBM Plex Sans',Arial,sans-serif; padding:42px; z-index:99999; }
         .inv-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #2F6F63; padding-bottom:16px; margin-bottom:20px; }
         .inv-header h1 { font-size:20px; color:#2F6F63; margin:0 0 4px; letter-spacing:.02em; }
@@ -187,48 +197,14 @@
         .comp-card-pdf h1 { color:#2F6F63; font-size:24px; margin-bottom:8px; }
         .comp-card-pdf .comp-tag { display:inline-block; background:#e8ecfb; color:#3b4fb0; padding:6px 18px; border-radius:20px; font-weight:700; font-size:12px; margin-bottom:26px; letter-spacing:.03em; }
         .comp-card-pdf p { font-size:14px; color:#333; max-width:520px; margin:0 auto 10px; line-height:1.6; }
-        .paid-stamp {
-            position: absolute;
-            top: 130px;
-            right: 70px;
-            transform: rotate(-16deg);
-            border: 6px solid #1F8F4D;
-            color: #1F8F4D;
-            font-family: 'IBM Plex Sans', Arial, sans-serif;
-            font-weight: 800;
-            font-size: 52px;
-            letter-spacing: 8px;
-            padding: 8px 24px;
-            border-radius: 10px;
-            opacity: 0.82;
-            pointer-events: none;
-            z-index: 10;
-            mix-blend-mode: multiply;
-        }
+        .paid-stamp { position:absolute; top:130px; right:70px; transform:rotate(-16deg); border:6px solid #1F8F4D; color:#1F8F4D; font-family:'IBM Plex Sans',Arial,sans-serif; font-weight:800; font-size:52px; letter-spacing:8px; padding:8px 24px; border-radius:10px; opacity:0.82; pointer-events:none; z-index:10; mix-blend-mode:multiply; }
 
-        /* ---- Native print isolation (Print button) ---- */
-        @media print {
-            body.printing-invoice > *:not(#invoicePrintTemplate) { display:none !important; }
-            body.printing-invoice #invoicePrintTemplate {
-                display:block !important;
-                position:relative !important;
-                width:auto !important;
-                z-index:auto !important;
-            }
-        }
-
-        /* ---- Fix: overflow on small screens ---- */
-        .modal-actions .btn { flex: 1 1 auto; }
-        @media (max-width: 480px) {
-            .modal-actions .btn { width: 100%; justify-content: center; }
-            .totals-box { width: 100%; }
-            .items-table { font-size: 0.78rem; }
-            .items-table input, .items-table select { font-size: 0.78rem; padding: 3px 4px; }
-        }
+        @media print { body.printing-invoice > *:not(#invoicePrintTemplate) { display:none !important; } body.printing-invoice #invoicePrintTemplate { display:block !important; position:relative !important; width:auto !important; z-index:auto !important; } }
+        @media (max-width:768px) { .list-item { grid-template-columns:1fr; } .list-item-actions { flex-direction:row; flex-wrap:wrap; } .form-row { grid-template-columns:1fr; } .header { flex-direction:column; align-items:flex-start; } .charts-row { grid-template-columns:1fr; } .bulk-bar { flex-wrap:wrap; } .modal-actions { flex-direction:column; } .modal-actions .btn { justify-content:center; } }
+        @media (max-width:480px) { .modal { padding:20px; } .modal-actions .btn { width:100%; justify-content:center; } .totals-box { width:100%; } .items-table { font-size:0.78rem; } .items-table input, .items-table select { font-size:0.78rem; padding:3px 4px; } }
     </style>
     <script>
-        // Theme engine — shared with index.html via localStorage (same domain).
-        // Runs synchronously before body renders, so there's no flash of the wrong theme.
+        // Theme engine
         var THEMES = {
             light:  { paper:'#F3EFE7', paper2:'#EAE3D3', ink:'#1F2421', inkSoft:'#4A4F49', teal:'#2F6F63', tealDark:'#204b43', amber:'#C97A2B', rule:'#C9C2B2', white:'#FFFDF8' },
             dark:   { paper:'#1A1D1B', paper2:'#262B28', ink:'#EDEBE4', inkSoft:'#9EA39C', teal:'#3D8B7A', tealDark:'#2F6F63', amber:'#D98F42', rule:'#3A403B', white:'#2A2F2C' },
@@ -260,6 +236,8 @@
     </script>
 </head>
 <body>
+
+<!-- ===== INVOICE PRINT TEMPLATE ===== -->
 <div id="invoicePrintTemplate" class="invoice-print-wrap"></div>
 
 <!-- ===== LOGIN OVERLAY ===== -->
@@ -270,14 +248,8 @@
         <div id="scriptStatus" style="background:#f0c040;color:#1F2421;padding:6px;border-radius:4px;margin-bottom:12px;text-align:center;">⏳ Loading Supabase...</div>
         <div id="loader" style="text-align:center;padding:10px;"><div style="border:4px solid var(--rule);border-top:4px solid var(--teal);border-radius:50%;width:30px;height:30px;animation:spin 1s linear infinite;margin:0 auto;"></div></div>
         <form id="loginForm" style="display:none;" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label for="loginEmail">Email</label>
-                <input type="email" id="loginEmail" required placeholder="admin@stylespc.com" autocomplete="username">
-            </div>
-            <div class="form-group">
-                <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
-            </div>
+            <div class="form-group"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required placeholder="admin@stylespc.com" autocomplete="username"></div>
+            <div class="form-group"><label for="loginPassword">Password</label><input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password"></div>
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;">Sign In</button>
             <div id="loginError" class="login-error"></div>
         </form>
@@ -293,12 +265,7 @@
             <span class="user-pill">👤 <span id="userNameDisplay"></span> (<span id="userRoleDisplay">User</span>)</span>
             <button class="btn btn-ghost btn-sm" onclick="changeMyPassword()">🔑 Change Password</button>
             <select id="themeSelect" onchange="setTheme(this.value)" style="padding:7px 10px;border:1px solid var(--rule);border-radius:var(--radius);font-family:inherit;font-size:0.84rem;background:var(--white);cursor:pointer;">
-                <option value="light">☀️ Light</option>
-                <option value="dark">🌙 Dark</option>
-                <option value="spring">🌸 Spring</option>
-                <option value="summer">🌞 Summer</option>
-                <option value="autumn">🍂 Autumn</option>
-                <option value="winter">❄️ Winter</option>
+                <option value="light">☀️ Light</option><option value="dark">🌙 Dark</option><option value="spring">🌸 Spring</option><option value="summer">🌞 Summer</option><option value="autumn">🍂 Autumn</option><option value="winter">❄️ Winter</option>
             </select>
             <script>document.getElementById('themeSelect').value = localStorage.getItem('stylespc_theme') || 'light';</script>
             <button class="btn btn-amber btn-sm" onclick="logout()">Logout</button>
@@ -376,20 +343,14 @@
         <h2 style="margin-bottom:20px;">Billing</h2>
         <div class="toolbar">
             <div class="search-box"><input type="text" id="invoiceSearch" placeholder="Search invoice #, client…" oninput="filterInvoices()"></div>
-            <select id="invoiceStatusFilter" onchange="filterInvoices()">
-                <option value="">All Status</option>
-                <option value="unpaid">Unpaid</option>
-                <option value="partial">Partial</option>
-                <option value="paid">Paid</option>
-                <option value="complimentary">Complimentary</option>
-            </select>
+            <select id="invoiceStatusFilter" onchange="filterInvoices()"><option value="">All Status</option><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option><option value="complimentary">Complimentary</option></select>
             <button class="btn btn-primary" onclick="openInvoiceModal('new')">+ New Invoice</button>
         </div>
         <div id="invoiceCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
         <div class="list-container" id="invoicesList"><div class="status-msg">Loading…</div></div>
     </div>
 
-    <!-- ACCOUNTING / P&L -->
+    <!-- ACCOUNTING -->
     <div id="accounting" class="section">
         <h2 style="margin-bottom:20px;">Accounting — Profit &amp; Loss</h2>
         <div class="toolbar">
@@ -407,13 +368,9 @@
             <div class="pl-card"><div class="pl-label">Total Expenses</div><div class="pl-value" id="plExpenses">—</div></div>
             <div class="pl-card" id="plNetCard"><div class="pl-label">Net Profit</div><div class="pl-value" id="plNet">—</div></div>
         </div>
-
         <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px;">
             <h3 style="margin:0;">Expenses</h3>
-            <div>
-                <button class="btn btn-ghost btn-sm" onclick="exportExpensesCSV()">📥 Export CSV</button>
-                <button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add Expense</button>
-            </div>
+            <div><button class="btn btn-ghost btn-sm" onclick="exportExpensesCSV()">📥 Export CSV</button><button class="btn btn-primary btn-sm" onclick="openExpenseModal()">+ Add Expense</button></div>
         </div>
         <div class="list-container" id="expensesList"><div class="status-msg">Loading…</div></div>
     </div>
@@ -428,7 +385,7 @@
         <div class="list-container" id="usersList"><div class="status-msg">Loading…</div></div>
     </div>
 
-    <!-- ACTIVITY LOG -->
+    <!-- ACTIVITY -->
     <div id="activity" class="section">
         <h2 style="margin-bottom:20px;">Activity Log</h2>
         <div class="toolbar">
@@ -446,31 +403,31 @@
         <div class="list-container">
             <div class="list-item" style="grid-template-columns:1fr;">
                 <div>
-                    <div class="list-item-main" style="margin-bottom:10px;"><div class="list-item-title">Pricelist</div><div class="list-item-subtitle">Edit prices here — updates instantly in Billing, no code changes or GitHub upload needed.</div></div>
+                    <div class="list-item-main" style="margin-bottom:10px;"><div class="list-item-title">Pricelist</div><div class="list-item-subtitle">Edit prices here — updates instantly in Billing.</div></div>
                     <div id="priceListManager"><div class="status-msg">Loading…</div></div>
                     <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openPriceModal()">+ Add Price Item</button>
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main"><div class="list-item-title">Company Name</div><div class="list-item-subtitle">Displayed on invoices and emails</div></div>
+                <div class="list-item-main"><div class="list-item-title">Company Name</div><div class="list-item-subtitle">Displayed on invoices</div></div>
                 <div class="list-item-actions">
                     <input type="text" id="companyName" value="StylesPC" style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);font-family:inherit;">
                     <button class="btn btn-primary btn-sm" onclick="saveCompanyName()">Save</button>
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main"><div class="list-item-title">Password Policy</div><div class="list-item-subtitle">Minimum length, expiry days, require special chars</div></div>
+                <div class="list-item-main"><div class="list-item-title">Password Policy</div><div class="list-item-subtitle">Min length, expiry days</div></div>
                 <div class="list-item-actions">
                     <div style="display:grid;gap:6px;">
                         <label>Min length: <input type="number" id="pwMinLen" value="6" style="width:60px;"></label>
                         <label>Expiry (days): <input type="number" id="pwExpiryDays" value="30" style="width:60px;"></label>
                         <label><input type="checkbox" id="pwSpecial" checked> Require special character</label>
                     </div>
-                    <button class="btn btn-primary btn-sm" onclick="savePasswordPolicy()">Save Policy</button>
+                    <button class="btn btn-primary btn-sm" onclick="savePasswordPolicy()">Save</button>
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main"><div class="list-item-title">Notification Settings</div><div class="list-item-subtitle">Email notifications for ticket events</div></div>
+                <div class="list-item-main"><div class="list-item-title">Notification Settings</div><div class="list-item-subtitle">Email notifications</div></div>
                 <div class="list-item-actions">
                     <label><input type="checkbox" id="notifyAssign" checked> On Assignment</label>
                     <label><input type="checkbox" id="notifyStatus" checked> On Status Change</label>
@@ -478,7 +435,7 @@
                 </div>
             </div>
             <div class="list-item">
-                <div class="list-item-main"><div class="list-item-title">Export All Data</div><div class="list-item-subtitle">Download tickets, clients, users, activity as JSON</div></div>
+                <div class="list-item-main"><div class="list-item-title">Export All Data</div><div class="list-item-subtitle">Download JSON backup</div></div>
                 <div class="list-item-actions">
                     <button class="btn btn-amber btn-sm" onclick="exportFullData()">📦 Export JSON</button>
                 </div>
@@ -490,9 +447,8 @@
 <!-- ===== MODALS ===== -->
 <div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith" onblur="titleCaseField(this)"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
-<div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
+<div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
 
-<!-- INVOICE MODAL -->
 <div class="modal-overlay" id="invoiceModal"> <div class="modal modal-wide">
     <h2 id="invoiceModalTitle">New Invoice</h2>
     <div class="form-row">
@@ -500,45 +456,24 @@
         <div class="form-group"><label>Link to Ticket (optional)</label><select id="invTicketLink" onchange="onInvoiceTicketLink()"><option value="">— None / walk-in —</option></select></div>
         <div class="form-group"><label>Select Existing Client</label><select id="invClientPick" onchange="onInvoiceClientPick()"><option value="">— Choose a client, or type new below —</option></select></div>
     </div>
-    <div class="form-row">
-        <div class="form-group"><label>Client Name *</label><input type="text" id="invClientName" required onblur="titleCaseField(this)"></div>
-        <div class="form-group"><label>Phone</label><input type="tel" id="invPhone"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>Email</label><input type="email" id="invEmail"></div>
-        <div class="form-group"><label>Address</label><input type="text" id="invAddress"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>Invoice Date</label><input type="date" id="invDate"></div>
-        <div class="form-group"><label>Due Date</label><input type="date" id="invDueDate"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>Reference</label><input type="text" id="invReference" placeholder="Ticket tag, PO#, etc."></div>
-        <div class="form-group"><label>Status</label><select id="invStatus" onchange="updatePaidBadge()"><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option></select><span id="invPaidBadge" style="display:none;margin-left:8px;background:#1F8F4D;color:#fff;font-weight:700;font-size:11px;letter-spacing:1px;padding:3px 9px;border-radius:4px;vertical-align:middle;">✓ PAID</span></div>
-    </div>
-
+    <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="invClientName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Phone</label><input type="tel" id="invPhone"></div></div>
+    <div class="form-row"><div class="form-group"><label>Email</label><input type="email" id="invEmail"></div><div class="form-group"><label>Address</label><input type="text" id="invAddress"></div></div>
+    <div class="form-row"><div class="form-group"><label>Invoice Date</label><input type="date" id="invDate"></div><div class="form-group"><label>Due Date</label><input type="date" id="invDueDate"></div></div>
+    <div class="form-row"><div class="form-group"><label>Reference</label><input type="text" id="invReference" placeholder="Ticket tag, PO#, etc."></div><div class="form-group"><label>Status</label><select id="invStatus" onchange="updatePaidBadge()"><option value="unpaid">Unpaid</option><option value="partial">Partial</option><option value="paid">Paid</option></select><span id="invPaidBadge" style="display:none;margin-left:8px;background:#1F8F4D;color:#fff;font-weight:700;font-size:11px;letter-spacing:1px;padding:3px 9px;border-radius:4px;vertical-align:middle;">✓ PAID</span></div></div>
     <div class="checkbox-group" style="margin:12px 0;"><input type="checkbox" id="invComplimentary" onchange="toggleComplimentary()"><label for="invComplimentary"><strong>🎁 Mark as Complimentary (no charge)</strong></label></div>
-
     <div id="invBillableSection">
         <h4 style="margin:14px 0 6px;">Line Items</h4>
-        <table class="items-table">
-            <thead><tr><th style="width:38%;">Service / Item</th><th style="width:10%;">Qty</th><th style="width:16%;">Unit Price</th><th style="width:10%;">Disc %</th><th class="amt" style="width:16%;">Line Total</th><th></th></tr></thead>
-            <tbody id="invItemsBody"></tbody>
-        </table>
+        <table class="items-table"><thead><tr><th style="width:38%;">Service / Item</th><th style="width:10%;">Qty</th><th style="width:16%;">Unit Price</th><th style="width:10%;">Disc %</th><th class="amt" style="width:16%;">Line Total</th><th></th></tr></thead><tbody id="invItemsBody"></tbody></table>
         <button class="btn btn-sm btn-ghost" onclick="addInvoiceItemRow()">+ Add Line</button>
-
         <div style="display:flex;justify-content:flex-end;gap:16px;align-items:center;margin-top:14px;flex-wrap:wrap;">
             <label style="font-size:0.85rem;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="invApplyGct" onchange="recalcInvoiceTotals()"> Apply GCT (15%)</label>
             <label style="font-size:0.85rem;">Overall Discount:</label>
             <select id="invDiscountPct" onchange="recalcInvoiceTotals()" style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);">
-                <option value="0">None</option>
-                <option value="5">5%</option><option value="10">10%</option><option value="15">15%</option>
+                <option value="0">None</option><option value="5">5%</option><option value="10">10%</option><option value="15">15%</option>
                 <option value="20">20%</option><option value="25">25%</option><option value="30">30%</option>
-                <option value="35">35%</option><option value="40">40%</option><option value="45">45%</option>
-                <option value="50">50%</option>
+                <option value="35">35%</option><option value="40">40%</option><option value="45">45%</option><option value="50">50%</option>
             </select>
         </div>
-
         <div class="totals-box">
             <div class="trow"><span>Subtotal</span><span id="invSubtotalOut">$0.00</span></div>
             <div class="trow"><span id="invDiscountLabel">Discount</span><span id="invDiscountOut">-$0.00</span></div>
@@ -548,64 +483,34 @@
             <div class="trow balance"><span>Balance Due</span><span id="invBalanceOut">$0.00</span></div>
         </div>
     </div>
-
-    <div id="invComplimentarySection" style="display:none;">
-        <div class="comp-box">
-            <label style="font-size:0.8rem;font-weight:600;">Complimentary Note (shown to client)</label>
-            <textarea id="invCompNote" rows="3" style="width:100%;margin-top:6px;">This is a one-time complimentary service. Any other service may incur charges. Thank you.</textarea>
-        </div>
-    </div>
-
+    <div id="invComplimentarySection" style="display:none;"><div class="comp-box"><label style="font-size:0.8rem;font-weight:600;">Complimentary Note</label><textarea id="invCompNote" rows="3" style="width:100%;margin-top:6px;">This is a one-time complimentary service. Any other service may incur charges. Thank you.</textarea></div></div>
     <div class="form-group" style="margin-top:12px;"><label>Notes / Warranty</label><textarea id="invNotes" rows="2">Repairs carry a 30-day warranty on parts and labour.</textarea></div>
-
     <div id="invoiceModalError" class="modal-error"></div>
     <div id="invoicePdfStatus" style="font-size:12px;margin-top:4px;"></div>
     <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
-        <button class="btn btn-ghost" id="invPrintBtn" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
-        <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
-        <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
-        <button class="btn btn-ghost" id="invWhatsappBtn" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
+        <button class="btn btn-ghost" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+        <button class="btn btn-ghost" onclick="emailInvoiceToClient()">📧 Email to Client</button>
+        <button class="btn btn-ghost" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
+        <button class="btn btn-ghost" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
         <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
     </div>
 </div></div>
 
-<!-- PRICE ITEM MODAL -->
-<div class="modal-overlay" id="priceModal"> <div class="modal">
-    <h2 id="priceModalTitle">New Price Item</h2>
-    <div class="form-group"><label>Service / Item Name *</label><input type="text" id="priceName" required></div>
-    <div class="form-row">
-        <div class="form-group"><label>Price (JMD) *</label><input type="number" id="priceAmount" min="0" required></div>
-        <div class="form-group"><label>Category</label><input type="text" id="priceCategory" placeholder="Repairs, Firestick, etc."></div>
-    </div>
-    <div class="checkbox-group"><input type="checkbox" id="priceActive" checked><label for="priceActive">Active (shown in Billing dropdown)</label></div>
-    <div id="priceModalError" class="modal-error"></div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('priceModal')">Cancel</button><button class="btn btn-primary" onclick="savePriceItem()">Save</button></div>
-</div></div>
+<div class="modal-overlay" id="priceModal"> <div class="modal"> <h2 id="priceModalTitle">New Price Item</h2> <div class="form-group"><label>Service / Item Name *</label><input type="text" id="priceName" required></div> <div class="form-row"><div class="form-group"><label>Price (JMD) *</label><input type="number" id="priceAmount" min="0" required></div><div class="form-group"><label>Category</label><input type="text" id="priceCategory" placeholder="Repairs, Firestick, etc."></div></div> <div class="checkbox-group"><input type="checkbox" id="priceActive" checked><label for="priceActive">Active (shown in Billing dropdown)</label></div> <div id="priceModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('priceModal')">Cancel</button><button class="btn btn-primary" onclick="savePriceItem()">Save</button></div> </div></div>
 
-<!-- EXPENSE MODAL -->
-<div class="modal-overlay" id="expenseModal"> <div class="modal">
-    <h2 id="expenseModalTitle">New Expense</h2>
-    <div class="form-group"><label>Description *</label><input type="text" id="expDescription" required placeholder="e.g. Parts purchase — SSD drives"></div>
-    <div class="form-row">
-        <div class="form-group"><label>Amount (JMD) *</label><input type="number" id="expAmount" min="0" required></div>
-        <div class="form-group"><label>Category</label><select id="expCategory"><option>Parts & Inventory</option><option>Rent</option><option>Utilities</option><option>Wages</option><option>Marketing</option><option>Transport</option><option>Other</option></select></div>
-    </div>
-    <div class="form-group"><label>Date</label><input type="date" id="expDate"></div>
-    <div id="expenseModalError" class="modal-error"></div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
-</div></div>
+<div class="modal-overlay" id="expenseModal"> <div class="modal"> <h2 id="expenseModalTitle">New Expense</h2> <div class="form-group"><label>Description *</label><input type="text" id="expDescription" required placeholder="e.g. Parts purchase — SSD drives"></div> <div class="form-row"><div class="form-group"><label>Amount (JMD) *</label><input type="number" id="expAmount" min="0" required></div><div class="form-group"><label>Category</label><select id="expCategory"><option>Parts & Inventory</option><option>Rent</option><option>Utilities</option><option>Wages</option><option>Marketing</option><option>Transport</option><option>Other</option></select></div></div> <div class="form-group"><label>Date</label><input type="date" id="expDate"></div> <div id="expenseModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div> </div></div>
 
 <div class="modal-overlay" id="userModal"> <div class="modal"> <h2 id="userModalTitle">Add User</h2> <form id="userForm" onsubmit="saveUser(event)"> <div class="form-group"><label>Email *</label><input type="email" id="userEmail" required placeholder="staff@stylespc.com"></div> <div class="form-group"><label>Password <span id="pwLabel">(required)</span></label><input type="password" id="userPassword" placeholder="Min. 6 characters"></div> <div class="form-row"><div class="form-group"><label>Role</label><select id="userRole"><option value="User">User</option><option value="Manager">Manager</option><option value="Technician">Technician</option><option value="Admin">Admin</option></select></div><div class="form-group"><label>Password Expiry (days)</label><input type="number" id="userExpiryDays" value="30" min="1" max="365"></div></div> <div class="checkbox-group"><input type="checkbox" id="userMustChange" checked><label for="userMustChange">Must change password at next login</label></div> <div id="userModalError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button type="submit" class="btn btn-primary">Save User</button></div> </form> </div></div>
 
 <div class="modal-overlay" id="changePasswordModal"> <div class="modal"> <h2>Change Password</h2> <form id="changePasswordForm" onsubmit="handleChangePassword(event)"> <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword" required></div> <div class="form-group"><label>New Password</label><input type="password" id="newPassword" required placeholder="Min. 6 characters"></div> <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPassword" required></div> <div id="changePasswordError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button><button type="submit" class="btn btn-primary">Update Password</button></div> </form> </div></div>
 
 <!-- ============================================================ -->
-<!-- JAVASCRIPT – Waits for Supabase to load                     -->
+<!-- JAVASCRIPT                                                  -->
 <!-- ============================================================ -->
 <script>
 // =============================================================
-// WAIT FOR SUPABASE TO BE DEFINED
+// WAIT FOR SUPABASE
 // =============================================================
 (function waitForSupabase() {
     const statusEl = document.getElementById('scriptStatus');
@@ -624,10 +529,10 @@
         initApp();
     }
 
-    function onFail(message) {
+    function onFail(msg) {
         if (settled) return;
         settled = true;
-        statusEl.textContent = '❌ ' + (message || 'Failed to load Supabase. Please refresh or check your internet.');
+        statusEl.textContent = '❌ ' + (msg || 'Failed to load Supabase. Please refresh.');
         statusEl.style.background = '#a3372a';
         statusEl.style.color = 'white';
         loaderEl.style.display = 'none';
@@ -635,59 +540,41 @@
         retryBtn.textContent = 'Retry';
         retryBtn.className = 'btn btn-primary';
         retryBtn.style.marginTop = '12px';
-        retryBtn.onclick = function() {
-            location.reload();
-        };
-        const box = document.querySelector('.login-box');
-        box.appendChild(retryBtn);
+        retryBtn.onclick = function() { location.reload(); };
+        document.querySelector('.login-box').appendChild(retryBtn);
     }
 
-    // If it's already loaded by the time this runs, don't wait at all.
-    if (typeof supabase !== 'undefined') {
-        onReady();
-        return;
-    }
+    if (typeof supabase !== 'undefined') { onReady(); return; }
 
-    // React the instant the script tag itself finishes (fast connections)
-    // or errors out (blocked/offline — real failure, no need to wait).
     const scriptTag = document.getElementById('supabaseScript');
     if (scriptTag) {
         scriptTag.addEventListener('load', function() {
-            // Give the SDK a tick to attach the global, then check.
             setTimeout(function() {
                 if (typeof supabase !== 'undefined') onReady();
-                else onFail('Supabase script loaded but did not initialize. Please refresh.');
+                else onFail('Supabase script loaded but did not initialize.');
             }, 50);
         });
         scriptTag.addEventListener('error', function() {
-            onFail('Could not reach the Supabase CDN. Check your internet connection and refresh.');
+            onFail('Could not reach the Supabase CDN. Check your internet.');
         });
     }
 
-    // Safety-net poll for slow connections where events above are unreliable —
-    // generous window (20s) instead of failing after just a few seconds.
     let attempts = 0;
-    const maxAttempts = 133; // ~20 seconds at 150ms per check
+    const maxAttempts = 133;
     (function poll() {
         if (settled) return;
         attempts++;
-        if (typeof supabase !== 'undefined') {
-            onReady();
-            return;
-        }
-        if (attempts >= maxAttempts) {
-            onFail('Failed to load Supabase. Please refresh or check your internet.');
-            return;
-        }
+        if (typeof supabase !== 'undefined') { onReady(); return; }
+        if (attempts >= maxAttempts) { onFail('Failed to load Supabase. Please refresh.'); return; }
         setTimeout(poll, 150);
     })();
 })();
 
 // =============================================================
-// APP INIT – called when Supabase is ready
+// APP INIT
 // =============================================================
 function initApp() {
-    console.log('🚀 App initializing with Supabase');
+    console.log('🚀 App initializing');
 
     const sb = supabase.createClient(
         'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
@@ -696,59 +583,19 @@ function initApp() {
     console.log('✅ Supabase client created');
 
     // =============================================================
-    // EMAILJS (customer confirmation)
+    // EMAILJS CONFIG
     // =============================================================
     const EMAILJS_PUBLIC_KEY = 'yAQ2vxUuGMjz2TAvq';
     const EMAILJS_SERVICE_ID = 'service_x983hzs';
     const EMAILJS_TEMPLATE_ID = 'template_h9k8p8f';
-    const EMAILJS_SUMMARY_TEMPLATE_ID = 'iw6dpn9';
-    const EMAILJS_INVOICE_TEMPLATE_ID = 'template_iw6dpn9'; // reusing the Internal Summary template — now also has an Attachment field
+    const EMAILJS_SUMMARY_TEMPLATE_ID = 'template_iw6dpn9';    // Fixed: added template_ prefix
+    const EMAILJS_INVOICE_TEMPLATE_ID = 'template_iw6dpn9';    // Fixed: added template_ prefix
+
     if (window.emailjs) {
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
-    }
-
-    async function sendConfirmationEmail() {
-        const statusEl = $('confirmEmailStatus');
-        const btn = $('sendConfirmBtn');
-        const name = $('ticketClientName').value.trim();
-        const email = $('ticketEmail').value.trim();
-        const phone = $('ticketPhone').value.trim();
-        const device = $('ticketDevice').value.trim();
-        const tag = $('ticketTag').value.trim();
-
-        if (!email) {
-            statusEl.textContent = '⚠️ No email on file for this client — cannot send.';
-            statusEl.style.color = '#a3372a';
-            return;
-        }
-        if (!window.emailjs) {
-            statusEl.textContent = '⚠️ EmailJS failed to load — check your connection and refresh.';
-            statusEl.style.color = '#a3372a';
-            return;
-        }
-
-        btn.disabled = true;
-        statusEl.textContent = 'Sending…';
-        statusEl.style.color = '';
-
-        try {
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                to_email: email,
-                to_name: name,
-                subject: `StylesPC — Confirmation for Ticket ${tag}`,
-                ticket_number: tag,
-                device: device,
-                message: `Hi ${name}, we've received your ${device} (Ticket ${tag}). We'll WhatsApp you at ${phone || 'the number on file'} as soon as we have an update. Thank you for choosing us.`
-            });
-            statusEl.textContent = '✅ Confirmation email sent to ' + email;
-            statusEl.style.color = '#2e7d32';
-        } catch (err) {
-            console.error('EmailJS error:', err);
-            statusEl.textContent = '❌ Failed to send — ' + (err?.text || err?.message || 'check EmailJS template/service ID');
-            statusEl.style.color = '#a3372a';
-        } finally {
-            btn.disabled = false;
-        }
+        console.log('✅ EmailJS initialized');
+    } else {
+        console.warn('⚠️ EmailJS not loaded');
     }
 
     // =============================================================
@@ -767,33 +614,34 @@ function initApp() {
     let selectedTicketIds = new Set();
     let statusChart = null, priorityChart = null;
 
-    function $(id) { return document.getElementById(id); }
-    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-    function genTag() { return 'SPC-' + Math.floor(1000 + Math.random() * 9000); }
-
-    // ---- Business info (used on printed invoices / complimentary cards) ----
     const BIZ_NAME = 'StylesPC';
     const BIZ_PARENT = 'Virtual Office';
     const BIZ_ADDRESS = 'Portmore, St. Catherine, Jamaica';
     const BIZ_PHONE = '(876) 334-1156';
     const BIZ_EMAIL = 'ajstyleg@gmail.com';
     const GCT_RATE = 0.15;
+    const SUMMARY_TO_EMAIL = 'ajstyleg@gmail.com';
+
+    function $(id) { return document.getElementById(id); }
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function genTag() { return 'SPC-' + Math.floor(1000 + Math.random() * 9000); }
 
     function fmtMoney(n) {
         n = Number(n) || 0;
         return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-    // Auto-corrects casing on name fields, e.g. "andrew johnson" -> "Andrew Johnson", "o'brien" -> "O'Brien"
+
     function toTitleCase(str) {
         return String(str || '').trim().replace(/\s+/g, ' ')
             .toLowerCase()
             .replace(/(^|[\s'-])([a-z])/g, (m, sep, ch) => sep + ch.toUpperCase());
     }
+
     function titleCaseField(el) { el.value = toTitleCase(el.value); }
-    // Normalizes a local Jamaican number ("876 334-1156") to WhatsApp's required format ("18763341156")
+
     function normalizeWhatsAppNumber(phone) {
         let digits = String(phone || '').replace(/\D/g, '');
-        if (digits.length === 10) digits = '1' + digits; // add NANP country code
+        if (digits.length === 10) digits = '1' + digits;
         return digits;
     }
 
@@ -806,20 +654,12 @@ function initApp() {
         errorEl.textContent = '';
         const email = $('loginEmail').value.trim();
         const password = $('loginPassword').value.trim();
-        if (!email || !password) {
-            errorEl.textContent = 'Please enter both email and password.';
-            return;
-        }
+        if (!email || !password) { errorEl.textContent = 'Please enter both email and password.'; return; }
         try {
             const { data, error } = await sb.auth.signInWithPassword({ email, password });
-            if (error) {
-                errorEl.textContent = '❌ ' + error.message;
-                return;
-            }
+            if (error) { errorEl.textContent = '❌ ' + error.message; return; }
             await afterLogin(data.user);
-        } catch (err) {
-            errorEl.textContent = '💥 ' + err.message;
-        }
+        } catch (err) { errorEl.textContent = '💥 ' + err.message; }
     }
 
     async function afterLogin(user) {
@@ -849,11 +689,6 @@ function initApp() {
         window.location.href = 'index.html';
     }
 
-    function showLogin() {
-        $('loginOverlay').classList.remove('hidden');
-        $('mainApp').style.display = 'none';
-    }
-
     async function checkSession() {
         try {
             const { data } = await sb.auth.getSession();
@@ -863,6 +698,11 @@ function initApp() {
             showLogin();
             $('loginError').textContent = 'Session error: ' + err.message;
         }
+    }
+
+    function showLogin() {
+        $('loginOverlay').classList.remove('hidden');
+        $('mainApp').style.display = 'none';
     }
 
     // =============================================================
@@ -875,7 +715,7 @@ function initApp() {
     }
 
     // =============================================================
-    // TICKETS (full CRUD + comments)
+    // TICKETS
     // =============================================================
     async function loadTickets() {
         const listEl = $('ticketsList');
@@ -892,15 +732,11 @@ function initApp() {
 
     function renderTickets(list) {
         $('ticketCount').textContent = list.length + ' ticket' + (list.length === 1 ? '' : 's');
-        if (list.length === 0) {
-            $('ticketsList').innerHTML = '<div class="empty-state"><h3>No tickets found</h3></div>';
-            return;
-        }
+        if (list.length === 0) { $('ticketsList').innerHTML = '<div class="empty-state"><h3>No tickets found</h3></div>'; return; }
         $('ticketsList').innerHTML = list.map(t => {
             const status = t.status || 'received';
             const sClass = status.toLowerCase().replace(/\s+/g,'-');
-            return `
-            <div class="list-item" data-id="${t.id}">
+            return `<div class="list-item" data-id="${t.id}">
                 <div class="list-item-main">
                     <div class="list-item-header">
                         <input type="checkbox" class="ticket-checkbox" data-id="${t.id}" onchange="toggleSelect('${t.id}')">
@@ -1030,6 +866,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     async function addComment() {
         const ticketId = currentEditId;
         if (!ticketId) return;
@@ -1041,6 +878,7 @@ function initApp() {
         $('newComment').value = '';
         loadComments(ticketId);
     }
+
     async function uploadAttachment() {
         const ticketId = currentEditId;
         if (!ticketId) return;
@@ -1056,39 +894,27 @@ function initApp() {
         fileInput.value = '';
     }
 
-    const SUMMARY_TO_EMAIL = 'ajstyleg@gmail.com'; // change if you want the summary sent elsewhere
-
     async function sendTicketSummaryEmail() {
         const ticketId = currentEditId;
         const statusEl = $('summaryEmailStatus');
         const btn = $('emailSummaryBtn');
         if (!ticketId) return;
         if (!window.emailjs) {
-            statusEl.textContent = '⚠️ EmailJS failed to load — check your connection and refresh.';
+            statusEl.textContent = '⚠️ EmailJS failed to load.';
             statusEl.style.color = '#a3372a';
             return;
         }
-
         btn.disabled = true;
         statusEl.textContent = 'Compiling & sending…';
         statusEl.style.color = '';
-
         try {
-            const { data: comments } = await sb.from('comments')
-                .select('*, profiles(email)')
-                .eq('ticket_id', ticketId)
-                .order('created_at', { ascending: true });
-
+            const { data: comments } = await sb.from('comments').select('*, profiles(email)').eq('ticket_id', ticketId).order('created_at', { ascending: true });
             const tag = $('ticketTag').value.trim();
             const name = $('ticketClientName').value.trim();
             const device = $('ticketDevice').value.trim();
             const issue = $('ticketIssue').value.trim();
-
-            const lines = (comments || []).map(c =>
-                `[${new Date(c.created_at).toLocaleString()}] ${c.profiles ? c.profiles.email : 'Unknown'}: ${c.content}`
-            );
+            const lines = (comments || []).map(c => `[${new Date(c.created_at).toLocaleString()}] ${c.profiles ? c.profiles.email : 'Unknown'}: ${c.content}`);
             const body = `Ticket: ${tag}\nClient: ${name}\nDevice: ${device}\nOriginal issue: ${issue}\n\n--- Comment log ---\n${lines.length ? lines.join('\n') : '(no comments logged)'}`;
-
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_SUMMARY_TEMPLATE_ID, {
                 to_name: 'Andrew',
                 subject: `Ticket ${tag} — Comment Summary (${name})`,
@@ -1107,15 +933,17 @@ function initApp() {
         }
     }
 
-    // ---- Bulk actions ----
+    // ---- Bulk ----
     function toggleSelect(id) {
         if (selectedTicketIds.has(id)) selectedTicketIds.delete(id);
         else selectedTicketIds.add(id);
         updateSelectedCount();
     }
+
     function updateSelectedCount() {
         $('selectedCount').textContent = selectedTicketIds.size + ' selected';
     }
+
     function bulkAction(action) {
         if (selectedTicketIds.size === 0) { alert('Select at least one ticket.'); return; }
         if (action === 'delete') {
@@ -1135,6 +963,7 @@ function initApp() {
             populateAssigneeSelect($('bulkAssigneeSelect'));
         }
     }
+
     function executeBulkAction() {
         const action = $('bulkConfirmBtn').dataset.action;
         const ids = Array.from(selectedTicketIds);
@@ -1162,6 +991,7 @@ function initApp() {
         renderClients(allClients);
         $('totalClients').textContent = allClients.length;
     }
+
     function renderClients(list) {
         $('clientCount').textContent = list.length + ' client' + (list.length === 1 ? '' : 's');
         if (list.length === 0) { $('clientsList').innerHTML = '<div class="empty-state"><h3>No clients</h3></div>'; return; }
@@ -1181,6 +1011,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     async function saveClient() {
         const first = toTitleCase($('clientFirstName').value.trim());
         const last = toTitleCase($('clientLastName').value.trim());
@@ -1199,12 +1030,14 @@ function initApp() {
         await loadClients();
         updateDashboard();
     }
+
     async function deleteClient(id) {
         if (!confirm('Delete this client?')) return;
         await sb.from('clients').delete().eq('id', id);
         await loadClients();
         updateDashboard();
     }
+
     function openClientModal(mode, id = null) {
         currentEditId = id;
         $('clientModalTitle').textContent = mode === 'new' ? 'New Client' : 'Edit Client';
@@ -1223,11 +1056,12 @@ function initApp() {
         }
         $('clientModal').classList.add('active');
     }
+
     function filterClients() {
         const q = $('clientSearch').value.toLowerCase();
-        const filtered = allClients.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q));
-        renderClients(filtered);
+        renderClients(allClients.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q)));
     }
+
     function exportClientsCSV() {
         let csv = 'Name,Phone,Email,Address,Notes,Created\n';
         allClients.forEach(c => { csv += `"${c.name||''}","${c.phone||''}","${c.email||''}","${c.address||''}","${c.notes||''}","${c.created_at||''}"\n`; });
@@ -1250,6 +1084,7 @@ function initApp() {
         renderUsers(allUsers);
         $('totalAdmins').textContent = allUsers.filter(u => u.role === 'Admin' || u.role === 'Manager').length;
     }
+
     function renderUsers(list) {
         if (list.length === 0) { $('usersList').innerHTML = '<div class="empty-state"><h3>No users</h3></div>'; return; }
         $('usersList').innerHTML = list.map(u => `
@@ -1268,6 +1103,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     async function openUserModal(mode, userId = null) {
         currentEditId = userId;
         $('userModalTitle').textContent = mode === 'new' ? 'Add New User' : 'Edit User';
@@ -1285,6 +1121,7 @@ function initApp() {
         }
         $('userModal').classList.add('active');
     }
+
     async function saveUser(e) {
         e.preventDefault();
         const email = $('userEmail').value.trim();
@@ -1304,28 +1141,20 @@ function initApp() {
         }
         if (!password) { errorEl.textContent = 'Password is required for new users.'; return; }
 
-        // ⚠️ Supabase quirk: calling auth.signUp() from an already-signed-in
-        // session replaces that session with the newly created user's session.
-        // Capture the admin's own session first so we can restore it right
-        // after — otherwise creating a staff account would silently log the
-        // admin out and log them in as the brand-new user instead.
         const { data: { session: adminSession } } = await sb.auth.getSession();
-
         const { data, error } = await sb.auth.signUp({ email, password });
         if (error) { errorEl.textContent = error.message; return; }
         if (data.user) {
             await sb.from('profiles').insert([{ id: data.user.id, role, must_change_password: must, password_expiry: expiry }]);
         }
         if (adminSession) {
-            await sb.auth.setSession({
-                access_token: adminSession.access_token,
-                refresh_token: adminSession.refresh_token,
-            });
+            await sb.auth.setSession({ access_token: adminSession.access_token, refresh_token: adminSession.refresh_token });
         }
         alert('User created!');
         closeModal('userModal');
         loadUsers();
     }
+
     async function deleteUser(userId) {
         if (!confirm('Delete this user?')) return;
         await sb.from('profiles').delete().eq('id', userId);
@@ -1333,13 +1162,14 @@ function initApp() {
     }
 
     // =============================================================
-    // PRICELIST (Settings) — edit prices without touching code
+    // PRICELIST
     // =============================================================
     async function loadPriceList() {
         const { data, error } = await sb.from('price_list').select('*').order('category').order('name');
         if (!error) allPriceList = data || [];
         renderPriceListManager();
     }
+
     function renderPriceListManager() {
         const el = $('priceListManager');
         if (!el) return;
@@ -1354,6 +1184,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     function openPriceModal(id = null) {
         currentPriceEditId = id;
         $('priceModalError').textContent = '';
@@ -1374,6 +1205,7 @@ function initApp() {
         }
         $('priceModal').classList.add('active');
     }
+
     async function savePriceItem() {
         const name = $('priceName').value.trim();
         const price = parseFloat($('priceAmount').value);
@@ -1391,8 +1223,9 @@ function initApp() {
         closeModal('priceModal');
         await loadPriceList();
     }
+
     async function deletePriceItem(id) {
-        if (!confirm('Delete this price item? Existing invoices are unaffected.')) return;
+        if (!confirm('Delete this price item?')) return;
         const p = allPriceList.find(x => x.id === id);
         await sb.from('price_list').delete().eq('id', id);
         logActivity('Pricelist Item Deleted', p ? p.name : id);
@@ -1410,10 +1243,11 @@ function initApp() {
         allInvoices = data || [];
         renderInvoices(allInvoices);
     }
+
     function renderInvoices(list) {
         const listEl = $('invoicesList');
         $('invoiceCount').textContent = `${list.length} invoice${list.length === 1 ? '' : 's'}`;
-        if (!list.length) { listEl.innerHTML = '<div class="empty-state"><h3>No invoices yet</h3><p>Create your first invoice to get started.</p></div>'; return; }
+        if (!list.length) { listEl.innerHTML = '<div class="empty-state"><h3>No invoices yet</h3></div>'; return; }
         listEl.innerHTML = list.map(inv => `
             <div class="list-item">
                 <div class="list-item-main">
@@ -1427,6 +1261,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     function filterInvoices() {
         const q = $('invoiceSearch').value.toLowerCase();
         const status = $('invoiceStatusFilter').value;
@@ -1441,11 +1276,13 @@ function initApp() {
         const sel = $('invTicketLink');
         sel.innerHTML = '<option value="">— None / walk-in —</option>' + allTickets.map(t => `<option value="${t.id}">${esc(t.ticket_number || t.id)} — ${esc(t.client_name)}</option>`).join('');
     }
+
     function populateInvoiceClientSelect() {
         const sel = $('invClientPick');
         const sorted = [...allClients].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
         sel.innerHTML = '<option value="">— Choose a client, or type new below —</option>' + sorted.map(c => `<option value="${c.id}">${esc(c.name)}${c.phone ? ' — ' + esc(c.phone) : ''}</option>`).join('');
     }
+
     function onInvoiceClientPick() {
         const id = $('invClientPick').value;
         if (!id) return;
@@ -1456,6 +1293,7 @@ function initApp() {
         $('invEmail').value = c.email || '';
         $('invAddress').value = c.address || '';
     }
+
     function onInvoiceTicketLink() {
         const id = $('invTicketLink').value;
         if (!id) return;
@@ -1485,22 +1323,21 @@ function initApp() {
             <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); recalcInvoiceTotals();">✕</button></td>
         </tr>`;
     }
+
     function onInvoiceItemPick(selectEl) {
         const row = selectEl.closest('tr');
         const opt = selectEl.selectedOptions[0];
         const descInput = row.querySelector('.inv-item-desc');
         if (!selectEl.value) { descInput.style.display = 'block'; descInput.focus(); }
-        else {
-            descInput.style.display = 'none';
-            descInput.value = '';
-            row.querySelector('.inv-item-price').value = opt.dataset.price || 0;
-        }
+        else { descInput.style.display = 'none'; descInput.value = ''; row.querySelector('.inv-item-price').value = opt.dataset.price || 0; }
         recalcInvoiceTotals();
     }
+
     function addInvoiceItemRow(item) {
         $('invItemsBody').insertAdjacentHTML('beforeend', invoiceItemRowHTML(item));
         recalcInvoiceTotals();
     }
+
     function collectInvoiceItems() {
         return Array.from(document.querySelectorAll('#invItemsBody tr')).map(row => {
             const sel = row.querySelector('select');
@@ -1512,6 +1349,7 @@ function initApp() {
             return { description, qty, unit_price, disc_pct };
         }).filter(i => i.description);
     }
+
     function updatePaidBadge() {
         const badge = $('invPaidBadge');
         if (!badge) return;
@@ -1547,6 +1385,7 @@ function initApp() {
 
         return { items, subtotal, discPct, discountAmount, applyGct, tax, grand, paid, balance };
     }
+
     function toggleComplimentary() {
         const isComp = $('invComplimentary').checked;
         $('invBillableSection').style.display = isComp ? 'none' : 'block';
@@ -1619,7 +1458,6 @@ function initApp() {
         if (!clientName) { errorEl.textContent = 'Client name is required.'; return; }
         const isComp = $('invComplimentary').checked;
         const totals = recalcInvoiceTotals();
-
         const payload = {
             invoice_number: $('invNumber').value,
             ticket_id: $('invTicketLink').value || null,
@@ -1642,7 +1480,6 @@ function initApp() {
             status: isComp ? 'complimentary' : $('invStatus').value,
             notes: isComp ? $('invCompNote').value.trim() : $('invNotes').value.trim(),
         };
-
         let error;
         if (currentInvoiceEditId) {
             ({ error } = await sb.from('invoices').update(payload).eq('id', currentInvoiceEditId));
@@ -1663,7 +1500,7 @@ function initApp() {
         await loadInvoices();
     }
 
-    // ---- PDF generation (html2pdf, matches the printed invoice template) ----
+    // ---- PDF generation ----
     function buildInvoicePdfHtml() {
         const isComp = $('invComplimentary').checked;
         const invNumber = $('invNumber').value;
@@ -1757,13 +1594,13 @@ function initApp() {
             el.innerHTML = buildInvoicePdfHtml();
             el.style.display = 'block';
             window.scrollTo(0, 0);
-            await new Promise(r => setTimeout(r, 100)); // let layout settle before capture
+            await new Promise(r => setTimeout(r, 100));
             const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value + '.pdf';
             await html2pdf().set({
                 margin: 0,
                 filename,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800, willReadFrequently: true },
                 jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
             }).from(el).save();
             statusEl.textContent = '✅ PDF downloaded.';
@@ -1788,7 +1625,6 @@ function initApp() {
             el.innerHTML = buildInvoicePdfHtml();
             document.body.classList.add('printing-invoice');
             el.style.display = 'block';
-
             function cleanup() {
                 document.body.classList.remove('printing-invoice');
                 el.style.display = 'none';
@@ -1799,7 +1635,7 @@ function initApp() {
             setTimeout(cleanup, 60000);
         } catch (err) {
             console.error('Print error:', err);
-            alert('Print failed with this error — please screenshot this and send it back:\n\n' + err.message);
+            alert('Print failed: ' + err.message);
             $('invoicePdfStatus').textContent = '❌ Print failed: ' + err.message;
             $('invoicePdfStatus').style.color = 'var(--red)';
             document.body.classList.remove('printing-invoice');
@@ -1818,7 +1654,7 @@ function initApp() {
             const dataUri = await html2pdf().set({
                 margin: 0,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800, willReadFrequently: true },
                 jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
             }).from(el).outputPdf('datauristring');
             return dataUri;
@@ -1850,8 +1686,8 @@ function initApp() {
         const clientName = $('invClientName').value.trim();
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!email) { statusEl.textContent = '⚠️ Enter a client email first.'; statusEl.style.color = 'var(--red)'; return; }
-        if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS failed to load — refresh and try again.'; statusEl.style.color = 'var(--red)'; return; }
-        if (!EMAILJS_INVOICE_TEMPLATE_ID) { statusEl.textContent = '⚠️ Invoice email template not set up yet — see setup steps.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS not loaded.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!EMAILJS_INVOICE_TEMPLATE_ID) { statusEl.textContent = '⚠️ Invoice template ID not set.'; statusEl.style.color = 'var(--red)'; return; }
 
         if (btn) btn.disabled = true;
         statusEl.textContent = 'Preparing PDF & sending…';
@@ -1879,7 +1715,7 @@ function initApp() {
             const isQuota = /quota|limit|429/i.test(err?.text || err?.message || '');
             statusEl.innerHTML = isQuota
                 ? '❌ EmailJS monthly limit reached. Try "✉️ Compose in My Email App" instead.'
-                : '❌ Failed to send — ' + esc(err?.text || err?.message || 'check EmailJS config');
+                : '❌ Failed to send — ' + esc(err?.text || err?.message || 'check EmailJS template ID');
             statusEl.style.color = 'var(--red)';
         } finally {
             if (btn) btn.disabled = false;
@@ -1892,7 +1728,6 @@ function initApp() {
         const email = $('invEmail').value.trim();
         const clientName = $('invClientName').value.trim();
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
-
         if (btn) btn.disabled = true;
         statusEl.textContent = 'Downloading PDF…';
         statusEl.style.color = '';
@@ -1916,7 +1751,6 @@ function initApp() {
         const clientName = $('invClientName').value.trim();
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!phone) { statusEl.textContent = '⚠️ Enter a client phone number first.'; statusEl.style.color = 'var(--red)'; return; }
-
         if (btn) btn.disabled = true;
         statusEl.textContent = 'Preparing PDF…';
         statusEl.style.color = '';
@@ -1935,7 +1769,7 @@ function initApp() {
             const blob = await html2pdf().set({
                 margin: 0,
                 image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800, willReadFrequently: true },
                 jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
             }).from(el).outputPdf('blob');
             el.style.display = 'none';
@@ -1958,9 +1792,7 @@ function initApp() {
                 statusEl.style.color = 'var(--teal-dark)';
             }
         } catch (err) {
-            if (err.name === 'AbortError') {
-                statusEl.textContent = ''; // user closed the share sheet — not an error
-            } else {
+            if (err.name === 'AbortError') { statusEl.textContent = ''; } else {
                 console.error('WhatsApp send error:', err);
                 statusEl.textContent = '❌ Failed to prepare PDF for WhatsApp.';
                 statusEl.style.color = 'var(--red)';
@@ -1972,7 +1804,7 @@ function initApp() {
     }
 
     // =============================================================
-    // ACCOUNTING / PROFIT & LOSS
+    // ACCOUNTING
     // =============================================================
     function setPLThisMonth() {
         const now = new Date();
@@ -1981,10 +1813,10 @@ function initApp() {
         $('plTo').value = now.toISOString().slice(0, 10);
         loadAccounting();
     }
+
     async function loadAccounting() {
         const from = $('plFrom').value;
         const to = $('plTo').value;
-
         let invQuery = sb.from('invoices').select('*');
         if (from) invQuery = invQuery.gte('invoice_date', from);
         if (to) invQuery = invQuery.lte('invoice_date', to);
@@ -2019,9 +1851,10 @@ function initApp() {
 
         renderExpenses(allExpenses);
     }
+
     function renderExpenses(list) {
         const el = $('expensesList');
-        if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No expenses logged</h3><p>Add an expense to track it against revenue.</p></div>'; return; }
+        if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No expenses logged</h3></div>'; return; }
         el.innerHTML = list.map(e => `
             <div class="list-item">
                 <div class="list-item-main">
@@ -2032,6 +1865,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     function openExpenseModal() {
         $('expenseModalError').textContent = '';
         $('expDescription').value = '';
@@ -2040,23 +1874,20 @@ function initApp() {
         $('expDate').value = new Date().toISOString().slice(0, 10);
         $('expenseModal').classList.add('active');
     }
+
     async function saveExpense() {
         const description = $('expDescription').value.trim();
         const amount = parseFloat($('expAmount').value);
         const errorEl = $('expenseModalError');
         if (!description || isNaN(amount) || amount <= 0) { errorEl.textContent = 'Enter a description and a valid amount.'; return; }
-        const payload = {
-            description, amount,
-            category: $('expCategory').value,
-            expense_date: $('expDate').value || new Date().toISOString().slice(0, 10),
-            created_by: currentUser.id,
-        };
+        const payload = { description, amount, category: $('expCategory').value, expense_date: $('expDate').value || new Date().toISOString().slice(0, 10), created_by: currentUser.id };
         const { error } = await sb.from('expenses').insert([payload]);
         if (error) { errorEl.textContent = error.message; return; }
         logActivity('Expense Added', `${description} — ${fmtMoney(amount)}`);
         closeModal('expenseModal');
         await loadAccounting();
     }
+
     async function deleteExpense(id) {
         if (!confirm('Delete this expense?')) return;
         const e = allExpenses.find(x => x.id === id);
@@ -2064,6 +1895,7 @@ function initApp() {
         logActivity('Expense Deleted', e ? e.description : id);
         await loadAccounting();
     }
+
     function exportExpensesCSV() {
         if (!allExpenses.length) { alert('No expenses to export.'); return; }
         const rows = [['Date', 'Description', 'Category', 'Amount']];
@@ -2077,7 +1909,7 @@ function initApp() {
     }
 
     // =============================================================
-    // ACTIVITY LOG
+    // ACTIVITY LOG — FIXED: correct column name
     // =============================================================
     async function logActivity(action, description) {
         try {
@@ -2103,6 +1935,7 @@ function initApp() {
             </div>
         `).join('');
     }
+
     async function exportActivityCSV() {
         const { data, error } = await sb.from('activity_logs').select('*, profiles(email)').order('created_at', { ascending: false }).limit(1000);
         if (error || !data || !data.length) { alert('No activity to export.'); return; }
@@ -2112,9 +1945,7 @@ function initApp() {
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `activity_log_${new Date().toISOString().slice(0,10)}.csv`;
-        a.click();
+        a.href = url; a.download = `activity_log_${new Date().toISOString().slice(0,10)}.csv`; a.click();
         URL.revokeObjectURL(url);
     }
 
@@ -2171,16 +2002,19 @@ function initApp() {
         localStorage.setItem('stylespc_company_name', name);
         alert('Saved!');
     }
+
     function savePasswordPolicy() {
         const policy = { minLen: parseInt($('pwMinLen').value) || 6, expiryDays: parseInt($('pwExpiryDays').value) || 30, special: $('pwSpecial').checked };
         localStorage.setItem('stylespc_password_policy', JSON.stringify(policy));
         alert('Password policy saved!');
     }
+
     function saveNotificationSettings() {
         const settings = { notifyAssign: $('notifyAssign').checked, notifyStatus: $('notifyStatus').checked };
         localStorage.setItem('stylespc_notification_settings', JSON.stringify(settings));
         alert('Notification settings saved!');
     }
+
     function exportFullData() {
         const data = { tickets: allTickets, clients: allClients, users: allUsers, exported: new Date().toISOString() };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
@@ -2191,12 +2025,13 @@ function initApp() {
     }
 
     // =============================================================
-    // MISC
+    // MISC HELPERS
     // =============================================================
     async function loadUsersForSelects() {
         const { data } = await sb.from('profiles').select('id, email, role');
         window._usersForSelect = data || [];
     }
+
     function populateAssigneeSelect(selectEl) {
         if (!selectEl) return;
         const current = selectEl.value;
@@ -2209,6 +2044,7 @@ function initApp() {
         });
         selectEl.value = current;
     }
+
     function populateAssigneeFilters() {
         const filter = $('ticketAssigneeFilter');
         if (!filter) return;
@@ -2220,7 +2056,9 @@ function initApp() {
             filter.appendChild(opt);
         });
     }
+
     function changeMyPassword() { $('changePasswordModal').classList.add('active'); }
+
     async function handleChangePassword(e) {
         e.preventDefault();
         const current = $('currentPassword').value;
@@ -2251,7 +2089,9 @@ function initApp() {
         if (tab === 'accounting') loadAccounting();
         if (tab === 'settings') renderPriceListManager();
     }
+
     function closeModal(id) { $(id).classList.remove('active'); currentEditId = null; }
+
     function filterTickets() {
         const q = $('ticketSearch').value.toLowerCase();
         const status = $('ticketStatusFilter').value;
@@ -2272,14 +2112,53 @@ function initApp() {
         renderTickets(filtered);
     }
 
+    // ---- Confirmation email ----
+    async function sendConfirmationEmail() {
+        const statusEl = $('confirmEmailStatus');
+        const btn = $('sendConfirmBtn');
+        const name = $('ticketClientName').value.trim();
+        const email = $('ticketEmail').value.trim();
+        const phone = $('ticketPhone').value.trim();
+        const device = $('ticketDevice').value.trim();
+        const tag = $('ticketTag').value.trim();
+
+        if (!email) {
+            statusEl.textContent = '⚠️ No email on file for this client — cannot send.';
+            statusEl.style.color = '#a3372a';
+            return;
+        }
+        if (!window.emailjs) {
+            statusEl.textContent = '⚠️ EmailJS failed to load.';
+            statusEl.style.color = '#a3372a';
+            return;
+        }
+
+        btn.disabled = true;
+        statusEl.textContent = 'Sending…';
+        statusEl.style.color = '';
+
+        try {
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                to_email: email,
+                to_name: name,
+                subject: `StylesPC — Confirmation for Ticket ${tag}`,
+                ticket_number: tag,
+                device: device,
+                message: `Hi ${name}, we've received your ${device} (Ticket ${tag}). We'll WhatsApp you at ${phone || 'the number on file'} as soon as we have an update. Thank you for choosing us.`
+            });
+            statusEl.textContent = '✅ Confirmation email sent to ' + email;
+            statusEl.style.color = '#2e7d32';
+        } catch (err) {
+            console.error('EmailJS error:', err);
+            statusEl.textContent = '❌ Failed to send — ' + (err?.text || err?.message || 'check EmailJS template/service ID');
+            statusEl.style.color = '#a3372a';
+        } finally {
+            btn.disabled = false;
+        }
+    }
+
     // =============================================================
-    // EXPOSE FUNCTIONS GLOBALLY
-    // Every button/form above uses inline onclick="..."/onsubmit="..."
-    // attributes, which the browser resolves against the GLOBAL scope —
-    // but all these functions are declared as local functions inside
-    // initApp(), so without this block, EVERY button in this panel
-    // (including the login form itself) throws "X is not defined" and
-    // does nothing when clicked.
+    // EXPOSE ALL FUNCTIONS GLOBALLY
     // =============================================================
     window.handleLogin = handleLogin;
     window.logout = logout;
@@ -2310,8 +2189,6 @@ function initApp() {
     window.addComment = addComment;
     window.changeMyPassword = changeMyPassword;
     window.handleChangePassword = handleChangePassword;
-
-    // ---- These were missing from the original global exposure list ----
     window.sendConfirmationEmail = sendConfirmationEmail;
     window.printInvoice = printInvoice;
     window.titleCaseField = titleCaseField;
@@ -2339,6 +2216,7 @@ function initApp() {
     window.deleteExpense = deleteExpense;
     window.exportExpensesCSV = exportExpensesCSV;
     window.sendTicketSummaryEmail = sendTicketSummaryEmail;
+    window.updatePaidBadge = updatePaidBadge;
 
     // =============================================================
     // START
