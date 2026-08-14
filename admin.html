@@ -1744,30 +1744,41 @@ function initApp() {
     }
 
     function printInvoice() {
-        if (!$('invClientName').value.trim()) {
-            $('invoicePdfStatus').textContent = '⚠️ Enter a client name first.';
-            $('invoicePdfStatus').style.color = 'var(--red)';
-            return;
-        }
-        const el = $('invoicePrintTemplate');
-        el.innerHTML = buildInvoicePdfHtml();
-        document.body.classList.add('printing-invoice');
-        el.style.display = 'block';
+        console.log('printInvoice() called');
+        try {
+            if (!$('invClientName').value.trim()) {
+                $('invoicePdfStatus').textContent = '⚠️ Enter a client name first.';
+                $('invoicePdfStatus').style.color = 'var(--red)';
+                return;
+            }
+            const el = $('invoicePrintTemplate');
+            el.innerHTML = buildInvoicePdfHtml();
+            document.body.classList.add('printing-invoice');
+            el.style.display = 'block';
 
-        // IMPORTANT: window.print() does not reliably block until the print
-        // dialog closes in every browser/version — hiding the content right
-        // after calling it can race ahead of the actual print capture and
-        // produce a blank page. Wait for the real afterprint event instead.
-        function cleanup() {
+            // IMPORTANT: window.print() does not reliably block until the print
+            // dialog closes in every browser/version — hiding the content right
+            // after calling it can race ahead of the actual print capture and
+            // produce a blank page. Wait for the real afterprint event instead.
+            function cleanup() {
+                document.body.classList.remove('printing-invoice');
+                el.style.display = 'none';
+                window.removeEventListener('afterprint', cleanup);
+            }
+            window.addEventListener('afterprint', cleanup);
+            window.print();
+            // Generous fallback only for the rare case afterprint never fires —
+            // long enough not to race ahead of a normal print/save interaction.
+            setTimeout(cleanup, 60000);
+        } catch (err) {
+            console.error('Print error:', err);
+            alert('Print failed with this error — please screenshot this and send it back:\n\n' + err.message);
+            $('invoicePdfStatus').textContent = '❌ Print failed: ' + err.message;
+            $('invoicePdfStatus').style.color = 'var(--red)';
             document.body.classList.remove('printing-invoice');
-            el.style.display = 'none';
-            window.removeEventListener('afterprint', cleanup);
+            const el2 = $('invoicePrintTemplate');
+            if (el2) el2.style.display = 'none';
         }
-        window.addEventListener('afterprint', cleanup);
-        window.print();
-        // Generous fallback only for the rare case afterprint never fires —
-        // long enough not to race ahead of a normal print/save interaction.
-        setTimeout(cleanup, 60000);
     }
 
     async function generateInvoicePdfDataUri() {
