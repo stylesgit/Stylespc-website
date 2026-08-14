@@ -458,6 +458,7 @@
     <div class="form-row">
         <div class="form-group"><label>Invoice #</label><input type="text" id="invNumber" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';"></div>
         <div class="form-group"><label>Link to Ticket (optional)</label><select id="invTicketLink" onchange="onInvoiceTicketLink()"><option value="">— None / walk-in —</option></select></div>
+        <div class="form-group"><label>Select Existing Client</label><select id="invClientPick" onchange="onInvoiceClientPick()"><option value="">— Choose a client, or type new below —</option></select></div>
     </div>
     <div class="form-row">
         <div class="form-group"><label>Client Name *</label><input type="text" id="invClientName" required onblur="titleCaseField(this)"></div>
@@ -690,14 +691,13 @@ function initApp() {
         statusEl.style.color = '';
 
         try {
-            const trackingLink = `https://stylesgit.github.io/Stylespc-website/status.html?ticket=${tag}`;
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                 to_email: email,
                 to_name: name,
                 subject: `StylesPC — Confirmation for Ticket ${tag}`,
                 ticket_number: tag,
                 device: device,
-                message: `Hi ${name}, we've received your ${device} (Ticket ${tag}). Track your repair anytime here: ${trackingLink} We'll WhatsApp you at ${phone || 'the number on file'} as soon as we have an update. Thank you for choosing us.`
+                message: `Hi ${name}, we've received your ${device} (Ticket ${tag}). We'll WhatsApp you at ${phone || 'the number on file'} as soon as we have an update. Thank you for choosing us.`
             });
             statusEl.textContent = '✅ Confirmation email sent to ' + email;
             statusEl.style.color = '#2e7d32';
@@ -1406,6 +1406,21 @@ function initApp() {
         const sel = $('invTicketLink');
         sel.innerHTML = '<option value="">— None / walk-in —</option>' + allTickets.map(t => `<option value="${t.id}">${esc(t.ticket_number || t.id)} — ${esc(t.client_name)}</option>`).join('');
     }
+    function populateInvoiceClientSelect() {
+        const sel = $('invClientPick');
+        const sorted = [...allClients].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        sel.innerHTML = '<option value="">— Choose a client, or type new below —</option>' + sorted.map(c => `<option value="${c.id}">${esc(c.name)}${c.phone ? ' — ' + esc(c.phone) : ''}</option>`).join('');
+    }
+    function onInvoiceClientPick() {
+        const id = $('invClientPick').value;
+        if (!id) return;
+        const c = allClients.find(x => x.id === id);
+        if (!c) return;
+        $('invClientName').value = c.name || '';
+        $('invPhone').value = c.phone || '';
+        $('invEmail').value = c.email || '';
+        $('invAddress').value = c.address || '';
+    }
     function onInvoiceTicketLink() {
         const id = $('invTicketLink').value;
         if (!id) return;
@@ -1505,11 +1520,13 @@ function initApp() {
         $('invoiceModalError').textContent = '';
         $('invoicePdfStatus').textContent = '';
         populateInvoiceTicketSelect();
+        populateInvoiceClientSelect();
         $('invItemsBody').innerHTML = '';
         if (mode === 'new') {
             $('invoiceModalTitle').textContent = 'New Invoice';
             $('invNumber').value = await nextInvoiceNumber();
             $('invTicketLink').value = '';
+            $('invClientPick').value = '';
             ['invClientName','invPhone','invEmail','invAddress','invReference'].forEach(f => $(f).value = '');
             $('invDate').value = new Date().toISOString().slice(0, 10);
             $('invDueDate').value = '';
@@ -1527,6 +1544,7 @@ function initApp() {
             $('invoiceModalTitle').textContent = 'Edit Invoice';
             $('invNumber').value = inv.invoice_number;
             $('invTicketLink').value = inv.ticket_id || '';
+            $('invClientPick').value = '';
             $('invClientName').value = inv.client_name || '';
             $('invPhone').value = inv.phone || '';
             $('invEmail').value = inv.email || '';
