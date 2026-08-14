@@ -185,6 +185,17 @@
         .comp-card-pdf h1 { color:#2F6F63; font-size:24px; margin-bottom:8px; }
         .comp-card-pdf .comp-tag { display:inline-block; background:#e8ecfb; color:#3b4fb0; padding:6px 18px; border-radius:20px; font-weight:700; font-size:12px; margin-bottom:26px; letter-spacing:.03em; }
         .comp-card-pdf p { font-size:14px; color:#333; max-width:520px; margin:0 auto 10px; line-height:1.6; }
+
+        /* ---- Native print isolation (Print button) ---- */
+        @media print {
+            body.printing-invoice > *:not(#invoicePrintTemplate) { display:none !important; }
+            body.printing-invoice #invoicePrintTemplate {
+                display:block !important;
+                position:static !important;
+                width:auto !important;
+                z-index:auto !important;
+            }
+        }
     </style>
     <script>
         // Theme engine — shared with index.html via localStorage (same domain).
@@ -523,7 +534,7 @@
     <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
         <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
-        <a href="#" class="btn btn-ghost" id="invPrintBtn" target="_blank" onclick="return prepareInvoicePrint(event)">🖨️ Print / Save as PDF</a>
+        <button class="btn btn-ghost" id="invPrintBtn" onclick="printInvoice()">🖨️ Print</button>
         <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
         <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
         <button class="btn btn-ghost" id="invWhatsappBtn" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
@@ -1733,60 +1744,19 @@ function initApp() {
         }
     }
 
-    function prepareInvoicePrint(event) {
+    function printInvoice() {
         if (!$('invClientName').value.trim()) {
-            event.preventDefault();
             $('invoicePdfStatus').textContent = '⚠️ Enter a client name first.';
             $('invoicePdfStatus').style.color = 'var(--red)';
-            return false;
+            return;
         }
-        const html = buildInvoicePdfHtml();
-        const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value;
-
-        const fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${filename}</title><style>
-            *{box-sizing:border-box;}
-            body{ font-family:'IBM Plex Sans',Arial,sans-serif; color:#1a1a1a; margin:0; padding:42px; background:#fff; }
-            .toolbar{ position:sticky; top:0; background:#f2efe6; border-bottom:1px solid #ddd; padding:12px 16px; margin:-42px -42px 30px; display:flex; gap:10px; align-items:center; }
-            .toolbar button{ font-family:inherit; font-size:14px; font-weight:600; padding:9px 18px; border-radius:6px; border:none; background:#2F6F63; color:#fff; cursor:pointer; }
-            .toolbar button:hover{ background:#1F4F45; }
-            .toolbar span{ font-size:12.5px; color:#666; }
-            .inv-header{ display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #2F6F63; padding-bottom:16px; margin-bottom:20px; }
-            .inv-header h1{ font-size:20px; color:#2F6F63; margin:0 0 4px; letter-spacing:.02em; }
-            .inv-header .biz-sub{ font-size:11px; color:#555; line-height:1.5; }
-            .inv-doctitle{ text-align:right; }
-            .inv-doctitle .doclabel{ font-size:22px; font-weight:700; color:#1a1a1a; letter-spacing:.06em; }
-            .inv-meta-grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:20px; font-size:12px; }
-            .inv-meta-grid b{ display:block; margin-bottom:2px; color:#333; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; }
-            .inv-meta-grid .row{ margin-bottom:6px; }
-            table.pdf-items{ width:100%; border-collapse:collapse; font-size:12px; margin-bottom:14px; }
-            table.pdf-items th{ background:#2F6F63; color:#fff; text-align:left; padding:8px; font-weight:600; }
-            table.pdf-items td{ padding:7px 8px; border-bottom:1px solid #e2ded1; }
-            table.pdf-items td.amt, table.pdf-items th.amt{ text-align:right; }
-            .pdf-totals{ margin-left:auto; width:280px; font-size:12px; }
-            .pdf-totals div{ display:flex; justify-content:space-between; padding:4px 0; }
-            .pdf-totals .grand{ font-weight:700; font-size:14px; border-top:2px solid #2F6F63; margin-top:4px; padding-top:8px; }
-            .pdf-totals .balance{ font-weight:700; color:#a3372a; }
-            .pdf-footer{ margin-top:26px; font-size:10.5px; color:#666; border-top:1px solid #e2ded1; padding-top:12px; line-height:1.6; }
-            .comp-card-pdf{ text-align:center; padding:70px 40px; }
-            .comp-card-pdf h1{ color:#2F6F63; font-size:24px; margin-bottom:8px; }
-            .comp-card-pdf .comp-tag{ display:inline-block; background:#e8ecfb; color:#3b4fb0; padding:6px 18px; border-radius:20px; font-weight:700; font-size:12px; margin-bottom:26px; letter-spacing:.03em; }
-            .comp-card-pdf p{ font-size:14px; color:#333; max-width:520px; margin:0 auto 10px; line-height:1.6; }
-            @media print { .toolbar{ display:none; } body{ padding:20px; margin:0; } }
-        </style></head><body>
-            <div class="toolbar">
-                <button onclick="window.print()">🖨️ Print / Save as PDF</button>
-                <span>If nothing appears below, this page failed to render — screenshot this and send it back.</span>
-            </div>
-            ${html}
-        </body></html>`;
-
-        const blob = new Blob([fullHtml], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        event.currentTarget.href = url;
-        $('invoicePdfStatus').textContent = '✅ Opening in a new tab — use the Print button there.';
-        $('invoicePdfStatus').style.color = 'var(--teal-dark)';
-        setTimeout(() => URL.revokeObjectURL(url), 120000);
-        return true; // let the browser follow the link natively — this is what avoids the popup blocker
+        const el = $('invoicePrintTemplate');
+        el.innerHTML = buildInvoicePdfHtml();
+        document.body.classList.add('printing-invoice');
+        el.style.display = 'block';
+        window.print();
+        document.body.classList.remove('printing-invoice');
+        el.style.display = 'none';
     }
 
     async function generateInvoicePdfDataUri() {
