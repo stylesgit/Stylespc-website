@@ -309,7 +309,7 @@
         <button class="nav-tab active" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
         <button class="nav-tab" onclick="switchTab('tickets',this)">🎫 Tickets</button>
         <button class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</button>
-        <button class="nav-tab" onclick="switchTab('devices',this)">🖥️ Devices</button>
+        <button class="nav-tab" id="navTabDevices" onclick="switchTab('devices',this)">🖥️ Devices</button>
         <button class="nav-tab" onclick="switchTab('techplaybook',this)">🧰 Tech Playbook</button>
         <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
         <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
@@ -382,11 +382,23 @@
                 <h3 id="deviceFormTitle" style="margin:0; font-size:1.05rem; letter-spacing:0.02em;">Log Client Device</h3>
                 <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,0.4);" onclick="closeDeviceForm()">✕ Close</button>
             </div>
-            <div style="padding:24px;">
-                <div class="form-row">
-                    <div class="form-group"><label>Client *</label><select id="deviceClientId" required><option value="">Select client…</option></select></div>
-                    <div class="form-group"><label>Parts Replaced</label><input type="text" id="deviceParts" placeholder="e.g. HDD, keyboard, battery"></div>
+
+            <!-- STEP 1: pick the client from a clickable list -->
+            <div id="devicePickerStep" style="padding:24px;">
+                <div class="search-box" style="margin-bottom:14px;"><input type="text" id="devicePickerSearch" placeholder="Filter by name or phone…" oninput="filterDevicePicker()"></div>
+                <div id="devicePickerList" style="max-height:340px;overflow-y:auto;border:1px solid var(--rule);border-radius:var(--radius);background:var(--white);"></div>
+            </div>
+
+            <!-- STEP 2: device details, client shown read-only -->
+            <div id="deviceDetailsStep" style="display:none; padding:24px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;background:var(--white);border:1px solid var(--rule);border-radius:var(--radius);padding:10px 14px;margin-bottom:18px;">
+                    <div>
+                        <div style="font-weight:600;" id="deviceSelectedClientName">—</div>
+                        <div style="font-size:0.82rem;color:var(--ink-soft);" id="deviceSelectedClientMeta">—</div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" onclick="backToClientPicker()">Change Client</button>
                 </div>
+                <input type="hidden" id="deviceClientId">
                 <div class="form-row">
                     <div class="form-group"><label>Device Type *</label><select id="deviceType" required><option value="Laptop">Laptop</option><option value="Desktop">Desktop</option><option value="All-in-One">All-in-One</option><option value="Tablet">Tablet</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div>
                     <div class="form-group"><label>Tag / Serial # (optional)</label><input type="text" id="deviceTagSerial" placeholder="Leave blank if unavailable"></div>
@@ -400,9 +412,10 @@
                     <div class="form-group"><label>Specs</label><input type="text" id="deviceSpecs" placeholder="i5, 8GB RAM, 256GB SSD"></div>
                 </div>
                 <div class="form-row">
+                    <div class="form-group"><label>Parts Replaced</label><input type="text" id="deviceParts" placeholder="e.g. HDD, keyboard, battery"></div>
                     <div class="form-group"><label>Issue Reported</label><input type="text" id="deviceIssue" placeholder="Won't power on, cracked screen…"></div>
-                    <div class="form-group"><label>Remarks</label><textarea id="deviceNotes" rows="3" placeholder="Condition at intake, missing parts, password provided…"></textarea></div>
                 </div>
+                <div class="form-group"><label>Remarks</label><textarea id="deviceNotes" rows="3" placeholder="Condition at intake, missing parts, password provided…"></textarea></div>
                 <div id="deviceFormError" class="modal-error"></div>
                 <div style="display:flex; justify-content:center; gap:12px; margin-top:8px;">
                     <button class="btn btn-primary" style="background:#1c4d2b;border-color:#1c4d2b;" onclick="saveDevice()">Submit</button>
@@ -1237,6 +1250,7 @@ function initApp() {
                     </div>
                 </div>
                 <div class="list-item-actions">
+                    <button class="btn btn-primary btn-sm" onclick="logDeviceForClient('${c.id}')">🖥️ Log Device</button>
                     <button class="btn btn-amber btn-sm" onclick="openClientModal('edit','${c.id}')">✏️ Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')">🗑️ Delete</button>
                 </div>
@@ -1356,13 +1370,7 @@ function initApp() {
         await sb.from('devices').delete().eq('id', id);
         await loadDevices();
     }
-    function populateClientSelect(sel) {
-        const current = sel.value;
-        sel.innerHTML = '<option value="">Select client…</option>' + allClients.map(c => `<option value="${c.id}">${esc(c.name||'—')}</option>`).join('');
-        sel.value = current;
-    }
     function resetDeviceForm() {
-        $('deviceClientId').value = '';
         $('deviceType').value = 'Laptop';
         ['deviceTagSerial','deviceBrand','deviceModel','deviceOS','deviceSpecs','deviceParts','deviceIssue','deviceNotes'].forEach(f => $(f).value = '');
         $('deviceFormError').textContent = '';
@@ -1371,16 +1379,60 @@ function initApp() {
         $('deviceFormPanel').style.display = 'none';
         currentEditId = null;
     }
-    function openDeviceModal(mode, id = null) {
+    function renderClientPicker(list) {
+        if (list.length === 0) { $('devicePickerList').innerHTML = '<div class="status-msg">No matching clients</div>'; return; }
+        $('devicePickerList').innerHTML = list.map(c => `
+            <div onclick="selectDeviceClient('${c.id}')" style="padding:12px 16px;border-bottom:1px solid var(--rule);cursor:pointer;display:flex;justify-content:space-between;align-items:center;" onmouseover="this.style.background='var(--paper-2)'" onmouseout="this.style.background=''">
+                <div>
+                    <div style="font-weight:600;">${esc(c.name||'—')}</div>
+                    <div style="font-size:0.8rem;color:var(--ink-soft);">${esc(c.phone||'—')}${c.email ? ' · ' + esc(c.email) : ''}</div>
+                </div>
+                <span style="color:var(--ink-soft);">›</span>
+            </div>
+        `).join('');
+    }
+    function filterDevicePicker() {
+        const q = $('devicePickerSearch').value.toLowerCase();
+        renderClientPicker(allClients.filter(c => (c.name||'').toLowerCase().includes(q) || (c.phone||'').includes(q)));
+    }
+    function showClientInfo(client) {
+        $('deviceClientId').value = client.id;
+        $('deviceSelectedClientName').textContent = client.name || '—';
+        $('deviceSelectedClientMeta').textContent = [client.phone, client.email].filter(Boolean).join(' · ') || '—';
+    }
+    function selectDeviceClient(clientId) {
+        const c = allClients.find(x => x.id === clientId);
+        if (!c) return;
+        showClientInfo(c);
+        $('devicePickerStep').style.display = 'none';
+        $('deviceDetailsStep').style.display = 'block';
+    }
+    function backToClientPicker() {
+        $('deviceDetailsStep').style.display = 'none';
+        $('devicePickerStep').style.display = 'block';
+        $('devicePickerSearch').value = '';
+        renderClientPicker(allClients);
+        $('devicePickerSearch').focus();
+    }
+    function openDeviceModal(mode, id = null, presetClientId = null) {
         currentEditId = id;
-        $('deviceFormTitle').textContent = mode === 'new' ? 'Log Client Device' : 'Edit Client Device';
-        populateClientSelect($('deviceClientId'));
+        $('deviceFormError').textContent = '';
         if (mode === 'new') {
             resetDeviceForm();
+            $('deviceFormTitle').textContent = 'Log Client Device';
+            if (presetClientId) {
+                selectDeviceClient(presetClientId);
+            } else {
+                $('deviceDetailsStep').style.display = 'none';
+                $('devicePickerStep').style.display = 'block';
+                $('devicePickerSearch').value = '';
+                renderClientPicker(allClients);
+            }
         } else {
             const d = allDevices.find(x => x.id === id);
             if (!d) return;
-            $('deviceClientId').value = d.client_id || '';
+            $('deviceFormTitle').textContent = 'Edit Client Device';
+            showClientInfo(d.clients ? { id: d.client_id, name: d.clients.name } : { id: d.client_id, name: '—' });
             $('deviceType').value = d.device_type || 'Laptop';
             $('deviceTagSerial').value = d.tag_serial || '';
             $('deviceBrand').value = d.brand || '';
@@ -1390,10 +1442,15 @@ function initApp() {
             $('deviceParts').value = d.parts_replaced || '';
             $('deviceIssue').value = d.issue || '';
             $('deviceNotes').value = d.notes || '';
-            $('deviceFormError').textContent = '';
+            $('devicePickerStep').style.display = 'none';
+            $('deviceDetailsStep').style.display = 'block';
         }
         $('deviceFormPanel').style.display = 'block';
         $('deviceFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    function logDeviceForClient(clientId) {
+        switchTab('devices', $('navTabDevices'));
+        openDeviceModal('new', null, clientId);
     }
     function filterDevices() {
         const q = $('deviceSearch').value.toLowerCase();
@@ -2623,6 +2680,10 @@ function initApp() {
     window.exportDevicesCSV = exportDevicesCSV;
     window.closeDeviceForm = closeDeviceForm;
     window.resetDeviceForm = resetDeviceForm;
+    window.selectDeviceClient = selectDeviceClient;
+    window.backToClientPicker = backToClientPicker;
+    window.filterDevicePicker = filterDevicePicker;
+    window.logDeviceForClient = logDeviceForClient;
     window.openTechNoteModal = openTechNoteModal;
     window.saveTechNote = saveTechNote;
     window.deleteTechNote = deleteTechNote;
