@@ -1884,8 +1884,17 @@ function initApp() {
     }
 
     async function nextInvoiceNumber() {
-        const { count } = await sb.from('invoices').select('id', { count: 'exact', head: true });
-        return 'INV-' + (1001 + (count || 0));
+        // Derive from the highest existing invoice number, not a row count —
+        // a row count breaks permanently after any invoice is ever deleted,
+        // since the count drops but old higher numbers still exist, causing
+        // a collision on the next save.
+        const { data } = await sb.from('invoices').select('invoice_number');
+        let max = 1000;
+        (data || []).forEach(r => {
+            const m = /INV-(\d+)/.exec(r.invoice_number || '');
+            if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        return 'INV-' + (max + 1);
     }
 
     async function openInvoiceModal(mode, id = null) {
@@ -1977,7 +1986,16 @@ function initApp() {
         if (currentInvoiceEditId) {
             ({ error } = await sb.from('invoices').update(payload).eq('id', currentInvoiceEditId));
         } else {
-            ({ error } = await sb.from('invoices').insert([payload]));
+            // Retry with a freshly-generated number if we hit a numbering collision
+            // (e.g. two invoices saved back-to-back) instead of failing outright.
+            for (let attempt = 0; attempt < 3; attempt++) {
+                ({ error } = await sb.from('invoices').insert([payload]));
+                if (!error) break;
+                const isDupNumber = /duplicate key|invoice_number/i.test(error.message || '');
+                if (!isDupNumber) break;
+                payload.invoice_number = await nextInvoiceNumber();
+                $('invNumber').value = payload.invoice_number;
+            }
         }
         if (error) { errorEl.textContent = error.message; return; }
         logActivity(currentInvoiceEditId ? 'Invoice Updated' : 'Invoice Created', `${payload.invoice_number} — ${clientName}${isComp ? ' (Complimentary)' : ' — ' + fmtMoney(payload.grand_total)}`);
@@ -2180,6 +2198,7 @@ function initApp() {
         const clientName = $('invClientName').value.trim();
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!email) { statusEl.textContent = '⚠️ Enter a client email first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!currentInvoiceEditId) { statusEl.textContent = '⚠️ Save this invoice first — it hasn\'t been recorded yet, so the client would get a number that doesn\'t exist in your records.'; statusEl.style.color = 'var(--red)'; return; }
         if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS failed to load — refresh and try again.'; statusEl.style.color = 'var(--red)'; return; }
         if (!EMAILJS_INVOICE_TEMPLATE_ID) { statusEl.textContent = '⚠️ Invoice email template not set up yet — see setup steps.'; statusEl.style.color = 'var(--red)'; return; }
 
@@ -2246,6 +2265,7 @@ function initApp() {
         const clientName = $('invClientName').value.trim();
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!phone) { statusEl.textContent = '⚠️ Enter a client phone number first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!currentInvoiceEditId) { statusEl.textContent = '⚠️ Save this invoice first — it hasn\'t been recorded yet, so the client would get a number that doesn\'t exist in your records.'; statusEl.style.color = 'var(--red)'; return; }
 
         if (btn) btn.disabled = true;
         statusEl.textContent = 'Preparing PDF…';
