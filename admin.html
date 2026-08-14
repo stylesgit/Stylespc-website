@@ -187,13 +187,31 @@
         .comp-card-pdf h1 { color:#2F6F63; font-size:24px; margin-bottom:8px; }
         .comp-card-pdf .comp-tag { display:inline-block; background:#e8ecfb; color:#3b4fb0; padding:6px 18px; border-radius:20px; font-weight:700; font-size:12px; margin-bottom:26px; letter-spacing:.03em; }
         .comp-card-pdf p { font-size:14px; color:#333; max-width:520px; margin:0 auto 10px; line-height:1.6; }
+        .paid-stamp {
+            position: absolute;
+            top: 130px;
+            right: 70px;
+            transform: rotate(-16deg);
+            border: 6px solid #1F8F4D;
+            color: #1F8F4D;
+            font-family: 'IBM Plex Sans', Arial, sans-serif;
+            font-weight: 800;
+            font-size: 52px;
+            letter-spacing: 8px;
+            padding: 8px 24px;
+            border-radius: 10px;
+            opacity: 0.82;
+            pointer-events: none;
+            z-index: 10;
+            mix-blend-mode: multiply;
+        }
 
         /* ---- Native print isolation (Print button) ---- */
         @media print {
             body.printing-invoice > *:not(#invoicePrintTemplate) { display:none !important; }
             body.printing-invoice #invoicePrintTemplate {
                 display:block !important;
-                position:static !important;
+                position:relative !important;
                 width:auto !important;
                 z-index:auto !important;
             }
@@ -544,10 +562,10 @@
     <div id="invoicePdfStatus" style="font-size:12px;margin-top:4px;"></div>
     <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
-        <button class="btn btn-ghost" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
-        <button class="btn btn-ghost" onclick="emailInvoiceToClient()">📧 Email to Client</button>
-        <button class="btn btn-ghost" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
-        <button class="btn btn-ghost" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
+        <button class="btn btn-ghost" id="invPrintBtn" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+        <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
+        <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
+        <button class="btn btn-ghost" id="invWhatsappBtn" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
         <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
     </div>
 </div></div>
@@ -1668,6 +1686,7 @@ function initApp() {
 
         const totals = recalcInvoiceTotals();
         const status = $('invStatus').value;
+        const showPaidStamp = status === 'paid';
         const rows = totals.items.map((it, i) => `
             <tr>
                 <td>${i + 1}. ${esc(it.description)}</td>
@@ -1678,6 +1697,7 @@ function initApp() {
             </tr>`).join('');
 
         return `
+            ${showPaidStamp ? '<div class="paid-stamp">PAID</div>' : ''}
             <div class="inv-header">
                 <div><h1>${BIZ_NAME}</h1><div class="biz-sub">${BIZ_PARENT}<br>${BIZ_ADDRESS}<br>Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}</div></div>
                 <div class="inv-doctitle"><div class="doclabel">INVOICE</div><div style="font-size:12px;margin-top:6px;">${esc(invNumber)}</div></div>
@@ -1826,7 +1846,7 @@ function initApp() {
         if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS failed to load — refresh and try again.'; statusEl.style.color = 'var(--red)'; return; }
         if (!EMAILJS_INVOICE_TEMPLATE_ID) { statusEl.textContent = '⚠️ Invoice email template not set up yet — see setup steps.'; statusEl.style.color = 'var(--red)'; return; }
 
-        btn.disabled = true;
+        if (btn) btn.disabled = true;
         statusEl.textContent = 'Preparing PDF & sending…';
         statusEl.style.color = '';
         try {
@@ -1855,7 +1875,7 @@ function initApp() {
                 : '❌ Failed to send — ' + esc(err?.text || err?.message || 'check EmailJS config');
             statusEl.style.color = 'var(--red)';
         } finally {
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
         }
     }
 
@@ -1866,7 +1886,7 @@ function initApp() {
         const clientName = $('invClientName').value.trim();
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
 
-        btn.disabled = true;
+        if (btn) btn.disabled = true;
         statusEl.textContent = 'Downloading PDF…';
         statusEl.style.color = '';
         try {
@@ -1878,7 +1898,7 @@ function initApp() {
             statusEl.textContent = '✅ PDF downloaded — attach it in the email draft that opened.';
             statusEl.style.color = 'var(--teal-dark)';
         } finally {
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
         }
     }
 
@@ -1890,7 +1910,7 @@ function initApp() {
         if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
         if (!phone) { statusEl.textContent = '⚠️ Enter a client phone number first.'; statusEl.style.color = 'var(--red)'; return; }
 
-        btn.disabled = true;
+        if (btn) btn.disabled = true;
         statusEl.textContent = 'Preparing PDF…';
         statusEl.style.color = '';
         const el = $('invoicePrintTemplate');
@@ -1940,7 +1960,7 @@ function initApp() {
             }
         } finally {
             el.style.display = 'none';
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
         }
     }
 
