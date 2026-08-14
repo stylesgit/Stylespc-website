@@ -487,7 +487,8 @@
         </table>
         <button class="btn btn-sm btn-ghost" onclick="addInvoiceItemRow()">+ Add Line</button>
 
-        <div style="display:flex;justify-content:flex-end;gap:10px;align-items:center;margin-top:14px;">
+        <div style="display:flex;justify-content:flex-end;gap:16px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+            <label style="font-size:0.85rem;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="invApplyGct" onchange="recalcInvoiceTotals()"> Apply GCT (15%)</label>
             <label style="font-size:0.85rem;">Overall Discount:</label>
             <select id="invDiscountPct" onchange="recalcInvoiceTotals()" style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);">
                 <option value="0">None</option>
@@ -501,7 +502,7 @@
         <div class="totals-box">
             <div class="trow"><span>Subtotal</span><span id="invSubtotalOut">$0.00</span></div>
             <div class="trow"><span id="invDiscountLabel">Discount</span><span id="invDiscountOut">-$0.00</span></div>
-            <div class="trow"><span>Tax (GCT 15%)</span><span id="invTaxOut">$0.00</span></div>
+            <div class="trow" id="invTaxRow" style="display:none;"><span>Tax (GCT 15%)</span><span id="invTaxOut">$0.00</span></div>
             <div class="trow grand"><span>Grand Total</span><span id="invGrandOut">$0.00</span></div>
             <div class="trow"><span>Amount Paid</span><span><input type="number" id="invAmountPaid" min="0" value="0" style="width:110px;text-align:right;padding:4px 6px;" oninput="recalcInvoiceTotals()"></span></div>
             <div class="trow balance"><span>Balance Due</span><span id="invBalanceOut">$0.00</span></div>
@@ -1490,7 +1491,8 @@ function initApp() {
         const discPct = parseFloat($('invDiscountPct').value) || 0;
         const discountAmount = subtotal * (discPct / 100);
         const afterDiscount = subtotal - discountAmount;
-        const tax = afterDiscount * GCT_RATE;
+        const applyGct = $('invApplyGct').checked;
+        const tax = applyGct ? afterDiscount * GCT_RATE : 0;
         const grand = afterDiscount + tax;
         const paid = parseFloat($('invAmountPaid').value) || 0;
         const balance = grand - paid;
@@ -1498,11 +1500,12 @@ function initApp() {
         $('invSubtotalOut').textContent = fmtMoney(subtotal);
         $('invDiscountLabel').textContent = `Discount (${discPct}%)`;
         $('invDiscountOut').textContent = '-' + fmtMoney(discountAmount);
+        $('invTaxRow').style.display = applyGct ? 'flex' : 'none';
         $('invTaxOut').textContent = fmtMoney(tax);
         $('invGrandOut').textContent = fmtMoney(grand);
         $('invBalanceOut').textContent = fmtMoney(balance);
 
-        return { items, subtotal, discPct, discountAmount, tax, grand, paid, balance };
+        return { items, subtotal, discPct, discountAmount, applyGct, tax, grand, paid, balance };
     }
     function toggleComplimentary() {
         const isComp = $('invComplimentary').checked;
@@ -1532,6 +1535,7 @@ function initApp() {
             $('invDueDate').value = '';
             $('invStatus').value = 'unpaid';
             $('invDiscountPct').value = '0';
+            $('invApplyGct').checked = false;
             $('invAmountPaid').value = '0';
             $('invComplimentary').checked = false;
             $('invCompNote').value = 'This is a one-time complimentary service. Any other service may incur charges. Thank you.';
@@ -1554,6 +1558,7 @@ function initApp() {
             $('invReference').value = inv.reference || '';
             $('invStatus').value = inv.status || 'unpaid';
             $('invDiscountPct').value = String(inv.discount_pct || 0);
+            $('invApplyGct').checked = !!(inv.tax_amount && Number(inv.tax_amount) > 0);
             $('invAmountPaid').value = inv.amount_paid || 0;
             $('invNotes').value = inv.notes || '';
             $('invComplimentary').checked = !!inv.is_complimentary;
@@ -1682,7 +1687,7 @@ function initApp() {
             <div class="pdf-totals">
                 <div><span>Subtotal</span><span>${fmtMoney(totals.subtotal)}</span></div>
                 <div><span>Discount (${totals.discPct}%)</span><span>-${fmtMoney(totals.discountAmount)}</span></div>
-                <div><span>Tax (GCT 15%)</span><span>${fmtMoney(totals.tax)}</span></div>
+                ${totals.applyGct ? `<div><span>Tax (GCT 15%)</span><span>${fmtMoney(totals.tax)}</span></div>` : ''}
                 <div class="grand"><span>Grand Total</span><span>${fmtMoney(totals.grand)}</span></div>
                 <div><span>Amount Paid</span><span>${fmtMoney(totals.paid)}</span></div>
                 <div class="balance"><span>Balance Due</span><span>${fmtMoney(totals.balance)}</span></div>
