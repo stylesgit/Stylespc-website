@@ -310,6 +310,7 @@
         <button class="nav-tab" onclick="switchTab('tickets',this)">🎫 Tickets</button>
         <button class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</button>
         <button class="nav-tab" onclick="switchTab('devices',this)">🖥️ Devices</button>
+        <button class="nav-tab" onclick="switchTab('techplaybook',this)">🧰 Tech Playbook</button>
         <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
         <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
         <button class="nav-tab" onclick="switchTab('users',this)">🔐 Users</button>
@@ -375,6 +376,41 @@
     <!-- DEVICES -->
     <div id="devices" class="section">
         <h2 style="margin-bottom:20px;">Devices</h2>
+
+        <div id="deviceFormPanel" style="display:none; margin-bottom:24px; border:1px solid var(--rule); border-radius:var(--radius); overflow:hidden; background:#eaf3e6;">
+            <div style="background:#1c4d2b; color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between;">
+                <h3 id="deviceFormTitle" style="margin:0; font-size:1.05rem; letter-spacing:0.02em;">Log Client Device</h3>
+                <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,0.4);" onclick="closeDeviceForm()">✕ Close</button>
+            </div>
+            <div style="padding:24px;">
+                <div class="form-row">
+                    <div class="form-group"><label>Client *</label><select id="deviceClientId" required><option value="">Select client…</option></select></div>
+                    <div class="form-group"><label>Parts Replaced</label><input type="text" id="deviceParts" placeholder="e.g. HDD, keyboard, battery"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Device Type *</label><select id="deviceType" required><option value="Laptop">Laptop</option><option value="Desktop">Desktop</option><option value="All-in-One">All-in-One</option><option value="Tablet">Tablet</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div>
+                    <div class="form-group"><label>Tag / Serial # (optional)</label><input type="text" id="deviceTagSerial" placeholder="Leave blank if unavailable"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Brand / Manufacturer *</label><input type="text" id="deviceBrand" required placeholder="Dell, HP, Apple…"></div>
+                    <div class="form-group"><label>Model</label><input type="text" id="deviceModel" placeholder="Inspiron 15 3000"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Operating System</label><input type="text" id="deviceOS" placeholder="Windows 11 Home"></div>
+                    <div class="form-group"><label>Specs</label><input type="text" id="deviceSpecs" placeholder="i5, 8GB RAM, 256GB SSD"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Issue Reported</label><input type="text" id="deviceIssue" placeholder="Won't power on, cracked screen…"></div>
+                    <div class="form-group"><label>Remarks</label><textarea id="deviceNotes" rows="3" placeholder="Condition at intake, missing parts, password provided…"></textarea></div>
+                </div>
+                <div id="deviceFormError" class="modal-error"></div>
+                <div style="display:flex; justify-content:center; gap:12px; margin-top:8px;">
+                    <button class="btn btn-primary" style="background:#1c4d2b;border-color:#1c4d2b;" onclick="saveDevice()">Submit</button>
+                    <button class="btn btn-ghost" style="border-color:#1c4d2b;color:#1c4d2b;" onclick="resetDeviceForm()">Reset</button>
+                </div>
+            </div>
+        </div>
+
         <div class="toolbar">
             <div class="search-box"><input type="text" id="deviceSearch" placeholder="Search client, brand, model, tag/serial…" oninput="filterDevices()"></div>
             <button class="btn btn-primary" onclick="openDeviceModal('new')">+ Log Device</button>
@@ -382,6 +418,17 @@
         </div>
         <div id="deviceCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
         <div class="list-container" id="devicesList"><div class="status-msg">Loading…</div></div>
+    </div>
+
+    <!-- TECH PLAYBOOK -->
+    <div id="techplaybook" class="section">
+        <h2 style="margin-bottom:20px;">Tech Playbook</h2>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="techNoteSearch" placeholder="Search title, category, tags…" oninput="filterTechNotes()"></div>
+            <button class="btn btn-primary" onclick="openTechNoteModal('new')">+ New Entry</button>
+        </div>
+        <div id="techNoteCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="techNotesList"><div class="status-msg">Loading…</div></div>
     </div>
 
     <!-- BILLING -->
@@ -503,7 +550,7 @@
 <!-- ===== MODALS ===== -->
 <div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith" onblur="titleCaseField(this)"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
-<div class="modal-overlay" id="deviceModal"> <div class="modal"> <h2 id="deviceModalTitle">Log Device</h2> <div class="form-group"><label>Client *</label><select id="deviceClientId" required><option value="">Select client…</option></select></div> <div class="form-row"><div class="form-group"><label>Device Type *</label><select id="deviceType" required><option value="Laptop">Laptop</option><option value="Desktop">Desktop</option><option value="All-in-One">All-in-One</option><option value="Tablet">Tablet</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div><div class="form-group"><label>Tag / Serial # (optional)</label><input type="text" id="deviceTagSerial" placeholder="Leave blank if unavailable"></div></div> <div class="form-row"><div class="form-group"><label>Brand / Manufacturer *</label><input type="text" id="deviceBrand" required placeholder="Dell, HP, Apple…"></div><div class="form-group"><label>Model</label><input type="text" id="deviceModel" placeholder="Inspiron 15 3000"></div></div> <div class="form-row"><div class="form-group"><label>Operating System</label><input type="text" id="deviceOS" placeholder="Windows 11 Home"></div><div class="form-group"><label>Specs</label><input type="text" id="deviceSpecs" placeholder="i5, 8GB RAM, 256GB SSD"></div></div> <div class="form-group"><label>Condition / Intake Notes</label><textarea id="deviceNotes" rows="3" placeholder="Scratches on lid, missing a key, password provided…"></textarea></div> <div id="deviceModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('deviceModal')">Cancel</button><button class="btn btn-primary" onclick="saveDevice()">Save Device</button></div> </div></div>
+<div class="modal-overlay" id="techNoteModal"> <div class="modal"> <h2 id="techNoteModalTitle">New Playbook Entry</h2> <div class="form-row"><div class="form-group"><label>Title *</label><input type="text" id="techNoteTitle" required placeholder="e.g. HP laptops won't detect SSD after BIOS update"></div><div class="form-group"><label>Category</label><select id="techNoteCategory"><option value="Hardware">Hardware</option><option value="Software">Software</option><option value="Network">Network</option><option value="OS">Operating System</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div></div> <div class="form-group"><label>Problem / Symptom *</label><textarea id="techNoteProblem" rows="2" required placeholder="What you see happening…"></textarea></div> <div class="form-group"><label>Fix / Workaround *</label><textarea id="techNoteSolution" rows="3" required placeholder="The steps that actually worked…"></textarea></div> <div class="form-group"><label>Tags (optional)</label><input type="text" id="techNoteTags" placeholder="bios, ssd, hp, comma separated"></div> <div class="form-group"><label>Notes (optional)</label><textarea id="techNoteNotes" rows="2" placeholder="Anything else worth remembering…"></textarea></div> <div id="techNoteModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('techNoteModal')">Cancel</button><button class="btn btn-primary" onclick="saveTechNote()">Save Entry</button></div> </div></div>
 <div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
 
 <!-- INVOICE MODAL -->
@@ -884,7 +931,7 @@ function initApp() {
     // LOAD ALL DATA
     // =============================================================
     async function loadAll() {
-        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadUsers(), loadPriceList()]);
+        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList()]);
         updateDashboard();
         populateAssigneeFilters();
     }
@@ -1267,6 +1314,7 @@ function initApp() {
                         <div class="detail-tag"><span class="label">🖥️</span><span class="value">${esc(d.device_type||'—')}</span></div>
                         <div class="detail-tag"><span class="label">🏷️</span><span class="value">${esc(d.tag_serial || 'No tag/serial')}</span></div>
                         ${d.os ? `<div class="detail-tag"><span class="label">💽</span><span class="value">${esc(d.os)}</span></div>` : ''}
+                        ${d.issue ? `<div class="detail-tag"><span class="label">⚠️</span><span class="value">${esc(d.issue)}</span></div>` : ''}
                     </div>
                 </div>
                 <div class="list-item-actions">
@@ -1279,7 +1327,7 @@ function initApp() {
     async function saveDevice() {
         const clientId = $('deviceClientId').value;
         const brand = $('deviceBrand').value.trim();
-        const errorEl = $('deviceModalError');
+        const errorEl = $('deviceFormError');
         if (!clientId || !brand) { errorEl.textContent = 'Client and brand/manufacturer are required.'; return; }
         const payload = {
             client_id: clientId,
@@ -1289,6 +1337,8 @@ function initApp() {
             model: $('deviceModel').value.trim() || null,
             os: $('deviceOS').value.trim() || null,
             specs: $('deviceSpecs').value.trim() || null,
+            parts_replaced: $('deviceParts').value.trim() || null,
+            issue: $('deviceIssue').value.trim() || null,
             notes: $('deviceNotes').value.trim() || null
         };
         let error;
@@ -1298,7 +1348,7 @@ function initApp() {
             ({ error } = await sb.from('devices').insert([payload]));
         }
         if (error) { errorEl.textContent = error.message; return; }
-        closeModal('deviceModal');
+        closeDeviceForm();
         await loadDevices();
     }
     async function deleteDevice(id) {
@@ -1311,14 +1361,22 @@ function initApp() {
         sel.innerHTML = '<option value="">Select client…</option>' + allClients.map(c => `<option value="${c.id}">${esc(c.name||'—')}</option>`).join('');
         sel.value = current;
     }
+    function resetDeviceForm() {
+        $('deviceClientId').value = '';
+        $('deviceType').value = 'Laptop';
+        ['deviceTagSerial','deviceBrand','deviceModel','deviceOS','deviceSpecs','deviceParts','deviceIssue','deviceNotes'].forEach(f => $(f).value = '');
+        $('deviceFormError').textContent = '';
+    }
+    function closeDeviceForm() {
+        $('deviceFormPanel').style.display = 'none';
+        currentEditId = null;
+    }
     function openDeviceModal(mode, id = null) {
         currentEditId = id;
-        $('deviceModalTitle').textContent = mode === 'new' ? 'Log Device' : 'Edit Device';
+        $('deviceFormTitle').textContent = mode === 'new' ? 'Log Client Device' : 'Edit Client Device';
         populateClientSelect($('deviceClientId'));
         if (mode === 'new') {
-            $('deviceClientId').value = '';
-            $('deviceType').value = 'Laptop';
-            ['deviceTagSerial','deviceBrand','deviceModel','deviceOS','deviceSpecs','deviceNotes'].forEach(f => $(f).value = '');
+            resetDeviceForm();
         } else {
             const d = allDevices.find(x => x.id === id);
             if (!d) return;
@@ -1329,10 +1387,13 @@ function initApp() {
             $('deviceModel').value = d.model || '';
             $('deviceOS').value = d.os || '';
             $('deviceSpecs').value = d.specs || '';
+            $('deviceParts').value = d.parts_replaced || '';
+            $('deviceIssue').value = d.issue || '';
             $('deviceNotes').value = d.notes || '';
+            $('deviceFormError').textContent = '';
         }
-        $('deviceModalError').textContent = '';
-        $('deviceModal').classList.add('active');
+        $('deviceFormPanel').style.display = 'block';
+        $('deviceFormPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
     function filterDevices() {
         const q = $('deviceSearch').value.toLowerCase();
@@ -1342,9 +1403,9 @@ function initApp() {
         renderDevices(filtered);
     }
     function exportDevicesCSV() {
-        const rows = [['Client','Device Type','Brand','Model','Tag/Serial','OS','Specs','Notes','Logged']];
+        const rows = [['Client','Device Type','Brand','Model','Tag/Serial','OS','Specs','Parts Replaced','Issue Reported','Remarks','Logged']];
         allDevices.forEach(d => rows.push([
-            (d.clients && d.clients.name) || '', d.device_type||'', d.brand||'', d.model||'', d.tag_serial||'', d.os||'', d.specs||'', d.notes||'', d.created_at||''
+            (d.clients && d.clients.name) || '', d.device_type||'', d.brand||'', d.model||'', d.tag_serial||'', d.os||'', d.specs||'', d.parts_replaced||'', d.issue||'', d.notes||'', d.created_at||''
         ]));
         const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -1352,6 +1413,93 @@ function initApp() {
         a.href = URL.createObjectURL(blob);
         a.download = 'devices.csv';
         a.click();
+    }
+
+    // =============================================================
+    // TECH PLAYBOOK — workarounds, fixes, and known-issue notes
+    // =============================================================
+    let allTechNotes = [];
+    async function loadTechNotes() {
+        const listEl = $('techNotesList');
+        listEl.innerHTML = '<div class="status-msg">Loading…</div>';
+        const { data, error } = await sb.from('tech_notes').select('*').order('created_at', { ascending: false });
+        if (error) { listEl.innerHTML = '<div class="status-msg err">Error: ' + error.message + '</div>'; return; }
+        allTechNotes = data || [];
+        renderTechNotes(allTechNotes);
+    }
+    function renderTechNotes(list) {
+        $('techNoteCount').textContent = list.length + ' entr' + (list.length === 1 ? 'y' : 'ies');
+        if (list.length === 0) { $('techNotesList').innerHTML = '<div class="empty-state"><h3>No entries yet</h3></div>'; return; }
+        $('techNotesList').innerHTML = list.map(n => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header"><span class="list-item-title">${esc(n.title||'—')}</span></div>
+                    <div class="list-item-details">
+                        <div class="detail-tag"><span class="label">🏷️</span><span class="value">${esc(n.category||'General')}</span></div>
+                        ${n.tags ? `<div class="detail-tag"><span class="label">#</span><span class="value">${esc(n.tags)}</span></div>` : ''}
+                    </div>
+                    <div style="margin-top:8px;font-size:0.86rem;"><strong>Problem:</strong> ${esc(n.problem||'—')}</div>
+                    <div style="margin-top:4px;font-size:0.86rem;"><strong>Fix:</strong> ${esc(n.solution||'—')}</div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-amber btn-sm" onclick="openTechNoteModal('edit','${n.id}')">✏️ Edit</button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteTechNote('${n.id}')">🗑️ Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    async function saveTechNote() {
+        const title = $('techNoteTitle').value.trim();
+        const problem = $('techNoteProblem').value.trim();
+        const solution = $('techNoteSolution').value.trim();
+        const errorEl = $('techNoteModalError');
+        if (!title || !problem || !solution) { errorEl.textContent = 'Title, problem, and fix/workaround are required.'; return; }
+        const payload = {
+            title,
+            category: $('techNoteCategory').value,
+            problem,
+            solution,
+            tags: $('techNoteTags').value.trim() || null,
+            notes: $('techNoteNotes').value.trim() || null
+        };
+        let error;
+        if (currentEditId) {
+            ({ error } = await sb.from('tech_notes').update(payload).eq('id', currentEditId));
+        } else {
+            ({ error } = await sb.from('tech_notes').insert([payload]));
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        closeModal('techNoteModal');
+        await loadTechNotes();
+    }
+    async function deleteTechNote(id) {
+        if (!confirm('Delete this playbook entry?')) return;
+        await sb.from('tech_notes').delete().eq('id', id);
+        await loadTechNotes();
+    }
+    function openTechNoteModal(mode, id = null) {
+        currentEditId = id;
+        $('techNoteModalTitle').textContent = mode === 'new' ? 'New Playbook Entry' : 'Edit Playbook Entry';
+        if (mode === 'new') {
+            ['techNoteTitle','techNoteProblem','techNoteSolution','techNoteTags','techNoteNotes'].forEach(f => $(f).value = '');
+            $('techNoteCategory').value = 'Hardware';
+        } else {
+            const n = allTechNotes.find(x => x.id === id);
+            if (!n) return;
+            $('techNoteTitle').value = n.title || '';
+            $('techNoteCategory').value = n.category || 'Hardware';
+            $('techNoteProblem').value = n.problem || '';
+            $('techNoteSolution').value = n.solution || '';
+            $('techNoteTags').value = n.tags || '';
+            $('techNoteNotes').value = n.notes || '';
+        }
+        $('techNoteModalError').textContent = '';
+        $('techNoteModal').classList.add('active');
+    }
+    function filterTechNotes() {
+        const q = $('techNoteSearch').value.toLowerCase();
+        const filtered = allTechNotes.filter(n => [n.title||'', n.category||'', n.tags||'', n.problem||''].join(' ').toLowerCase().includes(q));
+        renderTechNotes(filtered);
     }
     function exportClientsCSV() {
         let csv = 'Name,Phone,Email,Address,Notes,Created\n';
@@ -2374,6 +2522,7 @@ function initApp() {
         if (tab === 'dashboard') updateDashboard();
         if (tab === 'billing') loadInvoices();
         if (tab === 'devices') loadDevices();
+        if (tab === 'techplaybook') loadTechNotes();
         if (tab === 'accounting') loadAccounting();
         if (tab === 'settings') renderPriceListManager();
     }
