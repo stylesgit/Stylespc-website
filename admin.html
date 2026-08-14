@@ -523,7 +523,7 @@
     <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('invoiceModal')">Cancel</button>
         <button class="btn btn-ghost" id="invPdfBtn" onclick="downloadInvoicePdf()">📄 Download PDF</button>
-        <button class="btn btn-ghost" id="invPrintBtn" onclick="printInvoice()">🖨️ Print / Save as PDF</button>
+        <a href="#" class="btn btn-ghost" id="invPrintBtn" target="_blank" onclick="return prepareInvoicePrint(event)">🖨️ Print / Save as PDF</a>
         <button class="btn btn-ghost" id="invEmailBtn" onclick="emailInvoiceToClient()">📧 Email to Client</button>
         <button class="btn btn-ghost" id="invMailtoBtn" onclick="composeInvoiceEmailFallback()">✉️ Compose in My Email App</button>
         <button class="btn btn-ghost" id="invWhatsappBtn" onclick="sendInvoiceViaWhatsApp()">📱 Send via WhatsApp</button>
@@ -1733,11 +1733,12 @@ function initApp() {
         }
     }
 
-    function printInvoice() {
+    function prepareInvoicePrint(event) {
         if (!$('invClientName').value.trim()) {
+            event.preventDefault();
             $('invoicePdfStatus').textContent = '⚠️ Enter a client name first.';
             $('invoicePdfStatus').style.color = 'var(--red)';
-            return;
+            return false;
         }
         const html = buildInvoicePdfHtml();
         const filename = ($('invComplimentary').checked ? 'Complimentary_' : 'Invoice_') + $('invNumber').value;
@@ -1781,16 +1782,11 @@ function initApp() {
 
         const blob = new Blob([fullHtml], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
-        const win = window.open(url, '_blank');
-        if (!win) {
-            $('invoicePdfStatus').textContent = '⚠️ Your browser blocked the new tab. Please allow popups for this site and click Print again.';
-            $('invoicePdfStatus').style.color = 'var(--red)';
-            URL.revokeObjectURL(url);
-            return;
-        }
-        $('invoicePdfStatus').textContent = '✅ Opened in a new tab — use the Print button there.';
+        event.currentTarget.href = url;
+        $('invoicePdfStatus').textContent = '✅ Opening in a new tab — use the Print button there.';
         $('invoicePdfStatus').style.color = 'var(--teal-dark)';
         setTimeout(() => URL.revokeObjectURL(url), 120000);
+        return true; // let the browser follow the link natively — this is what avoids the popup blocker
     }
 
     async function generateInvoicePdfDataUri() {
