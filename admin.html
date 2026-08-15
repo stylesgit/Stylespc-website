@@ -478,7 +478,8 @@
             <div class="pl-card"><div class="pl-label">Discounts Given</div><div class="pl-value" id="plDiscounts">—</div></div>
             <div class="pl-card"><div class="pl-label">Complimentary Value</div><div class="pl-value" id="plComp">—</div></div>
             <div class="pl-card"><div class="pl-label">Total Expenses</div><div class="pl-value" id="plExpenses">—</div></div>
-            <div class="pl-card" id="plNetCard"><div class="pl-label">Net Profit</div><div class="pl-value" id="plNet">—</div></div>
+            <div class="pl-card" id="plNetCard"><div class="pl-label">Net Profit (Collected)</div><div class="pl-value" id="plNet">—</div></div>
+            <div class="pl-card" id="plNetBilledCard"><div class="pl-label">Net Profit (Billed, incl. unpaid)</div><div class="pl-value" id="plNetBilled">—</div></div>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px;">
@@ -618,8 +619,11 @@
             <div class="trow"><span id="invDiscountLabel">Discount</span><span id="invDiscountOut">-$0.00</span></div>
             <div class="trow" id="invTaxRow" style="display:none;"><span>Tax (GCT 15%)</span><span id="invTaxOut">$0.00</span></div>
             <div class="trow grand"><span>Grand Total</span><span id="invGrandOut">$0.00</span></div>
-            <div class="trow"><span>Amount Paid</span><span><input type="number" id="invAmountPaid" min="0" value="0" style="width:110px;text-align:right;padding:4px 6px;" oninput="recalcInvoiceTotals()"></span></div>
-            <div class="trow balance"><span>Balance Due</span><span id="invBalanceOut">$0.00</span></div>
+            <div id="invPaymentRows">
+                <div class="trow"><span>Amount Paid</span><span><input type="number" id="invAmountPaid" min="0" value="0" style="width:110px;text-align:right;padding:4px 6px;" oninput="recalcInvoiceTotals()"></span></div>
+                <div class="trow balance"><span>Balance Due</span><span id="invBalanceOut">$0.00</span></div>
+            </div>
+            <div class="trow balance" id="invWaivedRow" style="display:none;"><span>Amount Charged</span><span>$0.00 — waived (complimentary)</span></div>
         </div>
     </div>
 
@@ -1864,8 +1868,9 @@ function initApp() {
         const applyGct = $('invApplyGct').checked;
         const tax = applyGct ? afterDiscount * GCT_RATE : 0;
         const grand = afterDiscount + tax;
-        const paid = parseFloat($('invAmountPaid').value) || 0;
-        const balance = grand - paid;
+        const isComp = $('invComplimentary').checked;
+        const paid = isComp ? grand : (parseFloat($('invAmountPaid').value) || 0);
+        const balance = isComp ? 0 : grand - paid;
 
         $('invSubtotalOut').textContent = fmtMoney(subtotal);
         $('invDiscountLabel').textContent = `Discount (${discPct}%)`;
@@ -1879,8 +1884,15 @@ function initApp() {
     }
     function toggleComplimentary() {
         const isComp = $('invComplimentary').checked;
-        $('invBillableSection').style.display = isComp ? 'none' : 'block';
+        // Keep line items visible even when complimentary, so the real value of
+        // the job still gets recorded — only what's actually charged/collected
+        // is waived. Previously this hid the whole items section, which meant
+        // complimentary jobs never had a real total on file.
+        $('invBillableSection').style.display = 'block';
         $('invComplimentarySection').style.display = isComp ? 'block' : 'none';
+        $('invPaymentRows').style.display = isComp ? 'none' : 'block';
+        $('invWaivedRow').style.display = isComp ? 'flex' : 'none';
+        recalcInvoiceTotals();
     }
 
     async function nextInvoiceNumber() {
@@ -1970,12 +1982,17 @@ function initApp() {
             due_date: $('invDueDate').value || null,
             reference: $('invReference').value.trim() || null,
             is_complimentary: isComp,
-            items: isComp ? [] : totals.items,
-            subtotal: isComp ? 0 : totals.subtotal,
-            discount_pct: isComp ? 0 : totals.discPct,
-            discount_amount: isComp ? 0 : totals.discountAmount,
-            tax_amount: isComp ? 0 : totals.tax,
-            grand_total: isComp ? 0 : totals.grand,
+            // Keep the real itemized value on file even for complimentary jobs —
+            // only what's actually charged/collected is zeroed. This is what
+            // "Complimentary Value" on the P&L reports; previously this entire
+            // block was zeroed for isComp, so that figure had nothing real to
+            // work from and fell back to a rough, misleading estimate instead.
+            items: totals.items,
+            subtotal: totals.subtotal,
+            discount_pct: totals.discPct,
+            discount_amount: totals.discountAmount,
+            tax_amount: totals.tax,
+            grand_total: totals.grand,
             amount_paid: isComp ? 0 : totals.paid,
             balance_due: isComp ? 0 : totals.balance,
             status: isComp ? 'complimentary' : $('invStatus').value,
@@ -2354,9 +2371,21 @@ function initApp() {
         const taxCollected = billable.reduce((s, i) => s + (Number(i.tax_amount) || 0), 0);
         const discountsGiven = billable.reduce((s, i) => s + (Number(i.discount_amount) || 0), 0);
         const avgTicket = billable.length ? billable.reduce((s, i) => s + (Number(i.grand_total) || 0), 0) / billable.length : 0;
-        const compValue = comp.length * avgTicket;
+        // Complimentary jobs now store their real itemized total (see saveInvoice) —
+        // sum that directly. Any older complimentary invoice saved before this fix
+        // still has grand_total = 0 on file, so fall back to the average-ticket
+        // estimate for just those, rather than losing them from the total.
+        const compWithRealValue = comp.filter(i => Number(i.grand_total) > 0);
+        const compLegacy = comp.length - compWithRealValue.length;
+        const compValue = compWithRealValue.reduce((s, i) => s + Number(i.grand_total), 0) + (compLegacy * avgTicket);
         const totalExpenses = allExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
         const netProfit = revenueCollected - totalExpenses;
+        // Cash-basis "Net Profit" only counts money actually collected — Outstanding
+        // A/R is billed but not yet paid, so it's deliberately excluded. That's the
+        // financially safe default (it won't imply cash you don't have yet), but a
+        // business owner often also wants "what have I earned from work done,
+        // whether or not it's been paid" — this second figure covers that view.
+        const netProfitBilled = revenueCollected + outstanding - totalExpenses;
 
         $('plRevenue').textContent = fmtMoney(revenueCollected);
         $('plOutstanding').textContent = fmtMoney(outstanding);
@@ -2366,6 +2395,8 @@ function initApp() {
         $('plExpenses').textContent = fmtMoney(totalExpenses);
         $('plNet').textContent = fmtMoney(netProfit);
         $('plNetCard').className = 'pl-card ' + (netProfit >= 0 ? 'positive' : 'negative');
+        $('plNetBilled').textContent = fmtMoney(netProfitBilled);
+        $('plNetBilledCard').className = 'pl-card ' + (netProfitBilled >= 0 ? 'positive' : 'negative');
 
         renderExpenses(allExpenses);
     }
