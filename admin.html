@@ -101,6 +101,10 @@
         .form-group { margin-bottom: 16px; }
         .form-group label { display: block; font-weight: 600; font-size: 0.82rem; color: var(--ink-soft); margin-bottom: 5px; }
         .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 9px 13px; border: 1px solid var(--rule); border-radius: var(--radius); font-family: inherit; font-size: 0.9rem; background: var(--white); }
+        .pw-wrap { position: relative; }
+        .pw-wrap input { padding-right: 40px !important; }
+        .pw-toggle { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 1rem; padding: 6px 8px; line-height: 1; color: var(--ink-soft); }
+        .pw-toggle:hover { color: var(--ink); }
         .form-group textarea { resize: vertical; min-height: 90px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
@@ -276,7 +280,7 @@
             </div>
             <div class="form-group">
                 <label for="loginPassword">Password</label>
-                <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
+                <div class="pw-wrap"><input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password"><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('loginPassword', this)" aria-label="Show password">👁️</button></div>
             </div>
             <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;">Sign In</button>
             <div id="loginError" class="login-error"></div>
@@ -562,7 +566,7 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" required placeholder="Jane Smith" onblur="titleCaseField(this)"></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" required placeholder="Dell Inspiron 15"></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
+<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" list="ticketClientList" required placeholder="Start typing or pick from the list" onblur="titleCaseField(this)" oninput="autofillTicketFromClientName()"><datalist id="ticketClientList"></datalist></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" list="ticketDeviceList" required placeholder="Dell Inspiron 15, or pick a device on file"><datalist id="ticketDeviceList"></datalist></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
 <div class="modal-overlay" id="techNoteModal"> <div class="modal"> <h2 id="techNoteModalTitle">New Playbook Entry</h2> <div class="form-row"><div class="form-group"><label>Title *</label><input type="text" id="techNoteTitle" required placeholder="e.g. HP laptops won't detect SSD after BIOS update"></div><div class="form-group"><label>Category</label><select id="techNoteCategory"><option value="Hardware">Hardware</option><option value="Software">Software</option><option value="Network">Network</option><option value="OS">Operating System</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div></div> <div class="form-group"><label>Problem / Symptom *</label><textarea id="techNoteProblem" rows="2" required placeholder="What you see happening…"></textarea></div> <div class="form-group"><label>Fix / Workaround *</label><textarea id="techNoteSolution" rows="3" required placeholder="The steps that actually worked…"></textarea></div> <div class="form-group"><label>Tags (optional)</label><input type="text" id="techNoteTags" placeholder="bios, ssd, hp, comma separated"></div> <div class="form-group"><label>Notes (optional)</label><textarea id="techNoteNotes" rows="2" placeholder="Anything else worth remembering…"></textarea></div> <div id="techNoteModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('techNoteModal')">Cancel</button><button class="btn btn-primary" onclick="saveTechNote()">Save Entry</button></div> </div></div>
 <div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
@@ -674,9 +678,9 @@
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
 </div></div>
 
-<div class="modal-overlay" id="userModal"> <div class="modal"> <h2 id="userModalTitle">Add User</h2> <form id="userForm" onsubmit="saveUser(event)"> <div class="form-group"><label>Email *</label><input type="email" id="userEmail" required placeholder="staff@stylespc.com"></div> <div class="form-group"><label>Password <span id="pwLabel">(required)</span></label><input type="password" id="userPassword" placeholder="Min. 6 characters"></div> <div class="form-row"><div class="form-group"><label>Role</label><select id="userRole"><option value="User">User</option><option value="Manager">Manager</option><option value="Technician">Technician</option><option value="Admin">Admin</option></select></div><div class="form-group"><label>Password Expiry (days)</label><input type="number" id="userExpiryDays" value="30" min="1" max="365"></div></div> <div class="checkbox-group"><input type="checkbox" id="userMustChange" checked><label for="userMustChange">Must change password at next login</label></div> <div id="userModalError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button type="submit" class="btn btn-primary">Save User</button></div> </form> </div></div>
+<div class="modal-overlay" id="userModal"> <div class="modal"> <h2 id="userModalTitle">Add User</h2> <form id="userForm" onsubmit="saveUser(event)"> <div class="form-group"><label>Email *</label><input type="email" id="userEmail" required placeholder="staff@stylespc.com"></div> <div class="form-group"><label>Password <span id="pwLabel">(required)</span></label><div class="pw-wrap"><input type="password" id="userPassword" placeholder="Min. 6 characters"><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('userPassword', this)" aria-label="Show password">👁️</button></div></div> <div class="form-row"><div class="form-group"><label>Role</label><select id="userRole"><option value="User">User</option><option value="Manager">Manager</option><option value="Technician">Technician</option><option value="Admin">Admin</option></select></div><div class="form-group"><label>Password Expiry (days)</label><input type="number" id="userExpiryDays" value="30" min="1" max="365"></div></div> <div class="checkbox-group"><input type="checkbox" id="userMustChange" checked><label for="userMustChange">Must change password at next login</label></div> <div id="userModalError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button type="submit" class="btn btn-primary">Save User</button></div> </form> </div></div>
 
-<div class="modal-overlay" id="changePasswordModal"> <div class="modal"> <h2>Change Password</h2> <form id="changePasswordForm" onsubmit="handleChangePassword(event)"> <div class="form-group"><label>Current Password</label><input type="password" id="currentPassword" required></div> <div class="form-group"><label>New Password</label><input type="password" id="newPassword" required placeholder="Min. 6 characters"></div> <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmPassword" required></div> <div id="changePasswordError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button><button type="submit" class="btn btn-primary">Update Password</button></div> </form> </div></div>
+<div class="modal-overlay" id="changePasswordModal"> <div class="modal"> <h2>Change Password</h2> <form id="changePasswordForm" onsubmit="handleChangePassword(event)"> <div class="form-group"><label>Current Password</label><div class="pw-wrap"><input type="password" id="currentPassword" required><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('currentPassword', this)" aria-label="Show password">👁️</button></div></div> <div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="newPassword" required placeholder="Min. 6 characters"><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('newPassword', this)" aria-label="Show password">👁️</button></div></div> <div class="form-group"><label>Confirm New Password</label><div class="pw-wrap"><input type="password" id="confirmPassword" required><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('confirmPassword', this)" aria-label="Show password">👁️</button></div></div> <div id="changePasswordError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button><button type="submit" class="btn btn-primary">Update Password</button></div> </form> </div></div>
 
 <!-- ============================================================ -->
 <!-- JAVASCRIPT – Waits for Supabase to load                     -->
@@ -847,6 +851,13 @@ function initApp() {
     let statusChart = null, priorityChart = null;
 
     function $(id) { return document.getElementById(id); }
+    function togglePasswordVisibility(id, btn) {
+        const input = $(id);
+        const isHidden = input.type === 'password';
+        input.type = isHidden ? 'text' : 'password';
+        btn.textContent = isHidden ? '🙈' : '👁️';
+        btn.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+    }
     function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function genTag() { return 'SPC-' + Math.floor(1000 + Math.random() * 9000); }
 
@@ -1094,7 +1105,36 @@ function initApp() {
             $('ticketCommentsSection').style.display = 'block';
         }
         populateAssigneeSelect($('ticketAssignee'));
+        populateTicketClientDatalist();
+        populateTicketDeviceDatalist(mode === 'edit' ? findClientIdByName($('ticketClientName').value) : null);
         $('ticketModal').classList.add('active');
+    }
+
+    // ---- Client Name/Device dropdown-text-box: type to filter, or pick from the list ----
+    function populateTicketClientDatalist() {
+        $('ticketClientList').innerHTML = allClients.map(c => `<option value="${esc(c.name || '')}">`).join('');
+    }
+    function populateTicketDeviceDatalist(clientId) {
+        const devices = clientId ? allDevices.filter(d => d.client_id === clientId) : [];
+        $('ticketDeviceList').innerHTML = devices.map(d => {
+            const label = [d.brand, d.model].filter(Boolean).join(' ') + (d.tag_serial ? ` (${d.tag_serial})` : '');
+            return `<option value="${esc(label)}">`;
+        }).join('');
+    }
+    function findClientIdByName(name) {
+        const match = allClients.find(c => (c.name || '').toLowerCase() === (name || '').toLowerCase());
+        return match ? match.id : null;
+    }
+    function autofillTicketFromClientName() {
+        const name = $('ticketClientName').value;
+        const match = allClients.find(c => (c.name || '').toLowerCase() === name.toLowerCase());
+        if (match) {
+            $('ticketPhone').value = match.phone || '';
+            $('ticketEmail').value = match.email || '';
+            populateTicketDeviceDatalist(match.id);
+        } else {
+            populateTicketDeviceDatalist(null);
+        }
     }
 
     // ---- Comments ----
@@ -2722,6 +2762,9 @@ function initApp() {
     window.deleteExpense = deleteExpense;
     window.exportExpensesCSV = exportExpensesCSV;
     window.sendTicketSummaryEmail = sendTicketSummaryEmail;
+    window.togglePasswordVisibility = togglePasswordVisibility;
+    window.autofillTicketFromClientName = autofillTicketFromClientName;
+    window.filterClients = filterClients;
 
     // ---- Devices & Tech Playbook ----
     window.openDeviceModal = openDeviceModal;
