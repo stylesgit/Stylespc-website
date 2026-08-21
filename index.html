@@ -620,6 +620,31 @@
             margin: 0;
         }
 
+        /* register CTA (free assessment section) */
+        .register-benefits {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+        @media (max-width: 720px) { .register-benefits { grid-template-columns: 1fr; } }
+        .register-benefit {
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 18px 18px 20px;
+            text-align: left;
+        }
+        .register-benefit .tag {
+            font-family: 'IBM Plex Mono';
+            font-size: 0.72rem;
+            letter-spacing: 0.06em;
+            color: var(--teal-dark);
+        }
+        .register-benefit.amber .tag { color: var(--amber); }
+        .register-benefit h3 { font-size: 0.98rem; margin: 8px 0 0; }
+
         /* steps */
         .steps {
             display: grid;
@@ -1597,6 +1622,7 @@
                 <li><a href="#faq">FAQ</a></li>
             </ul>
             <a href="status.html" class="nav-track">Track Repair</a>
+            <a href="client-registration.html" class="nav-track">Register Free</a>
             <a href="#contact" class="nav-cta">Book a Repair</a>
         </nav>
     </header>
@@ -2189,6 +2215,36 @@
                         </button>
                         <div class="faq-a">For software, OS, and application issues, we can connect remotely to your computer using a screen-sharing tool. You download a small temporary app, share the code with us, and we take it from there — no device needs to leave your home. Sessions typically last 30–90 minutes depending on complexity.</div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================
+        REGISTER — FREE ASSESSMENT (no booking required)
+        ============================================================ -->
+        <section id="register" class="alt">
+            <div class="wrap">
+                <div class="section-head" style="text-align:center;margin-left:auto;margin-right:auto;">
+                    <span class="eyebrow" style="justify-content:center;">No booking needed · Takes 30 seconds</span>
+                    <h2>Not ready to book? Register free instead.</h2>
+                    <p style="margin:0 auto;">Get on file now, and I'll assess your device free of charge the first time you actually need a repair — no obligation to proceed after.</p>
+                </div>
+                <div class="register-benefits">
+                    <div class="register-benefit amber">
+                        <div class="tag">◆ Welcome offer</div>
+                        <h3>Free first assessment</h3>
+                    </div>
+                    <div class="register-benefit">
+                        <div class="tag">◆ Priority</div>
+                        <h3>Skip to the front next time</h3>
+                    </div>
+                    <div class="register-benefit">
+                        <div class="tag">◆ No repeating yourself</div>
+                        <h3>I remember your devices</h3>
+                    </div>
+                </div>
+                <div style="text-align:center;margin-top:32px;">
+                    <a href="client-registration.html" class="btn btn-amber">Register — Get Free Assessment</a>
                 </div>
             </div>
         </section>
