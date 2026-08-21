@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register as a StylesPC Client</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+    :root {
+        --bg: #0B1410;
+        --bg-2: #0F1B15;
+        --panel: #12201A;
+        --rule: #24362C;
+        --ink: #EAEFE9;
+        --ink-soft: #8FA396;
+        --ink-faint: #5C6E62;
+        --green: #3DDC84;
+        --green-dim: #1F8F53;
+        --amber: #E8A33D;
+        --mono: 'JetBrains Mono', ui-monospace, monospace;
+        --sans: 'Manrope', -apple-system, sans-serif;
+        --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+        margin: 0;
+        background: radial-gradient(ellipse 1200px 800px at 50% -10%, #14261C 0%, var(--bg) 55%);
+        color: var(--ink);
+        font-family: var(--sans);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--green); }
+    ::selection { background: var(--green-dim); color: #fff; }
+    :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---- Terminal boot sequence ---- */
+    .terminal {
+        max-width: 640px;
+        margin: 64px auto 0;
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 40px 100px -40px rgba(0,0,0,0.6);
+    }
+    .terminal-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: #0D1712;
+        border-bottom: 1px solid var(--rule);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: #2A3B32; }
+    .terminal-title { margin-left: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
+    .terminal-body {
+        padding: 22px 24px 26px;
+        font-family: var(--mono);
+        font-size: 14px;
+        color: var(--green);
+        min-height: 132px;
+    }
+    .terminal-line { opacity: 0; white-space: pre-wrap; }
+    .terminal-line.show { opacity: 1; }
+    .terminal-line .dim { color: var(--ink-faint); }
+    .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 16px;
+        background: var(--green);
+        vertical-align: text-bottom;
+        margin-left: 2px;
+        animation: blink 1s steps(1) infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ---- Hero ---- */
+    .hero {
+        text-align: center;
+        padding: 56px 24px 8px;
+    }
+    .eyebrow {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--green);
+        margin-bottom: 18px;
+    }
+    h1 {
+        font-family: var(--mono);
+        font-weight: 800;
+        font-size: clamp(2rem, 5vw, 3.1rem);
+        line-height: 1.08;
+        letter-spacing: -0.01em;
+        margin: 0 0 18px;
+    }
+    h1 .accent { color: var(--green); }
+    .sub {
+        font-size: 1.05rem;
+        color: var(--ink-soft);
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    /* ---- Benefits ---- */
+    .benefits {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin: 48px auto 0;
+        max-width: 640px;
+        padding: 0 24px;
+    }
+    @media (max-width: 560px) { .benefits { grid-template-columns: 1fr; } }
+    .benefit {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: var(--radius);
+        padding: 18px 18px 20px;
+    }
+    .benefit .tag {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--green);
+        letter-spacing: 0.06em;
+    }
+    .benefit.amber .tag { color: var(--amber); }
+    .benefit h3 {
+        font-size: 1rem;
+        margin: 8px 0 6px;
+        font-weight: 700;
+    }
+    .benefit p {
+        font-size: 0.88rem;
+        color: var(--ink-soft);
+        margin: 0;
+    }
+
+    /* ---- Form ---- */
+    .panel {
+        max-width: 520px;
+        margin: 52px auto 0;
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: var(--radius);
+        padding: 30px 28px 28px;
+    }
+    .panel-head {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--ink-faint);
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+    }
+    .panel h2 {
+        font-size: 1.3rem;
+        margin: 4px 0 22px;
+    }
+    label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--ink-soft);
+        margin-bottom: 6px;
+    }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
+    .field { margin-bottom: 16px; }
+    input {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 9px;
+        border: 1px solid var(--rule);
+        background: #0D1712;
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 0.95rem;
+    }
+    input::placeholder { color: var(--ink-faint); }
+    input:focus { border-color: var(--green-dim); }
+
+    .btn {
+        width: 100%;
+        margin-top: 6px;
+        padding: 15px 18px;
+        border-radius: 9px;
+        border: none;
+        background: var(--green);
+        color: #06130C;
+        font-family: var(--mono);
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: 0.01em;
+        cursor: pointer;
+        transition: transform 0.15s ease, background 0.15s ease;
+    }
+    .btn:hover { background: #4FE894; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+
+    .fine {
+        text-align: center;
+        font-size: 0.78rem;
+        color: var(--ink-faint);
+        margin-top: 14px;
+    }
+    .error {
+        color: #FF8A7A;
+        font-size: 0.85rem;
+        margin-top: 4px;
+        min-height: 1em;
+    }
+
+    /* ---- Success state ---- */
+    .success {
+        display: none;
+        text-align: center;
+        padding: 8px 4px 4px;
+    }
+    .success .check {
+        width: 52px; height: 52px;
+        border-radius: 50%;
+        background: var(--green-dim);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 1.4rem;
+    }
+    .success h2 { margin-bottom: 10px; }
+    .success p { color: var(--ink-soft); font-size: 0.95rem; }
+    .success .code {
+        display: inline-block;
+        margin-top: 14px;
+        padding: 8px 16px;
+        background: #0D1712;
+        border: 1px dashed var(--amber);
+        border-radius: 8px;
+        font-family: var(--mono);
+        color: var(--amber);
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    footer {
+        text-align: center;
+        padding: 56px 24px 40px;
+        font-size: 0.8rem;
+        color: var(--ink-faint);
+    }
+    footer a { color: var(--ink-faint); text-decoration: underline; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .terminal-line { opacity: 1 !important; }
+        .cursor { animation: none; }
+        html { scroll-behavior: auto; }
+    }
+</style>
+</head>
+<body>
+
+    <div class="terminal">
+        <div class="terminal-bar">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span class="terminal-title">stylespc — client-registration</span>
+        </div>
+        <div class="terminal-body" id="bootLines">
+            <div class="terminal-line" id="l1"><span class="dim">$</span> checking device history for this browser...</div>
+            <div class="terminal-line" id="l2"><span class="dim">$</span> no record found</div>
+            <div class="terminal-line" id="l3"><span class="dim">$</span> creating a client profile means faster service, every time.<span class="cursor" id="cur"></span></div>
+        </div>
+    </div>
+
+    <div class="hero">
+        <div class="eyebrow">StylesPC · Client Registry</div>
+        <h1>Get on the list<br>before you <span class="accent">need us.</span></h1>
+        <p class="sub">No repair to book, no appointment needed — just 30 seconds now so we already know you next time something breaks.</p>
+    </div>
+
+    <div class="benefits">
+        <div class="benefit amber">
+            <div class="tag">◆ WELCOME OFFER</div>
+            <h3>Free assessment on your first repair</h3>
+            <p>We'll assess your device free of charge before any work begins — no obligation.</p>
+        </div>
+        <div class="benefit">
+            <div class="tag">◆ PRIORITY</div>
+            <h3>Skip to the front</h3>
+            <p>Registered clients get priority scheduling over walk-ins.</p>
+        </div>
+        <div class="benefit">
+            <div class="tag">◆ NO REPEATING YOURSELF</div>
+            <h3>We remember your devices</h3>
+            <p>Model, history, past fixes — on file, so every visit starts faster.</p>
+        </div>
+        <div class="benefit">
+            <div class="tag">◆ STAY AHEAD</div>
+            <h3>Early access to promos</h3>
+            <p>Occasional maintenance tips and seasonal offers. Nothing else.</p>
+        </div>
+    </div>
+
+    <div class="panel" id="formPanel">
+        <div class="panel-head"><span>REGISTER_CLIENT.FORM</span><span id="fieldCount">0/3</span></div>
+        <h2>Create your client profile</h2>
+
+        <div class="row">
+            <div class="field">
+                <label for="fname">First name</label>
+                <input type="text" id="fname" placeholder="Kemar" autocomplete="given-name">
+            </div>
+            <div class="field">
+                <label for="lname">Last name</label>
+                <input type="text" id="lname" placeholder="Brown" autocomplete="family-name">
+            </div>
+        </div>
+        <div class="field">
+            <label for="phone">Phone number</label>
+            <input type="tel" id="phone" placeholder="876 334-1156" autocomplete="tel">
+        </div>
+        <div class="field">
+            <label for="email">Email <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></label>
+            <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+        </div>
+
+        <button class="btn" id="submitBtn" onclick="submitRegistration()">Register — takes 30 seconds</button>
+        <div class="error" id="formError"></div>
+        <p class="fine">No spam, ever. We'll only reach out about your own repairs and the occasional real offer.</p>
+    </div>
+
+    <div class="panel success" id="successPanel">
+        <div class="check">✓</div>
+        <h2>You're on the list, <span id="successName"></span>.</h2>
+        <p>Your profile is saved. Next time you bring in a device, just give us your name — your first assessment is on us.</p>
+        <div class="code">FREE ASSESSMENT · FIRST REPAIR</div>
+    </div>
+
+    <footer>
+        StylesPC — PC Repair &amp; Support · Kingston, Jamaica<br>
+        <a href="admin.html">Staff login →</a>
+    </footer>
+
+<script>
+    // ---- boot sequence & field counter: independent of Supabase, always runs ----
+    (function boot() {
+        const lines = [document.getElementById('l1'), document.getElementById('l2'), document.getElementById('l3')];
+        const cur = document.getElementById('cur');
+        lines.forEach((el, i) => {
+            setTimeout(() => { el.classList.add('show'); if (i < lines.length - 1) cur.remove(); }, i === 0 ? 150 : i === 1 ? 650 : 1150);
+        });
+    })();
+
+    function toTitleCase(s) {
+        return s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
+    }
+    function updateCount() {
+        const f = document.getElementById('fname').value.trim();
+        const l = document.getElementById('lname').value.trim();
+        const p = document.getElementById('phone').value.trim();
+        const n = (f ? 1 : 0) + (l ? 1 : 0) + (p ? 1 : 0);
+        document.getElementById('fieldCount').textContent = n + '/3';
+    }
+    ['fname', 'lname', 'phone'].forEach(id => document.getElementById(id).addEventListener('input', updateCount));
+</script>
+<script>
+    // ---- Supabase submission: isolated so a CDN load failure here can't ----
+    // ---- break the animation/form above, which don't depend on it. ----
+    let sb = null;
+    try {
+        sb = supabase.createClient(
+            'https://gtfqasmqbgxjfnwlvxjp.supabase.co',
+            'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1'
+        );
+    } catch (e) {
+        console.error('Supabase failed to load:', e);
+    }
+
+    async function submitRegistration() {
+        const fname = toTitleCase(document.getElementById('fname').value.trim());
+        const lname = toTitleCase(document.getElementById('lname').value.trim());
+        const phone = document.getElementById('phone').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const errorEl = document.getElementById('formError');
+        const btn = document.getElementById('submitBtn');
+
+        if (!fname || !lname || !phone) {
+            errorEl.textContent = 'First name, last name, and phone are required.';
+            return;
+        }
+        if (!sb) {
+            errorEl.textContent = 'Could not connect right now — please refresh the page and try again, or call us directly.';
+            return;
+        }
+        errorEl.textContent = '';
+        btn.disabled = true;
+        btn.textContent = 'Registering...';
+
+        const payload = {
+            name: fname + ' ' + lname,
+            phone,
+            email: email || null,
+            notes: 'Self-registered via website (no booking)'
+        };
+        const { error } = await sb.from('clients').insert([payload]);
+
+        if (error) {
+            errorEl.textContent = 'Something went wrong — please try again, or call us directly.';
+            btn.disabled = false;
+            btn.textContent = 'Register — takes 30 seconds';
+            console.error(error);
+            return;
+        }
+
+        document.getElementById('successName').textContent = fname;
+        document.getElementById('formPanel').style.display = 'none';
+        document.getElementById('successPanel').style.display = 'block';
+        document.getElementById('successPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+</script>
+
+</body>
+</html>
