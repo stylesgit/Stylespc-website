@@ -247,7 +247,9 @@
             name: fname + ' ' + lname,
             phone,
             email: email || null,
-            notes: 'Self-registered via website (no booking)'
+            notes: 'Self-registered via website (no booking)',
+            self_registered: true,
+            free_assessment_used: false
         };
         const { error } = await sb.from('clients').insert([payload]);
 
