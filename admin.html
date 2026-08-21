@@ -566,7 +566,7 @@
 </div>
 
 <!-- ===== MODALS ===== -->
-<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" list="ticketClientList" required placeholder="Start typing or pick from the list" onblur="titleCaseField(this)" oninput="autofillTicketFromClientName()"><datalist id="ticketClientList"></datalist></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" list="ticketDeviceList" required placeholder="Dell Inspiron 15, or pick a device on file"><datalist id="ticketDeviceList"></datalist></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
+<div class="modal-overlay" id="ticketModal"> <div class="modal"> <h2 id="ticketModalTitle">New Ticket</h2> <div class="form-group"><label>Service Tag #</label><input type="text" id="ticketTag" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';letter-spacing:0.04em;"></div> <div class="form-row"><div class="form-group"><label>Client Name *</label><input type="text" id="ticketClientName" list="ticketClientList" required placeholder="Start typing or pick from the list" onblur="titleCaseField(this)" oninput="autofillTicketFromClientName()"><datalist id="ticketClientList"></datalist></div><div class="form-group"><label>Phone *</label><input type="tel" id="ticketPhone" required placeholder="876 334-1156"></div></div> <div class="form-group"><label>Email</label><input type="email" id="ticketEmail" placeholder="client@email.com"></div> <div class="form-group"><label>Device *</label><input type="text" id="ticketDevice" list="ticketDeviceList" required placeholder="Dell Inspiron 15, or pick a device on file"><datalist id="ticketDeviceList"></datalist></div> <div class="form-group"><label>Issue *</label><textarea id="ticketIssue" required placeholder="Describe the problem…"></textarea></div> <div class="form-row"><div class="form-group"><label>Status</label><select id="ticketStatus"><option value="received">Received</option><option value="diagnosing">Diagnosing</option><option value="in_progress">In Progress</option><option value="ready">Ready</option><option value="delivered">Delivered</option><option value="cancelled">Cancelled</option></select></div><div class="form-group"><label>Priority</label><select id="ticketPriority"><option value="Medium">Medium</option><option value="High">High</option><option value="Low">Low</option></select></div></div> <div class="form-row"><div class="form-group"><label>Assignee</label><select id="ticketAssignee"><option value="">Unassigned</option></select></div><div class="form-group"><label>Due Date</label><input type="date" id="ticketDueDate"></div></div> <div class="form-row"><div class="form-group"><label>Amount (JMD)</label><input type="number" id="ticketAmount" placeholder="0" min="0"></div><div class="form-group"><label>Payment Status</label><select id="ticketPayment"><option value="unpaid">Unpaid</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="complimentary">Complimentary</option></select></div></div> <div id="ticketFreeAssessmentBanner" style="display:none;background:#FDF3E7;border:1px dashed #C97A2B;border-radius:6px;padding:10px 14px;margin:-6px 0 12px;font-size:0.85rem;color:#8a5a1f;">🎁 First-time registered client — amount set to $0 (free assessment). Adjust manually if this doesn't apply.</div> <div class="form-group"><label>Notes (internal)</label><textarea id="ticketNotes" placeholder="Internal notes…"></textarea></div> <div id="ticketCommentsSection" style="display:none; border-top:1px solid var(--rule); padding-top:12px; margin-top:12px;"><h4>Comments & Attachments</h4><div class="comment-thread" id="commentThread"></div><div class="file-upload"><input type="file" id="fileInput" multiple><button class="btn btn-sm btn-ghost" onclick="uploadAttachment()">Upload</button></div><div class="form-group" style="margin-top:8px;"><textarea id="newComment" rows="2" placeholder="Add a comment…"></textarea><button class="btn btn-sm btn-primary" onclick="addComment()">Post Comment</button> <button class="btn btn-sm btn-ghost" id="emailSummaryBtn" onclick="sendTicketSummaryEmail()">📧 Email Summary to Me</button></div><div id="summaryEmailStatus" style="font-size:12px;margin-top:6px;"></div></div> <div id="ticketModalError" class="modal-error"></div> <div id="confirmEmailStatus" style="font-size:13px;margin-top:6px;"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('ticketModal')">Cancel</button><button class="btn btn-ghost" id="sendConfirmBtn" onclick="sendConfirmationEmail()">Send Confirmation Email</button><button class="btn btn-primary" onclick="saveTicket()">Save Ticket</button></div> </div></div>
 
 <div class="modal-overlay" id="techNoteModal"> <div class="modal"> <h2 id="techNoteModalTitle">New Playbook Entry</h2> <div class="form-row"><div class="form-group"><label>Title *</label><input type="text" id="techNoteTitle" required placeholder="e.g. HP laptops won't detect SSD after BIOS update"></div><div class="form-group"><label>Category</label><select id="techNoteCategory"><option value="Hardware">Hardware</option><option value="Software">Software</option><option value="Network">Network</option><option value="OS">Operating System</option><option value="Printer">Printer</option><option value="Other">Other</option></select></div></div> <div class="form-group"><label>Problem / Symptom *</label><textarea id="techNoteProblem" rows="2" required placeholder="What you see happening…"></textarea></div> <div class="form-group"><label>Fix / Workaround *</label><textarea id="techNoteSolution" rows="3" required placeholder="The steps that actually worked…"></textarea></div> <div class="form-group"><label>Tags (optional)</label><input type="text" id="techNoteTags" placeholder="bios, ssd, hp, comma separated"></div> <div class="form-group"><label>Notes (optional)</label><textarea id="techNoteNotes" rows="2" placeholder="Anything else worth remembering…"></textarea></div> <div id="techNoteModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('techNoteModal')">Cancel</button><button class="btn btn-primary" onclick="saveTechNote()">Save Entry</button></div> </div></div>
 <div class="modal-overlay" id="clientModal"> <div class="modal"> <h2 id="clientModalTitle">New Client</h2> <div class="form-row"><div class="form-group"><label>First Name *</label><input type="text" id="clientFirstName" required onblur="titleCaseField(this)"></div><div class="form-group"><label>Last Name *</label><input type="text" id="clientLastName" required onblur="titleCaseField(this)"></div></div> <div class="form-row"><div class="form-group"><label>Phone *</label><input type="tel" id="clientPhone" required placeholder="876 334-1156"></div><div class="form-group"><label>Email</label><input type="email" id="clientEmail"></div></div> <div class="form-group"><label>Address</label><textarea id="clientAddress" rows="2"></textarea></div> <div class="form-group"><label>Notes</label><textarea id="clientNotes" rows="2" placeholder="Any additional notes…"></textarea></div> <div id="clientModalError" class="modal-error"></div> <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save Client</button></div> </div></div>
@@ -959,7 +959,11 @@ function initApp() {
     // LOAD ALL DATA
     // =============================================================
     async function loadAll() {
-        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList()]);
+        // Invoices load alongside everything else now (not just when the Billing
+        // tab is opened) — the ticket list needs allInvoices populated up front
+        // to correctly show/hide the "Create Invoice" button per ticket.
+        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList(), loadInvoices()]);
+        renderTickets(allTickets); // re-render now that allInvoices is guaranteed loaded, regardless of which finished first
         updateDashboard();
         populateAssigneeFilters();
     }
@@ -1007,6 +1011,7 @@ function initApp() {
                     </div>
                 </div>
                 <div class="list-item-actions">
+                    ${(Number(t.amount) > 0 && !allInvoices.some(inv => inv.ticket_id === t.id)) ? `<button class="btn btn-primary btn-sm" onclick="createInvoiceFromTicket('${t.id}')">🧾 Create Invoice</button>` : ''}
                     <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit','${t.id}')">✏️ Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteTicket('${t.id}')">🗑️ Delete</button>
                 </div>
@@ -1053,7 +1058,21 @@ function initApp() {
             }
         } else {
             ({ error } = await sb.from('tickets').insert([payload]));
-            if (!error) logActivity('Ticket Created', `${tag} — ${name} (${device})`);
+            if (!error) {
+                logActivity('Ticket Created', `${tag} — ${name} (${device})`);
+                // Lock in the free assessment now that it's actually been used —
+                // otherwise this same client could get it again on their next ticket.
+                if (freeAssessmentAppliedForClientId) {
+                    const { error: flagError } = await sb.from('clients')
+                        .update({ free_assessment_used: true })
+                        .eq('id', freeAssessmentAppliedForClientId);
+                    if (!flagError) {
+                        const c = allClients.find(x => x.id === freeAssessmentAppliedForClientId);
+                        if (c) c.free_assessment_used = true;
+                    }
+                    freeAssessmentAppliedForClientId = null;
+                }
+            }
         }
         if (error) { errorEl.textContent = error.message; return; }
         closeModal('ticketModal');
@@ -1076,6 +1095,8 @@ function initApp() {
         $('ticketModalError').textContent = '';
         $('confirmEmailStatus').textContent = '';
         $('ticketCommentsSection').style.display = 'none';
+        freeAssessmentAppliedForClientId = null;
+        $('ticketFreeAssessmentBanner').style.display = 'none';
         if (mode === 'new') {
             $('ticketTag').value = genTag();
             ['ticketClientName','ticketPhone','ticketEmail','ticketDevice','ticketIssue','ticketNotes'].forEach(f => $(f).value = '');
@@ -1125,13 +1146,69 @@ function initApp() {
         const match = allClients.find(c => (c.name || '').toLowerCase() === (name || '').toLowerCase());
         return match ? match.id : null;
     }
+    // One-click: turn a ticket's amount into a real, numbered invoice — no manual
+    // re-entry, and no separate "did I ever bill this?" bookkeeping gap.
+    async function createInvoiceFromTicket(ticketId) {
+        const t = allTickets.find(x => x.id === ticketId);
+        if (!t) return;
+        if (allInvoices.some(inv => inv.ticket_id === ticketId)) {
+            alert('An invoice already exists for this ticket.');
+            return;
+        }
+        const amount = Number(t.amount) || 0;
+        const isComp = t.payment_status === 'complimentary';
+        const isPaid = t.payment_status === 'paid';
+        const description = [t.device, t.issue].filter(Boolean).join(' — ') || 'Repair service';
+        const payload = {
+            invoice_number: await nextInvoiceNumber(),
+            client_name: t.client_name || '',
+            phone: t.phone || '',
+            email: t.email || '',
+            reference: t.ticket_number || '',
+            ticket_id: t.id,
+            is_complimentary: isComp,
+            items: [{ description, qty: 1, unit_price: amount, disc_pct: 0 }],
+            subtotal: amount,
+            discount_pct: 0,
+            discount_amount: 0,
+            tax_amount: 0,
+            grand_total: amount,
+            amount_paid: isComp ? 0 : (isPaid ? amount : 0),
+            balance_due: isComp ? 0 : (isPaid ? 0 : amount),
+            status: isComp ? 'complimentary' : (isPaid ? 'paid' : 'unpaid'),
+            notes: '',
+        };
+        let error;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            ({ error } = await sb.from('invoices').insert([payload]));
+            if (!error) break;
+            if (!/duplicate key|invoice_number/i.test(error.message || '')) break;
+            payload.invoice_number = await nextInvoiceNumber();
+        }
+        if (error) { alert('Could not create invoice: ' + error.message); return; }
+        logActivity('Invoice Created', `${payload.invoice_number} — ${payload.client_name} (from ${t.ticket_number || 'ticket'})`);
+        await loadInvoices();
+        renderTickets(allTickets);
+        alert(`${payload.invoice_number} created for ${payload.client_name}.`);
+    }
+    let freeAssessmentAppliedForClientId = null;
     function autofillTicketFromClientName() {
         const name = $('ticketClientName').value;
         const match = allClients.find(c => (c.name || '').toLowerCase() === name.toLowerCase());
+        freeAssessmentAppliedForClientId = null;
+        $('ticketFreeAssessmentBanner').style.display = 'none';
         if (match) {
             $('ticketPhone').value = match.phone || '';
             $('ticketEmail').value = match.email || '';
             populateTicketDeviceDatalist(match.id);
+            // Only auto-apply on a brand-new ticket, and only once per client —
+            // never re-trigger this while editing an existing ticket.
+            if (!currentEditId && match.self_registered && !match.free_assessment_used) {
+                $('ticketAmount').value = 0;
+                $('ticketPayment').value = 'complimentary';
+                $('ticketFreeAssessmentBanner').style.display = 'block';
+                freeAssessmentAppliedForClientId = match.id;
+            }
         } else {
             populateTicketDeviceDatalist(null);
         }
@@ -2765,6 +2842,8 @@ function initApp() {
     window.togglePasswordVisibility = togglePasswordVisibility;
     window.autofillTicketFromClientName = autofillTicketFromClientName;
     window.filterClients = filterClients;
+    window.createInvoiceFromTicket = createInvoiceFromTicket;
+    window.updatePaidBadge = updatePaidBadge;
 
     // ---- Devices & Tech Playbook ----
     window.openDeviceModal = openDeviceModal;
