@@ -3,359 +3,201 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register as a StylesPC Client</title>
+<title>Register as a Client — StylesPC</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
     :root {
-        --bg: #0B1410;
-        --bg-2: #0F1B15;
-        --panel: #12201A;
-        --rule: #24362C;
-        --ink: #EAEFE9;
-        --ink-soft: #8FA396;
-        --ink-faint: #5C6E62;
-        --green: #3DDC84;
-        --green-dim: #1F8F53;
-        --amber: #E8A33D;
-        --mono: 'JetBrains Mono', ui-monospace, monospace;
-        --sans: 'Manrope', -apple-system, sans-serif;
-        --radius: 14px;
+        --paper: #F3EFE7;
+        --paper-2: #EAE3D3;
+        --ink: #1F2421;
+        --ink-soft: #4A4F49;
+        --teal: #2F6F63;
+        --teal-dark: #204b43;
+        --amber: #C97A2B;
+        --rule: #C9C2B2;
+        --white: #FFFDF8;
+        --radius: 2px;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-        margin: 0;
-        background: radial-gradient(ellipse 1200px 800px at 50% -10%, #14261C 0%, var(--bg) 55%);
+        background: var(--paper);
         color: var(--ink);
-        font-family: var(--sans);
-        line-height: 1.5;
+        font-family: 'IBM Plex Sans', sans-serif;
+        line-height: 1.55;
         -webkit-font-smoothing: antialiased;
     }
-    a { color: var(--green); }
-    ::selection { background: var(--green-dim); color: #fff; }
-    :focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
+    h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.01em; margin: 0 0 0.4em 0; }
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; } }
 
-    .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+    .wrap { max-width: 640px; margin: 0 auto; padding: 0 24px; }
 
-    /* ---- Terminal boot sequence ---- */
-    .terminal {
-        max-width: 640px;
-        margin: 64px auto 0;
-        background: var(--panel);
-        border: 1px solid var(--rule);
-        border-radius: var(--radius);
-        overflow: hidden;
-        box-shadow: 0 40px 100px -40px rgba(0,0,0,0.6);
-    }
-    .terminal-bar {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 14px;
-        background: #0D1712;
-        border-bottom: 1px solid var(--rule);
-    }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: #2A3B32; }
-    .terminal-title { margin-left: 8px; font-family: var(--mono); font-size: 12px; color: var(--ink-faint); }
-    .terminal-body {
-        padding: 22px 24px 26px;
-        font-family: var(--mono);
-        font-size: 14px;
-        color: var(--green);
-        min-height: 132px;
-    }
-    .terminal-line { opacity: 0; white-space: pre-wrap; }
-    .terminal-line.show { opacity: 1; }
-    .terminal-line .dim { color: var(--ink-faint); }
-    .cursor {
-        display: inline-block;
-        width: 8px;
-        height: 16px;
-        background: var(--green);
-        vertical-align: text-bottom;
-        margin-left: 2px;
-        animation: blink 1s steps(1) infinite;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
+    header.site { padding: 22px 0; border-bottom: 1px solid var(--rule); }
+    header.site .wrap { display: flex; align-items: center; justify-content: space-between; max-width: 1120px; }
+    .brand { display: flex; align-items: center; gap: 8px; font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.1rem; }
+    .brand .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--amber); display: inline-block; }
+    .back-link { font-size: 0.88rem; color: var(--ink-soft); border-bottom: 1px solid var(--rule); padding-bottom: 1px; }
+    .back-link:hover { color: var(--teal-dark); border-color: var(--teal-dark); }
 
-    /* ---- Hero ---- */
-    .hero {
-        text-align: center;
-        padding: 56px 24px 8px;
-    }
     .eyebrow {
-        font-family: var(--mono);
-        font-size: 12px;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--green);
-        margin-bottom: 18px;
+        display: inline-flex; align-items: center; gap: 8px;
+        font-family: 'IBM Plex Mono'; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--teal-dark); background: rgba(47, 111, 99, 0.09);
+        padding: 6px 12px; border-radius: 20px; margin-bottom: 20px;
     }
-    h1 {
-        font-family: var(--mono);
-        font-weight: 800;
-        font-size: clamp(2rem, 5vw, 3.1rem);
-        line-height: 1.08;
-        letter-spacing: -0.01em;
-        margin: 0 0 18px;
-    }
-    h1 .accent { color: var(--green); }
-    .sub {
-        font-size: 1.05rem;
-        color: var(--ink-soft);
-        max-width: 480px;
-        margin: 0 auto;
-    }
+    .eyebrow::before { content: "●"; color: var(--teal); font-size: 0.6rem; }
 
-    /* ---- Benefits ---- */
-    .benefits {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
-        margin: 48px auto 0;
-        max-width: 640px;
-        padding: 0 24px;
-    }
+    .hero { text-align: center; padding: 60px 0 8px; }
+    .hero h1 { font-size: clamp(2.1rem, 4.5vw, 2.9rem); line-height: 1.12; }
+    .hero h1 em { font-style: normal; color: var(--teal-dark); background: linear-gradient(transparent 62%, rgba(201, 122, 43, 0.28) 0); }
+    .hero p.lead { font-size: 1.05rem; color: var(--ink-soft); max-width: 46ch; margin: 16px auto 0; }
+
+    .benefits { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin: 48px 0 0; }
     @media (max-width: 560px) { .benefits { grid-template-columns: 1fr; } }
-    .benefit {
-        background: var(--panel);
-        border: 1px solid var(--rule);
-        border-radius: var(--radius);
-        padding: 18px 18px 20px;
-    }
-    .benefit .tag {
-        font-family: var(--mono);
-        font-size: 11px;
-        color: var(--green);
-        letter-spacing: 0.06em;
-    }
+    .benefit { background: var(--white); border: 1px solid var(--rule); border-radius: 6px; padding: 20px 20px 22px; }
+    .benefit .tag { font-family: 'IBM Plex Mono'; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--teal-dark); }
     .benefit.amber .tag { color: var(--amber); }
-    .benefit h3 {
-        font-size: 1rem;
-        margin: 8px 0 6px;
-        font-weight: 700;
-    }
-    .benefit p {
-        font-size: 0.88rem;
-        color: var(--ink-soft);
-        margin: 0;
-    }
+    .benefit h3 { font-size: 1.02rem; margin: 8px 0 6px; }
+    .benefit p { font-size: 0.9rem; color: var(--ink-soft); margin: 0; }
 
-    /* ---- Form ---- */
-    .panel {
-        max-width: 520px;
-        margin: 52px auto 0;
-        background: var(--panel);
-        border: 1px solid var(--rule);
-        border-radius: var(--radius);
-        padding: 30px 28px 28px;
+    form.register {
+        background: var(--white); border: 1px solid var(--rule); border-radius: 6px;
+        padding: 32px 30px; margin: 52px 0 0; display: grid; gap: 16px;
     }
-    .panel-head {
-        font-family: var(--mono);
-        font-size: 13px;
-        color: var(--ink-faint);
-        margin-bottom: 4px;
-        display: flex;
-        justify-content: space-between;
+    .register-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+    .register-head h2 { font-size: 1.35rem; margin: 0; }
+    .register-head span { font-family: 'IBM Plex Mono'; font-size: 0.78rem; color: var(--ink-soft); }
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); }
+    .field input {
+        font-family: 'IBM Plex Sans'; font-size: 0.94rem; padding: 11px 12px;
+        border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); width: 100%;
     }
-    .panel h2 {
-        font-size: 1.3rem;
-        margin: 4px 0 22px;
-    }
-    label {
-        display: block;
-        font-size: 0.82rem;
-        font-weight: 600;
-        color: var(--ink-soft);
-        margin-bottom: 6px;
-    }
-    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    @media (max-width: 480px) { .row { grid-template-columns: 1fr; } }
-    .field { margin-bottom: 16px; }
-    input {
-        width: 100%;
-        padding: 12px 14px;
-        border-radius: 9px;
-        border: 1px solid var(--rule);
-        background: #0D1712;
-        color: var(--ink);
-        font-family: var(--sans);
-        font-size: 0.95rem;
-    }
-    input::placeholder { color: var(--ink-faint); }
-    input:focus { border-color: var(--green-dim); }
+    .field input:focus { border-color: var(--teal); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
 
     .btn {
-        width: 100%;
-        margin-top: 6px;
-        padding: 15px 18px;
-        border-radius: 9px;
-        border: none;
-        background: var(--green);
-        color: #06130C;
-        font-family: var(--mono);
-        font-weight: 700;
-        font-size: 0.95rem;
-        letter-spacing: 0.01em;
-        cursor: pointer;
-        transition: transform 0.15s ease, background 0.15s ease;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 14px 22px; border-radius: 4px; font-weight: 600; font-size: 0.95rem;
+        border: 1px solid transparent; cursor: pointer; font-family: 'IBM Plex Sans';
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
-    .btn:hover { background: #4FE894; transform: translateY(-1px); }
-    .btn:disabled { opacity: 0.6; cursor: default; transform: none; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary { background: var(--teal); color: var(--white); width: 100%; }
+    .btn-primary:hover { background: var(--teal-dark); box-shadow: 0 8px 20px rgba(47, 111, 99, 0.25); }
+    .btn:disabled { opacity: 0.65; cursor: default; transform: none; }
 
-    .fine {
-        text-align: center;
-        font-size: 0.78rem;
-        color: var(--ink-faint);
-        margin-top: 14px;
-    }
-    .error {
-        color: #FF8A7A;
-        font-size: 0.85rem;
-        margin-top: 4px;
-        min-height: 1em;
-    }
+    .form-note { font-size: 0.82rem; color: var(--ink-soft); text-align: center; margin-top: 2px; }
+    .error { color: #a33; font-size: 0.85rem; min-height: 1em; }
 
-    /* ---- Success state ---- */
-    .success {
-        display: none;
-        text-align: center;
-        padding: 8px 4px 4px;
-    }
+    .success { display: none; text-align: center; padding: 10px 4px 4px; }
     .success .check {
-        width: 52px; height: 52px;
-        border-radius: 50%;
-        background: var(--green-dim);
-        display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 18px;
-        font-size: 1.4rem;
+        width: 54px; height: 54px; border-radius: 50%; background: var(--teal);
+        color: var(--white); display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 18px; font-size: 1.5rem;
     }
-    .success h2 { margin-bottom: 10px; }
-    .success p { color: var(--ink-soft); font-size: 0.95rem; }
+    .success p { color: var(--ink-soft); font-size: 0.98rem; }
     .success .code {
-        display: inline-block;
-        margin-top: 14px;
-        padding: 8px 16px;
-        background: #0D1712;
-        border: 1px dashed var(--amber);
-        border-radius: 8px;
-        font-family: var(--mono);
-        color: var(--amber);
-        font-weight: 700;
-        letter-spacing: 0.04em;
+        display: inline-block; margin-top: 16px; padding: 9px 18px;
+        background: rgba(201, 122, 43, 0.1); border: 1px dashed var(--amber); border-radius: 20px;
+        font-family: 'IBM Plex Mono'; color: var(--amber); font-weight: 600; letter-spacing: 0.03em; font-size: 0.85rem;
     }
 
-    footer {
-        text-align: center;
-        padding: 56px 24px 40px;
-        font-size: 0.8rem;
-        color: var(--ink-faint);
-    }
-    footer a { color: var(--ink-faint); text-decoration: underline; }
-
-    @media (prefers-reduced-motion: reduce) {
-        .terminal-line { opacity: 1 !important; }
-        .cursor { animation: none; }
-        html { scroll-behavior: auto; }
-    }
+    footer { padding: 56px 0 40px; text-align: center; }
+    footer .brand { justify-content: center; margin-bottom: 10px; }
+    footer p { color: var(--ink-soft); font-size: 0.9rem; }
+    footer .fine { margin-top: 18px; font-size: 0.78rem; color: var(--ink-soft); opacity: 0.8; }
 </style>
 </head>
 <body>
 
-    <div class="terminal">
-        <div class="terminal-bar">
-            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-            <span class="terminal-title">stylespc — client-registration</span>
+    <header class="site">
+        <div class="wrap">
+            <a href="index.html" class="brand"><span class="dot"></span>StylesPC</a>
+            <a href="index.html" class="back-link">← Back to site</a>
         </div>
-        <div class="terminal-body" id="bootLines">
-            <div class="terminal-line" id="l1"><span class="dim">$</span> checking device history for this browser...</div>
-            <div class="terminal-line" id="l2"><span class="dim">$</span> no record found</div>
-            <div class="terminal-line" id="l3"><span class="dim">$</span> creating a client profile means faster service, every time.<span class="cursor" id="cur"></span></div>
-        </div>
-    </div>
+    </header>
 
-    <div class="hero">
-        <div class="eyebrow">StylesPC · Client Registry</div>
-        <h1>Get on the list<br>before you <span class="accent">need us.</span></h1>
-        <p class="sub">No repair to book, no appointment needed — just 30 seconds now so we already know you next time something breaks.</p>
-    </div>
+    <main class="wrap">
+        <div class="hero">
+            <span class="eyebrow">No booking needed · Takes 30 seconds</span>
+            <h1>Register now, get a <em>free assessment</em> on your first repair.</h1>
+            <p class="lead">You don't need a repair today to get on file. Register once, and next time something breaks, I'll assess it free of charge before any work begins.</p>
+        </div>
 
-    <div class="benefits">
-        <div class="benefit amber">
-            <div class="tag">◆ WELCOME OFFER</div>
-            <h3>Free assessment on your first repair</h3>
-            <p>We'll assess your device free of charge before any work begins — no obligation.</p>
-        </div>
-        <div class="benefit">
-            <div class="tag">◆ PRIORITY</div>
-            <h3>Skip to the front</h3>
-            <p>Registered clients get priority scheduling over walk-ins.</p>
-        </div>
-        <div class="benefit">
-            <div class="tag">◆ NO REPEATING YOURSELF</div>
-            <h3>We remember your devices</h3>
-            <p>Model, history, past fixes — on file, so every visit starts faster.</p>
-        </div>
-        <div class="benefit">
-            <div class="tag">◆ STAY AHEAD</div>
-            <h3>Early access to promos</h3>
-            <p>Occasional maintenance tips and seasonal offers. Nothing else.</p>
-        </div>
-    </div>
-
-    <div class="panel" id="formPanel">
-        <div class="panel-head"><span>REGISTER_CLIENT.FORM</span><span id="fieldCount">0/3</span></div>
-        <h2>Create your client profile</h2>
-
-        <div class="row">
-            <div class="field">
-                <label for="fname">First name</label>
-                <input type="text" id="fname" placeholder="Kemar" autocomplete="given-name">
+        <div class="benefits">
+            <div class="benefit amber">
+                <div class="tag">◆ WELCOME OFFER</div>
+                <h3>Free first assessment</h3>
+                <p>No charge to diagnose your device on your first visit — no obligation to proceed.</p>
             </div>
-            <div class="field">
-                <label for="lname">Last name</label>
-                <input type="text" id="lname" placeholder="Brown" autocomplete="family-name">
+            <div class="benefit">
+                <div class="tag">◆ PRIORITY</div>
+                <h3>Skip to the front</h3>
+                <p>Registered clients get priority scheduling over new walk-ins.</p>
+            </div>
+            <div class="benefit">
+                <div class="tag">◆ NO REPEATING YOURSELF</div>
+                <h3>I remember your devices</h3>
+                <p>Model, history, past fixes — on file, so every visit starts faster.</p>
+            </div>
+            <div class="benefit">
+                <div class="tag">◆ STAY AHEAD</div>
+                <h3>Early access to offers</h3>
+                <p>Occasional maintenance tips and seasonal promos. Nothing else.</p>
             </div>
         </div>
-        <div class="field">
-            <label for="phone">Phone number</label>
-            <input type="tel" id="phone" placeholder="876 334-1156" autocomplete="tel">
-        </div>
-        <div class="field">
-            <label for="email">Email <span style="color:var(--ink-faint);font-weight:400;">(optional)</span></label>
-            <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
-        </div>
 
-        <button class="btn" id="submitBtn" onclick="submitRegistration()">Register — takes 30 seconds</button>
-        <div class="error" id="formError"></div>
-        <p class="fine">No spam, ever. We'll only reach out about your own repairs and the occasional real offer.</p>
-    </div>
+        <form class="register" id="registerForm" onsubmit="return false;">
+            <div class="register-head">
+                <h2>Create your client profile</h2>
+                <span id="fieldCount">0/3</span>
+            </div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="fname">First name</label>
+                    <input type="text" id="fname" placeholder="Kemar" autocomplete="given-name">
+                </div>
+                <div class="field">
+                    <label for="lname">Last name</label>
+                    <input type="text" id="lname" placeholder="Brown" autocomplete="family-name">
+                </div>
+            </div>
+            <div class="field">
+                <label for="phone">Phone number</label>
+                <input type="tel" id="phone" placeholder="876 334-1156" autocomplete="tel">
+            </div>
+            <div class="field">
+                <label for="email">Email <span style="font-weight:400;">(optional)</span></label>
+                <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+            </div>
+            <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitRegistration()">Register — takes 30 seconds</button>
+            <p class="error" id="formError"></p>
+            <p class="form-note">🔒 Used only to manage your repairs and the occasional real offer. Never shared, never spammed.</p>
+        </form>
 
-    <div class="panel success" id="successPanel">
-        <div class="check">✓</div>
-        <h2>You're on the list, <span id="successName"></span>.</h2>
-        <p>Your profile is saved. Next time you bring in a device, just give us your name — your first assessment is on us.</p>
-        <div class="code">FREE ASSESSMENT · FIRST REPAIR</div>
-    </div>
+        <div class="success" id="successPanel">
+            <div class="check">✓</div>
+            <h2>You're on the list, <span id="successName"></span>.</h2>
+            <p>Your profile is saved. Next time you bring in a device, just give me your name — your first assessment is on me.</p>
+            <div class="code">FREE ASSESSMENT · FIRST REPAIR</div>
+        </div>
+    </main>
 
     <footer>
-        StylesPC — PC Repair &amp; Support · Kingston, Jamaica<br>
-        <a href="admin.html">Staff login →</a>
+        <a href="index.html" class="brand"><span class="dot"></span>StylesPC</a>
+        <p>Computer &amp; laptop repair — pickup, drop‑off &amp; remote support.</p>
+        <p><a href="mailto:ajstyleg@gmail.com" style="text-decoration:underline;">ajstyleg@gmail.com</a> · (876) 334-1156</p>
+        <div class="fine">© 2026 StylesPC. All repairs backed by a diagnosis‑first guarantee.</div>
     </footer>
 
 <script>
-    // ---- boot sequence & field counter: independent of Supabase, always runs ----
-    (function boot() {
-        const lines = [document.getElementById('l1'), document.getElementById('l2'), document.getElementById('l3')];
-        const cur = document.getElementById('cur');
-        lines.forEach((el, i) => {
-            setTimeout(() => { el.classList.add('show'); if (i < lines.length - 1) cur.remove(); }, i === 0 ? 150 : i === 1 ? 650 : 1150);
-        });
-    })();
-
     function toTitleCase(s) {
         return s.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.slice(1).toLowerCase());
     }
@@ -369,8 +211,8 @@
     ['fname', 'lname', 'phone'].forEach(id => document.getElementById(id).addEventListener('input', updateCount));
 </script>
 <script>
-    // ---- Supabase submission: isolated so a CDN load failure here can't ----
-    // ---- break the animation/form above, which don't depend on it. ----
+    // Isolated from the script above so a Supabase CDN failure can't break
+    // the rest of the page (field counter etc. keep working regardless).
     let sb = null;
     try {
         sb = supabase.createClient(
@@ -394,7 +236,7 @@
             return;
         }
         if (!sb) {
-            errorEl.textContent = 'Could not connect right now — please refresh the page and try again, or call us directly.';
+            errorEl.textContent = 'Could not connect right now — please refresh and try again, or email/call directly.';
             return;
         }
         errorEl.textContent = '';
@@ -410,7 +252,7 @@
         const { error } = await sb.from('clients').insert([payload]);
 
         if (error) {
-            errorEl.textContent = 'Something went wrong — please try again, or call us directly.';
+            errorEl.textContent = 'Something went wrong — please try again, or email/call directly.';
             btn.disabled = false;
             btn.textContent = 'Register — takes 30 seconds';
             console.error(error);
@@ -418,7 +260,7 @@
         }
 
         document.getElementById('successName').textContent = fname;
-        document.getElementById('formPanel').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'none';
         document.getElementById('successPanel').style.display = 'block';
         document.getElementById('successPanel').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
