@@ -1966,7 +1966,19 @@ function initApp() {
     function updatePaidBadge() {
         const badge = $('invPaidBadge');
         if (!badge) return;
-        badge.style.display = $('invStatus').value === 'paid' ? 'inline-block' : 'none';
+        const isPaid = $('invStatus').value === 'paid';
+        badge.style.display = isPaid ? 'inline-block' : 'none';
+        if (isPaid) {
+            // Marking an invoice "Paid" should mean the full amount was received.
+            // Status and Amount Paid used to be two separate fields that could
+            // drift apart — an invoice could show the green PAID badge while
+            // Amount Paid stayed at 0, which is what actually feeds Revenue
+            // Collected. Auto-fill it here so the two can't disagree; staff can
+            // still edit it manually afterward if the real amount differs.
+            const totals = recalcInvoiceTotals();
+            $('invAmountPaid').value = totals.grand.toFixed(2);
+            recalcInvoiceTotals();
+        }
     }
 
     function recalcInvoiceTotals() {
@@ -2087,6 +2099,14 @@ function initApp() {
         if (!clientName) { errorEl.textContent = 'Client name is required.'; return; }
         const isComp = $('invComplimentary').checked;
         const totals = recalcInvoiceTotals();
+        const status = $('invStatus').value;
+        // Guard against Status="Paid" being saved with an Amount Paid that
+        // doesn't actually match — this is the exact gap that let an invoice
+        // look paid (green badge) while Revenue Collected still read it as $0.
+        if (!isComp && status === 'paid' && Math.abs(totals.paid - totals.grand) > 0.01) {
+            errorEl.textContent = `Status is "Paid" but Amount Paid (${fmtMoney(totals.paid)}) doesn't match the total (${fmtMoney(totals.grand)}). Fix the amount, or change the status if this is a partial payment.`;
+            return;
+        }
 
         const payload = {
             invoice_number: $('invNumber').value,
@@ -2112,7 +2132,7 @@ function initApp() {
             grand_total: totals.grand,
             amount_paid: isComp ? 0 : totals.paid,
             balance_due: isComp ? 0 : totals.balance,
-            status: isComp ? 'complimentary' : $('invStatus').value,
+            status: isComp ? 'complimentary' : status,
             notes: isComp ? $('invCompNote').value.trim() : $('invNotes').value.trim(),
         };
 
