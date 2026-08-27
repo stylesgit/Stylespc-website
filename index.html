@@ -1012,6 +1012,35 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
+        .field input.detected,
+        .field input:disabled {
+            background: var(--paper-2);
+            color: var(--ink-soft);
+            cursor: not-allowed;
+        }
+        .client-match-note {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.82rem;
+            color: var(--teal-dark);
+            background: rgba(47, 111, 99, 0.08);
+            border: 1px solid rgba(47, 111, 99, 0.25);
+            border-radius: 4px;
+            padding: 9px 12px;
+            margin-top: -4px;
+        }
+        .client-match-note button {
+            background: none;
+            border: none;
+            padding: 0;
+            font: inherit;
+            font-weight: 600;
+            color: var(--amber);
+            text-decoration: underline;
+            cursor: pointer;
+            margin-left: auto;
+        }
         .form-note {
             font-size: 0.8rem;
             color: var(--ink-soft);
@@ -2292,6 +2321,10 @@
                             <input type="tel" id="phone" name="phone" placeholder="e.g. 876 333 1156" required>
                         </div>
                     </div>
+                    <p class="client-match-note" id="clientMatchNote">
+                        <span id="clientMatchText">✓ Found you on file — details filled in.</span>
+                        <button type="button" id="unlockClientFields" style="display:none;">Not you? Edit</button>
+                    </p>
                     <div class="field-row">
                         <div class="field">
                             <label for="email">Email (required)</label>
@@ -3516,6 +3549,114 @@
         var serviceTypeEl = document.getElementById('serviceType');
         var addressField = document.getElementById('address');
         var addressHint = document.getElementById('addressHint');
+
+        // =============================================================
+        //  RETURNING-CLIENT AUTODETECT — name-first.
+        //  1) Customer types their name and tabs off the field.
+        //  2) We check the "clients" table for that name.
+        //     - No match: nothing happens, fill the form normally.
+        //     - One match: fill in phone & email from that record and
+        //       grey out name/phone/email — only the remaining fields
+        //       (device, service type, address, issue) are required.
+        //     - More than one match (duplicate names): ask for phone
+        //       number too, then confirm with name+phone together.
+        //  "Not you? Edit" unlocks everything again.
+        //  Requires lookup_client_by_name(p_name) and
+        //  lookup_client_by_name_phone(p_name, p_phone) in Supabase —
+        //  see the setup note sent with this file.
+        // =============================================================
+        var nameField = document.getElementById('name');
+        var phoneField = document.getElementById('phone');
+        var emailField = document.getElementById('email');
+        var clientMatchNote = document.getElementById('clientMatchNote');
+        var clientMatchText = document.getElementById('clientMatchText');
+        var unlockClientFieldsBtn = document.getElementById('unlockClientFields');
+        var clientMatched = false;
+        var awaitingPhoneConfirm = false; // true while we're waiting on phone to break a name tie
+        var pendingConfirmName = '';
+
+        function showClientNote(text, showEditBtn) {
+            if (clientMatchText) clientMatchText.textContent = text;
+            if (unlockClientFieldsBtn) unlockClientFieldsBtn.style.display = showEditBtn ? '' : 'none';
+            if (clientMatchNote) clientMatchNote.style.display = 'flex';
+        }
+
+        function hideClientNote() {
+            if (clientMatchNote) clientMatchNote.style.display = 'none';
+        }
+
+        function applyClientMatch(match) {
+            clientMatched = true;
+            awaitingPhoneConfirm = false;
+            if (match.name) nameField.value = match.name;
+            if (match.phone) phoneField.value = match.phone;
+            if (match.email) emailField.value = match.email;
+            nameField.disabled = true;
+            phoneField.disabled = true;
+            emailField.disabled = true;
+            nameField.classList.add('detected');
+            phoneField.classList.add('detected');
+            emailField.classList.add('detected');
+            showClientNote('✓ Found you on file — details filled in.', true);
+        }
+
+        function clearClientMatch() {
+            clientMatched = false;
+            awaitingPhoneConfirm = false;
+            pendingConfirmName = '';
+            nameField.disabled = false;
+            phoneField.disabled = false;
+            emailField.disabled = false;
+            nameField.classList.remove('detected');
+            phoneField.classList.remove('detected');
+            emailField.classList.remove('detected');
+            hideClientNote();
+        }
+
+        async function lookupClientByName() {
+            if (clientMatched) return; // already matched — use "Not you? Edit" to unlock first
+            var nameVal = nameField.value.trim();
+            if (nameVal.length < 2) { awaitingPhoneConfirm = false; hideClientNote(); return; }
+            try {
+                var { data, error } = await sbPublic.rpc('lookup_client_by_name', { p_name: nameVal });
+                if (error) { console.error('Client lookup failed:', error); return; }
+                var row = Array.isArray(data) ? data[0] : data;
+                if (!row || !row.match_count) { awaitingPhoneConfirm = false; hideClientNote(); return; }
+                if (row.match_count === 1) {
+                    applyClientMatch(row);
+                } else if (row.match_count > 1) {
+                    awaitingPhoneConfirm = true;
+                    pendingConfirmName = nameVal;
+                    showClientNote('We found more than one client named "' + nameVal + '" — please also enter your phone number to confirm it\'s you.', false);
+                }
+            } catch (e) {
+                console.error('Client lookup error:', e);
+            }
+        }
+
+        async function confirmClientByNamePhone() {
+            if (!awaitingPhoneConfirm || clientMatched) return;
+            var phoneVal = phoneField.value.trim();
+            if (phoneVal.replace(/\D/g, '').length < 7) return; // too short to bother checking yet
+            try {
+                var { data, error } = await sbPublic.rpc('lookup_client_by_name_phone', { p_name: pendingConfirmName, p_phone: phoneVal });
+                if (error) { console.error('Client confirm failed:', error); return; }
+                var match = Array.isArray(data) ? data[0] : data;
+                if (match && match.name) {
+                    applyClientMatch(match);
+                } else {
+                    showClientNote('No match with that name & number — go ahead and fill in your details below.', false);
+                }
+            } catch (e) {
+                console.error('Client confirm error:', e);
+            }
+        }
+
+        nameField.addEventListener('blur', lookupClientByName);
+        phoneField.addEventListener('blur', confirmClientByNamePhone);
+        if (unlockClientFieldsBtn) {
+            unlockClientFieldsBtn.addEventListener('click', clearClientMatch);
+        }
 
         serviceTypeEl.addEventListener('change', function() {
             var isPickup = serviceTypeEl.value === 'Pickup';
