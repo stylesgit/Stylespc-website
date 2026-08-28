@@ -142,6 +142,12 @@
         .inv-badge.paid { background:#e3efe9; color:var(--teal-dark); }
         .inv-badge.partial { background:#fdf1e2; color:var(--amber); }
         .inv-badge.complimentary { background:#e8ecfb; color:#3b4fb0; }
+        /* ---- Quotations (reuses .inv-badge shape, own status colors) ---- */
+        .inv-badge.draft { background:#eef0f2; color:#5b6470; }
+        .inv-badge.sent { background:#fdf1e2; color:var(--amber); }
+        .inv-badge.accepted { background:#e3efe9; color:var(--teal-dark); }
+        .inv-badge.declined { background:#fbeaea; color:var(--red); }
+        .inv-badge.expired { background:#eef0f2; color:#8a8f98; }
         .items-table { width:100%; border-collapse:collapse; margin:10px 0; font-size:0.86rem; }
         .items-table th { text-align:left; background:var(--paper-2); padding:8px; font-size:0.76rem; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); }
         .items-table td { padding:6px 8px; border-bottom:1px solid var(--rule); vertical-align:middle; }
@@ -315,6 +321,7 @@
         <button class="nav-tab" onclick="switchTab('clients',this)">👥 Clients</button>
         <button class="nav-tab" id="navTabDevices" onclick="switchTab('devices',this)">🖥️ Devices</button>
         <button class="nav-tab" onclick="switchTab('techplaybook',this)">🧰 Tech Playbook</button>
+        <button class="nav-tab" onclick="switchTab('quotations',this)">🧾 Quotations</button>
         <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
         <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
         <button class="nav-tab" onclick="switchTab('users',this)">🔐 Users</button>
@@ -446,6 +453,25 @@
         </div>
         <div id="techNoteCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
         <div class="list-container" id="techNotesList"><div class="status-msg">Loading…</div></div>
+    </div>
+
+    <!-- QUOTATIONS -->
+    <div id="quotations" class="section">
+        <h2 style="margin-bottom:20px;">Quotations</h2>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="quotationSearch" placeholder="Search quote #, client…" oninput="filterQuotations()"></div>
+            <select id="quotationStatusFilter" onchange="filterQuotations()">
+                <option value="">All Status</option>
+                <option value="draft">Draft</option>
+                <option value="sent">Sent</option>
+                <option value="accepted">Accepted</option>
+                <option value="declined">Declined</option>
+                <option value="expired">Expired</option>
+            </select>
+            <button class="btn btn-primary" onclick="openQuotationModal('new')">+ New Quotation</button>
+        </div>
+        <div id="quotationCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="quotationsList"><div class="status-msg">Loading…</div></div>
     </div>
 
     <!-- BILLING -->
@@ -652,6 +678,72 @@
     </div>
 </div></div>
 
+<!-- QUOTATION MODAL -->
+<div class="modal-overlay" id="quotationModal"> <div class="modal modal-wide">
+    <h2 id="quotationModalTitle">New Quotation</h2>
+    <div class="form-row">
+        <div class="form-group"><label>Quote #</label><input type="text" id="quoNumber" readonly style="background:var(--paper-2);font-family:'IBM Plex Mono';"></div>
+        <div class="form-group"><label>Link to Ticket (optional)</label><select id="quoTicketLink" onchange="onQuotationTicketLink()"><option value="">— None / walk-in —</option></select></div>
+        <div class="form-group"><label>Select Existing Client</label><select id="quoClientPick" onchange="onQuotationClientPick()"><option value="">— Choose a client, or type new below —</option></select></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Client Name *</label><input type="text" id="quoClientName" required onblur="titleCaseField(this)"></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="quoPhone"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Email</label><input type="email" id="quoEmail"></div>
+        <div class="form-group"><label>Address</label><input type="text" id="quoAddress"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Quote Date</label><input type="date" id="quoDate"></div>
+        <div class="form-group"><label>Valid Until</label><input type="date" id="quoValidUntil"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Reference</label><input type="text" id="quoReference" placeholder="Ticket tag, etc."></div>
+        <div class="form-group"><label>Status</label><select id="quoStatus"><option value="draft">Draft</option><option value="sent">Sent</option><option value="accepted">Accepted</option><option value="declined">Declined</option><option value="expired">Expired</option></select></div>
+    </div>
+
+    <h4 style="margin:14px 0 6px;">Line Items</h4>
+    <table class="items-table">
+        <thead><tr><th style="width:38%;">Service / Item</th><th style="width:10%;">Qty</th><th style="width:16%;">Unit Price</th><th style="width:10%;">Disc %</th><th class="amt" style="width:16%;">Line Total</th><th></th></tr></thead>
+        <tbody id="quoItemsBody"></tbody>
+    </table>
+    <button class="btn btn-sm btn-ghost" onclick="addQuotationItemRow()">+ Add Line</button>
+
+    <div style="display:flex;justify-content:flex-end;gap:16px;align-items:center;margin-top:14px;flex-wrap:wrap;">
+        <label style="font-size:0.85rem;display:flex;align-items:center;gap:6px;"><input type="checkbox" id="quoApplyGct" onchange="recalcQuotationTotals()"> Apply GCT (15%)</label>
+        <label style="font-size:0.85rem;">Overall Discount:</label>
+        <select id="quoDiscountPct" onchange="recalcQuotationTotals()" style="padding:6px 10px;border:1px solid var(--rule);border-radius:var(--radius);">
+            <option value="0">None</option>
+            <option value="5">5%</option><option value="10">10%</option><option value="15">15%</option>
+            <option value="20">20%</option><option value="25">25%</option><option value="30">30%</option>
+            <option value="35">35%</option><option value="40">40%</option><option value="45">45%</option>
+            <option value="50">50%</option>
+        </select>
+    </div>
+
+    <div class="totals-box">
+        <div class="trow"><span>Subtotal</span><span id="quoSubtotalOut">$0.00</span></div>
+        <div class="trow"><span id="quoDiscountLabel">Discount</span><span id="quoDiscountOut">-$0.00</span></div>
+        <div class="trow" id="quoTaxRow" style="display:none;"><span>Tax (GCT 15%)</span><span id="quoTaxOut">$0.00</span></div>
+        <div class="trow grand"><span>Estimated Total</span><span id="quoGrandOut">$0.00</span></div>
+    </div>
+
+    <div class="form-group" style="margin-top:12px;"><label>Notes</label><textarea id="quoNotes" rows="2">This quotation is valid for 14 days from the date above. Prices are subject to change if parts availability or scope changes.</textarea></div>
+
+    <div id="quotationModalError" class="modal-error"></div>
+    <div id="quotationPdfStatus" style="font-size:12px;margin-top:4px;"></div>
+    <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('quotationModal')">Cancel</button>
+        <button class="btn btn-ghost" id="quoPrintBtn" onclick="printQuotation()">🖨️ Print / Save as PDF</button>
+        <button class="btn btn-ghost" id="quoEmailBtn" onclick="emailQuotationToClient()">📧 Email to Client</button>
+        <button class="btn btn-ghost" id="quoMailtoBtn" onclick="composeQuotationEmailFallback()">✉️ Compose in My Email App</button>
+        <button class="btn btn-ghost" id="quoWhatsappBtn" onclick="sendQuotationViaWhatsApp()">📱 Send via WhatsApp</button>
+        <button class="btn btn-ghost" id="quoConvertBtn" onclick="convertQuotationToInvoice()" style="display:none;">➡️ Convert to Invoice</button>
+        <button class="btn btn-primary" onclick="saveQuotation()">Save Quotation</button>
+    </div>
+</div></div>
+
 <!-- PRICE ITEM MODAL -->
 <div class="modal-overlay" id="priceModal"> <div class="modal">
     <h2 id="priceModalTitle">New Price Item</h2>
@@ -842,10 +934,12 @@ function initApp() {
     let allDevices = [];
     let allUsers = [];
     let allInvoices = [];
+    let allQuotations = [];
     let allPriceList = [];
     let allExpenses = [];
     let currentEditId = null;
     let currentInvoiceEditId = null;
+    let currentQuotationEditId = null;
     let currentPriceEditId = null;
     let selectedTicketIds = new Set();
     let statusChart = null, priorityChart = null;
@@ -962,7 +1056,7 @@ function initApp() {
         // Invoices load alongside everything else now (not just when the Billing
         // tab is opened) — the ticket list needs allInvoices populated up front
         // to correctly show/hide the "Create Invoice" button per ticket.
-        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList(), loadInvoices()]);
+        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList(), loadInvoices(), loadQuotations()]);
         renderTickets(allTickets); // re-render now that allInvoices is guaranteed loaded, regardless of which finished first
         updateDashboard();
         populateAssigneeFilters();
@@ -1966,18 +2060,562 @@ function initApp() {
     function updatePaidBadge() {
         const badge = $('invPaidBadge');
         if (!badge) return;
-        const isPaid = $('invStatus').value === 'paid';
-        badge.style.display = isPaid ? 'inline-block' : 'none';
-        if (isPaid) {
-            // Marking an invoice "Paid" should mean the full amount was received.
-            // Status and Amount Paid used to be two separate fields that could
-            // drift apart — an invoice could show the green PAID badge while
-            // Amount Paid stayed at 0, which is what actually feeds Revenue
-            // Collected. Auto-fill it here so the two can't disagree; staff can
-            // still edit it manually afterward if the real amount differs.
-            const totals = recalcInvoiceTotals();
-            $('invAmountPaid').value = totals.grand.toFixed(2);
-            recalcInvoiceTotals();
+        badge.style.display = $('invStatus').value === 'paid' ? 'inline-block' : 'none';
+    }
+
+    // =============================================================
+    // QUOTATIONS — same shape as Billing/Invoices above, but for a
+    // proposed price sent BEFORE work is agreed (no payment tracking).
+    // A saved quotation can be turned into a real invoice with one click
+    // once the client accepts.
+    // =============================================================
+    async function loadQuotations() {
+        const listEl = $('quotationsList');
+        if (listEl) listEl.innerHTML = '<div class="status-msg">Loading quotations…</div>';
+        const { data, error } = await sb.from('quotations').select('*').order('created_at', { ascending: false });
+        if (error) { if (listEl) listEl.innerHTML = '<div class="status-msg err">Error loading quotations.</div>'; return; }
+        allQuotations = data || [];
+        renderQuotations(allQuotations);
+    }
+    function renderQuotations(list) {
+        const listEl = $('quotationsList');
+        if (!listEl) return;
+        $('quotationCount').textContent = `${list.length} quotation${list.length === 1 ? '' : 's'}`;
+        if (!list.length) { listEl.innerHTML = '<div class="empty-state"><h3>No quotations yet</h3><p>Create your first quotation to send a client a price before starting work.</p></div>'; return; }
+        listEl.innerHTML = list.map(q => `
+            <div class="list-item">
+                <div>
+                    <div class="list-item-title">${esc(q.quote_number)} — ${esc(q.client_name)} <span class="inv-badge ${esc(q.status)}">${esc(q.status)}</span></div>
+                    <div class="list-item-subtitle">${new Date(q.quote_date).toLocaleDateString()}${q.valid_until ? ' · Valid until ' + new Date(q.valid_until).toLocaleDateString() : ''} · ${fmtMoney(q.grand_total)}</div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-ghost" onclick="openQuotationModal('edit','${q.id}')">View / Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteQuotation('${q.id}')">Delete</button>
+                </div>
+            </div>`).join('');
+    }
+    function filterQuotations() {
+        const q = $('quotationSearch').value.toLowerCase();
+        const status = $('quotationStatusFilter').value;
+        renderQuotations(allQuotations.filter(x => {
+            const matchesQ = !q || (x.quote_number || '').toLowerCase().includes(q) || (x.client_name || '').toLowerCase().includes(q);
+            const matchesStatus = !status || x.status === status;
+            return matchesQ && matchesStatus;
+        }));
+    }
+    function populateQuotationTicketSelect() {
+        const sel = $('quoTicketLink');
+        sel.innerHTML = '<option value="">— None / walk-in —</option>' + allTickets.map(t => `<option value="${t.id}">${esc(t.ticket_number || t.id)} — ${esc(t.client_name)}</option>`).join('');
+    }
+    function populateQuotationClientSelect() {
+        const sel = $('quoClientPick');
+        const sorted = [...allClients].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        sel.innerHTML = '<option value="">— Choose a client, or type new below —</option>' + sorted.map(c => `<option value="${c.id}">${esc(c.name)}${c.phone ? ' — ' + esc(c.phone) : ''}</option>`).join('');
+    }
+    function onQuotationClientPick() {
+        const id = $('quoClientPick').value;
+        if (!id) return;
+        const c = allClients.find(x => x.id === id);
+        if (!c) return;
+        $('quoClientName').value = c.name || '';
+        $('quoPhone').value = c.phone || '';
+        $('quoEmail').value = c.email || '';
+        $('quoAddress').value = c.address || '';
+    }
+    function onQuotationTicketLink() {
+        const id = $('quoTicketLink').value;
+        if (!id) return;
+        const t = allTickets.find(x => x.id === id);
+        if (!t) return;
+        $('quoClientName').value = t.client_name || '';
+        $('quoPhone').value = t.phone || '';
+        $('quoEmail').value = t.email || '';
+        $('quoReference').value = t.ticket_number || '';
+    }
+
+    function quotationItemRowHTML(item) {
+        item = item || { description: '', qty: 1, unit_price: 0, disc_pct: 0 };
+        const options = ['<option value="">Custom item…</option>'].concat(
+            allPriceList.filter(p => p.active).map(p => `<option value="${esc(p.name)}" data-price="${p.price}" ${p.name === item.description ? 'selected' : ''}>${esc(p.name)} — ${fmtMoney(p.price)}</option>`)
+        ).join('');
+        const isCustom = !allPriceList.some(p => p.name === item.description);
+        return `<tr class="quo-item-row">
+            <td>
+                <select onchange="onQuotationItemPick(this)">${options}</select>
+                <input type="text" class="quo-item-desc" placeholder="Custom description…" value="${isCustom ? esc(item.description) : ''}" style="margin-top:4px;display:${isCustom && item.description ? 'block' : (item.description ? 'none' : 'block')};" oninput="recalcQuotationTotals()">
+            </td>
+            <td><input type="number" class="quo-item-qty" min="0" step="1" value="${item.qty}" oninput="recalcQuotationTotals()"></td>
+            <td><input type="number" class="quo-item-price" min="0" step="0.01" value="${item.unit_price}" oninput="recalcQuotationTotals()"></td>
+            <td><input type="number" class="quo-item-disc" min="0" max="100" step="1" value="${item.disc_pct || 0}" oninput="recalcQuotationTotals()"></td>
+            <td class="amt quo-item-total">${fmtMoney(0)}</td>
+            <td><button class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); recalcQuotationTotals();">✕</button></td>
+        </tr>`;
+    }
+    function onQuotationItemPick(selectEl) {
+        const row = selectEl.closest('tr');
+        const opt = selectEl.selectedOptions[0];
+        const descInput = row.querySelector('.quo-item-desc');
+        if (!selectEl.value) { descInput.style.display = 'block'; descInput.focus(); }
+        else {
+            descInput.style.display = 'none';
+            descInput.value = '';
+            row.querySelector('.quo-item-price').value = opt.dataset.price || 0;
+        }
+        recalcQuotationTotals();
+    }
+    function addQuotationItemRow(item) {
+        $('quoItemsBody').insertAdjacentHTML('beforeend', quotationItemRowHTML(item));
+        recalcQuotationTotals();
+    }
+    function collectQuotationItems() {
+        return Array.from(document.querySelectorAll('#quoItemsBody tr')).map(row => {
+            const sel = row.querySelector('select');
+            const descInput = row.querySelector('.quo-item-desc');
+            const description = sel.value || descInput.value.trim();
+            const qty = parseFloat(row.querySelector('.quo-item-qty').value) || 0;
+            const unit_price = parseFloat(row.querySelector('.quo-item-price').value) || 0;
+            const disc_pct = parseFloat(row.querySelector('.quo-item-disc').value) || 0;
+            return { description, qty, unit_price, disc_pct };
+        }).filter(i => i.description);
+    }
+
+    function recalcQuotationTotals() {
+        document.querySelectorAll('#quoItemsBody tr').forEach(row => {
+            const qty = parseFloat(row.querySelector('.quo-item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.quo-item-price').value) || 0;
+            const disc = parseFloat(row.querySelector('.quo-item-disc').value) || 0;
+            const total = qty * price * (1 - disc / 100);
+            row.querySelector('.quo-item-total').textContent = fmtMoney(total);
+        });
+        const items = collectQuotationItems();
+        const subtotal = items.reduce((s, i) => s + i.qty * i.unit_price * (1 - i.disc_pct / 100), 0);
+        const discPct = parseFloat($('quoDiscountPct').value) || 0;
+        const discountAmount = subtotal * (discPct / 100);
+        const afterDiscount = subtotal - discountAmount;
+        const applyGct = $('quoApplyGct').checked;
+        const tax = applyGct ? afterDiscount * GCT_RATE : 0;
+        const grand = afterDiscount + tax;
+
+        $('quoSubtotalOut').textContent = fmtMoney(subtotal);
+        $('quoDiscountLabel').textContent = `Discount (${discPct}%)`;
+        $('quoDiscountOut').textContent = '-' + fmtMoney(discountAmount);
+        $('quoTaxRow').style.display = applyGct ? 'flex' : 'none';
+        $('quoTaxOut').textContent = fmtMoney(tax);
+        $('quoGrandOut').textContent = fmtMoney(grand);
+
+        return { items, subtotal, discPct, discountAmount, applyGct, tax, grand };
+    }
+
+    async function nextQuotationNumber() {
+        const { data } = await sb.from('quotations').select('quote_number');
+        let max = 1000;
+        (data || []).forEach(r => {
+            const m = /QUO-(\d+)/.exec(r.quote_number || '');
+            if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        return 'QUO-' + (max + 1);
+    }
+
+    async function openQuotationModal(mode, id = null) {
+        currentQuotationEditId = mode === 'edit' ? id : null;
+        $('quotationModalError').textContent = '';
+        $('quotationPdfStatus').textContent = '';
+        populateQuotationTicketSelect();
+        populateQuotationClientSelect();
+        $('quoItemsBody').innerHTML = '';
+        $('quoConvertBtn').style.display = mode === 'edit' ? '' : 'none';
+        if (mode === 'new') {
+            $('quotationModalTitle').textContent = 'New Quotation';
+            $('quoNumber').value = await nextQuotationNumber();
+            $('quoTicketLink').value = '';
+            $('quoClientPick').value = '';
+            ['quoClientName','quoPhone','quoEmail','quoAddress','quoReference'].forEach(f => $(f).value = '');
+            $('quoDate').value = new Date().toISOString().slice(0, 10);
+            $('quoValidUntil').value = '';
+            $('quoStatus').value = 'draft';
+            $('quoDiscountPct').value = '0';
+            $('quoApplyGct').checked = false;
+            $('quoNotes').value = 'This quotation is valid for 14 days from the date above. Prices are subject to change if parts availability or scope changes.';
+            addQuotationItemRow();
+        } else {
+            const q = allQuotations.find(x => x.id === id);
+            if (!q) return;
+            $('quotationModalTitle').textContent = 'Edit Quotation';
+            $('quoNumber').value = q.quote_number;
+            $('quoTicketLink').value = q.ticket_id || '';
+            $('quoClientPick').value = '';
+            $('quoClientName').value = q.client_name || '';
+            $('quoPhone').value = q.phone || '';
+            $('quoEmail').value = q.email || '';
+            $('quoAddress').value = q.address || '';
+            $('quoDate').value = q.quote_date ? q.quote_date.slice(0, 10) : '';
+            $('quoValidUntil').value = q.valid_until ? q.valid_until.slice(0, 10) : '';
+            $('quoReference').value = q.reference || '';
+            $('quoStatus').value = q.status || 'draft';
+            $('quoDiscountPct').value = String(q.discount_pct || 0);
+            $('quoApplyGct').checked = !!(q.tax_amount && Number(q.tax_amount) > 0);
+            $('quoNotes').value = q.notes || '';
+            (q.items || []).forEach(it => addQuotationItemRow(it));
+            if (!q.items || !q.items.length) addQuotationItemRow();
+        }
+        recalcQuotationTotals();
+        $('quotationModal').classList.add('active');
+    }
+
+    async function saveQuotation() {
+        const errorEl = $('quotationModalError');
+        errorEl.textContent = '';
+        const clientName = toTitleCase($('quoClientName').value.trim());
+        if (!clientName) { errorEl.textContent = 'Client name is required.'; return; }
+        const totals = recalcQuotationTotals();
+
+        const payload = {
+            quote_number: $('quoNumber').value,
+            ticket_id: $('quoTicketLink').value || null,
+            client_name: clientName,
+            phone: $('quoPhone').value.trim() || null,
+            email: $('quoEmail').value.trim() || null,
+            address: $('quoAddress').value.trim() || null,
+            quote_date: $('quoDate').value || new Date().toISOString().slice(0, 10),
+            valid_until: $('quoValidUntil').value || null,
+            reference: $('quoReference').value.trim() || null,
+            items: totals.items,
+            subtotal: totals.subtotal,
+            discount_pct: totals.discPct,
+            discount_amount: totals.discountAmount,
+            tax_amount: totals.tax,
+            grand_total: totals.grand,
+            status: $('quoStatus').value,
+            notes: $('quoNotes').value.trim(),
+        };
+
+        let error;
+        if (currentQuotationEditId) {
+            ({ error } = await sb.from('quotations').update(payload).eq('id', currentQuotationEditId));
+        } else {
+            for (let attempt = 0; attempt < 3; attempt++) {
+                ({ error } = await sb.from('quotations').insert([payload]));
+                if (!error) break;
+                const isDupNumber = /duplicate key|quote_number/i.test(error.message || '');
+                if (!isDupNumber) break;
+                payload.quote_number = await nextQuotationNumber();
+                $('quoNumber').value = payload.quote_number;
+            }
+        }
+        if (error) { errorEl.textContent = error.message; return; }
+        logActivity(currentQuotationEditId ? 'Quotation Updated' : 'Quotation Created', `${payload.quote_number} — ${clientName} — ${fmtMoney(payload.grand_total)}`);
+        closeModal('quotationModal');
+        await loadQuotations();
+    }
+
+    async function deleteQuotation(id) {
+        if (!confirm('Delete this quotation?')) return;
+        const q = allQuotations.find(x => x.id === id);
+        await sb.from('quotations').delete().eq('id', id);
+        logActivity('Quotation Deleted', q ? q.quote_number : id);
+        await loadQuotations();
+    }
+
+    // Once a client accepts, turn the quote straight into a real invoice —
+    // client info and line items carry over, nothing gets retyped.
+    async function convertQuotationToInvoice() {
+        if (!currentQuotationEditId) return;
+        const q = allQuotations.find(x => x.id === currentQuotationEditId);
+        if (!q) return;
+        if (!confirm(`Create an invoice from ${q.quote_number} for ${q.client_name}?`)) return;
+        closeModal('quotationModal');
+        await openInvoiceModal('new');
+        $('invClientName').value = q.client_name || '';
+        $('invPhone').value = q.phone || '';
+        $('invEmail').value = q.email || '';
+        $('invAddress').value = q.address || '';
+        $('invReference').value = q.quote_number;
+        $('invDiscountPct').value = String(q.discount_pct || 0);
+        $('invApplyGct').checked = !!(q.tax_amount && Number(q.tax_amount) > 0);
+        $('invItemsBody').innerHTML = '';
+        (q.items || []).forEach(it => addInvoiceItemRow(it));
+        if (!q.items || !q.items.length) addInvoiceItemRow();
+        recalcInvoiceTotals();
+        // Accepting a quote is a good moment to reflect that on the quote too.
+        await sb.from('quotations').update({ status: 'accepted' }).eq('id', q.id);
+        await loadQuotations();
+    }
+
+    // ---- PDF generation (shares the same #invoicePrintTemplate wrapper the invoice PDF uses — only one document is ever rendered into it at a time) ----
+    function buildQuotationPdfHtml() {
+        const quoNumber = $('quoNumber').value;
+        const clientName = esc($('quoClientName').value);
+        const phone = esc($('quoPhone').value);
+        const email = esc($('quoEmail').value);
+        const address = esc($('quoAddress').value);
+        const date = $('quoDate').value ? new Date($('quoDate').value).toLocaleDateString() : '';
+        const validUntil = $('quoValidUntil').value ? new Date($('quoValidUntil').value).toLocaleDateString() : '';
+        const reference = esc($('quoReference').value);
+        const status = $('quoStatus').value;
+
+        const totals = recalcQuotationTotals();
+        const rows = totals.items.map((it, i) => `
+            <tr>
+                <td>${i + 1}. ${esc(it.description)}</td>
+                <td class="amt">${it.qty}</td>
+                <td class="amt">${fmtMoney(it.unit_price)}</td>
+                <td class="amt">${it.disc_pct || 0}%</td>
+                <td class="amt">${fmtMoney(it.qty * it.unit_price * (1 - it.disc_pct / 100))}</td>
+            </tr>`).join('');
+
+        return `
+            <div class="inv-header">
+                <div><h1>${BIZ_NAME}</h1><div class="biz-sub">${BIZ_PARENT}<br>${BIZ_ADDRESS}<br>Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}</div></div>
+                <div class="inv-doctitle"><div class="doclabel">QUOTATION</div><div style="font-size:12px;margin-top:6px;">${esc(quoNumber)}</div></div>
+            </div>
+            <div class="inv-meta-grid">
+                <div>
+                    <div class="row"><b>Prepared For</b>${clientName}</div>
+                    ${phone ? `<div class="row"><b>Phone</b>${phone}</div>` : ''}
+                    ${email ? `<div class="row"><b>Email</b>${email}</div>` : ''}
+                    ${address ? `<div class="row"><b>Address</b>${address}</div>` : ''}
+                </div>
+                <div>
+                    <div class="row"><b>Quote Date</b>${date}</div>
+                    ${validUntil ? `<div class="row"><b>Valid Until</b>${validUntil}</div>` : ''}
+                    <div class="row"><b>Status</b>${esc(status)}</div>
+                    ${reference ? `<div class="row"><b>Reference</b>${reference}</div>` : ''}
+                </div>
+            </div>
+            <table class="pdf-items">
+                <thead><tr><th>Description</th><th class="amt">Qty</th><th class="amt">Unit Price</th><th class="amt">Disc %</th><th class="amt">Line Total</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div class="pdf-totals">
+                <div><span>Subtotal</span><span>${fmtMoney(totals.subtotal)}</span></div>
+                <div><span>Discount (${totals.discPct}%)</span><span>-${fmtMoney(totals.discountAmount)}</span></div>
+                ${totals.applyGct ? `<div><span>Tax (GCT 15%)</span><span>${fmtMoney(totals.tax)}</span></div>` : ''}
+                <div class="grand"><span>Estimated Total</span><span>${fmtMoney(totals.grand)}</span></div>
+            </div>
+            <div class="pdf-footer">
+                ${esc($('quoNotes').value)}<br>
+                This is a quotation, not an invoice — no payment is due until you confirm and work begins.<br>
+                ${BIZ_NAME} · ${BIZ_ADDRESS} · Tel: ${BIZ_PHONE} · ${BIZ_EMAIL}
+            </div>
+        `;
+    }
+
+    async function downloadQuotationPdf() {
+        const statusEl = $('quotationPdfStatus');
+        if (!$('quoClientName').value.trim()) {
+            statusEl.textContent = '⚠️ Enter a client name first.';
+            statusEl.style.color = 'var(--red)';
+            return;
+        }
+        statusEl.textContent = 'Generating PDF…';
+        statusEl.style.color = '';
+        const el = $('invoicePrintTemplate');
+        try {
+            el.innerHTML = buildQuotationPdfHtml();
+            el.style.display = 'block';
+            window.scrollTo(0, 0);
+            await new Promise(r => setTimeout(r, 100));
+            const filename = 'Quotation_' + $('quoNumber').value + '.pdf';
+            await html2pdf().set({
+                margin: 0,
+                filename,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
+            }).from(el).save();
+            statusEl.textContent = '✅ PDF downloaded.';
+            statusEl.style.color = 'var(--teal-dark)';
+        } catch (err) {
+            console.error('PDF error:', err);
+            statusEl.textContent = '❌ Failed to generate PDF.';
+            statusEl.style.color = 'var(--red)';
+        } finally {
+            el.style.display = 'none';
+        }
+    }
+
+    function printQuotation() {
+        try {
+            if (!$('quoClientName').value.trim()) {
+                $('quotationPdfStatus').textContent = '⚠️ Enter a client name first.';
+                $('quotationPdfStatus').style.color = 'var(--red)';
+                return;
+            }
+            const el = $('invoicePrintTemplate');
+            el.innerHTML = buildQuotationPdfHtml();
+            document.body.classList.add('printing-invoice');
+            el.style.display = 'block';
+
+            function cleanup() {
+                document.body.classList.remove('printing-invoice');
+                el.style.display = 'none';
+                window.removeEventListener('afterprint', cleanup);
+            }
+            window.addEventListener('afterprint', cleanup);
+            window.print();
+            setTimeout(cleanup, 60000);
+        } catch (err) {
+            console.error('Print error:', err);
+            alert('Print failed with this error — please screenshot this and send it back:\n\n' + err.message);
+            $('quotationPdfStatus').textContent = '❌ Print failed: ' + err.message;
+            $('quotationPdfStatus').style.color = 'var(--red)';
+            document.body.classList.remove('printing-invoice');
+            const el2 = $('invoicePrintTemplate');
+            if (el2) el2.style.display = 'none';
+        }
+    }
+
+    async function generateQuotationPdfDataUri() {
+        const el = $('invoicePrintTemplate');
+        el.innerHTML = buildQuotationPdfHtml();
+        el.style.display = 'block';
+        window.scrollTo(0, 0);
+        await new Promise(r => setTimeout(r, 100));
+        try {
+            const dataUri = await html2pdf().set({
+                margin: 0,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
+            }).from(el).outputPdf('datauristring');
+            return dataUri;
+        } finally {
+            el.style.display = 'none';
+        }
+    }
+
+    function buildQuotationEmailText(clientName) {
+        const quoNumber = $('quoNumber').value;
+        const totals = recalcQuotationTotals();
+        const validUntil = $('quoValidUntil').value ? new Date($('quoValidUntil').value).toLocaleDateString() : null;
+        const subject = `Your Quotation ${quoNumber} — ${BIZ_NAME}`;
+        const message = `Hi ${clientName}, thank you for considering ${BIZ_NAME}. Please find attached your quotation ${quoNumber} for ${fmtMoney(totals.grand)}.${validUntil ? ' This quote is valid until ' + validUntil + '.' : ''} Let us know if you'd like to go ahead and we'll get started. If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+        return { subject, message };
+    }
+
+    async function emailQuotationToClient() {
+        const statusEl = $('quotationPdfStatus');
+        const btn = $('quoEmailBtn');
+        const email = $('quoEmail').value.trim();
+        const clientName = $('quoClientName').value.trim();
+        if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!email) { statusEl.textContent = '⚠️ Enter a client email first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!currentQuotationEditId) { statusEl.textContent = '⚠️ Save this quotation first — it hasn\'t been recorded yet, so the client would get a number that doesn\'t exist in your records.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!window.emailjs) { statusEl.textContent = '⚠️ EmailJS failed to load — refresh and try again.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!EMAILJS_INVOICE_TEMPLATE_ID) { statusEl.textContent = '⚠️ Email template not set up yet — see setup steps.'; statusEl.style.color = 'var(--red)'; return; }
+
+        if (btn) btn.disabled = true;
+        statusEl.textContent = 'Preparing PDF & sending…';
+        statusEl.style.color = '';
+        try {
+            const quoNumber = $('quoNumber').value;
+            const filename = 'Quotation_' + quoNumber + '.pdf';
+            const pdfDataUri = await generateQuotationPdfDataUri();
+            const { subject, message } = buildQuotationEmailText(clientName);
+
+            // Reuses the same EmailJS template as invoice emails (it's a generic
+            // "attachment + message" template) — swap EMAILJS_INVOICE_TEMPLATE_ID
+            // for a dedicated quote template ID later if you'd rather word it differently.
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, {
+                to_email: email,
+                to_name: clientName,
+                subject,
+                message,
+                attachment_name: filename,
+                invoice_pdf: pdfDataUri,
+            });
+            if ($('quoStatus').value === 'draft') { $('quoStatus').value = 'sent'; await sb.from('quotations').update({ status: 'sent' }).eq('id', currentQuotationEditId); await loadQuotations(); }
+            logActivity('Quotation Emailed', `${quoNumber} sent to ${email} with PDF attached`);
+            statusEl.textContent = '✅ Sent to ' + email + ' with PDF attached.';
+            statusEl.style.color = 'var(--teal-dark)';
+        } catch (err) {
+            console.error('Quotation email error:', err);
+            const isQuota = /quota|limit|429/i.test(err?.text || err?.message || '');
+            statusEl.innerHTML = isQuota
+                ? '❌ EmailJS monthly limit reached. Try "✉️ Compose in My Email App" instead.'
+                : '❌ Failed to send — ' + esc(err?.text || err?.message || 'check EmailJS config');
+            statusEl.style.color = 'var(--red)';
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function composeQuotationEmailFallback() {
+        const statusEl = $('quotationPdfStatus');
+        const btn = $('quoMailtoBtn');
+        const email = $('quoEmail').value.trim();
+        const clientName = $('quoClientName').value.trim();
+        if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+
+        if (btn) btn.disabled = true;
+        statusEl.textContent = 'Downloading PDF…';
+        statusEl.style.color = '';
+        try {
+            await downloadQuotationPdf();
+            const { subject, message } = buildQuotationEmailText(clientName);
+            const body = message + '\n\n(Attach the PDF that just downloaded before sending.)';
+            const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailto, '_blank');
+            statusEl.textContent = '✅ PDF downloaded — attach it in the email draft that opened.';
+            statusEl.style.color = 'var(--teal-dark)';
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    }
+
+    async function sendQuotationViaWhatsApp() {
+        const statusEl = $('quotationPdfStatus');
+        const btn = $('quoWhatsappBtn');
+        const phone = $('quoPhone').value.trim();
+        const clientName = $('quoClientName').value.trim();
+        if (!clientName) { statusEl.textContent = '⚠️ Enter a client name first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!phone) { statusEl.textContent = '⚠️ Enter a client phone number first.'; statusEl.style.color = 'var(--red)'; return; }
+        if (!currentQuotationEditId) { statusEl.textContent = '⚠️ Save this quotation first — it hasn\'t been recorded yet, so the client would get a number that doesn\'t exist in your records.'; statusEl.style.color = 'var(--red)'; return; }
+
+        if (btn) btn.disabled = true;
+        statusEl.textContent = 'Preparing PDF…';
+        statusEl.style.color = '';
+        const el = $('invoicePrintTemplate');
+        try {
+            const quoNumber = $('quoNumber').value;
+            const filename = 'Quotation_' + quoNumber + '.pdf';
+            const { message } = buildQuotationEmailText(clientName);
+            const waNumber = normalizeWhatsAppNumber(phone);
+
+            el.innerHTML = buildQuotationPdfHtml();
+            el.style.display = 'block';
+            window.scrollTo(0, 0);
+            await new Promise(r => setTimeout(r, 100));
+            const blob = await html2pdf().set({
+                margin: 0,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', scrollX: 0, scrollY: 0, windowWidth: 800 },
+                jsPDF: { unit: 'pt', format: 'letter', orientation: 'portrait' }
+            }).from(el).outputPdf('blob');
+            el.style.display = 'none';
+
+            const file = new File([blob], filename, { type: 'application/pdf' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: filename, text: message });
+                logActivity('Quotation Sent via WhatsApp', `${quoNumber} shared to ${phone}`);
+                statusEl.textContent = '✅ Share sheet opened — pick WhatsApp to send.';
+                statusEl.style.color = 'var(--teal-dark)';
+            } else {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = filename; a.click();
+                URL.revokeObjectURL(url);
+                const waText = encodeURIComponent(message + '\n\n(Attach the PDF that just downloaded before sending.)');
+                window.open(`https://wa.me/${waNumber}?text=${waText}`, '_blank');
+                logActivity('Quotation WhatsApp Opened', `${quoNumber} — chat opened for ${phone}`);
+                statusEl.textContent = '✅ PDF downloaded — attach it in the WhatsApp chat that opened.';
+            }
+        } catch (err) {
+            console.error('WhatsApp send error:', err);
+            statusEl.textContent = '❌ Failed — ' + (err.message || 'see console for details.');
+            statusEl.style.color = 'var(--red)';
+        } finally {
+            if (btn) btn.disabled = false;
         }
     }
 
@@ -2099,14 +2737,6 @@ function initApp() {
         if (!clientName) { errorEl.textContent = 'Client name is required.'; return; }
         const isComp = $('invComplimentary').checked;
         const totals = recalcInvoiceTotals();
-        const status = $('invStatus').value;
-        // Guard against Status="Paid" being saved with an Amount Paid that
-        // doesn't actually match — this is the exact gap that let an invoice
-        // look paid (green badge) while Revenue Collected still read it as $0.
-        if (!isComp && status === 'paid' && Math.abs(totals.paid - totals.grand) > 0.01) {
-            errorEl.textContent = `Status is "Paid" but Amount Paid (${fmtMoney(totals.paid)}) doesn't match the total (${fmtMoney(totals.grand)}). Fix the amount, or change the status if this is a partial payment.`;
-            return;
-        }
 
         const payload = {
             invoice_number: $('invNumber').value,
@@ -2132,7 +2762,7 @@ function initApp() {
             grand_total: totals.grand,
             amount_paid: isComp ? 0 : totals.paid,
             balance_due: isComp ? 0 : totals.balance,
-            status: isComp ? 'complimentary' : status,
+            status: isComp ? 'complimentary' : $('invStatus').value,
             notes: isComp ? $('invCompNote').value.trim() : $('invNotes').value.trim(),
         };
 
