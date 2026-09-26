@@ -322,6 +322,7 @@
         <button class="nav-tab" id="navTabDevices" onclick="switchTab('devices',this)">🖥️ Devices</button>
         <button class="nav-tab" onclick="switchTab('techplaybook',this)">🧰 Tech Playbook</button>
         <button class="nav-tab" onclick="switchTab('quotations',this)">🧾 Quotations</button>
+        <button class="nav-tab" onclick="switchTab('feedback',this)">💬 Feedback</button>
         <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
         <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
         <button class="nav-tab" onclick="switchTab('users',this)">🔐 Users</button>
@@ -472,6 +473,21 @@
         </div>
         <div id="quotationCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
         <div class="list-container" id="quotationsList"><div class="status-msg">Loading…</div></div>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div id="feedback" class="section">
+        <h2 style="margin-bottom:20px;">Customer Feedback</h2>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="feedbackSearch" placeholder="Search name or comment…" oninput="filterFeedback()"></div>
+            <select id="feedbackStatusFilter" onchange="filterFeedback()">
+                <option value="">All</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+            </select>
+        </div>
+        <div id="feedbackCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="feedbackList"><div class="status-msg">Loading…</div></div>
     </div>
 
     <!-- BILLING -->
@@ -935,6 +951,7 @@ function initApp() {
     let allUsers = [];
     let allInvoices = [];
     let allQuotations = [];
+    let allFeedback = [];
     let allPriceList = [];
     let allExpenses = [];
     let currentEditId = null;
@@ -1056,7 +1073,7 @@ function initApp() {
         // Invoices load alongside everything else now (not just when the Billing
         // tab is opened) — the ticket list needs allInvoices populated up front
         // to correctly show/hide the "Create Invoice" button per ticket.
-        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList(), loadInvoices(), loadQuotations()]);
+        await Promise.all([loadTickets(), loadClients(), loadDevices(), loadTechNotes(), loadUsers(), loadPriceList(), loadInvoices(), loadQuotations(), loadFeedback()]);
         renderTickets(allTickets); // re-render now that allInvoices is guaranteed loaded, regardless of which finished first
         updateDashboard();
         populateAssigneeFilters();
@@ -2103,6 +2120,66 @@ function initApp() {
             return matchesQ && matchesStatus;
         }));
     }
+
+    // =============================================================
+    //  CUSTOMER FEEDBACK (public site submissions -> approval queue)
+    // =============================================================
+    async function loadFeedback() {
+        const listEl = $('feedbackList');
+        if (listEl) listEl.innerHTML = '<div class="status-msg">Loading feedback…</div>';
+        const { data, error } = await sb.from('testimonials').select('*').order('created_at', { ascending: false });
+        if (error) { if (listEl) listEl.innerHTML = '<div class="status-msg err">Error loading feedback.</div>'; return; }
+        allFeedback = data || [];
+        renderFeedback(allFeedback);
+    }
+    function renderFeedback(list) {
+        const listEl = $('feedbackList');
+        if (!listEl) return;
+        const pending = list.filter(f => !f.approved).length;
+        $('feedbackCount').textContent = `${list.length} total · ${pending} pending approval`;
+        if (!list.length) { listEl.innerHTML = '<div class="empty-state"><h3>No feedback yet</h3><p>Reviews submitted on the website will show up here for approval.</p></div>'; return; }
+        listEl.innerHTML = list.map(f => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header">
+                        <span class="list-item-title">${esc(f.name)}</span>
+                        <span class="inv-badge ${f.approved ? 'paid' : 'unpaid'}">${f.approved ? 'Approved' : 'Pending'}</span>
+                        <span style="color:var(--amber);">${'★'.repeat(Math.max(1, Math.min(5, f.rating || 0)))}</span>
+                    </div>
+                    <div class="list-item-subtitle">${new Date(f.created_at).toLocaleString()}</div>
+                    <div style="font-size:0.9rem;margin-top:4px;">${esc(f.quote)}</div>
+                </div>
+                <div class="list-item-actions">
+                    ${f.approved
+                        ? `<button class="btn btn-sm btn-ghost" onclick="setFeedbackApproved('${f.id}', false)">Unpublish</button>`
+                        : `<button class="btn btn-sm btn-primary" onclick="setFeedbackApproved('${f.id}', true)">Approve</button>`}
+                    <button class="btn btn-sm btn-danger" onclick="deleteFeedback('${f.id}')">Delete</button>
+                </div>
+            </div>`).join('');
+    }
+    function filterFeedback() {
+        const q = $('feedbackSearch').value.toLowerCase();
+        const status = $('feedbackStatusFilter').value;
+        renderFeedback(allFeedback.filter(f => {
+            const matchesQ = !q || (f.name || '').toLowerCase().includes(q) || (f.quote || '').toLowerCase().includes(q);
+            const matchesStatus = !status || (status === 'approved' ? f.approved : !f.approved);
+            return matchesQ && matchesStatus;
+        }));
+    }
+    async function setFeedbackApproved(id, approved) {
+        const { error } = await sb.from('testimonials').update({ approved }).eq('id', id);
+        if (error) { alert('Could not update feedback: ' + error.message); return; }
+        logActivity(approved ? 'Feedback Approved' : 'Feedback Unpublished', id);
+        await loadFeedback();
+    }
+    async function deleteFeedback(id) {
+        if (!confirm('Delete this feedback permanently?')) return;
+        const { error } = await sb.from('testimonials').delete().eq('id', id);
+        if (error) { alert('Could not delete feedback: ' + error.message); return; }
+        logActivity('Feedback Deleted', id);
+        await loadFeedback();
+    }
+
     function populateQuotationTicketSelect() {
         const sel = $('quoTicketLink');
         sel.innerHTML = '<option value="">— None / walk-in —</option>' + allTickets.map(t => `<option value="${t.id}">${esc(t.ticket_number || t.id)} — ${esc(t.client_name)}</option>`).join('');
@@ -2207,26 +2284,44 @@ function initApp() {
     }
 
     async function nextQuotationNumber() {
-        const { data } = await sb.from('quotations').select('quote_number');
-        let max = 1000;
-        (data || []).forEach(r => {
-            const m = /QUO-(\d+)/.exec(r.quote_number || '');
-            if (m) max = Math.max(max, parseInt(m[1], 10));
-        });
-        return 'QUO-' + (max + 1);
+        // Defensive: any Supabase failure here (RLS, network, missing table)
+        // used to throw inside openQuotationModal and silently abort it
+        // before the modal was ever shown. Never let this block the modal.
+        try {
+            const { data, error } = await sb.from('quotations').select('quote_number');
+            if (error) throw error;
+            let max = 1000;
+            (data || []).forEach(r => {
+                const m = /QUO-(\d+)/.exec(r.quote_number || '');
+                if (m) max = Math.max(max, parseInt(m[1], 10));
+            });
+            return 'QUO-' + (max + 1);
+        } catch (e) {
+            console.error('nextQuotationNumber failed, falling back to timestamp-based number:', e);
+            return 'QUO-' + Date.now().toString().slice(-6);
+        }
     }
 
     async function openQuotationModal(mode, id = null) {
         currentQuotationEditId = mode === 'edit' ? id : null;
         $('quotationModalError').textContent = '';
         $('quotationPdfStatus').textContent = '';
-        populateQuotationTicketSelect();
-        populateQuotationClientSelect();
+        // Show the modal immediately — everything below only fills it in.
+        // Previously the modal only opened after several awaited Supabase
+        // calls succeeded, so any one of them failing meant clicking
+        // "+ New Quotation" appeared to do nothing at all.
+        $('quotationModal').classList.add('active');
+        try {
+            populateQuotationTicketSelect();
+        } catch (e) { console.error('populateQuotationTicketSelect failed:', e); }
+        try {
+            populateQuotationClientSelect();
+        } catch (e) { console.error('populateQuotationClientSelect failed:', e); }
         $('quoItemsBody').innerHTML = '';
         $('quoConvertBtn').style.display = mode === 'edit' ? '' : 'none';
         if (mode === 'new') {
             $('quotationModalTitle').textContent = 'New Quotation';
-            $('quoNumber').value = await nextQuotationNumber();
+            $('quoNumber').value = 'QUO-…';
             $('quoTicketLink').value = '';
             $('quoClientPick').value = '';
             ['quoClientName','quoPhone','quoEmail','quoAddress','quoReference'].forEach(f => $(f).value = '');
@@ -2237,9 +2332,11 @@ function initApp() {
             $('quoApplyGct').checked = false;
             $('quoNotes').value = 'This quotation is valid for 14 days from the date above. Prices are subject to change if parts availability or scope changes.';
             addQuotationItemRow();
+            // Fill in the real number once it's ready; the modal is already open.
+            nextQuotationNumber().then(num => { $('quoNumber').value = num; });
         } else {
             const q = allQuotations.find(x => x.id === id);
-            if (!q) return;
+            if (!q) { $('quotationModalError').textContent = 'Could not find that quotation.'; return; }
             $('quotationModalTitle').textContent = 'Edit Quotation';
             $('quoNumber').value = q.quote_number;
             $('quoTicketLink').value = q.ticket_id || '';
