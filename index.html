@@ -1384,6 +1384,81 @@
         }
 
         /* ============================================================
+           FEEDBACK FORM (customer-submitted reviews, pending approval)
+           ============================================================ */
+        .feedback-form-wrap {
+            max-width: 480px;
+            margin: 52px auto 0;
+            background: var(--white);
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 28px 26px 24px;
+            text-align: center;
+        }
+        .feedback-form-wrap h3 {
+            font-size: 1.1rem;
+        }
+        .feedback-form-sub {
+            font-size: 0.88rem;
+            color: var(--ink-soft);
+            margin: 0 0 20px;
+        }
+        .feedback-form {
+            display: grid;
+            gap: 16px;
+            text-align: left;
+        }
+        .feedback-form .field label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--ink-soft);
+            display: block;
+            margin-bottom: 6px;
+        }
+        .feedback-form input,
+        .feedback-form textarea {
+            font-family: 'IBM Plex Sans';
+            font-size: 0.94rem;
+            padding: 11px 12px;
+            border: 1px solid var(--rule);
+            border-radius: 4px;
+            background: var(--paper);
+            color: var(--ink);
+            width: 100%;
+        }
+        .feedback-form textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .star-rating {
+            display: flex;
+            gap: 4px;
+        }
+        .star-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.7rem;
+            line-height: 1;
+            color: var(--rule);
+            padding: 2px;
+            transition: color 0.15s, transform 0.1s;
+        }
+        .star-btn:hover {
+            transform: scale(1.12);
+        }
+        .star-btn.active {
+            color: var(--amber);
+        }
+        #feedbackFormStatus {
+            font-size: 0.88rem;
+            font-weight: 600;
+            min-height: 1.2em;
+        }
+        #feedbackFormStatus.ok { color: var(--teal-dark); }
+        #feedbackFormStatus.err { color: #a3372a; }
+
+        /* ============================================================
            FAQ
            ============================================================ */
         .faq-list { display: grid; gap: 2px; max-width: 780px; }
@@ -2157,7 +2232,7 @@
                     <h2>What customers say</h2>
                     <p>Real feedback from people who've trusted StylesPC with their devices.</p>
                 </div>
-                <div class="testimonials-grid">
+                <div class="testimonials-grid" id="testimonialsGrid">
                     <div class="testimonial-card reveal">
                         <div class="testimonial-stars">★★★★★</div>
                         <p class="testimonial-quote">My laptop wouldn't boot at all. StylesPC picked it up, diagnosed a failed SSD, replaced it and had everything restored within two days. Professional and fast.</p>
@@ -2180,6 +2255,40 @@
                     <div class="trust-badge"><span class="ti">🚗</span>Pickup &amp; drop-off available</div>
                     <div class="trust-badge"><span class="ti">💻</span>Remote support — no need to send it in</div>
                     <div class="trust-badge"><span class="ti">🔒</span>Your data stays private</div>
+                </div>
+
+                <!-- ============================================================
+                CUSTOMER FEEDBACK FORM
+                Submits to Supabase table "testimonials" with approved=false.
+                Nothing typed here appears publicly until approved in the
+                admin panel's Feedback tab.
+                ============================================================ -->
+                <div class="feedback-form-wrap reveal">
+                    <h3>Share your experience</h3>
+                    <p class="feedback-form-sub">Had work done with us? We'd love to hear about it — approved reviews are shown above.</p>
+                    <form id="feedbackForm" class="feedback-form" onsubmit="return submitFeedback(event)">
+                        <div class="field">
+                            <label for="fbName">Your Name</label>
+                            <input type="text" id="fbName" required placeholder="e.g. Andrea B.">
+                        </div>
+                        <div class="field">
+                            <label>Rating</label>
+                            <div class="star-rating" id="starRating" role="radiogroup" aria-label="Rating">
+                                <button type="button" class="star-btn" data-value="1" aria-label="1 star">★</button>
+                                <button type="button" class="star-btn" data-value="2" aria-label="2 stars">★</button>
+                                <button type="button" class="star-btn" data-value="3" aria-label="3 stars">★</button>
+                                <button type="button" class="star-btn" data-value="4" aria-label="4 stars">★</button>
+                                <button type="button" class="star-btn" data-value="5" aria-label="5 stars">★</button>
+                            </div>
+                            <input type="hidden" id="fbRating" value="0">
+                        </div>
+                        <div class="field">
+                            <label for="fbQuote">Your Feedback</label>
+                            <textarea id="fbQuote" required placeholder="Tell us how it went…"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="fbSubmitBtn">Submit Feedback</button>
+                        <div id="feedbackFormStatus"></div>
+                    </form>
                 </div>
             </div>
         </section>
@@ -3391,6 +3500,107 @@
                 // static HTML rates remain as a safe fallback
             }
         })();
+
+        // =============================================================
+        //  CUSTOMER FEEDBACK — approved reviews shown, new ones submitted
+        //  for approval via the admin panel's Feedback tab.
+        // =============================================================
+        function escHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        (async function loadApprovedTestimonials() {
+            try {
+                var { data, error } = await sbPublic
+                    .from('testimonials')
+                    .select('*')
+                    .eq('approved', true)
+                    .order('created_at', { ascending: false })
+                    .limit(9);
+                if (error || !data || !data.length) return; // keep the seed testimonials above as-is
+                var grid = document.getElementById('testimonialsGrid');
+                if (!grid) return;
+                var html = data.map(function (t) {
+                    var stars = '★'.repeat(Math.max(1, Math.min(5, t.rating || 5)));
+                    return '<div class="testimonial-card reveal">' +
+                        '<div class="testimonial-stars">' + stars + '</div>' +
+                        '<p class="testimonial-quote">' + escHtml(t.quote) + '</p>' +
+                        '<div class="testimonial-author">' + escHtml(t.name) + '</div>' +
+                        '</div>';
+                }).join('');
+                grid.insertAdjacentHTML('beforeend', html);
+            } catch (e) {
+                console.error('Testimonials load error:', e);
+            }
+        })();
+
+        // Star rating widget
+        (function () {
+            var stars = document.querySelectorAll('#starRating .star-btn');
+            var ratingInput = document.getElementById('fbRating');
+            if (!stars.length || !ratingInput) return;
+            function paint(val) {
+                stars.forEach(function (s) {
+                    s.classList.toggle('active', parseInt(s.dataset.value, 10) <= val);
+                });
+            }
+            stars.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    ratingInput.value = btn.dataset.value;
+                    paint(parseInt(btn.dataset.value, 10));
+                });
+                btn.addEventListener('mouseenter', function () { paint(parseInt(btn.dataset.value, 10)); });
+                btn.addEventListener('mouseleave', function () { paint(parseInt(ratingInput.value, 10) || 0); });
+            });
+        })();
+
+        async function submitFeedback(evt) {
+            evt.preventDefault();
+            var statusEl = document.getElementById('feedbackFormStatus');
+            var btn = document.getElementById('fbSubmitBtn');
+            var name = document.getElementById('fbName').value.trim();
+            var quote = document.getElementById('fbQuote').value.trim();
+            var rating = parseInt(document.getElementById('fbRating').value, 10) || 0;
+
+            statusEl.className = '';
+            statusEl.textContent = '';
+
+            if (!name || !quote) {
+                statusEl.className = 'err';
+                statusEl.textContent = 'Please fill in your name and feedback.';
+                return false;
+            }
+            if (rating < 1 || rating > 5) {
+                statusEl.className = 'err';
+                statusEl.textContent = 'Please choose a star rating.';
+                return false;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Submitting…';
+            try {
+                var { error } = await sbPublic.from('testimonials').insert([{
+                    name: name,
+                    rating: rating,
+                    quote: quote,
+                    approved: false
+                }]);
+                if (error) throw error;
+                statusEl.className = 'ok';
+                statusEl.textContent = 'Thank you! Your feedback has been submitted and will appear once approved.';
+                document.getElementById('feedbackForm').reset();
+                document.getElementById('fbRating').value = '0';
+                document.querySelectorAll('#starRating .star-btn').forEach(s => s.classList.remove('active'));
+            } catch (e) {
+                console.error('Feedback submit error:', e);
+                statusEl.className = 'err';
+                statusEl.textContent = 'Sorry, something went wrong submitting your feedback. Please try again.';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Submit Feedback';
+            }
+            return false;
+        }
 
         // =============================================================
         //  PICKUP SERVICE AREA + DISTANCE FARE ESTIMATE
