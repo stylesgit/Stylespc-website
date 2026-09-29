@@ -166,8 +166,20 @@
         .pl-card { background:var(--white); border:1px solid var(--rule); border-radius:6px; padding:16px 18px; box-shadow:var(--shadow); }
         .pl-card .pl-label { font-size:0.74rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin-bottom:4px; }
         .pl-card .pl-value { font-size:1.35rem; font-weight:700; }
+        .pl-card .pl-hint { font-size:0.72rem; color:var(--ink-soft); margin-top:6px; line-height:1.4; }
         .pl-card.positive .pl-value { color:var(--teal-dark); }
         .pl-card.negative .pl-value { color:var(--red); }
+        .pl-section-title { margin:28px 0 4px; font-size:1.05rem; }
+        .pl-section-title .pl-section-sub { font-weight:400; font-size:0.82rem; color:var(--ink-soft); }
+        .month-table { width:100%; border-collapse:collapse; background:var(--white); border:1px solid var(--rule); border-radius:6px; overflow:hidden; box-shadow:var(--shadow); }
+        .month-table th { text-align:left; font-size:0.72rem; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); background:var(--paper-2); padding:10px 14px; }
+        .month-table td { padding:10px 14px; border-top:1px solid var(--rule); font-size:0.88rem; }
+        .month-table td.amt, .month-table th.amt { text-align:right; }
+        .month-table tr.negative td.profit { color:var(--red); font-weight:600; }
+        .month-table tr.positive td.profit { color:var(--teal-dark); font-weight:600; }
+        .payhist-row { display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; padding:6px 0; border-bottom:1px dashed var(--rule); }
+        .payhist-row:last-child { border-bottom:none; }
+        .payhist-row .payhist-del { color:var(--red); cursor:pointer; background:none; border:none; font-size:0.78rem; padding:2px 6px; }
 
         /* ---- Pricelist manager ---- */
         .price-row { display:grid; grid-template-columns:1fr 120px 130px 90px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--rule); }
@@ -289,7 +301,7 @@
     </script>
 </head>
 <body>
-<div id="invoicePrintTemplate" class="invoice-print-wrap"></div>
+<div id="invoicePrintWrapperOuter"><div id="invoicePrintTemplate" class="invoice-print-wrap"></div></div>
 
 <!-- ===== LOGIN OVERLAY ===== -->
 <div class="login-overlay" id="loginOverlay">
@@ -546,25 +558,81 @@
 
     <!-- ACCOUNTING / P&L -->
     <div id="accounting" class="section">
-        <h2 style="margin-bottom:20px;">Accounting — Profit &amp; Loss</h2>
+        <h2 style="margin-bottom:6px;">Money — Profit &amp; Loss</h2>
+        <p style="color:var(--ink-soft);font-size:0.88rem;margin:0 0 20px;max-width:720px;">A plain-language look at what actually came in, what went out, and what customers still owe you.</p>
         <div class="toolbar">
             <label style="font-size:0.82rem;">From <input type="date" id="plFrom" onchange="loadAccounting()"></label>
             <label style="font-size:0.82rem;">To <input type="date" id="plTo" onchange="loadAccounting()"></label>
             <button class="btn btn-ghost btn-sm" onclick="setPLThisMonth()">This Month</button>
             <button class="btn btn-ghost btn-sm" onclick="loadAccounting()">⟳ Refresh</button>
         </div>
+
+        <h3 class="pl-section-title">Profit &amp; Loss <span class="pl-section-sub">— cash in vs. cash out, for the dates above</span></h3>
         <div class="pl-grid" id="plGrid">
-            <div class="pl-card"><div class="pl-label">Revenue Collected</div><div class="pl-value" id="plRevenue">—</div></div>
-            <div class="pl-card"><div class="pl-label">Outstanding (A/R)</div><div class="pl-value" id="plOutstanding">—</div></div>
-            <div class="pl-card"><div class="pl-label">Tax Collected (GCT)</div><div class="pl-value" id="plTax">—</div></div>
-            <div class="pl-card"><div class="pl-label">Discounts Given</div><div class="pl-value" id="plDiscounts">—</div></div>
-            <div class="pl-card"><div class="pl-label">Complimentary Value</div><div class="pl-value" id="plComp">—</div></div>
-            <div class="pl-card"><div class="pl-label">Total Expenses</div><div class="pl-value" id="plExpenses">—</div></div>
-            <div class="pl-card" id="plNetCard"><div class="pl-label">Net Profit (Collected)</div><div class="pl-value" id="plNet">—</div></div>
-            <div class="pl-card" id="plNetBilledCard"><div class="pl-label">Net Profit (Billed, incl. unpaid)</div><div class="pl-value" id="plNetBilled">—</div></div>
+            <div class="pl-card">
+                <div class="pl-label">Money Collected</div>
+                <div class="pl-value" id="plRevenue">—</div>
+                <div class="pl-hint">Actual payments received from customers in this date range</div>
+            </div>
+            <div class="pl-card">
+                <div class="pl-label">Expenses</div>
+                <div class="pl-value" id="plExpenses">—</div>
+                <div class="pl-hint">What you spent running the business in this date range</div>
+            </div>
+            <div class="pl-card" id="plNetCard">
+                <div class="pl-label">Profit</div>
+                <div class="pl-value" id="plNet">—</div>
+                <div class="pl-hint">Money Collected minus Expenses — what you actually kept</div>
+            </div>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 10px;">
+        <h3 class="pl-section-title">Money Still Owed To You <span class="pl-section-sub">— as of today, every unpaid invoice (not limited to the dates above)</span></h3>
+        <div class="pl-grid">
+            <div class="pl-card">
+                <div class="pl-label">Total Outstanding</div>
+                <div class="pl-value" id="arOutstanding">—</div>
+                <div class="pl-hint" id="arOutstandingHint">—</div>
+            </div>
+        </div>
+
+        <h3 class="pl-section-title">This Period's Invoices <span class="pl-section-sub">— for reference only, not counted in Profit above</span></h3>
+        <div class="pl-grid">
+            <div class="pl-card">
+                <div class="pl-label">Total Billed (incl. unpaid)</div>
+                <div class="pl-value" id="plBilled">—</div>
+                <div class="pl-hint">Value of every invoice created in this range, whether it's been paid yet or not</div>
+            </div>
+            <div class="pl-card">
+                <div class="pl-label">Discounts Given</div>
+                <div class="pl-value" id="plDiscounts">—</div>
+                <div class="pl-hint">How much you knocked off invoices in this range</div>
+            </div>
+            <div class="pl-card">
+                <div class="pl-label">Tax on Invoices (GCT)</div>
+                <div class="pl-value" id="plTax">—</div>
+                <div class="pl-hint">GCT included in this range's invoices</div>
+            </div>
+            <div class="pl-card">
+                <div class="pl-label">Complimentary Work</div>
+                <div class="pl-value" id="plComp">—</div>
+                <div class="pl-hint">Free jobs in this range, and what they'd normally be worth</div>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 0 10px;flex-wrap:wrap;gap:10px;">
+            <h3 style="margin:0;">Payments Received</h3>
+            <button class="btn btn-primary btn-sm" onclick="openPaymentModal()">+ Record a Payment</button>
+        </div>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="paymentSearch" placeholder="Search client or invoice #…" oninput="filterPayments()"></div>
+        </div>
+        <div id="paymentCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="paymentsList"><div class="status-msg">Loading…</div></div>
+
+        <h3 style="margin:28px 0 10px;">Month by Month <span class="pl-section-sub" style="font-weight:400;font-size:0.82rem;color:var(--ink-soft);">— last 12 months, regardless of the dates above</span></h3>
+        <div id="monthlyTable"><div class="status-msg">Loading…</div></div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 0 10px;">
             <h3 style="margin:0;">Expenses</h3>
             <div>
                 <button class="btn btn-ghost btn-sm" onclick="exportExpensesCSV()">📥 Export CSV</button>
@@ -704,6 +772,13 @@
             <div id="invPaymentRows">
                 <div class="trow"><span>Amount Paid</span><span><input type="number" id="invAmountPaid" min="0" value="0" style="width:110px;text-align:right;padding:4px 6px;" oninput="recalcInvoiceTotals()"></span></div>
                 <div class="trow balance"><span>Balance Due</span><span id="invBalanceOut">$0.00</span></div>
+                <div id="invPaymentHistoryWrap" style="display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--rule);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <span style="font-size:0.76rem;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;">Payment History</span>
+                        <button class="btn btn-sm btn-ghost" style="padding:3px 10px;font-size:0.76rem;" onclick="openPaymentModal(currentInvoiceEditId)">+ Record Payment</button>
+                    </div>
+                    <div id="invPaymentHistoryList"></div>
+                </div>
             </div>
             <div class="trow balance" id="invWaivedRow" style="display:none;"><span>Amount Charged</span><span>$0.00 — waived (complimentary)</span></div>
         </div>
@@ -820,6 +895,27 @@
     <div class="form-group"><label>Date</label><input type="date" id="expDate"></div>
     <div id="expenseModalError" class="modal-error"></div>
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
+</div></div>
+
+<!-- RECORD A PAYMENT MODAL -->
+<div class="modal-overlay" id="paymentModal"> <div class="modal">
+    <h2>Record a Payment</h2>
+    <div class="form-group">
+        <label>Invoice *</label>
+        <select id="paymentInvoiceSelect" onchange="onPaymentInvoiceChange()"><option value="">Select an invoice…</option></select>
+    </div>
+    <div id="paymentInvoiceInfo" style="font-size:0.82rem;color:var(--ink-soft);margin:-6px 0 12px;"></div>
+    <div class="form-row">
+        <div class="form-group"><label>Amount (JMD) *</label><input type="number" id="paymentAmount" min="0" step="0.01"></div>
+        <div class="form-group"><label>Date *</label><input type="date" id="paymentDate"></div>
+    </div>
+    <div class="form-group">
+        <label>Method</label>
+        <select id="paymentMethod"><option>Cash</option><option>Bank Transfer</option><option>Online Payment</option></select>
+    </div>
+    <div class="form-group"><label>Note (optional)</label><input type="text" id="paymentNote" placeholder="e.g. deposit, final payment…"></div>
+    <div id="paymentModalError" class="modal-error"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('paymentModal')">Cancel</button><button class="btn btn-primary" onclick="savePayment()">Save Payment</button></div>
 </div></div>
 
 <!-- WHATSAPP STATUS UPDATE MODAL -->
@@ -1071,6 +1167,8 @@ function initApp() {
     let allFeedback = [];
     let allPriceList = [];
     let allExpenses = [];
+    let allPayments = [];
+    let currentInvoicePayments = [];
     let currentEditId = null;
     let currentInvoiceEditId = null;
     let currentQuotationEditId = null;
@@ -3021,7 +3119,13 @@ function initApp() {
             $('invStatus').value = 'unpaid';
             $('invDiscountPct').value = '0';
             $('invApplyGct').checked = false;
+            // A brand-new invoice has no id yet to attach payment-ledger rows to, so this
+            // field stays a plain editable "starting payment" (e.g. a deposit taken on the
+            // spot) — saveInvoice() turns it into a proper dated payment record once saved.
+            $('invAmountPaid').readOnly = false;
+            $('invAmountPaid').style.background = '';
             $('invAmountPaid').value = '0';
+            $('invPaymentHistoryWrap').style.display = 'none';
             $('invComplimentary').checked = false;
             $('invCompNote').value = 'This is a one-time complimentary service. Any other service may incur charges. Thank you.';
             $('invNotes').value = 'Repairs carry a 30-day warranty on parts and labour.';
@@ -3045,12 +3149,23 @@ function initApp() {
             $('invDiscountPct').value = String(inv.discount_pct || 0);
             $('invApplyGct').checked = !!(inv.tax_amount && Number(inv.tax_amount) > 0);
             $('invAmountPaid').value = inv.amount_paid || 0;
+            // Once an invoice is saved, "Amount Paid" is no longer hand-typed — it's the sum
+            // of the dated payment records below, kept accurate via Record Payment/delete so
+            // the figure always matches an actual, datable transaction.
+            $('invAmountPaid').readOnly = !inv.is_complimentary;
+            $('invAmountPaid').style.background = !inv.is_complimentary ? 'var(--paper-2)' : '';
             $('invNotes').value = inv.notes || '';
             $('invComplimentary').checked = !!inv.is_complimentary;
             $('invCompNote').value = inv.notes && inv.is_complimentary ? inv.notes : 'This is a one-time complimentary service. Any other service may incur charges. Thank you.';
             toggleComplimentary();
             (inv.items || []).forEach(it => addInvoiceItemRow(it));
             if (!inv.items || !inv.items.length) addInvoiceItemRow();
+            if (!inv.is_complimentary) {
+                $('invPaymentHistoryWrap').style.display = 'block';
+                loadInvoicePaymentHistory(id);
+            } else {
+                $('invPaymentHistoryWrap').style.display = 'none';
+            }
         }
         recalcInvoiceTotals();
         updatePaidBadge();
@@ -3093,15 +3208,17 @@ function initApp() {
             notes: isComp ? $('invCompNote').value.trim() : $('invNotes').value.trim(),
         };
 
-        let error;
+        let error, newId = null;
+        const isNewInvoice = !currentInvoiceEditId;
         if (currentInvoiceEditId) {
             ({ error } = await sb.from('invoices').update(payload).eq('id', currentInvoiceEditId));
         } else {
             // Retry with a freshly-generated number if we hit a numbering collision
             // (e.g. two invoices saved back-to-back) instead of failing outright.
             for (let attempt = 0; attempt < 3; attempt++) {
-                ({ error } = await sb.from('invoices').insert([payload]));
-                if (!error) break;
+                const res = await sb.from('invoices').insert([payload]).select('id').single();
+                error = res.error;
+                if (!error) { newId = res.data && res.data.id; break; }
                 const isDupNumber = /duplicate key|invoice_number/i.test(error.message || '');
                 if (!isDupNumber) break;
                 payload.invoice_number = await nextInvoiceNumber();
@@ -3109,14 +3226,28 @@ function initApp() {
             }
         }
         if (error) { errorEl.textContent = error.message; return; }
+
+        // A brand-new, non-complimentary invoice with a starting amount entered (e.g. a
+        // deposit taken on the spot) gets that recorded as its first dated entry in the
+        // payments ledger, so it shows up in the Payments list and Month by Month table
+        // right away instead of only existing as a number on the invoice.
+        if (isNewInvoice && !isComp && newId && totals.paid > 0) {
+            await sb.from('payments').insert([{
+                invoice_id: newId, invoice_number: payload.invoice_number, client_name: clientName,
+                amount: totals.paid, payment_date: payload.invoice_date, method: 'Cash',
+                notes: 'Recorded when the invoice was created.', created_by: currentUser.id,
+            }]);
+        }
+
         logActivity(currentInvoiceEditId ? 'Invoice Updated' : 'Invoice Created', `${payload.invoice_number} — ${clientName}${isComp ? ' (Complimentary)' : ' — ' + fmtMoney(payload.grand_total)}`);
         closeModal('invoiceModal');
         await loadInvoices();
     }
 
     async function deleteInvoice(id) {
-        if (!confirm('Delete this invoice?')) return;
+        if (!confirm('Delete this invoice? Any payments recorded against it will be deleted too.')) return;
         const inv = allInvoices.find(x => x.id === id);
+        await sb.from('payments').delete().eq('invoice_id', id);
         await sb.from('invoices').delete().eq('id', id);
         logActivity('Invoice Deleted', inv ? inv.invoice_number : id);
         await loadInvoices();
@@ -3445,29 +3576,56 @@ function initApp() {
         $('plTo').value = now.toISOString().slice(0, 10);
         loadAccounting();
     }
+    // ---- Accounting model, in plain terms ----
+    // Profit & Loss (cash basis, for the selected date range): money actually RECEIVED
+    // in that range (from the payments ledger, dated by when it was paid — not by when
+    // the invoice was created) minus expenses actually incurred in that range. This is
+    // the true "did I make money in this window" figure.
+    // Accounts Receivable (balance sheet, always "as of today"): every invoice that
+    // still has a balance, full stop — never limited by the date pickers above, because
+    // money owed to you doesn't belong to a single month. Mixing these two together
+    // under one "Net Profit" figure was the root of the confusing numbers before —
+    // splitting them out is the actual fix, not just a relabeling.
     async function loadAccounting() {
         const from = $('plFrom').value;
         const to = $('plTo').value;
 
-        let invQuery = sb.from('invoices').select('*');
-        if (from) invQuery = invQuery.gte('invoice_date', from);
-        if (to) invQuery = invQuery.lte('invoice_date', to);
-        const { data: invoices } = await invQuery;
+        await ensureLegacyPaymentsBackfilled();
 
+        // ---- Money actually collected in this range (real payments, real dates) ----
+        let payQuery = sb.from('payments').select('*').order('payment_date', { ascending: false });
+        if (from) payQuery = payQuery.gte('payment_date', from);
+        if (to) payQuery = payQuery.lte('payment_date', to);
+        const { data: periodPayments } = await payQuery;
+        allPayments = periodPayments || [];
+        const revenueCollected = allPayments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+
+        // ---- Expenses in this range ----
         let expQuery = sb.from('expenses').select('*').order('expense_date', { ascending: false });
         if (from) expQuery = expQuery.gte('expense_date', from);
         if (to) expQuery = expQuery.lte('expense_date', to);
         const { data: expenses } = await expQuery;
         allExpenses = expenses || [];
+        const totalExpenses = allExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
-        const billable = (invoices || []).filter(i => !i.is_complimentary);
-        const comp = (invoices || []).filter(i => i.is_complimentary);
+        const netProfit = revenueCollected - totalExpenses;
 
-        const revenueCollected = billable.reduce((s, i) => s + (Number(i.amount_paid) || 0), 0);
-        const outstanding = billable.reduce((s, i) => s + Math.max(0, Number(i.balance_due) || 0), 0);
-        const taxCollected = billable.reduce((s, i) => s + (Number(i.tax_amount) || 0), 0);
+        // ---- Everything still owed to you, right now — not scoped to the date range ----
+        const { data: unpaidInvoices } = await sb.from('invoices').select('id, balance_due, is_complimentary').gt('balance_due', 0);
+        const arList = (unpaidInvoices || []).filter(i => !i.is_complimentary);
+        const outstanding = arList.reduce((s, i) => s + (Number(i.balance_due) || 0), 0);
+
+        // ---- This range's invoices, shown separately for reference (not part of Profit) ----
+        let invQuery = sb.from('invoices').select('*');
+        if (from) invQuery = invQuery.gte('invoice_date', from);
+        if (to) invQuery = invQuery.lte('invoice_date', to);
+        const { data: periodInvoices } = await invQuery;
+        const billable = (periodInvoices || []).filter(i => !i.is_complimentary);
+        const comp = (periodInvoices || []).filter(i => i.is_complimentary);
+        const taxOnInvoices = billable.reduce((s, i) => s + (Number(i.tax_amount) || 0), 0);
         const discountsGiven = billable.reduce((s, i) => s + (Number(i.discount_amount) || 0), 0);
-        const avgTicket = billable.length ? billable.reduce((s, i) => s + (Number(i.grand_total) || 0), 0) / billable.length : 0;
+        const totalBilled = billable.reduce((s, i) => s + (Number(i.grand_total) || 0), 0);
+        const avgTicket = billable.length ? totalBilled / billable.length : 0;
         // Complimentary jobs now store their real itemized total (see saveInvoice) —
         // sum that directly. Any older complimentary invoice saved before this fix
         // still has grand_total = 0 on file, so fall back to the average-ticket
@@ -3475,28 +3633,238 @@ function initApp() {
         const compWithRealValue = comp.filter(i => Number(i.grand_total) > 0);
         const compLegacy = comp.length - compWithRealValue.length;
         const compValue = compWithRealValue.reduce((s, i) => s + Number(i.grand_total), 0) + (compLegacy * avgTicket);
-        const totalExpenses = allExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
-        const netProfit = revenueCollected - totalExpenses;
-        // Cash-basis "Net Profit" only counts money actually collected — Outstanding
-        // A/R is billed but not yet paid, so it's deliberately excluded. That's the
-        // financially safe default (it won't imply cash you don't have yet), but a
-        // business owner often also wants "what have I earned from work done,
-        // whether or not it's been paid" — this second figure covers that view.
-        const netProfitBilled = revenueCollected + outstanding - totalExpenses;
 
         $('plRevenue').textContent = fmtMoney(revenueCollected);
-        $('plOutstanding').textContent = fmtMoney(outstanding);
-        $('plTax').textContent = fmtMoney(taxCollected);
-        $('plDiscounts').textContent = fmtMoney(discountsGiven);
-        $('plComp').textContent = comp.length + ' job' + (comp.length === 1 ? '' : 's') + ' · ~' + fmtMoney(compValue);
         $('plExpenses').textContent = fmtMoney(totalExpenses);
         $('plNet').textContent = fmtMoney(netProfit);
         $('plNetCard').className = 'pl-card ' + (netProfit >= 0 ? 'positive' : 'negative');
-        $('plNetBilled').textContent = fmtMoney(netProfitBilled);
-        $('plNetBilledCard').className = 'pl-card ' + (netProfitBilled >= 0 ? 'positive' : 'negative');
+
+        $('arOutstanding').textContent = fmtMoney(outstanding);
+        $('arOutstandingHint').textContent = arList.length + ' unpaid invoice' + (arList.length === 1 ? '' : 's') + ', as of today';
+
+        $('plBilled').textContent = fmtMoney(totalBilled);
+        $('plDiscounts').textContent = fmtMoney(discountsGiven);
+        $('plTax').textContent = fmtMoney(taxOnInvoices);
+        $('plComp').textContent = comp.length + ' job' + (comp.length === 1 ? '' : 's') + ' · ~' + fmtMoney(compValue);
 
         renderExpenses(allExpenses);
+        renderPayments(allPayments);
+        renderMonthlyTable();
     }
+
+    // The old design stored ONE lump "amount paid" number per invoice with no date, so
+    // there was no way to list individual payments or see them by month. The first time
+    // this runs after the payments table exists, any invoice that already has money
+    // recorded against it but no ledger entry yet gets ONE entry created for it, dated
+    // at the invoice's own date — so historical revenue still shows up below instead of
+    // disappearing. Safe to call every time: it only ever fills in what's missing.
+    async function ensureLegacyPaymentsBackfilled() {
+        const { data: paidInvoices, error: invErr } = await sb.from('invoices').select('id, invoice_number, client_name, amount_paid, invoice_date').gt('amount_paid', 0);
+        if (invErr || !paidInvoices || !paidInvoices.length) return;
+        const { data: existing, error: payErr } = await sb.from('payments').select('invoice_id');
+        if (payErr) return; // payments table isn't set up yet — nothing to backfill into
+        const idsWithPayments = new Set((existing || []).map(p => p.invoice_id));
+        const toBackfill = paidInvoices.filter(i => !idsWithPayments.has(i.id));
+        if (!toBackfill.length) return;
+        const rows = toBackfill.map(i => ({
+            invoice_id: i.id, invoice_number: i.invoice_number, client_name: i.client_name,
+            amount: i.amount_paid, payment_date: i.invoice_date, method: 'Legacy',
+            notes: "Carried over from this invoice's Amount Paid total when payment history was added.",
+            created_by: currentUser.id,
+        }));
+        await sb.from('payments').insert(rows);
+    }
+
+    function renderPayments(list) {
+        const el = $('paymentsList');
+        $('paymentCount').textContent = list.length + ' payment' + (list.length === 1 ? '' : 's') + ' in this range';
+        if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No payments in this date range</h3><p>Record a payment, or widen the dates above.</p></div>'; return; }
+        el.innerHTML = list.map(p => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-title">${esc(p.client_name || '—')} — ${fmtMoney(p.amount)}</div>
+                    <div class="list-item-subtitle">${new Date(p.payment_date).toLocaleDateString()} · ${esc(p.method || 'Cash')}${p.invoice_number ? ' · Invoice ' + esc(p.invoice_number) : ''}${p.notes ? ' · ' + esc(p.notes) : ''}</div>
+                </div>
+                <div class="list-item-actions">
+                    ${p.invoice_id ? `<button class="btn btn-sm btn-ghost" onclick="openInvoiceModal('edit','${p.invoice_id}')">View Invoice</button>` : ''}
+                    <button class="btn btn-sm btn-danger" onclick="deletePayment('${p.id}')">Delete</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    function filterPayments() {
+        const q = $('paymentSearch').value.toLowerCase();
+        renderPayments(allPayments.filter(p => !q || (p.client_name || '').toLowerCase().includes(q) || (p.invoice_number || '').toLowerCase().includes(q)));
+    }
+    async function deletePayment(id) {
+        if (!confirm('Delete this payment record? This will reduce the linked invoice\'s Amount Paid.')) return;
+        const p = allPayments.find(x => x.id === id);
+        await sb.from('payments').delete().eq('id', id);
+        if (p && p.invoice_id) await recalcInvoicePaidFromLedger(p.invoice_id);
+        logActivity('Payment Deleted', p ? `${fmtMoney(p.amount)} — ${p.client_name || ''}` : id);
+        await loadInvoices();
+        await loadAccounting();
+    }
+
+    // Recomputes an invoice's Amount Paid / Balance Due / Status directly from its
+    // payment ledger (the source of truth), and saves that back onto the invoice row —
+    // so the two never drift apart no matter how many payments get added or removed.
+    async function recalcInvoicePaidFromLedger(invoiceId) {
+        const { data: pays } = await sb.from('payments').select('amount').eq('invoice_id', invoiceId);
+        const paidTotal = (pays || []).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+        const inv = allInvoices.find(i => i.id === invoiceId);
+        const grand = inv ? Number(inv.grand_total) || 0 : 0;
+        const balance = Math.max(0, grand - paidTotal);
+        const status = paidTotal <= 0 ? 'unpaid' : (balance <= 0.005 ? 'paid' : 'partial');
+        await sb.from('invoices').update({ amount_paid: paidTotal, balance_due: balance, status }).eq('id', invoiceId);
+        return { paidTotal, balance, status };
+    }
+
+    // "Month by Month" always looks at the last 12 months regardless of the date pickers
+    // above, so Andrew can see the shape of the business over time without having to
+    // keep changing From/To.
+    async function renderMonthlyTable() {
+        const el = $('monthlyTable');
+        const since = new Date();
+        since.setMonth(since.getMonth() - 11);
+        since.setDate(1);
+        const sinceStr = since.toISOString().slice(0, 10);
+
+        const [{ data: pays }, { data: exps }] = await Promise.all([
+            sb.from('payments').select('amount, payment_date').gte('payment_date', sinceStr),
+            sb.from('expenses').select('amount, expense_date').gte('expense_date', sinceStr)
+        ]);
+
+        const months = {}; // 'YYYY-MM' -> { collected, expenses }
+        const bucket = (d) => (d || '').slice(0, 7);
+        (pays || []).forEach(p => {
+            const k = bucket(p.payment_date);
+            if (!k) return;
+            months[k] = months[k] || { collected: 0, expenses: 0 };
+            months[k].collected += Number(p.amount) || 0;
+        });
+        (exps || []).forEach(e => {
+            const k = bucket(e.expense_date);
+            if (!k) return;
+            months[k] = months[k] || { collected: 0, expenses: 0 };
+            months[k].expenses += Number(e.amount) || 0;
+        });
+
+        const keys = Object.keys(months).sort().reverse();
+        if (!keys.length) { el.innerHTML = '<div class="empty-state"><h3>No activity yet</h3><p>Record a payment or an expense to see monthly totals.</p></div>'; return; }
+
+        const rows = keys.map(k => {
+            const m = months[k];
+            const profit = m.collected - m.expenses;
+            const label = new Date(k + '-02').toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+            return `<tr class="${profit >= 0 ? 'positive' : 'negative'}">
+                <td>${label}</td>
+                <td class="amt">${fmtMoney(m.collected)}</td>
+                <td class="amt">${fmtMoney(m.expenses)}</td>
+                <td class="amt profit">${fmtMoney(profit)}</td>
+            </tr>`;
+        }).join('');
+
+        el.innerHTML = `<table class="month-table"><thead><tr><th>Month</th><th class="amt">Collected</th><th class="amt">Expenses</th><th class="amt">Profit</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    function openPaymentModal(prefillInvoiceId) {
+        $('paymentModalError').textContent = '';
+        $('paymentAmount').value = '';
+        $('paymentDate').value = new Date().toISOString().slice(0, 10);
+        $('paymentMethod').value = 'Cash';
+        $('paymentNote').value = '';
+        populatePaymentInvoiceSelect(prefillInvoiceId);
+        onPaymentInvoiceChange();
+        $('paymentModal').classList.add('active');
+    }
+    function populatePaymentInvoiceSelect(selectedId) {
+        // Invoices still owing money first (most useful), then settled ones, newest first
+        // within each group. Complimentary jobs never take payments.
+        const billable = allInvoices.filter(i => !i.is_complimentary);
+        const withBalance = billable.filter(i => Number(i.balance_due) > 0).sort((a, b) => new Date(b.invoice_date) - new Date(a.invoice_date));
+        const settled = billable.filter(i => !(Number(i.balance_due) > 0)).sort((a, b) => new Date(b.invoice_date) - new Date(a.invoice_date));
+        const ordered = withBalance.concat(settled);
+        const sel = $('paymentInvoiceSelect');
+        sel.innerHTML = '<option value="">Select an invoice…</option>' + ordered.map(i =>
+            `<option value="${i.id}">${esc(i.invoice_number)} — ${esc(i.client_name)}${Number(i.balance_due) > 0 ? ' · Balance ' + fmtMoney(i.balance_due) : ' · Paid in full'}</option>`
+        ).join('');
+        if (selectedId) sel.value = selectedId;
+    }
+    function onPaymentInvoiceChange() {
+        const id = $('paymentInvoiceSelect').value;
+        const inv = allInvoices.find(i => i.id === id);
+        const info = $('paymentInvoiceInfo');
+        if (!inv) { info.textContent = ''; return; }
+        info.textContent = `Total ${fmtMoney(inv.grand_total)} · Already paid ${fmtMoney(inv.amount_paid)} · Balance ${fmtMoney(inv.balance_due)}`;
+        // Default to what's still owed, so a full payment is a single click away — the
+        // amount can still be edited down for a partial payment.
+        if (Number(inv.balance_due) > 0) $('paymentAmount').value = inv.balance_due;
+    }
+    async function savePayment() {
+        const errorEl = $('paymentModalError');
+        errorEl.textContent = '';
+        const invoiceId = $('paymentInvoiceSelect').value;
+        const amount = parseFloat($('paymentAmount').value);
+        const date = $('paymentDate').value;
+        if (!invoiceId) { errorEl.textContent = 'Choose which invoice this payment is for.'; return; }
+        if (isNaN(amount) || amount <= 0) { errorEl.textContent = 'Enter a valid payment amount.'; return; }
+        if (!date) { errorEl.textContent = 'Pick the date the payment was received.'; return; }
+        const inv = allInvoices.find(i => i.id === invoiceId);
+        const payload = {
+            invoice_id: invoiceId, invoice_number: inv ? inv.invoice_number : null, client_name: inv ? inv.client_name : null,
+            amount, payment_date: date, method: $('paymentMethod').value, notes: $('paymentNote').value.trim() || null,
+            created_by: currentUser.id,
+        };
+        const { error } = await sb.from('payments').insert([payload]);
+        if (error) { errorEl.textContent = error.message; return; }
+        await recalcInvoicePaidFromLedger(invoiceId);
+        logActivity('Payment Recorded', `${payload.invoice_number || ''} — ${payload.client_name || ''} — ${fmtMoney(amount)}`);
+        closeModal('paymentModal');
+        await loadInvoices();
+        // If this invoice happens to be open in the invoice modal right now, refresh its
+        // Amount Paid / Balance / history in place instead of leaving stale numbers showing.
+        if (currentInvoiceEditId === invoiceId) {
+            const updated = allInvoices.find(i => i.id === invoiceId);
+            if (updated) { $('invAmountPaid').value = updated.amount_paid || 0; $('invStatus').value = updated.status || 'unpaid'; }
+            updatePaidBadge();
+            recalcInvoiceTotals();
+            loadInvoicePaymentHistory(invoiceId);
+        }
+        if ($('accounting').classList.contains('active')) await loadAccounting();
+    }
+
+    async function loadInvoicePaymentHistory(id) {
+        const { data } = await sb.from('payments').select('*').eq('invoice_id', id).order('payment_date', { ascending: false });
+        currentInvoicePayments = data || [];
+        renderInvoicePaymentHistoryMini();
+    }
+    function renderInvoicePaymentHistoryMini() {
+        const el = $('invPaymentHistoryList');
+        if (!currentInvoicePayments.length) { el.innerHTML = '<div style="font-size:0.8rem;color:var(--ink-soft);">No payments recorded yet.</div>'; return; }
+        el.innerHTML = currentInvoicePayments.map(p => `
+            <div class="payhist-row">
+                <span>${new Date(p.payment_date).toLocaleDateString()} · ${fmtMoney(p.amount)} · ${esc(p.method || 'Cash')}</span>
+                <button class="payhist-del" onclick="deleteInvoicePayment('${p.id}')">Remove</button>
+            </div>
+        `).join('');
+    }
+    async function deleteInvoicePayment(paymentId) {
+        if (!confirm('Remove this payment record? This will reduce the invoice\'s Amount Paid.')) return;
+        const p = currentInvoicePayments.find(x => x.id === paymentId);
+        await sb.from('payments').delete().eq('id', paymentId);
+        if (p && p.invoice_id) {
+            const result = await recalcInvoicePaidFromLedger(p.invoice_id);
+            $('invAmountPaid').value = result.paidTotal;
+            $('invStatus').value = result.status;
+            updatePaidBadge();
+            recalcInvoiceTotals();
+        }
+        logActivity('Payment Removed', p ? `${fmtMoney(p.amount)} from invoice` : paymentId);
+        if (currentInvoiceEditId) await loadInvoicePaymentHistory(currentInvoiceEditId);
+        await loadInvoices();
+    }
+
     function renderExpenses(list) {
         const el = $('expensesList');
         if (!list.length) { el.innerHTML = '<div class="empty-state"><h3>No expenses logged</h3><p>Add an expense to track it against revenue.</p></div>'; return; }
