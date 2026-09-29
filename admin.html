@@ -174,8 +174,17 @@
         .price-row input, .price-row select { padding:6px 8px; border:1px solid var(--rule); border-radius:var(--radius); font-family:inherit; font-size:0.85rem; }
         @media (max-width:700px) { .price-row { grid-template-columns:1fr; } }
 
-        /* ---- Offscreen PDF render template ---- */
-        .invoice-print-wrap { display:none; position:fixed; left:0; top:0; width:800px; background:#fff; color:#1a1a1a; font-family:'IBM Plex Sans',Arial,sans-serif; padding:42px; z-index:99999; }
+        /* ---- Offscreen PDF render template ----
+           #invoicePrintWrapperOuter clips the template to nothing on the live page
+           (position:fixed + 0x0 + overflow:hidden), so it never shows or shifts layout.
+           The template itself MUST stay position:static (in normal flow): html2pdf.js
+           clones only the element passed to .from() into its own internal height:auto
+           container, and an out-of-flow (fixed/absolute) clone doesn't contribute to
+           that container's auto height — the capture then comes out blank/near-empty.
+           This is why Download/Email/WhatsApp PDFs were blank while native Print (which
+           doesn't go through html2canvas) worked fine. */
+        #invoicePrintWrapperOuter { position:fixed; left:0; top:0; width:0; height:0; overflow:hidden; }
+        .invoice-print-wrap { display:none; position:static; width:800px; background:#fff; color:#1a1a1a; font-family:'IBM Plex Sans',Arial,sans-serif; padding:42px; }
         .inv-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #2F6F63; padding-bottom:16px; margin-bottom:20px; }
         .inv-header h1 { font-size:20px; color:#2F6F63; margin:0 0 4px; letter-spacing:.02em; }
         .inv-header .biz-sub { font-size:11px; color:#555; line-height:1.5; }
@@ -216,9 +225,19 @@
             mix-blend-mode: multiply;
         }
 
-        /* ---- Native print isolation (Print button) ---- */
+        /* ---- Native print isolation (Print button) ----
+           The template now lives inside #invoicePrintWrapperOuter (see above), so that's
+           the direct child of <body> that must survive the "hide everything else" rule —
+           and it needs its own clip (0x0/overflow:hidden) lifted for print too. */
         @media print {
-            body.printing-invoice > *:not(#invoicePrintTemplate) { display:none !important; }
+            body.printing-invoice > *:not(#invoicePrintWrapperOuter) { display:none !important; }
+            body.printing-invoice #invoicePrintWrapperOuter {
+                display:block !important;
+                position:relative !important;
+                width:auto !important;
+                height:auto !important;
+                overflow:visible !important;
+            }
             body.printing-invoice #invoicePrintTemplate {
                 display:block !important;
                 position:relative !important;
