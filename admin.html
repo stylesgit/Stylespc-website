@@ -3258,9 +3258,44 @@ function initApp() {
             }]);
         }
 
+        // Picking "Paid" in the Status dropdown used to just change a label with nothing
+        // behind it — the real balance never moved, so Accounting's balance-based totals
+        // (correctly) kept treating it as still owing, and the next automatic status check
+        // would flip the label right back, which looked like the change wasn't saving.
+        // Now, marking an invoice Paid actually records the rest of the money as received
+        // (as of today), so the label and the real balance always agree from here on.
+        const savedId = currentInvoiceEditId || newId;
+        if (!isComp && savedId && payload.status === 'paid') {
+            // recalcInvoicePaidFromLedger (called inside this) looks the invoice up in the
+            // in-memory allInvoices cache to know its grand_total — which won't have a
+            // brand-new invoice yet (that only refreshes via loadInvoices() below), so make
+            // sure it's there first.
+            if (newId && !allInvoices.some(i => i.id === newId)) {
+                allInvoices.push(Object.assign({ id: newId }, payload));
+            }
+            await ensurePaidStatusIsBackedByLedger(savedId, payload.invoice_number, clientName, payload.grand_total);
+        }
+
         logActivity(currentInvoiceEditId ? 'Invoice Updated' : 'Invoice Created', `${payload.invoice_number} — ${clientName}${isComp ? ' (Complimentary)' : ' — ' + fmtMoney(payload.grand_total)}`);
         closeModal('invoiceModal');
         await loadInvoices();
+    }
+
+    async function ensurePaidStatusIsBackedByLedger(invoiceId, invoiceNumber, clientName, grandTotal) {
+        const { data: pays } = await sb.from('payments').select('amount').eq('invoice_id', invoiceId);
+        const paidSoFar = (pays || []).reduce((s, p) => s + (Number(p.amount) || 0), 0);
+        const shortfall = (Number(grandTotal) || 0) - paidSoFar;
+        if (shortfall > 0.005) {
+            await sb.from('payments').insert([{
+                invoice_id: invoiceId, invoice_number: invoiceNumber, client_name: clientName,
+                amount: shortfall, payment_date: new Date().toISOString().slice(0, 10), method: 'Cash',
+                notes: 'Recorded automatically because the invoice was marked Paid.', created_by: currentUser.id,
+            }]);
+            logActivity('Payment Recorded', `${invoiceNumber} — marked Paid, remaining ${fmtMoney(shortfall)} recorded`);
+        }
+        // Re-derive amount_paid / balance_due / status from the ledger either way, so the
+        // invoice row always matches the sum of its real payments, never a typed-in label.
+        await recalcInvoicePaidFromLedger(invoiceId);
     }
 
     async function deleteInvoice(id) {
