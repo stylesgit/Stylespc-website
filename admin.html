@@ -3180,8 +3180,13 @@ function initApp() {
             (inv.items || []).forEach(it => addInvoiceItemRow(it));
             if (!inv.items || !inv.items.length) addInvoiceItemRow();
             if (!inv.is_complimentary) {
+                await ensureLegacyPaymentBackfilledForInvoice(inv);
                 $('invPaymentHistoryWrap').style.display = 'block';
-                loadInvoicePaymentHistory(id);
+                await loadInvoicePaymentHistory(id);
+                // Reflect the now-guaranteed-to-match ledger total in the readonly field,
+                // in case this invoice's amount_paid had drifted from its real payments.
+                const ledgerTotal = currentInvoicePayments.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+                $('invAmountPaid').value = ledgerTotal;
             } else {
                 $('invPaymentHistoryWrap').style.display = 'none';
             }
@@ -3709,6 +3714,25 @@ function initApp() {
         renderExpenses(allExpenses);
         renderPayments(allPayments);
         renderMonthlyTable();
+    }
+
+    // Same idea as ensureLegacyPaymentsBackfilled() below, but scoped to the ONE invoice
+    // being opened right now, so it runs the moment ANY invoice is opened for editing —
+    // not only after the Accounting tab has been visited (which is what let this drift:
+    // an invoice touched only via Billing could still show its old lump "Amount Paid"
+    // figure while Payment History said "No payments recorded yet."). Safe to call every
+    // time: it only inserts a backfill row when this invoice truly has none yet.
+    async function ensureLegacyPaymentBackfilledForInvoice(inv) {
+        if (!inv || inv.is_complimentary || !(Number(inv.amount_paid) > 0)) return;
+        const { data: existing, error } = await sb.from('payments').select('id').eq('invoice_id', inv.id).limit(1);
+        if (error) return; // payments table isn't set up yet — nothing to backfill into
+        if (existing && existing.length) return; // already has real ledger entries
+        await sb.from('payments').insert([{
+            invoice_id: inv.id, invoice_number: inv.invoice_number, client_name: inv.client_name,
+            amount: inv.amount_paid, payment_date: inv.invoice_date, method: 'Legacy',
+            notes: "Carried over from this invoice's Amount Paid total when payment history was added.",
+            created_by: currentUser.id,
+        }]);
     }
 
     // The old design stored ONE lump "amount paid" number per invoice with no date, so
