@@ -593,7 +593,7 @@
         <h3 class="pl-section-title">Money Still Owed To You <span class="pl-section-sub">— as of today, every unpaid invoice (not limited to the dates above)</span></h3>
         <div class="pl-grid">
             <div class="pl-card pl-card-clickable" onclick="toggleARDetail()">
-                <div class="pl-label">Total Outstanding <span class="pl-expand-hint">▾ click to see which invoices</span></div>
+                <div class="pl-label">Total Outstanding <span class="pl-expand-hint" id="arExpandHint">▾ click to see which invoices</span></div>
                 <div class="pl-value" id="arOutstanding">—</div>
                 <div class="pl-hint" id="arOutstandingHint">—</div>
             </div>
@@ -603,7 +603,7 @@
         <h3 class="pl-section-title">This Period's Invoices <span class="pl-section-sub">— for reference only, not counted in Profit above</span></h3>
         <div class="pl-grid">
             <div class="pl-card pl-card-clickable" onclick="toggleBilledDetail()">
-                <div class="pl-label">Total Billed (incl. unpaid) <span class="pl-expand-hint">▾ click to see invoices</span></div>
+                <div class="pl-label">Total Billed (incl. unpaid) <span class="pl-expand-hint" id="billedExpandHint">▾ click to see invoices</span></div>
                 <div class="pl-value" id="plBilled">—</div>
                 <div class="pl-hint">Value of every invoice created in this range, whether it's been paid yet or not</div>
             </div>
@@ -1181,6 +1181,7 @@ function initApp() {
     let currentInvoiceEditId = null;
     let currentQuotationEditId = null;
     let currentPriceEditId = null;
+    let currentExpenseEditId = null;
     let selectedTicketIds = new Set();
     let statusChart = null, priorityChart = null;
 
@@ -3140,8 +3141,18 @@ function initApp() {
             toggleComplimentary();
             addInvoiceItemRow();
         } else {
-            const inv = allInvoices.find(x => x.id === id);
-            if (!inv) return;
+            let inv = allInvoices.find(x => x.id === id);
+            // The invoice list is cached in memory and only refreshed after actions taken
+            // in THIS tab — so a link built from a fresher, independent query (like the
+            // Accounts Receivable drill-down list) can point at an id this cache doesn't
+            // have yet, e.g. if it was created in another tab/device. Previously this just
+            // did nothing with no explanation, which looked like the button was broken —
+            // now it re-fetches that one invoice directly instead of giving up.
+            if (!inv) {
+                const { data: fresh } = await sb.from('invoices').select('*').eq('id', id).single();
+                if (fresh) { inv = fresh; allInvoices.push(inv); }
+            }
+            if (!inv) { alert("Couldn't find that invoice — it may have just been deleted. Refreshing the list…"); await loadInvoices(); return; }
             $('invoiceModalTitle').textContent = 'Edit Invoice';
             $('invNumber').value = inv.invoice_number;
             $('invTicketLink').value = inv.ticket_id || '';
@@ -3800,7 +3811,10 @@ function initApp() {
     }
     function toggleARDetail() {
         const el = $('arDetailList');
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        const opening = el.style.display === 'none';
+        el.style.display = opening ? 'block' : 'none';
+        $('arExpandHint').textContent = opening ? '▴ click to hide' : '▾ click to see which invoices';
+        if (opening) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     // Same idea for "Total Billed" — the invoices created inside the selected date
@@ -3820,7 +3834,10 @@ function initApp() {
     }
     function toggleBilledDetail() {
         const el = $('billedDetailList');
-        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+        const opening = el.style.display === 'none';
+        el.style.display = opening ? 'block' : 'none';
+        $('billedExpandHint').textContent = opening ? '▴ click to hide' : '▾ click to see invoices';
+        if (opening) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function openPaymentModal(prefillInvoiceId) {
@@ -3929,16 +3946,28 @@ function initApp() {
                     <div class="list-item-title">${esc(e.description)} — ${fmtMoney(e.amount)}</div>
                     <div class="list-item-subtitle">${esc(e.category || 'General')} · ${new Date(e.expense_date).toLocaleDateString()}</div>
                 </div>
-                <div class="list-item-actions"><button class="btn btn-sm btn-danger" onclick="deleteExpense('${e.id}')">Delete</button></div>
+                <div class="list-item-actions"><button class="btn btn-sm btn-ghost" onclick="openExpenseModal('${e.id}')">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteExpense('${e.id}')">Delete</button></div>
             </div>
         `).join('');
     }
-    function openExpenseModal() {
+    function openExpenseModal(id = null) {
+        currentExpenseEditId = id;
         $('expenseModalError').textContent = '';
-        $('expDescription').value = '';
-        $('expAmount').value = '';
-        $('expCategory').value = 'Parts & Inventory';
-        $('expDate').value = new Date().toISOString().slice(0, 10);
+        if (id) {
+            const e = allExpenses.find(x => x.id === id);
+            if (!e) return;
+            $('expenseModalTitle').textContent = 'Edit Expense';
+            $('expDescription').value = e.description || '';
+            $('expAmount').value = e.amount;
+            $('expCategory').value = e.category || 'Parts & Inventory';
+            $('expDate').value = e.expense_date ? e.expense_date.slice(0, 10) : new Date().toISOString().slice(0, 10);
+        } else {
+            $('expenseModalTitle').textContent = 'New Expense';
+            $('expDescription').value = '';
+            $('expAmount').value = '';
+            $('expCategory').value = 'Parts & Inventory';
+            $('expDate').value = new Date().toISOString().slice(0, 10);
+        }
         $('expenseModal').classList.add('active');
     }
     async function saveExpense() {
@@ -3952,10 +3981,16 @@ function initApp() {
             expense_date: $('expDate').value || new Date().toISOString().slice(0, 10),
             created_by: currentUser.id,
         };
-        const { error } = await sb.from('expenses').insert([payload]);
+        let error;
+        if (currentExpenseEditId) {
+            ({ error } = await sb.from('expenses').update(payload).eq('id', currentExpenseEditId));
+        } else {
+            ({ error } = await sb.from('expenses').insert([payload]));
+        }
         if (error) { errorEl.textContent = error.message; return; }
-        logActivity('Expense Added', `${description} — ${fmtMoney(amount)}`);
+        logActivity(currentExpenseEditId ? 'Expense Updated' : 'Expense Added', `${description} — ${fmtMoney(amount)}`);
         closeModal('expenseModal');
+        currentExpenseEditId = null;
         await loadAccounting();
     }
     async function deleteExpense(id) {
