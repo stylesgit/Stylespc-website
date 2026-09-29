@@ -3278,7 +3278,18 @@ function initApp() {
             if (newId && !allInvoices.some(i => i.id === newId)) {
                 allInvoices.push(Object.assign({ id: newId }, payload));
             }
-            await ensurePaidStatusIsBackedByLedger(savedId, payload.invoice_number, clientName, payload.grand_total);
+            const ledgerResult = await ensurePaidStatusIsBackedByLedger(savedId, payload.invoice_number, clientName, payload.grand_total);
+            if (ledgerResult && ledgerResult.error) {
+                // The invoice's other fields DID save above — it's specifically the "back
+                // this up with a real payment" step that failed (most likely the `payments`
+                // table doesn't exist yet, or its permissions/RLS are blocking this write).
+                // Surfacing this instead of failing silently is exactly what was missing:
+                // before this, the Paid label would just quietly get reverted afterwards,
+                // which looked like "changing to Paid isn't saving" with no clue why.
+                errorEl.textContent = 'Saved the invoice, but marking it Paid failed: ' + (ledgerResult.error.message || 'unknown error') + ' — the Status may revert until this is fixed. Check that the "payments" table exists in Supabase with the right permissions.';
+                await loadInvoices();
+                return;
+            }
         }
 
         logActivity(currentInvoiceEditId ? 'Invoice Updated' : 'Invoice Created', `${payload.invoice_number} — ${clientName}${isComp ? ' (Complimentary)' : ' — ' + fmtMoney(payload.grand_total)}`);
@@ -3287,20 +3298,22 @@ function initApp() {
     }
 
     async function ensurePaidStatusIsBackedByLedger(invoiceId, invoiceNumber, clientName, grandTotal) {
-        const { data: pays } = await sb.from('payments').select('amount').eq('invoice_id', invoiceId);
+        const { data: pays, error: readErr } = await sb.from('payments').select('amount').eq('invoice_id', invoiceId);
+        if (readErr) { console.error('ensurePaidStatusIsBackedByLedger: could not read payments', readErr); return { error: readErr }; }
         const paidSoFar = (pays || []).reduce((s, p) => s + (Number(p.amount) || 0), 0);
         const shortfall = (Number(grandTotal) || 0) - paidSoFar;
         if (shortfall > 0.005) {
-            await sb.from('payments').insert([{
+            const { error: insErr } = await sb.from('payments').insert([{
                 invoice_id: invoiceId, invoice_number: invoiceNumber, client_name: clientName,
                 amount: shortfall, payment_date: new Date().toISOString().slice(0, 10), method: 'Cash',
                 notes: 'Recorded automatically because the invoice was marked Paid.', created_by: currentUser.id,
             }]);
+            if (insErr) { console.error('ensurePaidStatusIsBackedByLedger: could not insert payment', insErr); return { error: insErr }; }
             logActivity('Payment Recorded', `${invoiceNumber} — marked Paid, remaining ${fmtMoney(shortfall)} recorded`);
         }
         // Re-derive amount_paid / balance_due / status from the ledger either way, so the
         // invoice row always matches the sum of its real payments, never a typed-in label.
-        await recalcInvoicePaidFromLedger(invoiceId);
+        return await recalcInvoicePaidFromLedger(invoiceId);
     }
 
     async function deleteInvoice(id) {
@@ -3814,14 +3827,19 @@ function initApp() {
     // Recomputes an invoice's Amount Paid / Balance Due / Status directly from its
     // payment ledger (the source of truth), and saves that back onto the invoice row —
     // so the two never drift apart no matter how many payments get added or removed.
+    // Both DB calls' errors are now surfaced (returned as { error }) instead of being
+    // swallowed — a silent failure here used to look exactly like "Paid isn't saving",
+    // because the invoice would quietly get re-derived as still-unpaid right after.
     async function recalcInvoicePaidFromLedger(invoiceId) {
-        const { data: pays } = await sb.from('payments').select('amount').eq('invoice_id', invoiceId);
+        const { data: pays, error: readErr } = await sb.from('payments').select('amount').eq('invoice_id', invoiceId);
+        if (readErr) { console.error('recalcInvoicePaidFromLedger: could not read payments', readErr); return { error: readErr }; }
         const paidTotal = (pays || []).reduce((s, p) => s + (Number(p.amount) || 0), 0);
         const inv = allInvoices.find(i => i.id === invoiceId);
         const grand = inv ? Number(inv.grand_total) || 0 : 0;
         const balance = Math.max(0, grand - paidTotal);
         const status = paidTotal <= 0 ? 'unpaid' : (balance <= 0.005 ? 'paid' : 'partial');
-        await sb.from('invoices').update({ amount_paid: paidTotal, balance_due: balance, status }).eq('id', invoiceId);
+        const { error: updErr } = await sb.from('invoices').update({ amount_paid: paidTotal, balance_due: balance, status }).eq('id', invoiceId);
+        if (updErr) { console.error('recalcInvoicePaidFromLedger: could not update invoice', updErr); return { error: updErr }; }
         return { paidTotal, balance, status };
     }
 
@@ -4009,10 +4027,12 @@ function initApp() {
         await sb.from('payments').delete().eq('id', paymentId);
         if (p && p.invoice_id) {
             const result = await recalcInvoicePaidFromLedger(p.invoice_id);
-            $('invAmountPaid').value = result.paidTotal;
-            $('invStatus').value = result.status;
-            updatePaidBadge();
-            recalcInvoiceTotals();
+            if (result && !result.error) {
+                $('invAmountPaid').value = result.paidTotal;
+                $('invStatus').value = result.status;
+                updatePaidBadge();
+                recalcInvoiceTotals();
+            }
         }
         logActivity('Payment Removed', p ? `${fmtMoney(p.amount)} from invoice` : paymentId);
         if (currentInvoiceEditId) await loadInvoicePaymentHistory(currentInvoiceEditId);
