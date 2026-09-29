@@ -323,6 +323,7 @@
         <button class="nav-tab" onclick="switchTab('techplaybook',this)">🧰 Tech Playbook</button>
         <button class="nav-tab" onclick="switchTab('quotations',this)">🧾 Quotations</button>
         <button class="nav-tab" onclick="switchTab('feedback',this)">💬 Feedback</button>
+        <button class="nav-tab" onclick="switchTab('reviewrequests',this)">⭐ Review Requests</button>
         <button class="nav-tab" onclick="switchTab('billing',this)">💳 Billing</button>
         <button class="nav-tab" onclick="switchTab('accounting',this)">📈 Accounting</button>
         <button class="nav-tab" onclick="switchTab('users',this)">🔐 Users</button>
@@ -488,6 +489,22 @@
         </div>
         <div id="feedbackCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
         <div class="list-container" id="feedbackList"><div class="status-msg">Loading…</div></div>
+    </div>
+
+    <!-- REVIEW REQUESTS (past customers with a delivered ticket) -->
+    <div id="reviewrequests" class="section">
+        <h2 style="margin-bottom:6px;">Review Requests</h2>
+        <p style="font-size:0.86rem;color:var(--ink-soft);margin-bottom:16px;">Past customers whose device was delivered. Send each a friendly link to leave a review on your website. Reviews still go to the Feedback tab for your approval.</p>
+        <div class="toolbar">
+            <div class="search-box"><input type="text" id="reviewReqSearch" placeholder="Search name, phone, email…" oninput="renderReviewRequests()"></div>
+            <select id="reviewReqFilter" onchange="renderReviewRequests()">
+                <option value="notasked">Not asked yet</option>
+                <option value="asked">Already asked</option>
+                <option value="">All</option>
+            </select>
+        </div>
+        <div id="reviewReqCount" style="font-size:0.82rem;color:var(--ink-soft);margin-bottom:12px;"></div>
+        <div class="list-container" id="reviewReqList"><div class="status-msg">Loading…</div></div>
     </div>
 
     <!-- BILLING -->
@@ -786,6 +803,15 @@
     <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('expenseModal')">Cancel</button><button class="btn btn-primary" onclick="saveExpense()">Save Expense</button></div>
 </div></div>
 
+<!-- WHATSAPP STATUS UPDATE MODAL -->
+<div class="modal-overlay" id="waModal"> <div class="modal">
+    <h2>📱 Send WhatsApp Update</h2>
+    <div id="waModalSubtitle" style="font-size:0.85rem;color:var(--ink-soft);margin:-14px 0 18px;"></div>
+    <div id="waModalButtons"></div>
+    <div id="waModalStatus" style="font-size:0.85rem;font-weight:600;margin-bottom:14px;min-height:1.2em;"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('waModal')">Close</button></div>
+</div></div>
+
 <div class="modal-overlay" id="userModal"> <div class="modal"> <h2 id="userModalTitle">Add User</h2> <form id="userForm" onsubmit="saveUser(event)"> <div class="form-group"><label>Email *</label><input type="email" id="userEmail" required placeholder="staff@stylespc.com"></div> <div class="form-group"><label>Password <span id="pwLabel">(required)</span></label><div class="pw-wrap"><input type="password" id="userPassword" placeholder="Min. 6 characters"><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('userPassword', this)" aria-label="Show password">👁️</button></div></div> <div class="form-row"><div class="form-group"><label>Role</label><select id="userRole"><option value="User">User</option><option value="Manager">Manager</option><option value="Technician">Technician</option><option value="Admin">Admin</option></select></div><div class="form-group"><label>Password Expiry (days)</label><input type="number" id="userExpiryDays" value="30" min="1" max="365"></div></div> <div class="checkbox-group"><input type="checkbox" id="userMustChange" checked><label for="userMustChange">Must change password at next login</label></div> <div id="userModalError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('userModal')">Cancel</button><button type="submit" class="btn btn-primary">Save User</button></div> </form> </div></div>
 
 <div class="modal-overlay" id="changePasswordModal"> <div class="modal"> <h2>Change Password</h2> <form id="changePasswordForm" onsubmit="handleChangePassword(event)"> <div class="form-group"><label>Current Password</label><div class="pw-wrap"><input type="password" id="currentPassword" required><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('currentPassword', this)" aria-label="Show password">👁️</button></div></div> <div class="form-group"><label>New Password</label><div class="pw-wrap"><input type="password" id="newPassword" required placeholder="Min. 6 characters"><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('newPassword', this)" aria-label="Show password">👁️</button></div></div> <div class="form-group"><label>Confirm New Password</label><div class="pw-wrap"><input type="password" id="confirmPassword" required><button type="button" class="pw-toggle" onclick="togglePasswordVisibility('confirmPassword', this)" aria-label="Show password">👁️</button></div></div> <div id="changePasswordError" class="modal-error"></div> <div class="modal-actions"><button type="button" class="btn btn-ghost" onclick="closeModal('changePasswordModal')">Cancel</button><button type="submit" class="btn btn-primary">Update Password</button></div> </form> </div></div>
@@ -895,6 +921,78 @@ function initApp() {
     const EMAILJS_INVOICE_TEMPLATE_ID = 'template_xam3hl1'; // reusing the Internal Summary template — now also has an Attachment field
     if (window.emailjs) {
         emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+    }
+
+    // =============================================================
+    // WHATSAPP STATUS UPDATES (Twilio, via a Supabase Edge Function)
+    // =============================================================
+    // Twilio's Account SID/Auth Token are secret and must never live in this
+    // file — anyone who viewed the page source could use them to send
+    // WhatsApp messages on your account. Instead, this calls a small server
+    // function ("send-whatsapp") that holds those secrets and talks to
+    // Twilio on your behalf. See SETUP_GUIDE_WhatsApp.md for full setup.
+    const WHATSAPP_FUNCTION_URL = 'https://YOUR-PROJECT-REF.functions.supabase.co/send-whatsapp'; // set after deploying the edge function
+    const WHATSAPP_SHARED_SECRET = 'CHANGE-ME'; // must exactly match ADMIN_SHARED_SECRET set on the edge function
+
+    // Each key here must match a Twilio Content Template SID configured as a
+    // secret on the edge function (TWILIO_TPL_...). The "preview" text is
+    // shown to you in the modal before sending — it's only accurate if the
+    // approved Twilio template uses this same wording and variable order.
+    const WHATSAPP_MESSAGES = [
+        { key: 'request_received', label: '✅ Request Received', preview: (t) => `Hi ${t.client_name}, thanks for bringing in your ${t.device}! We've received your service request (Ticket ${t.ticket_number}) and will keep you updated as we work on it. — StylesPC` },
+        { key: 'work_in_progress', label: '🔧 Work In Progress', preview: (t) => `Hi ${t.client_name}, quick update — we've started working on your ${t.device} (Ticket ${t.ticket_number}). We'll let you know as soon as it's ready. — StylesPC` },
+        { key: 'ready_for_pickup', label: '📦 Ready for Pickup', preview: (t) => `Hi ${t.client_name}, great news! Your ${t.device} (Ticket ${t.ticket_number}) is ready for pickup. — StylesPC` },
+        { key: 'amount_owed', label: '💰 Total Amount Owed', preview: (t) => `Hi ${t.client_name}, here's a quick billing update for your ${t.device} (Ticket ${t.ticket_number}): total amount owed is ${fmtMoney(t.amount)}. Let us know if you have any questions. — StylesPC` },
+        { key: 'paid_in_full', label: '✔️ Paid in Full', preview: (t) => `Hi ${t.client_name}, we've received your payment in full for your ${t.device} (Ticket ${t.ticket_number}). Thank you for choosing StylesPC!` },
+    ];
+    let waCurrentTicket = null;
+
+    function openWhatsAppModal(ticketId) {
+        const t = allTickets.find(x => x.id === ticketId);
+        if (!t) return;
+        if (!t.phone) { alert('This ticket has no phone number on file — add one before sending a WhatsApp update.'); return; }
+        waCurrentTicket = t;
+        $('waModalSubtitle').textContent = `${t.client_name || '—'} · ${t.device || '—'} · ${t.ticket_number || t.id} · 📱 ${t.phone}`;
+        $('waModalStatus').textContent = '';
+        $('waModalButtons').innerHTML = WHATSAPP_MESSAGES.map(m => `
+            <div>
+                <button class="btn btn-ghost btn-sm" style="width:100%;text-align:left;justify-content:flex-start;margin-bottom:6px;" onclick="sendWhatsAppTemplate('${m.key}')">${m.label}</button>
+                <div style="font-size:0.78rem;color:var(--ink-soft);margin:0 0 14px 4px;">${esc(m.preview(t))}</div>
+            </div>`).join('');
+        $('waModal').classList.add('active');
+    }
+
+    async function sendWhatsAppTemplate(templateKey) {
+        const t = waCurrentTicket;
+        const msg = WHATSAPP_MESSAGES.find(m => m.key === templateKey);
+        const statusEl = $('waModalStatus');
+        if (!t || !msg) return;
+        if (WHATSAPP_FUNCTION_URL.includes('YOUR-PROJECT-REF')) {
+            statusEl.style.color = 'var(--red)';
+            statusEl.textContent = '⚠️ WhatsApp sending isn\'t set up yet — see SETUP_GUIDE_WhatsApp.md to connect Twilio.';
+            return;
+        }
+        statusEl.style.color = 'var(--ink-soft)';
+        statusEl.textContent = 'Sending…';
+        try {
+            const resp = await fetch(WHATSAPP_FUNCTION_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'x-admin-secret': WHATSAPP_SHARED_SECRET },
+                body: JSON.stringify({
+                    to: t.phone,
+                    templateKey,
+                    variables: { '1': t.client_name || '', '2': t.device || '', '3': t.ticket_number || t.id, '4': fmtMoney(t.amount) },
+                }),
+            });
+            const result = await resp.json();
+            if (!resp.ok || !result.success) throw new Error(result.error || 'Send failed');
+            statusEl.style.color = 'var(--teal)';
+            statusEl.textContent = '✅ Sent: ' + msg.label;
+            logActivity('WhatsApp Sent', `${msg.label} — ${t.ticket_number || t.id} — ${t.client_name || ''} (${t.phone})`);
+        } catch (err) {
+            statusEl.style.color = 'var(--red)';
+            statusEl.textContent = '❌ Failed to send — ' + (err?.message || 'check WhatsApp setup');
+        }
     }
 
     async function sendConfirmationEmail() {
@@ -1123,6 +1221,7 @@ function initApp() {
                 </div>
                 <div class="list-item-actions">
                     ${(Number(t.amount) > 0 && !allInvoices.some(inv => inv.ticket_id === t.id)) ? `<button class="btn btn-primary btn-sm" onclick="createInvoiceFromTicket('${t.id}')">🧾 Create Invoice</button>` : ''}
+                    <button class="btn btn-ghost btn-sm" onclick="openWhatsAppModal('${t.id}')">📱 WhatsApp</button>
                     <button class="btn btn-amber btn-sm" onclick="openTicketModal('edit','${t.id}')">✏️ Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteTicket('${t.id}')">🗑️ Delete</button>
                 </div>
@@ -2166,6 +2265,122 @@ function initApp() {
             return matchesQ && matchesStatus;
         }));
     }
+    // =============================================================
+    //  REVIEW REQUESTS — ask past (delivered) customers for a review
+    // =============================================================
+    const REVIEW_ASKED_KEY = 'stylespc_review_asked';
+    function getReviewAsked() {
+        try { return JSON.parse(localStorage.getItem(REVIEW_ASKED_KEY) || '{}') || {}; } catch (e) { return {}; }
+    }
+    function markReviewAsked(key, channel) {
+        const m = getReviewAsked();
+        m[key] = { at: new Date().toISOString(), channel };
+        try { localStorage.setItem(REVIEW_ASKED_KEY, JSON.stringify(m)); } catch (e) {}
+    }
+    function reviewLink() {
+        try { return new URL('index.html#testimonials', window.location.href).href; }
+        catch (e) { return window.location.origin + '/index.html#testimonials'; }
+    }
+    function reviewMessage(name) {
+        const first = (name || '').trim().split(/\s+/)[0] || 'there';
+        return `Hi ${first}, thank you for choosing StylesPC! If you were happy with the service, we'd really appreciate a quick review — it takes under a minute and helps other customers find us: ${reviewLink()}`;
+    }
+    // One entry per past customer: anyone with at least one delivered ticket.
+    function getReviewCandidates() {
+        const byKey = new Map();
+        allTickets.filter(t => t.status === 'delivered').forEach(t => {
+            const phoneDigits = String(t.phone || '').replace(/\D/g, '');
+            const key = phoneDigits || (t.email || '').toLowerCase() || (t.client_name || '').toLowerCase();
+            if (!key) return;
+            const cur = byKey.get(key);
+            if (!cur) {
+                byKey.set(key, { key, name: t.client_name || '', phone: t.phone || '', email: t.email || '', devices: [t.device].filter(Boolean), count: 1 });
+            } else {
+                cur.count++;
+                if (t.device && !cur.devices.includes(t.device)) cur.devices.push(t.device);
+                if (!cur.phone && t.phone) cur.phone = t.phone;
+                if (!cur.email && t.email) cur.email = t.email;
+            }
+        });
+        return [...byKey.values()].sort((a, b) => a.name.localeCompare(b.name));
+    }
+    function renderReviewRequests() {
+        const listEl = $('reviewReqList');
+        if (!listEl) return;
+        const asked = getReviewAsked();
+        const q = ($('reviewReqSearch').value || '').toLowerCase();
+        const f = $('reviewReqFilter').value;
+        const all = getReviewCandidates();
+        const list = all.filter(c => {
+            const hay = [c.name, c.phone, c.email].join(' ').toLowerCase();
+            if (q && !hay.includes(q)) return false;
+            if (f === 'notasked') return !asked[c.key];
+            if (f === 'asked') return !!asked[c.key];
+            return true;
+        });
+        const askedCount = all.filter(c => asked[c.key]).length;
+        $('reviewReqCount').textContent = `${all.length} past customer${all.length === 1 ? '' : 's'} · ${askedCount} already asked`;
+        if (!list.length) { listEl.innerHTML = '<div class="empty-state"><h3>Nobody to show</h3><p>Customers appear here once a ticket is marked Delivered.</p></div>'; return; }
+        listEl.innerHTML = list.map(c => {
+            const a = asked[c.key];
+            const k = esc(c.key).replace(/'/g, '&#39;');
+            return `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-header">
+                        <span class="list-item-title">${esc(c.name)}</span>
+                        ${a ? `<span class="inv-badge paid">Asked ${new Date(a.at).toLocaleDateString()}</span>` : '<span class="inv-badge draft">Not asked</span>'}
+                    </div>
+                    <div class="list-item-subtitle">${esc(c.phone || 'no phone')} · ${esc(c.email || 'no email')}</div>
+                    <div class="list-item-details"><div class="detail-tag"><span class="label">Devices:</span><span class="value">${esc(c.devices.join(', ') || '—')}</span></div></div>
+                </div>
+                <div class="list-item-actions">
+                    <button class="btn btn-sm btn-primary" ${c.phone ? '' : 'disabled title="No phone on file"'} onclick="requestReviewWhatsApp('${k}')">📱 WhatsApp</button>
+                    <button class="btn btn-sm btn-ghost" ${c.email ? '' : 'disabled title="No email on file"'} onclick="requestReviewEmail('${k}')">📧 Email</button>
+                    ${a ? `<button class="btn btn-sm btn-ghost" onclick="unmarkReviewAsked('${k}')">Reset</button>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+    function findReviewCandidate(key) { return getReviewCandidates().find(c => c.key === key); }
+    function requestReviewWhatsApp(key) {
+        const c = findReviewCandidate(key);
+        if (!c || !c.phone) return;
+        const text = encodeURIComponent(reviewMessage(c.name));
+        window.open(`https://wa.me/${normalizeWhatsAppNumber(c.phone)}?text=${text}`, '_blank');
+        markReviewAsked(key, 'whatsapp');
+        logActivity('Review Requested (WhatsApp)', `${c.name} — ${c.phone}`);
+        renderReviewRequests();
+    }
+    async function requestReviewEmail(key) {
+        const c = findReviewCandidate(key);
+        if (!c || !c.email) return;
+        const subject = 'How did we do? — StylesPC';
+        const message = reviewMessage(c.name);
+        try {
+            if (!EMAILJS_INVOICE_TEMPLATE_ID) throw new Error('no template');
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, {
+                to_email: c.email, to_name: c.name, subject, message,
+            });
+            markReviewAsked(key, 'email');
+            logActivity('Review Requested (Email)', `${c.name} — ${c.email}`);
+            alert('Review request emailed to ' + c.email);
+        } catch (err) {
+            // EmailJS failed or hit its monthly limit: fall back to the user's own mail app.
+            console.error('Review email error:', err);
+            window.location.href = `mailto:${encodeURIComponent(c.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(message)}`;
+            markReviewAsked(key, 'email');
+            logActivity('Review Requested (Email app)', `${c.name} — ${c.email}`);
+        }
+        renderReviewRequests();
+    }
+    function unmarkReviewAsked(key) {
+        const m = getReviewAsked();
+        delete m[key];
+        try { localStorage.setItem(REVIEW_ASKED_KEY, JSON.stringify(m)); } catch (e) {}
+        renderReviewRequests();
+    }
+
     async function setFeedbackApproved(id, approved) {
         const { error } = await sb.from('testimonials').update({ approved }).eq('id', id);
         if (error) { alert('Could not update feedback: ' + error.message); return; }
@@ -2581,12 +2796,12 @@ function initApp() {
         }
     }
 
-    function buildQuotationEmailText(clientName) {
+    function buildQuotationMessage(clientName, channel) {
         const quoNumber = $('quoNumber').value;
         const totals = recalcQuotationTotals();
         const validUntil = $('quoValidUntil').value ? new Date($('quoValidUntil').value).toLocaleDateString() : null;
         const subject = `Your Quotation ${quoNumber} — ${BIZ_NAME}`;
-        const message = `Hi ${clientName}, thank you for considering ${BIZ_NAME}. Please find attached your quotation ${quoNumber} for ${fmtMoney(totals.grand)}.${validUntil ? ' This quote is valid until ' + validUntil + '.' : ''} Let us know if you'd like to go ahead and we'll get started. If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+        const message = `Hi ${clientName}, thank you for considering ${BIZ_NAME}. Please find attached your quotation ${quoNumber} for ${fmtMoney(totals.grand)}.${validUntil ? ' This quote is valid until ' + validUntil + '.' : ''} Let us know if you'd like to go ahead and we'll get started. ${contactLine(channel)}`;
         return { subject, message };
     }
 
@@ -2608,7 +2823,7 @@ function initApp() {
             const quoNumber = $('quoNumber').value;
             const filename = 'Quotation_' + quoNumber + '.pdf';
             const pdfDataUri = await generateQuotationPdfDataUri();
-            const { subject, message } = buildQuotationEmailText(clientName);
+            const { subject, message } = buildQuotationMessage(clientName, 'email');
 
             // Reuses the same EmailJS template as invoice emails (it's a generic
             // "attachment + message" template) — swap EMAILJS_INVOICE_TEMPLATE_ID
@@ -2649,7 +2864,7 @@ function initApp() {
         statusEl.style.color = '';
         try {
             await downloadQuotationPdf();
-            const { subject, message } = buildQuotationEmailText(clientName);
+            const { subject, message } = buildQuotationMessage(clientName, 'email');
             const body = message + '\n\n(Attach the PDF that just downloaded before sending.)';
             const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.open(mailto, '_blank');
@@ -2676,7 +2891,7 @@ function initApp() {
         try {
             const quoNumber = $('quoNumber').value;
             const filename = 'Quotation_' + quoNumber + '.pdf';
-            const { message } = buildQuotationEmailText(clientName);
+            const { message } = buildQuotationMessage(clientName, 'whatsapp');
             const waNumber = normalizeWhatsAppNumber(phone);
 
             el.innerHTML = buildQuotationPdfHtml();
@@ -3056,18 +3271,25 @@ function initApp() {
         }
     }
 
-    function buildInvoiceEmailText(clientName) {
+    // channel: 'email' (default) or 'whatsapp' — only the closing line differs, so a WhatsApp
+    // message never tells the customer to "reply to this email" again.
+    function contactLine(channel) {
+        return channel === 'whatsapp'
+            ? `If you have any questions, feel free to reply here or call us at ${BIZ_PHONE}.`
+            : `If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+    }
+    function buildInvoiceMessage(clientName, channel) {
         const isComp = $('invComplimentary').checked;
         const invNumber = $('invNumber').value;
         let subject, message;
         if (isComp) {
             subject = `Your Complimentary Service — ${BIZ_NAME}`;
-            message = `Hi ${clientName}, thank you for choosing ${BIZ_NAME}. Please find attached confirmation of your complimentary service. ${$('invCompNote').value.trim()} If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+            message = `Hi ${clientName}, thank you for choosing ${BIZ_NAME}. Please find attached confirmation of your complimentary service. ${$('invCompNote').value.trim()} ${contactLine(channel)}`;
         } else {
             const totals = recalcInvoiceTotals();
             const balanceLine = totals.balance > 0.005 ? ` A balance of ${fmtMoney(totals.balance)} remains outstanding.` : ' This invoice has been paid in full.';
             subject = `Invoice ${invNumber} — ${BIZ_NAME}`;
-            message = `Hi ${clientName}, thank you for choosing ${BIZ_NAME}. Please find attached your invoice ${invNumber}, totalling ${fmtMoney(totals.grand)}.${balanceLine} If you have any questions, feel free to reply to this email or call us at ${BIZ_PHONE}.`;
+            message = `Hi ${clientName}, thank you for choosing ${BIZ_NAME}. Please find attached your invoice ${invNumber}, totalling ${fmtMoney(totals.grand)}.${balanceLine} ${contactLine(channel)}`;
         }
         return { subject, message };
     }
@@ -3091,7 +3313,7 @@ function initApp() {
             const invNumber = $('invNumber').value;
             const filename = (isComp ? 'Complimentary_' : 'Invoice_') + invNumber + '.pdf';
             const pdfDataUri = await generateInvoicePdfDataUri();
-            const { subject, message } = buildInvoiceEmailText(clientName);
+            const { subject, message } = buildInvoiceMessage(clientName, 'email');
 
             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_INVOICE_TEMPLATE_ID, {
                 to_email: email,
@@ -3128,7 +3350,7 @@ function initApp() {
         statusEl.style.color = '';
         try {
             await downloadInvoicePdf();
-            const { subject, message } = buildInvoiceEmailText(clientName);
+            const { subject, message } = buildInvoiceMessage(clientName, 'email');
             const body = message + '\n\n(Attach the PDF that just downloaded before sending.)';
             const mailto = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             window.open(mailto, '_blank');
@@ -3156,7 +3378,7 @@ function initApp() {
             const isComp = $('invComplimentary').checked;
             const invNumber = $('invNumber').value;
             const filename = (isComp ? 'Complimentary_' : 'Invoice_') + invNumber + '.pdf';
-            const { message } = buildInvoiceEmailText(clientName);
+            const { message } = buildInvoiceMessage(clientName, 'whatsapp');
             const waNumber = normalizeWhatsAppNumber(phone);
 
             el.innerHTML = buildInvoicePdfHtml();
@@ -3497,6 +3719,7 @@ function initApp() {
         if (tab === 'techplaybook') loadTechNotes();
         if (tab === 'accounting') loadAccounting();
         if (tab === 'settings') renderPriceListManager();
+        if (tab === 'reviewrequests') renderReviewRequests();
     }
     function closeModal(id) { $(id).classList.remove('active'); currentEditId = null; }
     function filterTickets() {
@@ -3629,6 +3852,12 @@ function initApp() {
     window.filterFeedback = filterFeedback;
     window.setFeedbackApproved = setFeedbackApproved;
     window.deleteFeedback = deleteFeedback;
+
+    // ---- Review Requests ----
+    window.renderReviewRequests = renderReviewRequests;
+    window.requestReviewWhatsApp = requestReviewWhatsApp;
+    window.requestReviewEmail = requestReviewEmail;
+    window.unmarkReviewAsked = unmarkReviewAsked;
 
     // =============================================================
     // START
