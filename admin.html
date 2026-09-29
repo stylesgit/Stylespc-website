@@ -180,6 +180,10 @@
         .payhist-row { display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; padding:6px 0; border-bottom:1px dashed var(--rule); }
         .payhist-row:last-child { border-bottom:none; }
         .payhist-row .payhist-del { color:var(--red); cursor:pointer; background:none; border:none; font-size:0.78rem; padding:2px 6px; }
+        .pl-card-clickable { cursor:pointer; transition:box-shadow 0.15s, border-color 0.15s; }
+        .pl-card-clickable:hover { border-color:var(--teal); box-shadow:0 2px 10px rgba(47,111,99,0.15); }
+        .pl-expand-hint { font-size:0.68rem; font-weight:400; text-transform:none; letter-spacing:0; color:var(--teal-dark); margin-left:6px; }
+        .pl-detail-list { margin:-14px 0 24px; }
 
         /* ---- Pricelist manager ---- */
         .price-row { display:grid; grid-template-columns:1fr 120px 130px 90px auto; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--rule); }
@@ -588,17 +592,18 @@
 
         <h3 class="pl-section-title">Money Still Owed To You <span class="pl-section-sub">— as of today, every unpaid invoice (not limited to the dates above)</span></h3>
         <div class="pl-grid">
-            <div class="pl-card">
-                <div class="pl-label">Total Outstanding</div>
+            <div class="pl-card pl-card-clickable" onclick="toggleARDetail()">
+                <div class="pl-label">Total Outstanding <span class="pl-expand-hint">▾ click to see which invoices</span></div>
                 <div class="pl-value" id="arOutstanding">—</div>
                 <div class="pl-hint" id="arOutstandingHint">—</div>
             </div>
         </div>
+        <div id="arDetailList" class="pl-detail-list" style="display:none;"></div>
 
         <h3 class="pl-section-title">This Period's Invoices <span class="pl-section-sub">— for reference only, not counted in Profit above</span></h3>
         <div class="pl-grid">
-            <div class="pl-card">
-                <div class="pl-label">Total Billed (incl. unpaid)</div>
+            <div class="pl-card pl-card-clickable" onclick="toggleBilledDetail()">
+                <div class="pl-label">Total Billed (incl. unpaid) <span class="pl-expand-hint">▾ click to see invoices</span></div>
                 <div class="pl-value" id="plBilled">—</div>
                 <div class="pl-hint">Value of every invoice created in this range, whether it's been paid yet or not</div>
             </div>
@@ -618,6 +623,7 @@
                 <div class="pl-hint">Free jobs in this range, and what they'd normally be worth</div>
             </div>
         </div>
+        <div id="billedDetailList" class="pl-detail-list" style="display:none;"></div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin:28px 0 10px;flex-wrap:wrap;gap:10px;">
             <h3 style="margin:0;">Payments Received</h3>
@@ -1168,6 +1174,8 @@ function initApp() {
     let allPriceList = [];
     let allExpenses = [];
     let allPayments = [];
+    let allARInvoices = [];
+    let periodBillableInvoices = [];
     let currentInvoicePayments = [];
     let currentEditId = null;
     let currentInvoiceEditId = null;
@@ -3611,9 +3619,10 @@ function initApp() {
         const netProfit = revenueCollected - totalExpenses;
 
         // ---- Everything still owed to you, right now — not scoped to the date range ----
-        const { data: unpaidInvoices } = await sb.from('invoices').select('id, balance_due, is_complimentary').gt('balance_due', 0);
-        const arList = (unpaidInvoices || []).filter(i => !i.is_complimentary);
+        const { data: unpaidInvoices } = await sb.from('invoices').select('*').gt('balance_due', 0);
+        const arList = (unpaidInvoices || []).filter(i => !i.is_complimentary).sort((a, b) => new Date(a.invoice_date) - new Date(b.invoice_date));
         const outstanding = arList.reduce((s, i) => s + (Number(i.balance_due) || 0), 0);
+        allARInvoices = arList;
 
         // ---- This range's invoices, shown separately for reference (not part of Profit) ----
         let invQuery = sb.from('invoices').select('*');
@@ -3633,6 +3642,7 @@ function initApp() {
         const compWithRealValue = comp.filter(i => Number(i.grand_total) > 0);
         const compLegacy = comp.length - compWithRealValue.length;
         const compValue = compWithRealValue.reduce((s, i) => s + Number(i.grand_total), 0) + (compLegacy * avgTicket);
+        periodBillableInvoices = billable.slice().sort((a, b) => new Date(a.invoice_date) - new Date(b.invoice_date));
 
         $('plRevenue').textContent = fmtMoney(revenueCollected);
         $('plExpenses').textContent = fmtMoney(totalExpenses);
@@ -3647,6 +3657,8 @@ function initApp() {
         $('plTax').textContent = fmtMoney(taxOnInvoices);
         $('plComp').textContent = comp.length + ' job' + (comp.length === 1 ? '' : 's') + ' · ~' + fmtMoney(compValue);
 
+        renderARDetail();
+        renderBilledDetail();
         renderExpenses(allExpenses);
         renderPayments(allPayments);
         renderMonthlyTable();
@@ -3766,6 +3778,49 @@ function initApp() {
         }).join('');
 
         el.innerHTML = `<table class="month-table"><thead><tr><th>Month</th><th class="amt">Collected</th><th class="amt">Expenses</th><th class="amt">Profit</th></tr></thead><tbody>${rows}</tbody></table>`;
+    }
+
+    // Lets Andrew click straight through "Total Outstanding" to see exactly which
+    // invoices make it up — including ones from before the date range above, since
+    // that total deliberately isn't scoped to it. If a number here looks wrong (e.g.
+    // a job that was actually paid in cash but never updated), this is where to spot
+    // it and jump straight to fixing that one invoice.
+    function renderARDetail() {
+        const el = $('arDetailList');
+        if (!allARInvoices.length) { el.innerHTML = '<div class="empty-state"><h3>Nothing outstanding</h3><p>Every invoice is paid up.</p></div>'; return; }
+        el.innerHTML = allARInvoices.map(i => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-title">${esc(i.invoice_number)} — ${esc(i.client_name)}</div>
+                    <div class="list-item-subtitle">${new Date(i.invoice_date).toLocaleDateString()} · Billed ${fmtMoney(i.grand_total)} · Balance ${fmtMoney(i.balance_due)}</div>
+                </div>
+                <div class="list-item-actions"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openInvoiceModal('edit','${i.id}')">View / Edit</button></div>
+            </div>
+        `).join('');
+    }
+    function toggleARDetail() {
+        const el = $('arDetailList');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+
+    // Same idea for "Total Billed" — the invoices created inside the selected date
+    // range, whether or not they've been paid yet.
+    function renderBilledDetail() {
+        const el = $('billedDetailList');
+        if (!periodBillableInvoices.length) { el.innerHTML = '<div class="empty-state"><h3>No invoices in this range</h3></div>'; return; }
+        el.innerHTML = periodBillableInvoices.map(i => `
+            <div class="list-item">
+                <div class="list-item-main">
+                    <div class="list-item-title">${esc(i.invoice_number)} — ${esc(i.client_name)}</div>
+                    <div class="list-item-subtitle">${new Date(i.invoice_date).toLocaleDateString()} · ${fmtMoney(i.grand_total)}${Number(i.balance_due) > 0 ? ' · Balance ' + fmtMoney(i.balance_due) : ' · Paid in full'}</div>
+                </div>
+                <div class="list-item-actions"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openInvoiceModal('edit','${i.id}')">View / Edit</button></div>
+            </div>
+        `).join('');
+    }
+    function toggleBilledDetail() {
+        const el = $('billedDetailList');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
     }
 
     function openPaymentModal(prefillInvoiceId) {
