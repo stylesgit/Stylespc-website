@@ -3610,6 +3610,7 @@ function initApp() {
         const to = $('plTo').value;
 
         await ensureLegacyPaymentsBackfilled();
+        await ensureInvoiceStatusesReconciled();
 
         // ---- Money actually collected in this range (real payments, real dates) ----
         let payQuery = sb.from('payments').select('*').order('payment_date', { ascending: false });
@@ -3696,6 +3697,28 @@ function initApp() {
             created_by: currentUser.id,
         }));
         await sb.from('payments').insert(rows);
+    }
+
+    // The Status dropdown on each invoice (Unpaid/Partial/Paid) used to be something
+    // YOU picked by hand, completely separate from the actual balance — so it could
+    // drift out of sync (an invoice that's really partially paid could still say
+    // "Unpaid", or vice versa). That's exactly why Billing's "Unpaid" filter and
+    // Accounting's Total Outstanding could show different invoices for the same money:
+    // Billing's filter trusts the (possibly stale) status label, while Total Outstanding
+    // trusts the real balance. This runs every time Accounting loads and quietly
+    // corrects any invoice whose status doesn't match its real balance, so both screens
+    // agree going forward. Safe to run repeatedly — it only fixes mismatches.
+    async function ensureInvoiceStatusesReconciled() {
+        const { data: invoices, error } = await sb.from('invoices').select('id, amount_paid, balance_due, status, is_complimentary');
+        if (error || !invoices) return;
+        const correctStatus = (i) => {
+            const balance = Number(i.balance_due) || 0;
+            const paid = Number(i.amount_paid) || 0;
+            return balance <= 0.005 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+        };
+        const fixes = invoices.filter(i => !i.is_complimentary && i.status !== correctStatus(i));
+        if (!fixes.length) return;
+        await Promise.all(fixes.map(i => sb.from('invoices').update({ status: correctStatus(i) }).eq('id', i.id)));
     }
 
     function renderPayments(list) {
@@ -3802,7 +3825,7 @@ function initApp() {
         el.innerHTML = allARInvoices.map(i => `
             <div class="list-item">
                 <div class="list-item-main">
-                    <div class="list-item-title">${esc(i.invoice_number)} — ${esc(i.client_name)}</div>
+                    <div class="list-item-title">${esc(i.invoice_number)} — ${esc(i.client_name)} <span class="inv-badge ${esc(i.status)}">${esc(i.status)}</span></div>
                     <div class="list-item-subtitle">${new Date(i.invoice_date).toLocaleDateString()} · Billed ${fmtMoney(i.grand_total)} · Balance ${fmtMoney(i.balance_due)}</div>
                 </div>
                 <div class="list-item-actions"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openInvoiceModal('edit','${i.id}')">View / Edit</button></div>
@@ -3825,7 +3848,7 @@ function initApp() {
         el.innerHTML = periodBillableInvoices.map(i => `
             <div class="list-item">
                 <div class="list-item-main">
-                    <div class="list-item-title">${esc(i.invoice_number)} — ${esc(i.client_name)}</div>
+                    <div class="list-item-title">${esc(i.invoice_number)} — ${esc(i.client_name)} <span class="inv-badge ${esc(i.status)}">${esc(i.status)}</span></div>
                     <div class="list-item-subtitle">${new Date(i.invoice_date).toLocaleDateString()} · ${fmtMoney(i.grand_total)}${Number(i.balance_due) > 0 ? ' · Balance ' + fmtMoney(i.balance_due) : ' · Paid in full'}</div>
                 </div>
                 <div class="list-item-actions"><button class="btn btn-sm btn-ghost" onclick="event.stopPropagation();openInvoiceModal('edit','${i.id}')">View / Edit</button></div>
