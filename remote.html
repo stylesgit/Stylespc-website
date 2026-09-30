@@ -123,7 +123,7 @@
     <div id="requestFlow">
         <div class="card">
             <h2><span class="num">1</span> Install a remote app</h2>
-            <p>Pick one and install it. When it opens, you'll see <strong>Your ID</strong> — a 9–10 digit number. Keep the app open.</p>
+            <p>Pick one and install it. When it opens, you'll see your <strong>remote ID</strong> (a 9–10 digit number). You'll type it in step 2. Keep the app open.</p>
             <div class="tools">
                 <div class="tool">
                     <strong>RustDesk (recommended)</strong>
@@ -152,9 +152,9 @@
                         <select id="rTool"><option>RustDesk</option><option>AnyDesk</option><option>Other</option></select>
                     </div>
                     <div>
-                        <label for="rId">Your ID *</label>
+                        <label for="rId" id="rIdLabel">RustDesk ID number *</label>
                         <input id="rId" required inputmode="numeric" placeholder="e.g. 123 456 789" style="font-family:'IBM Plex Mono';">
-                        <div class="hint">Shown as "Your ID" in the app.</div>
+                        <div class="hint" id="rIdHint">Open RustDesk. It's the number shown under <strong>ID</strong> on the left side of the window.</div>
                     </div>
                 </div>
                 <div><label for="rIssue">What's the problem?</label><textarea id="rIssue" placeholder="e.g. Windows keeps freezing after update, Outlook won't open…"></textarea></div>
@@ -246,7 +246,7 @@
     }
 
     function api(body) {
-        return sb.functions.invoke('stylespc-api', { body: body }).then(function (r) {
+        return sb.functions.invoke('quick-processor', { body: body }).then(function (r) {
             if (r.error) throw r.error;
             if (r.data && r.data.error) throw new Error(r.data.error);
             return r.data;
@@ -258,6 +258,18 @@
             body: JSON.stringify({ _subject: subject, message: lines.join('\n') })
         }).catch(function () {});
     }
+
+    // Label + help text follow the app the customer picks
+    var ID_HELP = {
+        RustDesk: ['RustDesk ID number *', "Open RustDesk. It's the number shown under <strong>ID</strong> on the left side of the window."],
+        AnyDesk:  ['AnyDesk address *', "Open AnyDesk. It's the number shown under <strong>Your Address</strong> (or <strong>This Desk</strong>)."],
+        Other:    ['Remote app ID / code *', 'Type the ID or code your remote app shows, and tell me the app name in the problem box.']
+    };
+    $('rTool').addEventListener('change', function () {
+        var h = ID_HELP[this.value] || ID_HELP.Other;
+        $('rIdLabel').textContent = h[0]; $('rIdHint').innerHTML = h[1];
+        $('rId').setAttribute('inputmode', this.value === 'Other' ? 'text' : 'numeric');
+    });
 
     // =============================================================
     // SUBMIT REQUEST
