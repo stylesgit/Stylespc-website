@@ -1045,20 +1045,12 @@ function initApp() {
     }
 
     // =============================================================
-    // WHATSAPP STATUS UPDATES (Twilio, via a Supabase Edge Function)
+    // WHATSAPP STATUS UPDATES (free click-to-send via wa.me links)
     // =============================================================
-    // Twilio's Account SID/Auth Token are secret and must never live in this
-    // file — anyone who viewed the page source could use them to send
-    // WhatsApp messages on your account. Instead, this calls a small server
-    // function ("send-whatsapp") that holds those secrets and talks to
-    // Twilio on your behalf. See SETUP_GUIDE_WhatsApp.md for full setup.
-    const WHATSAPP_FUNCTION_URL = 'https://YOUR-PROJECT-REF.functions.supabase.co/send-whatsapp'; // set after deploying the edge function
-    const WHATSAPP_SHARED_SECRET = 'CHANGE-ME'; // must exactly match ADMIN_SHARED_SECRET set on the edge function
-
-    // Each key here must match a Twilio Content Template SID configured as a
-    // secret on the edge function (TWILIO_TPL_...). The "preview" text is
-    // shown to you in the modal before sending — it's only accurate if the
-    // approved Twilio template uses this same wording and variable order.
+    // No Twilio, no fees, no Meta approval: clicking a status opens your own
+    // WhatsApp (app or WhatsApp Web) in the customer's chat with the message
+    // already typed. You just press Send.
+    // Edit the wording of each status message here.
     const WHATSAPP_MESSAGES = [
         { key: 'request_received', label: '✅ Request Received', preview: (t) => `Hi ${t.client_name}, thanks for bringing in your ${t.device}! We've received your service request (Ticket ${t.ticket_number}) and will keep you updated as we work on it. — StylesPC` },
         { key: 'work_in_progress', label: '🔧 Work In Progress', preview: (t) => `Hi ${t.client_name}, quick update — we've started working on your ${t.device} (Ticket ${t.ticket_number}). We'll let you know as soon as it's ready. — StylesPC` },
@@ -1083,37 +1075,22 @@ function initApp() {
         $('waModal').classList.add('active');
     }
 
-    async function sendWhatsAppTemplate(templateKey) {
+    function sendWhatsAppTemplate(templateKey) {
         const t = waCurrentTicket;
         const msg = WHATSAPP_MESSAGES.find(m => m.key === templateKey);
         const statusEl = $('waModalStatus');
         if (!t || !msg) return;
-        if (WHATSAPP_FUNCTION_URL.includes('YOUR-PROJECT-REF')) {
+        const waNumber = normalizeWhatsAppNumber(t.phone);
+        if (waNumber.length < 11) {
             statusEl.style.color = 'var(--red)';
-            statusEl.textContent = '⚠️ WhatsApp sending isn\'t set up yet — see SETUP_GUIDE_WhatsApp.md to connect Twilio.';
+            statusEl.textContent = '⚠️ Phone number looks incomplete — check it on the ticket (e.g. 876 334-1156).';
             return;
         }
-        statusEl.style.color = 'var(--ink-soft)';
-        statusEl.textContent = 'Sending…';
-        try {
-            const resp = await fetch(WHATSAPP_FUNCTION_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-admin-secret': WHATSAPP_SHARED_SECRET },
-                body: JSON.stringify({
-                    to: t.phone,
-                    templateKey,
-                    variables: { '1': t.client_name || '', '2': t.device || '', '3': t.ticket_number || t.id, '4': fmtMoney(t.amount) },
-                }),
-            });
-            const result = await resp.json();
-            if (!resp.ok || !result.success) throw new Error(result.error || 'Send failed');
-            statusEl.style.color = 'var(--teal)';
-            statusEl.textContent = '✅ Sent: ' + msg.label;
-            logActivity('WhatsApp Sent', `${msg.label} — ${t.ticket_number || t.id} — ${t.client_name || ''} (${t.phone})`);
-        } catch (err) {
-            statusEl.style.color = 'var(--red)';
-            statusEl.textContent = '❌ Failed to send — ' + (err?.message || 'check WhatsApp setup');
-        }
+        const text = encodeURIComponent(msg.preview(t));
+        window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
+        statusEl.style.color = 'var(--teal)';
+        statusEl.textContent = '✅ WhatsApp opened — press Send in the chat: ' + msg.label;
+        logActivity('WhatsApp Opened', `${msg.label} — ${t.ticket_number || t.id} — ${t.client_name || ''} (${t.phone})`);
     }
 
     async function sendConfirmationEmail() {
@@ -1218,6 +1195,7 @@ function initApp() {
     // Normalizes a local Jamaican number ("876 334-1156") to WhatsApp's required format ("18763341156")
     function normalizeWhatsAppNumber(phone) {
         let digits = String(phone || '').replace(/\D/g, '');
+        if (digits.length === 7) digits = '1876' + digits; // local 7-digit number, assume Jamaica
         if (digits.length === 10) digits = '1' + digits; // add NANP country code
         return digits;
     }
@@ -4427,6 +4405,10 @@ function initApp() {
     // ---- Review Requests ----
     window.renderReviewRequests = renderReviewRequests;
     window.requestReviewWhatsApp = requestReviewWhatsApp;
+
+    // ---- WhatsApp status updates ----
+    window.openWhatsAppModal = openWhatsAppModal;
+    window.sendWhatsAppTemplate = sendWhatsAppTemplate;
     window.requestReviewEmail = requestReviewEmail;
     window.unmarkReviewAsked = unmarkReviewAsked;
 
