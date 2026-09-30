@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Start a Remote Session — StylesPC</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --paper: #F3EFE7; --paper-2: #EAE3D3; --ink: #1F2421; --ink-soft: #4A4F49;
+            --teal: #2F6F63; --teal-dark: #204b43; --amber: #C97A2B; --rule: #C9C2B2; --white: #FFFDF8;
+            --red: #a3372a; --green: #25D366;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--paper); color: var(--ink); font-family: 'IBM Plex Sans', sans-serif; line-height: 1.55; -webkit-font-smoothing: antialiased; }
+        h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.01em; }
+        a { color: var(--teal-dark); }
+        .wrap { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+        header { border-bottom: 1px solid var(--rule); background: var(--paper); }
+        header .wrap { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; padding-bottom: 14px; gap: 12px; }
+        .brand { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.2rem; text-decoration: none; color: var(--ink); display: flex; align-items: center; gap: 10px; }
+        .brand .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--teal); box-shadow: 0 0 0 3px rgba(47,111,99,0.18); }
+        .back { font-size: 0.88rem; font-weight: 600; text-decoration: none; }
+        main { padding: 44px 0 80px; }
+        .eyebrow { display: inline-block; font-family: 'IBM Plex Mono'; font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal-dark); background: rgba(47,111,99,0.09); padding: 6px 12px; border-radius: 20px; margin-bottom: 16px; }
+        h1 { font-size: clamp(1.9rem, 5vw, 2.6rem); line-height: 1.1; margin-bottom: 12px; }
+        .lead { color: var(--ink-soft); font-size: 1.02rem; margin-bottom: 28px; }
+        .card { background: var(--white); border: 1px solid var(--rule); border-radius: 8px; padding: 24px; margin-bottom: 20px; }
+        .card h2 { font-size: 1.15rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .num { font-family: 'IBM Plex Mono'; font-size: 0.8rem; width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--ink); display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .card p { color: var(--ink-soft); font-size: 0.94rem; margin-bottom: 10px; }
+        .fee-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: rgba(201,122,43,0.08); border: 1px solid rgba(201,122,43,0.3); border-radius: 6px; padding: 16px 18px; }
+        .fee-box .amt { font-family: 'IBM Plex Mono'; font-weight: 600; font-size: 1.35rem; }
+        .fee-box small { display: block; color: var(--ink-soft); font-size: 0.8rem; }
+        .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+        .tool { border: 1px solid var(--rule); border-radius: 6px; padding: 14px; background: var(--paper); }
+        .tool strong { display: block; margin-bottom: 4px; }
+        .tool span { font-size: 0.82rem; color: var(--ink-soft); display: block; margin-bottom: 10px; }
+        .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 20px; border-radius: 3px; font-weight: 600; font-size: 0.95rem; border: 1px solid transparent; cursor: pointer; font-family: 'IBM Plex Sans'; text-decoration: none; transition: background 0.15s; }
+        .btn-primary { background: var(--teal); color: #fff; }
+        .btn-primary:hover { background: var(--teal-dark); }
+        .btn-primary:disabled { opacity: 0.6; cursor: wait; }
+        .btn-ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+        .btn-ghost:hover { background: var(--ink); color: var(--white); }
+        .btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+        .btn-wa { background: var(--green); color: #fff; }
+        form { display: grid; gap: 14px; }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        label { font-size: 0.82rem; font-weight: 600; color: var(--ink-soft); display: block; margin-bottom: 6px; }
+        input, select, textarea { font-family: 'IBM Plex Sans'; font-size: 0.95rem; padding: 11px 12px; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); color: var(--ink); width: 100%; }
+        textarea { min-height: 80px; resize: vertical; }
+        .hint { font-size: 0.78rem; color: var(--ink-soft); margin-top: 4px; }
+        .msg { font-size: 0.9rem; font-weight: 600; min-height: 1.2em; }
+        .msg.err { color: var(--red); }
+        .status-card { border-width: 2px; }
+        .status-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .status-icon { font-size: 1.8rem; }
+        .status-title { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.25rem; }
+        .status-text { color: var(--ink-soft); font-size: 0.96rem; white-space: pre-line; }
+        .admin-msg { background: var(--paper-2); border-left: 3px solid var(--teal); padding: 12px 14px; border-radius: 4px; margin-top: 12px; font-size: 0.93rem; white-space: pre-line; }
+        .pill { display: inline-block; font-family: 'IBM Plex Mono'; font-size: 0.72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; }
+        .pill.unpaid { background: rgba(201,122,43,0.14); color: #a9631e; }
+        .pill.paid { background: rgba(47,111,99,0.14); color: var(--teal-dark); }
+        .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+        .pulse { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: #3ecf6e; margin-right: 6px; animation: pr 1.8s infinite; }
+        @keyframes pr { 0% { box-shadow: 0 0 0 0 rgba(62,207,110,0.6); } 70% { box-shadow: 0 0 0 8px rgba(62,207,110,0); } 100% { box-shadow: 0 0 0 0 rgba(62,207,110,0); } }
+        #paypalButtons { margin-top: 14px; max-width: 420px; }
+        [hidden] { display: none !important; }
+        @media (max-width: 600px) { .row, .tools { grid-template-columns: 1fr; } .card { padding: 18px; } }
+    </style>
+    <script>
+        // Theme shared with the rest of the site
+        (function () {
+            var T = {
+                dark:   { paper:'#1A1D1B', paper2:'#262B28', ink:'#EDEBE4', inkSoft:'#9EA39C', teal:'#3D8B7A', tealDark:'#2F6F63', amber:'#D98F42', rule:'#3A403B', white:'#2A2F2C' },
+                spring: { paper:'#F1F7EA', paper2:'#E1EFD0', ink:'#24321F', inkSoft:'#55694A', teal:'#4E9B5E', tealDark:'#397548', amber:'#E0A23B', rule:'#C7DAB3', white:'#FCFEF8' },
+                summer: { paper:'#FEF6E4', paper2:'#FCE8C2', ink:'#2B2416', inkSoft:'#6B5D3A', teal:'#1E8FA3', tealDark:'#146877', amber:'#E8762C', rule:'#F0D6A0', white:'#FFFDF6' },
+                autumn: { paper:'#F7EDE2', paper2:'#EFD9BC', ink:'#2E1F16', inkSoft:'#6B4A32', teal:'#A8562B', tealDark:'#7C3E1D', amber:'#C9862F', rule:'#E0C09A', white:'#FFF9F0' },
+                winter: { paper:'#EEF3F7', paper2:'#DCE6EE', ink:'#1B2530', inkSoft:'#4E6577', teal:'#2E6FA6', tealDark:'#1F4F7A', amber:'#C0392B', rule:'#C9D6E0', white:'#FFFFFF' }
+            };
+            try {
+                var t = T[localStorage.getItem('stylespc_theme')];
+                if (!t) return;
+                var r = document.documentElement.style;
+                r.setProperty('--paper', t.paper); r.setProperty('--paper-2', t.paper2); r.setProperty('--ink', t.ink);
+                r.setProperty('--ink-soft', t.inkSoft); r.setProperty('--teal', t.teal); r.setProperty('--teal-dark', t.tealDark);
+                r.setProperty('--amber', t.amber); r.setProperty('--rule', t.rule); r.setProperty('--white', t.white);
+            } catch (e) {}
+        })();
+    </script>
+</head>
+<body>
+<header>
+    <div class="wrap">
+        <a href="index.html" class="brand"><span class="dot"></span>StylesPC</a>
+        <a href="index.html" class="back">← Back to site</a>
+    </div>
+</header>
+
+<main class="wrap">
+    <span class="eyebrow">Remote support</span>
+    <h1>Start a remote session</h1>
+    <p class="lead">For software, Windows and application problems. I connect to your computer with Windows Quick Assist (already built in) or a free remote app, and fix it while you watch. No need to send your device in.</p>
+
+    <!-- FEE -->
+    <div class="card">
+        <div class="fee-box">
+            <div>
+                <strong>Remote Access Support — per session</strong>
+                <small>Pay by credit/debit card or PayPal. You can pay now or once I confirm I'm connecting.</small>
+            </div>
+            <div style="text-align:right;">
+                <div class="amt" id="feeJmd">J$2,000</div>
+                <small id="feeUsd">≈ US$—</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- REQUEST FLOW -->
+    <div id="requestFlow">
+        <div class="card">
+            <h2><span class="num">1</span> Choose how I connect</h2>
+            <p>On Windows 10 or 11 you can use <strong>Quick Assist</strong>, which is already on your PC, so there's nothing to install. Otherwise install RustDesk or AnyDesk and keep it open.</p>
+            <div class="tools">
+                <div class="tool" style="grid-column:1/-1;border-color:var(--teal);">
+                    <strong>Quick Assist (Windows, nothing to install)</strong>
+                    <span>Built into Windows 10/11. When I'm ready I'll give you a 6-digit code. Press <strong>Windows + Ctrl + Q</strong>, type the code, and click Allow.</span>
+                    <button type="button" class="btn btn-primary btn-sm" id="pickQA">Use Quick Assist</button>
+                </div>
+                <div class="tool">
+                    <strong>RustDesk (recommended)</strong>
+                    <span>Free and secure. Windows, Mac, Android.</span>
+                    <a class="btn btn-ghost btn-sm" href="https://rustdesk.com/download" target="_blank" rel="noopener">Download RustDesk</a>
+                </div>
+                <div class="tool">
+                    <strong>AnyDesk</strong>
+                    <span>Use this if you already have it installed.</span>
+                    <a class="btn btn-ghost btn-sm" href="https://anydesk.com/en/downloads" target="_blank" rel="noopener">Download AnyDesk</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><span class="num">2</span> Send me your details</h2>
+            <form id="remoteForm">
+                <div class="row">
+                    <div><label for="rName">Full name *</label><input id="rName" required autocomplete="name"></div>
+                    <div><label for="rPhone">WhatsApp / phone *</label><input id="rPhone" type="tel" required placeholder="876 334-1156" autocomplete="tel"></div>
+                </div>
+                <div><label for="rEmail">Email (optional)</label><input id="rEmail" type="email" autocomplete="email"></div>
+                <div class="row">
+                    <div>
+                        <label for="rTool">Remote app *</label>
+                        <select id="rTool"><option value="Quick Assist">Quick Assist (Windows)</option><option>RustDesk</option><option>AnyDesk</option><option>Other</option></select>
+                    </div>
+                    <div id="rIdWrap" hidden>
+                        <label for="rId" id="rIdLabel">RustDesk ID number *</label>
+                        <input id="rId" inputmode="numeric" placeholder="e.g. 123 456 789" style="font-family:'IBM Plex Mono';">
+                        <div class="hint" id="rIdHint">Open RustDesk. It's the number shown under <strong>ID</strong> on the left side of the window.</div>
+                    </div>
+                    <div id="qaNote">
+                        <label>No ID needed</label>
+                        <div class="hint" style="font-size:0.85rem;">With Quick Assist, <strong>I</strong> send <strong>you</strong> a 6-digit code on this page (and on WhatsApp) when I'm ready to connect.</div>
+                    </div>
+                </div>
+                <div><label for="rIssue">What's the problem?</label><textarea id="rIssue" placeholder="e.g. Windows keeps freezing after update, Outlook won't open…"></textarea></div>
+                <p class="hint">By continuing you agree to the session fee shown above. I only connect when you accept the prompt on your screen, and you can end the session at any time.</p>
+                <button type="submit" class="btn btn-primary" id="rSubmit">Request remote session</button>
+                <p class="msg" id="rMsg" role="status"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- LIVE STATUS -->
+    <div id="statusFlow" hidden>
+        <div class="card status-card" id="statusCard">
+            <div class="status-head">
+                <span class="status-icon" id="stIcon">⏳</span>
+                <div>
+                    <div class="status-title" id="stTitle">Request sent</div>
+                    <div style="font-size:0.8rem;color:var(--ink-soft);"><span class="pulse"></span>Live — this page updates by itself</div>
+                </div>
+            </div>
+            <div class="status-text" id="stText"></div>
+            <div id="qaCodeBox" hidden style="margin-top:14px;background:var(--paper-2);border:2px solid var(--teal);border-radius:8px;padding:16px;">
+                <div style="font-size:0.8rem;font-weight:600;color:var(--ink-soft);">YOUR QUICK ASSIST CODE</div>
+                <div id="qaCode" style="font-family:'IBM Plex Mono';font-weight:600;font-size:2.2rem;letter-spacing:0.15em;margin:4px 0 10px;"></div>
+                <ol style="font-size:0.9rem;color:var(--ink-soft);padding-left:20px;display:grid;gap:4px;">
+                    <li>Press <strong>Windows + Ctrl + Q</strong> (or search "Quick Assist" in Start).</li>
+                    <li>Under <strong>Get help</strong>, type the code above and click <strong>Submit</strong>.</li>
+                    <li>Click <strong>Allow</strong> to let StylesPC see and control your screen.</li>
+                </ol>
+                <div style="font-size:0.78rem;color:var(--ink-soft);margin-top:8px;">Codes expire after about 10 minutes. If it says the code expired, press "I can't connect" and I'll send a new one.</div>
+            </div>
+            <div class="admin-msg" id="stAdminMsg" hidden></div>
+            <div class="actions">
+                <button class="btn btn-ghost btn-sm" id="btnCantConnect" type="button">😕 I can't connect</button>
+                <a class="btn btn-wa btn-sm" id="btnWhatsApp" target="_blank" rel="noopener" href="#">💬 WhatsApp StylesPC</a>
+                <button class="btn btn-ghost btn-sm" id="btnCancel" type="button">Cancel request</button>
+            </div>
+            <p class="msg" id="stMsg" role="status" style="margin-top:10px;"></p>
+        </div>
+
+        <div class="card" id="payCard">
+            <h2>💳 Session fee <span class="pill unpaid" id="payPill">UNPAID</span></h2>
+            <p id="payText">Pay securely by credit/debit card or PayPal. You don't need a PayPal account — choose <strong>Debit or Credit Card</strong>.</p>
+            <div id="paypalButtons"></div>
+            <div id="payFallback" hidden>
+                <p>Online card payment is being set up. You can pay by <strong>bank transfer</strong> or cash — I'll send the details on WhatsApp.</p>
+            </div>
+            <p class="msg" id="payMsg" role="status"></p>
+        </div>
+
+        <p style="font-size:0.85rem;color:var(--ink-soft);">Keep this page open, or bookmark it to check back — <a href="#" id="newRequestLink">start a new request</a>.</p>
+    </div>
+</main>
+
+<script>
+(function () {
+    // =============================================================
+    // SETTINGS — edit these
+    // =============================================================
+    var PAYPAL_CLIENT_ID = '';        // from developer.paypal.com → Apps & Credentials (LIVE). Leave '' until ready.
+    var WIPAY_PAYMENT_LINK = '';      // later: paste a WiPay payment link here to show a "Pay with WiPay" button
+    var JMD_PER_USD = 157;            // exchange rate used to convert the JMD fee for PayPal (PayPal can't charge JMD)
+    var REMOTE_FEE_FALLBACK = 2000;   // used if the price list can't be loaded
+    var STYLESPC_WHATSAPP = '18763341156';
+    var FORMSPREE_ENDPOINT = 'https://formspree.io/f/mbgrrzja';
+
+    var sb = supabase.createClient('https://gtfqasmqbgxjfnwlvxjp.supabase.co', 'sb_publishable_t5wUt78t9oYjg_ngzVp5nA_E9m0WyM1');
+    var $ = function (id) { return document.getElementById(id); };
+    var feeJmd = REMOTE_FEE_FALLBACK, feeUsd = 0;
+    var session = null, pollTimer = null, paypalRendered = false;
+
+    function fmtJmd(n) { return 'J$' + Number(n).toLocaleString('en-US'); }
+    function calcUsd(j) { return Math.ceil((j / JMD_PER_USD) * 100) / 100; }
+    function showFee() {
+        feeUsd = calcUsd(feeJmd);
+        $('feeJmd').textContent = fmtJmd(feeJmd);
+        $('feeUsd').textContent = '≈ US$' + feeUsd.toFixed(2) + ' by card/PayPal';
+    }
+    showFee();
+
+    // Fee comes from the price list you manage in admin.html (any active item with "remote" in its name)
+    sb.from('price_list').select('name,price,active').eq('active', true).ilike('name', '%remote%').limit(1)
+        .then(function (r) { if (r.data && r.data[0] && Number(r.data[0].price) > 0) { feeJmd = Number(r.data[0].price); showFee(); } });
+
+    // ---- remember this customer's session (link + browser) ----
+    function saveSession(s) {
+        try { localStorage.setItem('stylespc_remote', JSON.stringify(s)); } catch (e) {}
+        history.replaceState(null, '', '#s=' + s.id + '.' + s.token);
+    }
+    function loadSession() {
+        var m = location.hash.match(/s=([0-9a-f-]{36})\.([0-9a-f-]{36})/i);
+        if (m) return { id: m[1], token: m[2] };
+        try { var s = JSON.parse(localStorage.getItem('stylespc_remote') || 'null'); if (s && s.id) return s; } catch (e) {}
+        return null;
+    }
+    function clearSession() {
+        try { localStorage.removeItem('stylespc_remote'); } catch (e) {}
+        history.replaceState(null, '', location.pathname);
+    }
+
+    function api(body) {
+        return sb.functions.invoke('quick-processor', { body: body }).then(function (r) {
+            if (r.error) throw r.error;
+            if (r.data && r.data.error) throw new Error(r.data.error);
+            return r.data;
+        });
+    }
+    function emailMe(subject, lines) {
+        return fetch(FORMSPREE_ENDPOINT, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({ _subject: subject, message: lines.join('\n') })
+        }).catch(function () {});
+    }
+
+    // Label + help text follow the app the customer picks
+    var ID_HELP = {
+        RustDesk: ['RustDesk ID number *', "Open RustDesk. It's the number shown under <strong>ID</strong> on the left side of the window."],
+        AnyDesk:  ['AnyDesk address *', "Open AnyDesk. It's the number shown under <strong>Your Address</strong> (or <strong>This Desk</strong>)."],
+        Other:    ['Remote app ID / code *', 'Type the ID or code your remote app shows, and tell me the app name in the problem box.']
+    };
+    function onToolChange() {
+        var tool = $('rTool').value, qa = tool === 'Quick Assist';
+        $('rIdWrap').hidden = qa; $('qaNote').hidden = !qa;
+        $('rId').required = !qa;
+        if (qa) return;
+        var h = ID_HELP[tool] || ID_HELP.Other;
+        $('rIdLabel').textContent = h[0]; $('rIdHint').innerHTML = h[1];
+        $('rId').setAttribute('inputmode', tool === 'Other' ? 'text' : 'numeric');
+    }
+    $('rTool').addEventListener('change', onToolChange);
+    $('pickQA').addEventListener('click', function () { $('rTool').value = 'Quick Assist'; onToolChange(); $('rName').focus(); });
+    onToolChange();
+
+    // =============================================================
+    // SUBMIT REQUEST
+    // =============================================================
+    $('remoteForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var btn = $('rSubmit'), msg = $('rMsg');
+        msg.className = 'msg'; msg.textContent = '';
+        var d = {
+            name: $('rName').value.trim(), phone: $('rPhone').value.trim(), email: $('rEmail').value.trim(),
+            tool: $('rTool').value, rid: $('rId').value.trim(), issue: $('rIssue').value.trim()
+        };
+        if (d.tool === 'Quick Assist') d.rid = 'Quick Assist';
+        if (!d.name || !d.phone || !d.rid) { msg.className = 'msg err'; msg.textContent = 'Please fill in your name, phone and remote ID.'; return; }
+        btn.disabled = true; btn.textContent = 'Sending…';
+        try {
+            var r = await sb.rpc('create_remote_session', {
+                p_name: d.name, p_phone: d.phone, p_email: d.email, p_tool: d.tool, p_remote_id: d.rid,
+                p_issue: d.issue, p_fee_jmd: feeJmd, p_fee_usd: feeUsd
+            });
+            if (r.error) throw r.error;
+            var row = Array.isArray(r.data) ? r.data[0] : r.data;
+            session = { id: row.id, token: row.access_token };
+            saveSession(session);
+            // Alert Andrew: WhatsApp (if set up) + email (always)
+            api({ action: 'notify_admin', session_id: session.id, token: session.token }).catch(function (err) { console.warn('WhatsApp alert:', err.message); });
+            emailMe('🖥️ Remote session request — ' + d.name, [
+                'New remote session request', '', 'Name: ' + d.name, 'Phone: ' + d.phone, 'Email: ' + (d.email || '—'),
+                'App: ' + d.tool, 'Remote ID: ' + d.rid, 'Issue: ' + (d.issue || '—'), 'Fee: ' + fmtJmd(feeJmd), '',
+                'Open admin.html → Remote Sessions to respond.'
+            ]);
+            startStatus();
+        } catch (err) {
+            msg.className = 'msg err';
+            msg.textContent = 'Could not send your request (' + (err.message || 'error') + '). Please WhatsApp us instead.';
+        } finally {
+            btn.disabled = false; btn.textContent = 'Request remote session';
+        }
+    });
+
+    // =============================================================
+    // LIVE STATUS
+    // =============================================================
+    var STATES = {
+        waiting:             { icon: '⏳', title: 'Request sent — waiting for StylesPC', text: "I've been notified and will connect as soon as possible. Keep your remote app open.\nWhen I connect, your app will pop up asking to accept — click Accept." },
+        unavailable:         { icon: '🕒', title: "I'm not available right now", text: "Your request is saved and I'll start the connection as soon as I'm free. Keep your remote app open, or I'll message you on WhatsApp before connecting." },
+        connecting:          { icon: '🔌', title: 'Connecting now — check your screen', text: 'Your remote app should show an incoming connection from StylesPC. Click Accept (and allow control if asked).\nNothing popped up? Press "I can\'t connect" below.' },
+        client_cant_connect: { icon: '📨', title: "Got it — I've been told you can't connect", text: "Make sure the remote app is open and your ID matches. I'll message you with next steps shortly." },
+        no_answer:           { icon: '📵', title: "I tried to connect but couldn't reach you", text: "Please open your remote app and check your ID. Press \"I can't connect\" if you need help, or WhatsApp me when you're ready." },
+        connected:           { icon: '🛠️', title: 'Session in progress', text: "I'm connected and working on your computer. Please don't turn it off." },
+        completed:           { icon: '✅', title: 'Session complete', text: 'Thanks for choosing StylesPC! You can close the remote app now.' },
+        cancelled:           { icon: '✖️', title: 'Request cancelled', text: 'This request was cancelled. You can start a new one any time.' }
+    };
+
+    async function refresh() {
+        if (!session) return;
+        var r = await sb.rpc('get_remote_session', { p_id: session.id, p_token: session.token });
+        if (r.error) { $('stMsg').className = 'msg err'; $('stMsg').textContent = 'Connection problem — retrying…'; return; }
+        var s = Array.isArray(r.data) ? r.data[0] : r.data;
+        if (!s) { clearSession(); location.reload(); return; }
+        $('stMsg').textContent = '';
+        var st = STATES[s.status] || STATES.waiting;
+        $('stIcon').textContent = st.icon; $('stTitle').textContent = st.title; $('stText').textContent = st.text;
+        $('statusCard').style.borderColor = s.status === 'connecting' ? 'var(--teal)' : (s.status === 'unavailable' || s.status === 'no_answer') ? 'var(--amber)' : 'var(--rule)';
+        var showCode = s.remote_tool === 'Quick Assist' && s.connect_code && s.status === 'connecting';
+        $('qaCodeBox').hidden = !showCode;
+        $('qaCode').textContent = showCode ? s.connect_code : '';
+        if (showCode) { $('stTitle').textContent = 'Ready — enter your code in Quick Assist'; $('stText').textContent = 'Follow the 3 steps below.'; }
+        else if (s.remote_tool === 'Quick Assist' && (s.status === 'waiting' || s.status === 'unavailable')) {
+            $('stText').textContent = st.text.replace(/Keep your remote app open[^.]*\./, "You'll get a 6-digit Quick Assist code here when I'm ready.").replace(/When I connect[\s\S]*/, '');
+        }
+        $('stAdminMsg').hidden = !s.admin_message;
+        $('stAdminMsg').textContent = s.admin_message ? '💬 From StylesPC: ' + s.admin_message : '';
+        var closed = s.status === 'completed' || s.status === 'cancelled';
+        $('btnCantConnect').hidden = closed || s.status === 'client_cant_connect' || s.status === 'connected';
+        $('btnCancel').hidden = closed || s.status === 'connected';
+        $('btnWhatsApp').href = 'https://wa.me/' + STYLESPC_WHATSAPP + '?text=' + encodeURIComponent('Hi StylesPC, about my remote session (' + (s.remote_tool === 'Quick Assist' ? 'Quick Assist' : s.remote_tool + ' ID ' + s.remote_id) + ')…');
+        feeJmd = Number(s.fee_jmd) || feeJmd; feeUsd = Number(s.fee_usd) || calcUsd(feeJmd);
+        renderPayment(s.payment_status, s.status);
+        if (closed && pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    }
+
+    function startStatus() {
+        $('requestFlow').hidden = true;
+        $('statusFlow').hidden = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        refresh();
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = setInterval(refresh, 5000);
+    }
+
+    $('btnCantConnect').addEventListener('click', async function () {
+        var b = this; b.disabled = true;
+        var r = await sb.rpc('customer_remote_action', { p_id: session.id, p_token: session.token, p_action: 'cant_connect' });
+        if (!r.error) {
+            api({ action: 'notify_admin', session_id: session.id, token: session.token }).catch(function () {});
+            emailMe('😕 Customer can\'t connect — remote session', ['A customer pressed "I can\'t connect".', 'Open admin.html → Remote Sessions.']);
+        }
+        b.disabled = false; refresh();
+    });
+    $('btnCancel').addEventListener('click', async function () {
+        if (!confirm('Cancel this remote session request?')) return;
+        await sb.rpc('customer_remote_action', { p_id: session.id, p_token: session.token, p_action: 'cancel' });
+        refresh();
+    });
+    $('newRequestLink').addEventListener('click', function (e) {
+        e.preventDefault(); clearSession(); location.reload();
+    });
+
+    // =============================================================
+    // PAYMENT — PayPal (cards accepted, no PayPal account needed)
+    // =============================================================
+    function renderPayment(paymentStatus, status) {
+        var paid = paymentStatus === 'paid' || paymentStatus === 'waived';
+        $('payPill').textContent = paymentStatus === 'waived' ? 'NO CHARGE' : paid ? 'PAID' : 'UNPAID';
+        $('payPill').className = 'pill ' + (paid ? 'paid' : 'unpaid');
+        if (paid) {
+            $('payText').textContent = paymentStatus === 'waived' ? 'No charge for this session.' : 'Payment received — thank you! (' + fmtJmd(feeJmd) + ')';
+            $('paypalButtons').innerHTML = ''; $('payFallback').hidden = true; paypalRendered = false;
+            return;
+        }
+        if (status === 'cancelled') { $('payCard').hidden = true; return; }
+        $('payCard').hidden = false;
+        if (!PAYPAL_CLIENT_ID) {
+            $('payFallback').hidden = false;
+            if (WIPAY_PAYMENT_LINK && !$('wipayBtn')) {
+                $('payFallback').insertAdjacentHTML('beforeend', '<a id="wipayBtn" class="btn btn-primary btn-sm" target="_blank" rel="noopener" href="' + WIPAY_PAYMENT_LINK + '">💳 Pay by card (WiPay)</a>');
+            }
+            return;
+        }
+        if (!paypalRendered) loadPayPal();
+    }
+
+    function loadPayPal() {
+        paypalRendered = true;
+        var s = document.createElement('script');
+        s.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID) + '&currency=USD&intent=capture&enable-funding=card';
+        s.onload = function () {
+            paypal.Buttons({
+                style: { layout: 'vertical', shape: 'rect', label: 'pay' },
+                createOrder: function (data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            custom_id: session.id,
+                            description: 'StylesPC Remote Support Session (' + fmtJmd(feeJmd) + ')',
+                            amount: { currency_code: 'USD', value: feeUsd.toFixed(2) }
+                        }]
+                    });
+                },
+                onApprove: function (data) {
+                    $('payMsg').className = 'msg'; $('payMsg').textContent = 'Confirming payment…';
+                    return api({ action: 'paypal_capture', session_id: session.id, token: session.token, order_id: data.orderID })
+                        .then(function () { $('payMsg').textContent = '✅ Payment received — thank you!'; refresh(); })
+                        .catch(function (err) { $('payMsg').className = 'msg err'; $('payMsg').textContent = 'Payment issue: ' + err.message + '. Please WhatsApp us.'; });
+                },
+                onError: function (err) {
+                    $('payMsg').className = 'msg err'; $('payMsg').textContent = 'PayPal error — please try again or WhatsApp us.';
+                    console.error(err);
+                }
+            }).render('#paypalButtons');
+        };
+        s.onerror = function () { paypalRendered = false; $('payFallback').hidden = false; };
+        document.head.appendChild(s);
+    }
+
+    // Returning customer? Show their live status straight away.
+    session = loadSession();
+    if (session) startStatus();
+})();
+</script>
+</body>
+</html>
