@@ -200,6 +200,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
 #adCount{font-size:60px;color:var(--gold);text-shadow:4px 4px 0 var(--green)}
 .mouse-only{display:none}
 @media (hover:hover) and (pointer:fine){ .mouse-only{display:inline} .touch-only{display:none} }
+.padfocus{outline:4px solid #FFC72C!important;outline-offset:3px;box-shadow:0 0 0 8px rgba(255,199,44,.35)!important;transform:scale(1.03)}
 </style>
 </head>
 <body>
@@ -3364,6 +3365,29 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   function rumble(strong, ms){ try{ const pads = navigator.getGamepads ? navigator.getGamepads() : []; for(const pad of pads){ if(pad && pad.vibrationActuator && pad.vibrationActuator.playEffect) pad.vibrationActuator.playEffect("dual-rumble", {duration: ms, strongMagnitude: strong, weakMagnitude: strong*.6}); } }catch(e){} }
   { const c0 = sfx.crash; sfx.crash = () => { c0(); rumble(.9, 280); }; }
   function clickVisible(sel){ const el = [...document.querySelectorAll(sel)].find(b => b.offsetParent !== null && !b.disabled); if(el){ el.click(); return true; } return false; }
+  // move a highlight between buttons/cards on any open screen (controller d-pad/stick or keyboard arrows)
+  let navEl = null;
+  function focusables(){ const p2 = document.querySelector(".panel.on"); if(!p2) return [];
+    return [...p2.querySelectorAll("button, input, a[href]")].filter(e => e.offsetParent !== null && !e.disabled && getComputedStyle(e).visibility !== "hidden"); }
+  function setNav(el){ if(navEl) navEl.classList.remove("padfocus"); navEl = el; if(el){ el.classList.add("padfocus"); el.scrollIntoView({block:"nearest", behavior:"smooth"}); if(el.tagName === "INPUT") el.focus(); } }
+  function moveNav(dx, dy){
+    const list = focusables(); if(!list.length) return;
+    if(!navEl || !list.includes(navEl)){ setNav(list.find(e => e.matches("[data-k], [data-o], [data-d], [data-p]")) || list.find(e => e.classList.contains("hot")) || list[0]); return; }
+    const r0 = navEl.getBoundingClientRect(), c0 = {x: r0.left + r0.width/2, y: r0.top + r0.height/2};
+    let best = null, bestS = Infinity;
+    for(const e of list){ if(e === navEl) continue; const r = e.getBoundingClientRect(), c = {x: r.left + r.width/2, y: r.top + r.height/2}, vx = c.x - c0.x, vy = c.y - c0.y;
+      const along = vx*dx + vy*dy; if(along <= 4) continue; const side = Math.abs(vx*dy - vy*dx), sc = along + side*2.2; if(sc < bestS){ bestS = sc; best = e; } }
+    if(best) setNav(best); else if(dy) setNav(dy > 0 ? list[list.length - 1] : list[0]);
+  }
+  function navOK(){ const list = focusables(); if(navEl && list.includes(navEl)){ navEl.click(); if(navEl.tagName !== "INPUT") setTimeout(() => { if(!focusables().includes(navEl)) setNav(null); }, 60); return true; } return false; }
+  new MutationObserver(() => { if(navEl && !focusables().includes(navEl)) setNav(null); }).observe(document.body, {subtree:true, attributes:true, attributeFilter:["class"]});
+  addEventListener("keydown", e => {
+    if(state === "play" || !document.querySelector(".panel.on")) return;
+    if(document.activeElement && document.activeElement.tagName === "INPUT" && (e.key === "ArrowLeft" || e.key === "ArrowRight")) return;
+    const k = {ArrowUp:[0,-1], ArrowDown:[0,1], ArrowLeft:[-1,0], ArrowRight:[1,0]}[e.key];
+    if(k){ e.preventDefault(); moveNav(k[0], k[1]); }
+    else if(e.key === "Enter" && navEl){ e.preventDefault(); navOK(); }
+  });
   function pollPad(){
     const pads = navigator.getGamepads ? navigator.getGamepads() : []; let pad = null;
     for(const q of pads) if(q && q.connected){ pad = q; break; }
@@ -3389,7 +3413,10 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         if(pressed(MAP)) $("#mapBtn").dispatchEvent(new PointerEvent("pointerdown", {bubbles:true}));
         if(pressed(9)) clickVisible("#pauseBtn, .pause, [aria-label='Pause']");
       } else {
-        if(pressed(OK)) clickVisible(".panel.on .btn.hot") || clickVisible(".panel.on .btn");
+        const sy = pad.axes[1] || 0, up = b(12) || sy < -.55, down = b(13) || sy > .55;
+        if((up || down || left || right) && (gp.navT <= 0 || (up && !gp.prev.U) || (down && !gp.prev.D) || (left && !gp.prev.NL) || (right && !gp.prev.NR))){ moveNav(left ? -1 : right ? 1 : 0, up ? -1 : down ? 1 : 0); gp.navT = .22; }
+        gp.navT = (gp.navT || 0) - 1/60; gp.prev.U = up; gp.prev.D = down; gp.prev.NL = left; gp.prev.NR = right;
+        if(pressed(OK)){ if(!navOK()) clickVisible(".panel.on .btn.hot") || clickVisible(".panel.on .btn"); }
         if(pressed(BACK)) clickVisible(".panel.on .btn.ghost");
         if(pressed(9)) clickVisible(".panel.on .btn.hot");
       }
