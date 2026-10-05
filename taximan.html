@@ -290,6 +290,20 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     <button class="btn hot" id="devClose">Back to game</button>
   </section>
 
+  <section class="panel dim" id="pausePanel">
+    <h2>Paused</h2>
+    <p class="sub">🎮 START to keep driving</p>
+    <button class="btn hot" id="pzResume">Keep driving</button>
+    <button class="btn ghost" id="pzEnd">End shift</button>
+  </section>
+  <section class="panel dim" id="parkPanel">
+    <h2 id="pkTitle">Transport Centre</h2>
+    <p class="sub" id="pkSub"></p>
+    <div id="pkList" style="font-weight:700;font-size:14px;max-width:340px;text-align:left;line-height:1.6"></div>
+    <button class="btn hot" id="pkLoad">Load passengers</button>
+    <button class="btn ghost" id="pkGo">Drive out</button>
+  </section>
+
   <section class="panel dim" id="login">
     <h1 style="margin-bottom:6px"><span class="a">Jamaican</span><span class="b">Taxi Man</span><span class="c">PP 4417</span></h1>
     <h2 style="font-size:clamp(22px,6vw,32px);margin-top:4px">Who driving?</h2>
@@ -420,12 +434,12 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     night: {sky:["#040A1C","#0B1736","#1A2A55","#2A3D6E"], sun:"#F2F4FF", glow:"rgba(200,210,255,.35)", ridge:["#1A2440","#142034","#0E1A26"], dark:.48}
   };
   const ENVS = {
-    city:   {grass:["#45A651","#3A9445"], road:["#454A55","#3E434D"], lines:true,  curbs:true,  deco:{palm:.26, pole:.16, shop:.28, people:.3}},
-    hills:  {grass:["#3A9446","#2F823B"], road:["#454A55","#3E434D"], lines:true,  curbs:true,  deco:{palm:.22, tree:.38, pole:.1, shop:.12, people:.18}},
-    beach:  {grass:["#4FB05A","#43A04E"], road:["#4A4F5A","#434852"], lines:true,  curbs:true,  deco:{palm:.45, people:.33, shop:.14, pole:.08}, sea:true},
-    highway: {grass:["#4C9A4A","#3F8D42"], road:["#43474F","#3D4149"], lines:true, curbs:true, deco:{tree:.42, palm:.3, pole:.28}},
-    street: {grass:["#4AA656","#3F9A4B"], road:["#4C515C","#454A55"], lines:false, curbs:true, deco:{shop:.36, people:.34, tree:.14, pole:.16}},
-    offroad:{grass:["#6A9A3E","#5E8C36"], road:["#A47E50","#967245"], lines:false, curbs:false, deco:{tree:.45, palm:.2, people:.14, pole:.08, shop:.13}, dirt:true}
+    city:   {grass:["#4CAE57","#41A04C"], road:["#454A55","#3E434D"], lines:true,  curbs:true,  deco:{palm:.24, tree:.2, bush:.14, pole:.08, shop:.2, people:.14}},
+    hills:  {grass:["#3FA04B","#348F40"], road:["#454A55","#3E434D"], lines:true,  curbs:true,  deco:{tree:.46, palm:.2, bush:.2, pole:.04, shop:.06, people:.04}},
+    beach:  {grass:["#55B85F","#49A853"], road:["#4A4F5A","#434852"], lines:true,  curbs:true,  deco:{palm:.5, bush:.18, tree:.1, people:.1, shop:.08, pole:.04}, sea:true},
+    highway: {grass:["#4FA24D","#43944A"], road:["#43474F","#3D4149"], lines:true, curbs:true, deco:{tree:.46, palm:.24, bush:.22, pole:.08}},
+    street: {grass:["#4FAE5A","#44A04F"], road:["#4C515C","#454A55"], lines:false, curbs:true, deco:{shop:.28, tree:.26, bush:.18, people:.18, pole:.1}},
+    offroad:{grass:["#6EA444","#62963C"], road:["#A47E50","#967245"], lines:false, curbs:false, deco:{tree:.5, palm:.18, bush:.22, people:.04, pole:.03, shop:.03}, dirt:true}
   };
   const PARISH_LEN = 1700;
   let level = 0;
@@ -667,7 +681,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     deco = [];
     for(let z = -2; z < FAR; z += 3.2){
       for(const side of [-1,1]){
-        if(Math.random() < .25) continue;
+        if(Math.random() < .12) continue;
         const E = env(); if(E.sea && side < 0 && Math.random() < .45) continue;
         let r = Math.random(), kind = "palm";
         for(const [k,w] of Object.entries(E.deco)){ if(r < w){ kind = k; break; } r -= w; }
@@ -857,8 +871,8 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     const lost = trips.length; trips = []; road = null;
     store.set("loc", level % PARISHES.length); homeParish = level % PARISHES.length;
     if(reason === "wreck"){ sfx.crash(); shake = 16; flash = .8; }
-    const T = {wreck:"Vehicle mash up!", gas:"Out of gas!", jail:"Straight to jail!", clock:"Shift done!"};
-    const S = {wreck:"Yuh vehicle need a tow.", gas:"Yuh run dry on di road.", jail:"Yuh refuse di officer. Three tickets, three strikes.", clock:"Good work today, driver."};
+    const T = {wreck:"Vehicle mash up!", gas:"Out of gas!", jail:"Straight to jail!", clock:"Shift done!", quit:"Shift done!"};
+    const S = {wreck:"Yuh vehicle need a tow.", gas:"Yuh run dry on di road.", jail:"Yuh refuse di officer. Three tickets, three strikes.", clock:"Good work today, driver.", quit:"Good work today, driver."};
     $("#overTitle").textContent = T[reason]; $("#overSub").textContent = S[reason] + (lost && reason !== "clock" ? ` ${lost} passenger${lost>1?"s":""} left without paying.` : "");
     if(shift.stolen) $("#overSub").textContent += ` Rival taxis took ${shift.stolen} fare${shift.stolen>1?"s":""} from you.`;
     $("#earnO").textContent = "J$" + fmt(shift.earned); $("#faresO").textContent = shift.fares; $("#ontimeO").textContent = shift.ontime; $("#parO").textContent = shift.parishes;
@@ -1133,10 +1147,19 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     items.push({type:"cross", kind, x: from*(ROAD + .7), vx: -from*sp, z: FAR, d:.6, ph: Math.random()*6, pause: kind === "cow" && Math.random() < .5 ? 1.5 + Math.random()*2 : 0,
       look: {shirt: PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], skin: PEOPLE_SKINS[Math.floor(Math.random()*4)], dress: Math.random() < .5}});
   }
+  const RIVAL_BUSES = [{name:"Road King", body:"#F4F4F2", stripe:"#C8102E"}, {name:"Yaad Express", body:"#FFD100", stripe:"#1F9D55"}, {name:"Country Runner", body:"#3FA7C9", stripe:"#FFC72C"}, {name:"Island Liner", body:"#E8E1D9", stripe:"#1E3A8A"}];
+  const RIVAL_BIKES = [{name:"Rocky", stripe:"#FF9F1C"}, {name:"Dougie", stripe:"#3DD68C"}, {name:"Ras Rider", stripe:"#FFC72C"}, {name:"Shorty", stripe:"#FF6BB5"}];
   function spawnRival(){
     if(items.filter(it => it.type === "rival").length >= 2) return;
-    const R0 = RIVALS[Math.floor(Math.random()*RIVALS.length)], lane = Math.floor(Math.random()*3);
+    let R0 = RIVALS[Math.floor(Math.random()*RIVALS.length)]; const lane = Math.floor(Math.random()*3);
     const behind = curSpeed > 9 && Math.random() < .5;
+    if(VCLS() === "bus"){ const B0 = RIVAL_BUSES[Math.floor(Math.random()*RIVAL_BUSES.length)], st = Math.random() < .5 ? "coach" : "coaster";
+      items.push({type:"rival", rbus:true, style: st, veh:true, kind:"rival", w:SPEC[st].w, h:SPEC[st].h, d:SPEC[st].d, lane, x:laneWX(lane), z: behind ? -16 : FAR, rs: behind ? curSpeed + 3 : 9 + Math.random()*5, stopT:0, name:B0.name, body:B0.body, stripe:B0.stripe, hornT:0});
+      if(behind) setTimeout(() => toast(`🚌 ${B0.name} bus coming up behind yuh! Dem want yuh passengers`), 300); return; }
+    if(VCLS() === "bike"){ const K0 = RIVAL_BIKES[Math.floor(Math.random()*RIVAL_BIKES.length)];
+      items.push({type:"rival", rbike:true, veh:true, kind:"rival", w:.45, h:1.1, d:1.0, lane, x:laneWX(lane), z: behind ? -16 : FAR, rs: behind ? curSpeed + 4 : 11 + Math.random()*6, stopT:0, name:K0.name, body:"#222", stripe:K0.stripe, hornT:0,
+        skin: Object.assign(randBiker(), {c2: K0.stripe, bstyle: ["commuter","naked","sport"][Math.floor(Math.random()*3)]})});
+      if(behind) setTimeout(() => toast(`🏍️ ${K0.name} di bike taxi a try overtake yuh!`), 300); return; }
 
     items.push({type:"rival", veh:true, kind:"rival", w:.92, h:1.2, d:1.95, lane, x:laneWX(lane), z: behind ? -16 : FAR, rs: behind ? curSpeed + 4 + Math.random()*2.5 : 11 + Math.random()*6,
       stopT:0, name:R0.name, body:R0.body, stripe:R0.stripe, hornT:0});
@@ -1149,7 +1172,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     // lanes already busy near the horizon (moving traffic, rivals, road works) also count, so one lane is always open
     items.forEach(q => { if((q.type === "traffic" || q.type === "rival" || q.type === "obs" || (q.type === "works" && !q.fixed)) && q.z > FAR - 14 && !blocked.includes(q.lane)) blocked.push(q.lane); });
     lanes.sort((a,b) => blocked.includes(a) - blocked.includes(b));
-    const nObs = Math.max(0, Math.min(3 - new Set(blocked).size - 1, Math.random() < .05 + .09*D() ? 2 : Math.random() < .55 + .27*D() ? 1 : 0));
+    const nObs = Math.max(0, Math.min(3 - new Set(blocked).size - 1, Math.random() < .03 + .05*D() ? 2 : Math.random() < .36 + .2*D() ? 1 : 0));
     for(let i=0;i<nObs;i++){
       const r = Math.random(); let it;
       if(r < .5) it = {type:"obs", kind:"hole", w:.78, h:.05, d:.9, low:true};
@@ -1160,7 +1183,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       Object.assign(it, {lane:lanes[i], z:FAR, x:laneWX(lanes[i]), stopT:0});
       items.push(it); used.push(lanes[i]);
     }
-    if(!road && Math.random() < (VCLS() === "bus" ? .2 : .06) && !items.some(it => it.type === "busstop" && it.z > FAR - 70)){
+    if(!road && Math.random() < (VCLS() === "bus" ? .2 : .06) && !items.some(it => it.type === "busstop" && it.z > FAR - 200)){
       const l = Math.random() < .5 ? 0 : 2;
       if(!used.includes(l)){ items.push({type:"busstop", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .55), z: FAR + 4, d:1.6, n: 3 + Math.floor(Math.random()*(VCLS() === "bus" ? 8 : 3)),
         cols: Array.from({length: 11}, () => [PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], PEOPLE_SKINS[Math.floor(Math.random()*4)], Math.random() < .5])}); used.push(l); }
@@ -1169,7 +1192,8 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       const l = Math.random() < .5 ? 0 : 2; if(!used.includes(l)){ items.push({type:"jelly", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .55), z: FAR + 3, d:1}); used.push(l); } }
     const waiting = items.filter(it => it.type === "pick").length;
     const edge = [0,2].filter(l => !used.includes(l));
-    if(!(road && road.hw) && freeSeats() > waiting && edge.length && Math.random() < (V().seats > 1 ? .55 : .4)*energyMul()){
+    if(!(road && road.hw) && freeSeats() > waiting && edge.length && Math.abs(dist - lastPickD) > 240 && Math.random() < .35*energyMul()){
+      lastPickD = dist;
       const l = edge[Math.floor(Math.random()*edge.length)];
       items.push({type:"pick", kind:"pass", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .4), y:.4, z:FAR + 2, spin:0, call: ["One stop!","Pick me up!","Driver!","Taxi!","Mi a go town!","Hol' on deh!"][Math.floor(Math.random()*6)], look:{
         shirt: PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], skin: PEOPLE_SKINS[Math.floor(Math.random()*4)], dress: Math.random()<.5, hat: Math.random()<.35}});
@@ -1178,7 +1202,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     if(Math.random() < .035 + .035*D() && !items.some(it => it.type === "cross" && it.z > FAR - 25)) spawnCrosser();
     if(Math.random() < .025) spawnWorks();
     const free = lanes.find(l => !used.includes(l));
-    if(free !== undefined && Math.random() < .22)
+    if(free !== undefined && Math.random() < .12)
       for(let k=0;k<3;k++) items.push({type:"coin", lane:free, x:laneWX(free), y:.42, z:FAR + k*1.5, spin:Math.random()*6});
   }
   function lightState(it){
@@ -1193,14 +1217,14 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   const centrePos = k => k*PARISH_LEN + PARISH_LEN*.55;
   function nextCentre(){ const k0 = Math.floor(pos/PARISH_LEN); let best = null; for(let k = k0 - 1; k <= k0 + 2; k++){ const z = relZ(centrePos(k)); if(z > 160 && (!best || z < best.z)) best = {k, z}; } return best; }
   function pickUp(it, quiet){
-    let d = 420 + Math.random()*520, dpos = pos + dir*d, P = PARISHES[parishAt(dpos)];
-    const isBus = VCLS() === "bus", nc = !road ? nextCentre() : null, toCentre = nc && Math.random() < (isBus ? .55 : .2);
+    let d = 900 + Math.random()*900, dpos = pos + dir*d, P = PARISHES[parishAt(dpos)];
+    const isBus = VCLS() === "bus", nc = !road ? nextCentre() : null, toCentre = nc && (forceCentre || Math.random() < (isBus ? .8 : .65));
     let dest = P.towns[Math.floor(Math.random()*P.towns.length)], troad = null, tspos = 0;
     const exp = 17*speedMul();
     if(road){
       if(sdir > 0 && spos + 160 < roadLen() - 60){ troad = road; tspos = spos + 140 + Math.random()*(roadLen() - 60 - spos - 140); d = tspos - spos; dest = road.name; }
       else { d = spos + 300 + Math.random()*400; dpos = pos + dir*(d - spos); P = PARISHES[parishAt(dpos)]; dest = P.towns[Math.floor(Math.random()*P.towns.length)]; }
-    } else if(isBus && busRoute && busRoute.stops.length > 1 && Math.random() < .55){
+    } else if(!toCentre && isBus && busRoute && busRoute.stops.length > 1){
       const si = Math.min(busRoute.stops.length - 1, busRoute.idx + Math.floor(Math.random()*2)); dest = busRoute.stops[si]; d = 300 + (si - busRoute.idx + 1)*260 + Math.random()*120; dpos = pos + dir*d;
     } else if(toCentre){
       dpos = centrePos(nc.k); d = nc.z; P = PARISHES[parishAt(dpos)]; dest = `${P.towns[0]} Transport Centre`;
@@ -1212,7 +1236,8 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       troad = {k, ws, name: streetName(k, ws)}; tspos = 120 + Math.random()*460;
       d = junctionZ(k) + tspos; dest = troad.name;
     }
-    const vExp = 18*speedMul()*.72, stopsBefore = trips.filter(t2 => tripDistAlong(t2) < d).length;
+    const vExp = 18*speedMul()*.72, stopsBefore = 0;
+    if(trips.length && !troad && !trips[trips.length - 1].road){ const legD = Math.abs(dpos - trips[trips.length - 1].pos); d = Math.max(150, Math.min(d, legD)); }
     const detour = trips.reduce((a, t2) => { const dd = tripDistAlong(t2); return a + (dd > d ? 0 : (tripZ(t2) !== null && tripZ(t2) < -2.4 ? dd*2 : 0)); }, 0);
     const limit = Math.round(((d + detour)/vExp + stopsBefore*6 + (troad && !road ? 14 : 8))*(1.3 - .3*D()));
     const fare = Math.round((d*1.25 + 260 + (troad ? 150 : 0))*(shift.wash ? 1.1 : 1)/50)*50;
@@ -1719,6 +1744,13 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       }
       ctx.fillStyle = "#5A3A1E";
       for(const o of [-.1,.06,.0]){ ctx.beginPath(); ctx.arc(top.x + o*s, top.y + s*.08 + Math.abs(o)*s*.4, s*.07, 0, 7); ctx.fill(); }
+    } else if(d.kind === "bush"){
+      const b = proj(d.x, d.z, 0), s2 = b.s*.7; if(s2 < 2) return;
+      ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath(); ctx.ellipse(b.x, b.y, s2*.55, s2*.12, 0, 0, 7); ctx.fill();
+      const cols = ["#2E8B3E","#3AA24B","#287A36"];
+      [[-.28,-.22,.3],[.25,-.24,.32],[0,-.38,.36],[-.05,-.15,.3]].forEach(([ox,oy,r],i) => { const gx = b.x + ox*s2, gy = b.y + oy*s2, rr = r*s2;
+        const g = ctx.createRadialGradient(gx - rr*.3, gy - rr*.4, rr*.1, gx, gy, rr); g.addColorStop(0, "#5CC069"); g.addColorStop(1, cols[i % 3]); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(gx, gy, rr, 0, 7); ctx.fill(); });
+      if(d.hue % 2 === 0){ const fc = ["#FF6BB5","#FFD23F","#FF7A3D","#FFFFFF"][d.hue % 4]; ctx.fillStyle = fc; for(let k=0;k<6;k++){ ctx.beginPath(); ctx.arc(b.x + Math.cos(k*1.9)*s2*.35, b.y - s2*.3 + Math.sin(k*2.7)*s2*.15, Math.max(1, s2*.045), 0, 7); ctx.fill(); } }
     } else if(d.kind === "tree"){
       const b = proj(d.x, d.z, 0), s = b.s, top = proj(d.x, d.z, 1.6);
       ctx.fillStyle = "rgba(0,0,0,.18)"; ctx.beginPath(); ctx.ellipse(b.x, b.y, s*.5, s*.1, 0, 0, 7); ctx.fill();
@@ -2809,7 +2841,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       if(fuel > .35) lowGasWarned = false;
       // trips: timers, drop-offs, missed stops
       for(const tr of trips.slice()){
-        tr.t -= dt;
+        if(tr === trips[0]) tr.t -= dt;
         const z = tripZ(tr), lane = laneFor(tr);
         if(z !== null && z < 35 && z > 3 && !tr.shouted){ tr.shouted = true; toast(`${tr.face} "${["Bus stop!","One stop, driver!","Next stop, please!","Mi a come off up ahead!"][Math.floor(Math.random()*4)]}" Stop on the ${lane === 0 ? "LEFT" : "RIGHT"}`); sfx.horn && tone(880, .12, "square", .04); }
         if(z !== null && Math.abs(z) < 2.4 && Math.abs(curSpeed) < 1.2 && (p.lane === lane || p.lane === 1)){ trips.splice(trips.indexOf(tr), 1); dropOff(tr); continue; }
@@ -2830,7 +2862,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         if(it.type !== "rival" && it.type !== "traffic") continue;
         if(it.stopT > 0){ it.stopT -= dt; continue; }
         const rival = it.type === "rival";
-        const tgt = rival ? items.filter(q => q.type === "pick" && !q.dead && q.z > it.z && q.z - it.z < 46).sort((a,b) => a.z - b.z)[0] : null;
+        const tgt = rival ? items.filter(q => ((q.type === "pick" && !q.dead) || (it.rbus && q.type === "busstop" && q.n > 0 && !q.boarding)) && q.z > it.z && q.z - it.z < 46).sort((a,b) => a.z - b.z)[0] : null;
         const occupied = (l, from, to) => (p.lane === l && 0 > it.z + from && 0 < it.z + to + 1.6) ||
           items.some(q => q !== it && (q.type === "obs" || q.type === "rival" || q.type === "traffic" || (q.type === "works" && !q.fixed)) && q.lane === l && q.z + (q.d||0) > it.z + from && q.z < it.z + to);
         let want = tgt ? tgt.lane : it.lane;
@@ -2845,7 +2877,10 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         }
         it.z += v*dt;
         it.x += (laneWX(it.lane) - it.x)*Math.min(1, dt*3);
-        if(tgt && tgt.lane === it.lane && Math.abs(tgt.z - it.z) < 1){
+        if(tgt && tgt.type === "busstop" && tgt.lane === it.lane && Math.abs(tgt.z - it.z) < 1.2){
+          const took = Math.min(tgt.n, 3 + Math.floor(Math.random()*5)); tgt.n -= took; it.stopT = 2.4; it.full = true; shift.stolen += took;
+          if(tgt.z < FAR - 10 && tgt.z > -2){ banner(`${it.name} tek ${took} passengers!`, true); tone(330,.25,"square",.05,1); }
+        } else if(tgt && tgt.lane === it.lane && Math.abs(tgt.z - it.z) < 1){
           tgt.dead = true; it.stopT = 1.6; it.full = true; shift.stolen++;
           if(tgt.z < FAR - 10 && tgt.z > -2){ banner(`${it.name} tek yuh fare!`, true); tone(330,.25,"square",.05,1); }
         }
@@ -3040,6 +3075,11 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       else if(it.type === "busstop") drawBusStop(it, t);
       else if(it.type === "jelly") drawJelly(it, t);
       else if(it.type === "checkpoint") drawCheckpoint(it, t);
+      else if(it.type === "rival" && it.rbike){ if(it.z > -1.4 && it.z < FAR){ ctx.globalAlpha = fogA(it.z); const g0 = proj(it.x, it.z + .3, 0), s2 = g0.s*1.05;
+          ctx.fillStyle = "rgba(0,0,0,.35)"; ctx.beginPath(); ctx.ellipse(g0.x, g0.y, s2*.26, s2*.07, 0, 0, 7); ctx.fill(); drawRider(ctx, it.skin, g0.x, g0.y, s2, (laneWX(it.lane) - it.x)*.5, t, it.stopT <= 0);
+          if(s2 > 14){ ctx.font = `${Math.round(s2*.16)}px Bungee, Impact, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "bottom"; const tw2 = ctx.measureText("🏍️ " + it.name).width + 10;
+            ctx.fillStyle = "rgba(18,32,43,.85)"; ctx.fillRect(g0.x - tw2/2, g0.y - s2*1.25, tw2, s2*.2); ctx.fillStyle = it.stripe; ctx.fillText("🏍️ " + it.name, g0.x, g0.y - s2*1.06); }
+          ctx.globalAlpha = 1; } }
       else if(it.type === "rival"){ if(it.z > -1.4 && it.z < FAR){ ctx.globalAlpha = fogA(it.z); if(!it.style) it.style = ["probox","van","sedan"][Math.floor(Math.random()*3)];
           drawRearVehicle(it.x, it.z, it.style, it.body, {heads: 1 + (it.full ? 2 : 0), stripe: it.stripe, tag: it.name, plate: "PP " + (1000 + (it.name.length*731) % 8999)}); ctx.globalAlpha = 1; } }
       else if(it.type === "obs") drawJutc(it); else if(it.type === "light") drawSignal(it); else if(it.type === "station") drawStation(it);
@@ -3107,7 +3147,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
           } else { short = "↩ main rd"; line = `<span class="arr">↩</span>${tr.dest} is off this road. Head back to di main road`; cls = " back"; }
           return {tr, z: z === null ? 9999 : Math.abs(z), short, line, cls, prio: (z !== null ? Math.abs(z) : tr.road && !road ? Math.abs(junctionZ(tr.road.k)) : 500)};
         });
-        const plan = planOrder(), ord = tr => { const i = plan.indexOf(tr); return i < 0 ? 99 : i; };
+        const plan = trips.slice(), ord = tr => { const i = plan.indexOf(tr); return i < 0 ? 99 : i; };
         info.sort((a,b) => ord(a.tr) - ord(b.tr));
         $("#trips").innerHTML = info.slice(0,4).map(({tr, short}, idx) => `<div class="trip ${tr.t < 0 ? "late" : ""}" style="box-shadow:3px 3px 0 ${tr.color}"><span class="face">${idx + 1}. ${tr.face}</span><span class="dest">${tr.dest}</span>
           <span class="meta"><span>${short}</span><span class="tm">⏱ ${tr.t >= 0 ? Math.ceil(tr.t) + "s" : "LATE"}</span><span>J$${fmt(tr.fare)}</span></span></div>`).join("") + (info.length > 4 ? `<div class="trip more">+${info.length - 4} more passengers</div>` : "");
@@ -3125,9 +3165,10 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         else if(turnQueue && nextJ && state === "play"){ nav.className = "nav on here"; nav.innerHTML = `<span class="arr">${turnQueue.side === "L" ? "⬅" : "➡"}</span>Turning ${turnQueue.side === "L" ? "LEFT" : "RIGHT"} at di junction in ${fmtD(nextJ.z)}`; }
         else if(turnOpt && state === "play" && !info.length){ nav.className = "nav on here"; nav.innerHTML = turnOpt.kind === "exit" ? `<span class="arr">↔</span>T-junction: ⬅ ${exitLabelOf(road.k, -road.ws)} · ${exitLabelOf(road.k, road.ws)} ➡` : `<span class="arr">↔</span>Junction: ⬅ ${destLabelOf(nextJ ? nextJ.k : turnOpt.k, -dir)} · ${destLabelOf(nextJ ? nextJ.k : turnOpt.k, dir)} ➡ (or go straight)`; }
         else if(info.length && state === "play"){
-          const n = info[0], eta = etaOf(n.tr), slack = eta === null ? null : n.tr.t - eta;
+          const firstTr = trips[0], n = info.find(i2 => i2.tr === firstTr) || info[0], eta = etaOf(n.tr), slack = eta === null ? null : n.tr.t - eta;
+          const zMain = tripZ(n.tr), onWay = info.find(i2 => i2 !== n && zMain !== null && tripZ(i2.tr) !== null && tripZ(i2.tr) > 0 && tripZ(i2.tr) < zMain);
           const timing = n.tr.t < 0 ? `<span style="color:#FF7B7B">· LATE</span>` : slack === null ? "" : slack > 8 ? `<span style="color:#7CF0A8">· ⏱ ${Math.ceil(n.tr.t)}s · on time</span>` : `<span style="color:#FFC72C">· ⏱ ${Math.ceil(n.tr.t)}s · hurry!</span>`;
-          const then = info[1] ? `<br><small style="opacity:.8;font-weight:600">then ${info[1].tr.dest}${info[2] ? ` · ${info[2].tr.dest}` : ""}${info.length > 3 ? ` +${info.length - 3}` : ""}</small>` : "";
+          const rest = info.filter(i2 => i2 !== n), then = (onWay ? `<br><small style="color:#7CF0A8;font-weight:700">on di way: ${onWay.tr.dest} ${fmtD(tripZ(onWay.tr))} (their clock waits)</small>` : "") + (rest.length ? `<br><small style="opacity:.8;font-weight:600">waiting: ${rest.slice(0,2).map(i2 => i2.tr.dest).join(" · ")}${rest.length > 2 ? ` +${rest.length - 2}` : ""} · ⏸ their time paused</small>` : "");
           nav.className = "nav on" + n.cls; nav.innerHTML = `${n.line} ${timing}${then}`;
           const want = n.tr.road && !road && n.cls === " here" ? (n.tr.road.ws === dir ? "R" : "L") : null;
           $("#turnL").classList.toggle("hint", want === "L"); $("#turnR").classList.toggle("hint", want === "R");
@@ -3411,14 +3452,14 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         if(pressed(UT)) uTurn();
         if(pressed(BACK)) clickVisible("#pullBtn");
         if(pressed(MAP)) $("#mapBtn").dispatchEvent(new PointerEvent("pointerdown", {bubbles:true}));
-        if(pressed(9)) clickVisible("#pauseBtn, .pause, [aria-label='Pause']");
+        if(pressed(9)) pauseGame();
       } else {
         const sy = pad.axes[1] || 0, up = b(12) || sy < -.55, down = b(13) || sy > .55;
         if((up || down || left || right) && (gp.navT <= 0 || (up && !gp.prev.U) || (down && !gp.prev.D) || (left && !gp.prev.NL) || (right && !gp.prev.NR))){ moveNav(left ? -1 : right ? 1 : 0, up ? -1 : down ? 1 : 0); gp.navT = .22; }
         gp.navT = (gp.navT || 0) - 1/60; gp.prev.U = up; gp.prev.D = down; gp.prev.NL = left; gp.prev.NR = right;
         if(pressed(OK)){ if(!navOK()) clickVisible(".panel.on .btn.hot") || clickVisible(".panel.on .btn"); }
         if(pressed(BACK)) clickVisible(".panel.on .btn.ghost");
-        if(pressed(9)) clickVisible(".panel.on .btn.hot");
+        if(pressed(9)){ if(document.querySelector("#menu.on")) clickVisible("#playBtn"); else if(document.querySelector("#pausePanel.on")) resumeGame(); else clickVisible(".panel.on .btn.hot"); }
       }
       pad.buttons.forEach((_, i) => gp.prev[i] = b(i));
     }
@@ -3528,6 +3569,37 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     ctx.globalAlpha = 1;
   }
   // Transport centre in each parish (central drop-off)
+  let parkCool = 0, parkK = null, forceCentre = false, lastPickD = -999;
+  function checkPark(){
+    if(road || state !== "play" || performance.now() < parkCool) return;
+    const k0 = Math.floor(pos/PARISH_LEN);
+    for(let k = k0 - 1; k <= k0 + 1; k++){ const z = relZ(centrePos(k)); if(z < 6 && z > -2 && p.lane === (dir > 0 ? 2 : 0) && Math.abs(curSpeed) < 7){ openPark(k); return; } }
+  }
+  function openPark(k){
+    parkK = k; state = "pause"; setGas(false); setBrake(false); curSpeed = 0; sfx.door && sfx.door();
+    const P2 = PARISHES[parishAt(centrePos(k))], here = `${P2.towns[0]} Transport Centre`;
+    const off = trips.filter(tr => tr.centre && tr.dest === here); let total = 0;
+    off.forEach(tr => { const before = cash; trips.splice(trips.indexOf(tr), 1); dropOff(tr); total += cash - before; });
+    const crowd = (VCLS() === "bus" ? 10 : 4) + Math.floor(Math.random()*(VCLS() === "bus" ? 16 : 5));
+    $("#pkTitle").textContent = `🚌 ${here}`;
+    $("#pkSub").textContent = off.length ? `${off.length} passenger${off.length > 1 ? "s" : ""} got off · +J$${fmt(total)}` : "Bus park · passengers waiting fi a ride";
+    $("#pkList").innerHTML = `👥 ${crowd} people waiting here<br>💺 ${freeSeats()} free seat${freeSeats() === 1 ? "" : "s"} in yuh ${V().name}<br>📍 Most are going to di next parish transport centre`;
+    $("#pkLoad").dataset.crowd = crowd; $("#pkLoad").disabled = freeSeats() <= 0;
+    show("parkPanel");
+  }
+  $("#pkLoad").onclick = () => {
+    const crowd = +$("#pkLoad").dataset.crowd || 0, n = Math.min(crowd, freeSeats()); forceCentre = true;
+    for(let i=0;i<n;i++) pickUp({look:{shirt: PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], skin: PEOPLE_SKINS[Math.floor(Math.random()*4)], dress: Math.random() < .5}}, true);
+    forceCentre = false; $("#pkLoad").disabled = true;
+    $("#pkList").innerHTML = `✅ ${n} passenger${n === 1 ? "" : "s"} on board.<br>📍 First stop: ${trips[0] ? trips[0].dest : "-"}<br>Follow di guide at di top of di screen.`;
+  };
+  $("#pkGo").onclick = () => { parkCool = performance.now() + 6000; state = "play"; show(null); last = performance.now(); };
+  function pauseGame(){ if(state !== "play") return; state = "pause"; setGas(false); setBrake(false); show("pausePanel"); }
+  function resumeGame(){ state = "play"; show(null); last = performance.now(); }
+  $("#pzResume").onclick = resumeGame;
+  $("#pzEnd").onclick = () => { show(null); state = "play"; endShift("quit"); };
+  addEventListener("keydown", e => { if((e.key === "Escape" || e.key === "p" || e.key === "P") && state === "play"){ e.preventDefault(); pauseGame(); } });
+  setInterval(checkPark, 120);
   function drawTerminals(t){
     if(road || state === "menu") return;
     const k0 = Math.floor(pos/PARISH_LEN);
@@ -3541,7 +3613,13 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       const sign = frontRect(f, .04, .76, .96, .97, "#1F7A45");
       if(sign.w > 30){ ctx.fillStyle = "#fff"; ctx.font = `${Math.max(8, Math.round(sign.h*.5))}px Bungee, Impact, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(`${P2.towns[0].toUpperCase()} TRANSPORT CENTRE`, sign.x + sign.w/2, sign.y + sign.h/2 + 1, sign.w*.94); }
       frontRect(f, .1, 0, .9, .6, "#2B3B4E");
-      const roof = proj(x + sd*.6, z + .2, 2.2); if(roof.s > 8 && z > 2){ ctx.fillStyle = "rgba(31,122,69,.95)"; ctx.font = `700 ${Math.max(9, roof.s*.16)}px "Space Grotesk", sans-serif`; ctx.textAlign = "center"; ctx.fillText("🚌 CENTRAL DROP-OFF", roof.x, roof.y); }
+      const roof = proj(x + sd*.6, z + .2, 2.2); if(roof.s > 8 && z > 2){ ctx.fillStyle = "rgba(31,122,69,.95)"; ctx.font = `700 ${Math.max(9, roof.s*.16)}px "Space Grotesk", sans-serif`; ctx.textAlign = "center"; ctx.fillText("🚌 BUS PARK · DRIVE IN", roof.x, roof.y); }
+      // crowd waiting in the park
+      for(let i=0;i<7;i++){ const pz = z - 1 + i*.55; if(pz < -.4) continue; const b = proj(sd*(ROAD + 1.3 + (i % 2)*.35), pz, 0);
+        drawHuman(b.x, b.y, b.s*.9, {shirt: PEOPLE_COLS[i % PEOPLE_COLS.length], pants:"#1C2230", skin: PEOPLE_SKINS[i % 4], dress: i % 3 === 0, hairStyle: i % 4, hairCol: i % 4, shoe:"#1A1A1A"}, {wave: i === 2, t}); }
+      // drive-in arrows in the lane next to it
+      if(z > 2 && z < 40){ const lx = laneWX(dir > 0 ? 2 : 0); for(let a2 = 0; a2 < 3; a2++){ const az = z - 6 - a2*2.2 - ((t*.004) % 1)*2.2; if(az < .5) continue;
+        const q1 = proj(lx - .22, az, 0), q2 = proj(lx + .22, az, 0), q3 = proj(lx + sd*.35, az + .8, 0); ctx.fillStyle = "rgba(31,200,110,.85)"; ctx.beginPath(); ctx.moveTo(q1.x, q1.y); ctx.lineTo(q3.x, q3.y); ctx.lineTo(q2.x, q2.y); ctx.closePath(); ctx.fill(); } }
       ctx.globalAlpha = 1;
     }
   }
