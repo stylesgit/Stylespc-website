@@ -3353,6 +3353,49 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   }
   function breakHeadlight(){ if(headBroken || Math.random() > .35) return; headBroken = true; store.set("headBroken", true); setTimeout(() => toast("💡 One headlight bruk! Fix it at an auto shop before night"), 900); }
 
+  /* ---------- Game controllers (Xbox, PlayStation, most Bluetooth/USB pads) ----------
+     RT = gas · LT = brake/reverse · Left stick or D-pad = change lanes · LB/RB = turn left/right at junctions
+     X / Square = U-turn · B / Circle = pull over · Y / Triangle = maps · A / Cross = start / OK · Menu/Options = pause */
+  const gp = {prev: {}, gas: false, brake: false, stickT: 0, connected: false};
+  addEventListener("gamepadconnected", e => { gp.connected = true; toast(`🎮 Controller connected: RT gas · LT brake · stick to change lanes`); });
+  addEventListener("gamepaddisconnected", () => { gp.connected = false; if(gp.gas){ setGas(false); gp.gas = false; } if(gp.brake){ setBrake(false); gp.brake = false; } });
+  function rumble(strong, ms){ try{ const pads = navigator.getGamepads ? navigator.getGamepads() : []; for(const pad of pads){ if(pad && pad.vibrationActuator && pad.vibrationActuator.playEffect) pad.vibrationActuator.playEffect("dual-rumble", {duration: ms, strongMagnitude: strong, weakMagnitude: strong*.6}); } }catch(e){} }
+  { const c0 = sfx.crash; sfx.crash = () => { c0(); rumble(.9, 280); }; }
+  function clickVisible(sel){ const el = [...document.querySelectorAll(sel)].find(b => b.offsetParent !== null && !b.disabled); if(el){ el.click(); return true; } return false; }
+  function pollPad(){
+    const pads = navigator.getGamepads ? navigator.getGamepads() : []; let pad = null;
+    for(const q of pads) if(q && q.connected){ pad = q; break; }
+    if(pad){
+      const b = i => pad.buttons[i] ? (pad.buttons[i].pressed || pad.buttons[i].value > .35) : false, val = i => pad.buttons[i] ? pad.buttons[i].value : 0;
+      const pressed = i => b(i) && !gp.prev[i];
+      // pedals (analog triggers)
+      const wantGas = val(7) > .25 || b(7), wantBrake = val(6) > .25 || b(6);
+      if(wantGas !== gp.gas){ gp.gas = wantGas; setGas(wantGas); }
+      if(wantBrake !== gp.brake){ gp.brake = wantBrake; setBrake(wantBrake); }
+      // lanes: d-pad or left stick (with repeat delay)
+      const sx = pad.axes[0] || 0, left = b(14) || sx < -.55, right = b(15) || sx > .55;
+      gp.stickT -= 1/60;
+      if((left || right) && (gp.stickT <= 0 || (!gp.prev.L && left) || (!gp.prev.R && right)) && state === "play"){ move(left ? -1 : 1); gp.stickT = .28; rumble(.15, 40); }
+      gp.prev.L = left; gp.prev.R = right;
+      // buttons
+      if(state === "play"){
+        if(pressed(4)) pressTurn("L");
+        if(pressed(5)) pressTurn("R");
+        if(pressed(2)) uTurn();
+        if(pressed(1)) clickVisible("#pullBtn");
+        if(pressed(3)) $("#mapBtn").dispatchEvent(new PointerEvent("pointerdown", {bubbles:true}));
+        if(pressed(9)) clickVisible("#pauseBtn, .pause, [aria-label='Pause']");
+      } else {
+        if(pressed(0)) clickVisible(".panel.on .btn.hot") || clickVisible(".panel.on .btn");
+        if(pressed(1)) clickVisible(".panel.on .btn.ghost");
+        if(pressed(9)) clickVisible(".panel.on .btn.hot");
+      }
+      pad.buttons.forEach((_, i) => gp.prev[i] = b(i));
+    }
+    requestAnimationFrame(pollPad);
+  }
+  requestAnimationFrame(pollPad);
+
   /* ---------- Live events sent from the admin page ---------- */
   let pendingRob = 0;
   async function pollEvents(){
