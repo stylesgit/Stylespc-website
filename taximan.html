@@ -212,6 +212,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       <div class="row2 loc">📍 <span id="locName">Half Way Tree</span></div>
       <div class="row2" id="hpRow"><span>🔧</span><span class="lbar"><i id="hpFill"></i></span></div>
       <div class="row2" id="fuelRow"><span>⛽</span><span class="lbar"><i id="fuelFill"></i></span></div>
+      <div class="row2" id="foodRow"><span>🍗</span><span class="lbar"><i id="foodFill"></i></span></div>
       <div class="row2 seats" id="seats"></div>
       <div class="speedo"><b id="kmh">0</b><span>km/h</span></div>
     </div>
@@ -421,14 +422,58 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     city:   {grass:["#45A651","#3A9445"], road:["#454A55","#3E434D"], lines:true,  curbs:true,  deco:{palm:.26, pole:.16, shop:.28, people:.3}},
     hills:  {grass:["#3A9446","#2F823B"], road:["#454A55","#3E434D"], lines:true,  curbs:true,  deco:{palm:.22, tree:.38, pole:.1, shop:.12, people:.18}},
     beach:  {grass:["#4FB05A","#43A04E"], road:["#4A4F5A","#434852"], lines:true,  curbs:true,  deco:{palm:.45, people:.33, shop:.14, pole:.08}, sea:true},
+    highway: {grass:["#4C9A4A","#3F8D42"], road:["#43474F","#3D4149"], lines:true, curbs:true, deco:{tree:.42, palm:.3, pole:.28}},
     street: {grass:["#4AA656","#3F9A4B"], road:["#4C515C","#454A55"], lines:false, curbs:true, deco:{shop:.36, people:.34, tree:.14, pole:.16}},
     offroad:{grass:["#6A9A3E","#5E8C36"], road:["#A47E50","#967245"], lines:false, curbs:false, deco:{tree:.45, palm:.2, people:.14, pole:.08, shop:.13}, dirt:true}
   };
   const PARISH_LEN = 1700;
   let level = 0;
   const parish = () => PARISHES[level % PARISHES.length];
-  const sky = () => SKIES[parish().time];
-  const env = () => road ? ENVS.street : ENVS[parish().env];
+  let clockMin = store.get("clock", 7*60);
+  function timeNow(){ const h = ((clockMin/60) % 24 + 24) % 24; return h >= 6 && h < 17.5 ? "day" : (h >= 17.5 && h < 19) || (h >= 5 && h < 6) ? "sunset" : "night"; }
+  const clockText = () => { const m = Math.floor(((clockMin % 1440) + 1440) % 1440), h = Math.floor(m/60), mm = m % 60; return `${(h % 12) || 12}:${String(mm).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`; };
+  const sky = () => SKIES[timeNow()];
+  const COMMUNITIES = {
+    "Clarendon": ["Alley","Banks","Beckford Kraal","Cumberland","Dawkins","Longwood","Moores","Morgans Forest","Mount Airy","Pennants","Portland Cottage","Race Course","Richmond Park","Rock River","Rocky Point","Sedge Pond","Thompson Town","Turners","Four Paths","Mocho","Kellits","Gimme-Me-Bit","Milk River"],
+    "Hanover": ["Askenish","Cascade","Cash Hill","Chambers Pen","Copse","Dias","Haddington","Kendal","Maryland","Pell River","Pondside","Cacoon","Chester Castle","Cousins Cove","Great Valley","Jericho","Kingsvale","Lances Bay","Logwood","March Town","Mount Peto","Orange Bay","Ramble","Rock Spring","Santoy","Woodsville"],
+    "Manchester": ["Bethany","Ellen Street","Evergreen","Good Intent","Harry Watch","Hibernia","Lancaster","Litchfield","Maidstone","Mike Town","Mile Gully","Plowden","May Day","Knockpatrick","Newport","Cross Keys","Bellefield","Grove Town","Nain","Gutters","Spur Tree","Kendal","Chudleigh","Old England"],
+    "Westmoreland": ["Ashton","Beaufort","Beeston Spring","Belvedere","Berkshire","Bog","Cairn Curran","Cave","Content","Dundee","Enfield","Ferris","Kentucky","Leamington","Mearnsville","New Works","Seaford Town","St. Leonards"],
+    "St. Andrew": ["Lawrence Tavern","Golden Spring","Temple Hall","Gordon Town","Mavis Bank","Red Hills","Rock Hall"],
+    "St. Ann": ["Runaway Bay","Discovery Bay","Steer Town","Priory","Bamboo","Cave Valley","Alexandria","Moneague","Walkers Wood","Colgate","Claremont","Golden Grove","Edge Hill"],
+    "St. Catherine": ["Brown's Hall","Barton","Kitson Town","Bog Walk","Ewarton","Above Rocks","Glengoffe","Treadways","Lluidas Vale","Linstead"],
+    "St. Elizabeth": ["Lacovia","Middle Quarters","Pedro Cross","Barbary Hall","Newell","Burnt Savannah","Alligator Pond","Downs","Balaclava","Wilton","Braes River","Elim","Bogue","Aberdeen","Maggotty","Lewisville","New Market"],
+    "St. James": ["Seaford","Cambridge","Montpelier","Anchovy","Struie","Bethel Town"],
+    "St. Mary": ["Llanrumney","Trinity","Whitehall","Tower Isle","Galina","Richmond","Grandeholle","Carron Hall","Friendship","Dean Pen","Islington"],
+    "St. Thomas": ["Ramble","Duckenfield","Poor Mans Corner","Cedar Valley","Port Morant","Lloyds","Albion","Lyssons","Golden Grove","Amity Hall","Hector's River","Dalvey"],
+    "Portland": ["Moore Town","Windsor","Hope Bay","St. Margaret's Bay","Hectors River","Drapers","Boston Bay","Long Bay","Fruitful Vale","Wakefield","Mount Pleasant","Snow Hill","Swift River"]
+  };
+  PARISHES.forEach(P => { (COMMUNITIES[P.name] || []).forEach(c => { if(!P.towns.includes(c)) P.towns.push(c); }); });
+  // Country bus routes: [from, to, [via...]]
+  const ROUTES = {
+    "Clarendon": [["Christiana","Spalding",[]],["Lionel Town","Gimme-Me-Bit",[]],["May Pen","Race Course",["Gimme-Me-Bit","Kemps Hill"]],["May Pen","Victoria",["Mocho","Thompson Town"]],["Rock River","May Pen",["Moores","Chatteau","Birds Hill","Cross"]],["Milk River","May Pen",["Gimme-Me-Bit"]],["Smithville","May Pen",["Lennon","Four Paths","Thompson Town"]],["Crofts Hill","James Hill",["Kellits"]]],
+    "Hanover": [["Lucea","Orange Bay",["Cousins Cove","Green Island"]],["Negril","Green Island",["Orange Bay"]]],
+    "Manchester": [["Mandeville","May Day",[]],["Mandeville","Christiana",[]],["Mandeville","Cross Keys",["Knockpatrick","Newport"]],["Mandeville","Porus",["Bellefield"]],["Grove Town","Mandeville",["Cross Keys","Newport","Knockpatrick"]],["Junction","Mandeville",["Nain","Gutters"]],["Mile Gully","Mandeville",["Grove Place","New Green"]],["Spalding","Mandeville",["Kendal","Chudleigh"]],["Santa Cruz","Mandeville",["Gutters","Spur Tree"]],["Pusey Hill","Mandeville",["Ellen Street","Old England","May Day"]]],
+    "Portland": [["Port Antonio","Moore Town",["Wain Road","Windsor"]],["Buff Bay","Port Antonio",["Hope Bay","St. Margaret's Bay"]],["Port Antonio","Hectors River",["Drapers","Boston Bay","Long Bay","Manchioneal"]],["Fruitful Vale","Port Antonio",["Hope Bay"]],["Buff Bay","Wakefield",[]],["Port Antonio","Mount Pleasant",["Snow Hill"]],["Swift River","Port Antonio",[]]],
+    "St. Andrew": [["Half Way Tree","Lawrence Tavern",["Constant Spring","Stony Hill","Golden Spring","Temple Hall"]],["Half Way Tree","Papine",[]],["Papine","Mavis Bank",["Gordon Town"]],["Chancery Street","Rock Hall",["Red Hills"]]],
+    "St. Ann": [["Ocho Rios","Discovery Bay",["St. Ann's Bay","Runaway Bay"]],["Steer Town","St. Ann's Bay",[]],["Ocho Rios","Brown's Town",["St. Ann's Bay","Priory","Bamboo"]],["Runaway Bay","Brown's Town",[]],["Discovery Bay","Brown's Town",[]],["Cave Valley","Brown's Town",["Alexandria"]],["Moneague","Ocho Rios",["Walkers Wood","Colgate"]],["Claremont","Ocho Rios",["Golden Grove","Steer Town"]],["Moneague","Brown's Town",["Golden Grove","Claremont","Bamboo"]]],
+    "St. Catherine": [["Old Harbour","Brown's Hall",["Barton"]],["Lawrence Tavern","Glengoffe",[]],["Spanish Town","Brown's Hall",["Kitson Town"]],["Bog Walk","Ewarton",[]],["Rock Hall","Above Rocks",[]],["Moneague","Linstead",[]],["Linstead","Treadways",[]],["Lluidas Vale","Ewarton",[]]],
+    "St. Elizabeth": [["Santa Cruz","Black River",["Lacovia","Middle Quarters"]],["Black River","Pedro Cross",["Barbary Hall","Newell"]],["Santa Cruz","Newell",["Burnt Savannah"]],["Lacovia","Santa Cruz",[]],["Gutters","Alligator Pond",["Downs","Junction"]],["Santa Cruz","Balaclava",["Wilton","Braes River","Elim","Bogue"]],["Santa Cruz","Aberdeen",["Lacovia","Maggotty"]],["Black River","New Market",["Middle Quarters"]],["Junction","Santa Cruz",[]]],
+    "St. James": [["Seaford","Montego Bay",["Cambridge","Montpelier","Anchovy"]],["Struie","Montego Bay",["Bethel Town"]]],
+    "St. Mary": [["Buff Bay","Highgate",["Annotto Bay"]],["Annotto Bay","Port Maria",["Llanrumney","Trinity"]],["Highgate","Port Maria",["Whitehall","Llanrumney","Trinity"]],["Port Maria","Ocho Rios",["Tower Isle","Oracabessa","Galina"]],["Port Maria","Richmond",["Highgate"]],["Grandeholle","Annotto Bay",[]],["Carron Hall","Friendship",["Dean Pen","Highgate","Islington"]]],
+    "St. Thomas": [["Ramble","Duckenfield",["Poor Mans Corner","Yallahs","Morant Bay"]],["Bethel","Duckenfield",["Cedar Valley","Morant Bay","Port Morant"]],["Lloyds","Duckenfield",["Yallahs","Albion","Morant Bay","Port Morant"]],["Morant Bay","Happy Grove",["Lyssons","Port Morant","Golden Grove","Amity Hall","Hector's River"]],["Dalvey","Morant Bay",[]],["Bath","Morant Bay",["Port Morant"]]]
+  };
+  let busRoute = null;
+  function pickRoute(){
+    const pn = parishAt(pos), P = PARISHES[pn], L = ROUTES[P.name];
+    if(L){ const r = L[Math.floor(Math.random()*L.length)]; busRoute = {parish: pn, name: `${r[0]} ➜ ${r[1]}`, stops: [r[0], ...r[2], r[1]], idx: 1}; }
+    else busRoute = {parish: pn, name: `${P.towns[0]} ➜ ${P.towns[Math.min(3, P.towns.length - 1)]}`, stops: P.towns.slice(0, 4), idx: 1};
+  }
+  const RAIN = {"Portland":.55,"St. Mary":.45,"St. Thomas":.38,"St. Ann":.32,"Trelawny":.3,"Hanover":.32,"Westmoreland":.3,"Manchester":.32,"St. Andrew":.26,"St. James":.22,"St. Elizabeth":.12,"Clarendon":.12,"St. Catherine":.12,"Kingston":.1};
+  const RISK = {"Kingston":1.7,"St. Catherine":1.5,"St. James":1.4,"Clarendon":1.1,"St. Andrew":1.1,"Manchester":.8,"St. Ann":.8,"Westmoreland":.9,"St. Elizabeth":.6,"Trelawny":.6,"Portland":.6,"St. Mary":.7,"St. Thomas":.8,"Hanover":.7};
+  let rain = {on:false, k:0, until:0}, energy = store.get("energy", 100), wear = store.get("wear", 0), roadFund = store.get("roadFund", 0), headBroken = store.get("headBroken", false), lightDeadline = 0;
+  const energyMul = () => energy > 60 ? 1.25 : energy < 25 ? .6 : 1;
+  const coinVal = () => Math.round((50 + Math.sqrt(V().price || 0)*.4)/10)*10;
+  const env = () => road ? (road.hw ? ENVS.highway : ENVS.street) : ENVS[parish().env];
 
   /* ---------- Vehicles & economy ---------- */
   const VEH = {
@@ -441,14 +486,14 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     cruiser:    {name:"Cruiser 650",       cls:"bike", bstyle:"cruiser",  seats:1,  hp:160, dmg:.8,  tankCost:1600, tankRange:5000, speed:1.04,hop:1,   price:34000,  col:"#2B2B30", desc:"Heavy, comfy and tough"},
     sportbike:  {name:"Sport Bike 600",    cls:"bike", bstyle:"sport",    seats:1,  hp:115, dmg:1,   tankCost:1900, tankRange:4300, speed:1.2, hop:1,   price:42000,  col:"#1E3A8A", desc:"Fastest thing on two wheels"},
     // cars (way more than bikes)
-    saloon:     {name:"Classic Saloon",    cls:"car",  seats:4,  hp:230, dmg:.6,  tankCost:2200, tankRange:6200, speed:.9,  hop:.62, price:60000,  col:"#C8162B", desc:"Di cheapest car. Old-school and built like a tank, but slower than the rest"},
-    hatch:      {name:"Hatchback",         cls:"car",  seats:3,  hp:150, dmg:.9,  tankCost:1900, tankRange:5600, speed:.98, hop:.62, price:80000,  col:"#E63946", desc:"Nimble little town car"},
-    wagon:      {name:"Box Wagon",         cls:"car",  seats:4,  hp:180, dmg:.8,  tankCost:2400, tankRange:5600, speed:.97, hop:.62, price:95000,  col:"#C9CDD2", desc:"Classic route taxi"},
-    van:        {name:"Family Van",        cls:"car",  seats:6,  hp:200, dmg:.8,  tankCost:2900, tankRange:5800, speed:.98, hop:.62, price:150000, col:"#3B4A57", desc:"6 seats, tall and comfy with sliding doors"},
-    suv:        {name:"SUV",               cls:"car",  seats:5,  hp:260, dmg:.55, tankCost:3400, tankRange:6200, speed:1.02,hop:.62, price:210000, col:"#2E3440", desc:"Very tough, quick, laughs at potholes"},
+    saloon:     {name:"Classic Saloon",    cls:"car",  seats:4,  hp:230, dmg:.6,  tankCost:2200, tankRange:7000, speed:.9,  hop:.62, price:60000,  col:"#C8162B", desc:"Di cheapest car. Old-school and built like a tank, but slower than the rest"},
+    hatch:      {name:"Hatchback",         cls:"car",  seats:3,  hp:150, dmg:.9,  tankCost:1900, tankRange:6000, speed:.98, hop:.62, price:80000,  col:"#E63946", desc:"Nimble little town car"},
+    wagon:      {name:"Box Wagon",         cls:"car",  seats:4,  hp:180, dmg:.8,  tankCost:2400, tankRange:6400, speed:.97, hop:.62, price:95000,  col:"#C9CDD2", desc:"Classic route taxi"},
+    van:        {name:"Family Van",        cls:"car",  seats:7,  hp:200, dmg:.8,  tankCost:2900, tankRange:7300, speed:.98, hop:.62, price:150000, col:"#3B4A57", desc:"7 seats, tall and comfy with sliding doors"},
+    suv:        {name:"SUV",               cls:"car",  seats:6,  hp:260, dmg:.55, tankCost:3400, tankRange:7600, speed:1.02,hop:.62, price:210000, col:"#2E3440", desc:"6 seats, very tough, best suspension: potholes barely touch it"},
     // buses (way more than cars)
-    bus:        {name:"Minibus",           cls:"bus",  seats:8,  hp:260, dmg:.75, tankCost:4200, tankRange:6200, speed:.9,  hop:.42, price:380000, col:"#F4F4F2", desc:"8 seats! Big money"},
-    bigbus:     {name:"Country Bus",       cls:"bus",  seats:12, hp:320, dmg:.7,  tankCost:5600, tankRange:6800, speed:.86, hop:.42, price:650000, col:"#FFD100", desc:"12 seats, di big earner"}
+    bus:        {name:"Minibus",           cls:"bus",  seats:18, hp:260, dmg:.75, tankCost:4200, tankRange:7000, speed:.9,  hop:.42, price:380000, col:"#F4F4F2", desc:"18 seats! Stops at bus stops and transport centres"},
+    bigbus:     {name:"Country Bus",       cls:"bus",  seats:36, hp:320, dmg:.7,  tankCost:5600, tankRange:7400, speed:.86, hop:.42, price:650000, col:"#FFD100", desc:"36 seats, di big earner. Fill it at bus stops"}
   };
   const VCLS = () => (VEH[vehicle] || VEH.cub50).cls;
   const WAGON_PRICE = 35000, BUS_PRICE = 110000, FINE = 1500, BRIBE = 5000, REPAIR_PER_HP = 18;
@@ -463,7 +508,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   if(!VEH[vehicle]) vehicle = "cub50";
   const V = () => VEH[vehicle] || VEH.cub50;
   const speedMul = () => (1 + ups.engine*.07) * V().speed;
-  const tankRange = () => V().tankRange * (1 + ups.tank*.3);
+  const tankRange = () => V().tankRange * (1 + ups.tank*.3) * (1 + ups.engine*.08);
   const tipMul = () => 1 + ups.sound*.15;
   let vehHP = store.get("hp_"+vehicle, V().hp), fuel = store.get("fuel_"+vehicle, 1);
 
@@ -537,6 +582,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   let exitGasT = 0;
   let road = null, spos = 0, sdir = 1, brakeHold = 0, rivalT = 8, revBeep = 0, turnOpt = null, turnQueue = null, nextJ = null;
   const STREET_LEN = 720;
+  const roadLen = () => road && road.len ? road.len : STREET_LEN;
   const STREETS = ["Hope Road","Molynes Road","Red Hills Road","Constant Spring Road","Mountain View Ave","Old Hope Road","Church Street","Market Street",
     "Main Street","Bay Road","Hill Road","Barbican Road","Lyndhurst Road","Windward Road","Washington Blvd","Waltham Park Road","Orange Street","King Street"];
   const RIVALS = [{name:"Speedy", body:"#F2F3F5", stripe:"#5BC0FF"}, {name:"Bigga", body:"#FFE38A", stripe:"#C8102E"}, {name:"Dawg", body:"#DDE3EA", stripe:"#9B5DE5"}, {name:"Ras Fari", body:"#F2F3F5", stripe:"#1F9D55"}];
@@ -722,7 +768,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   }
   function hideHint(){ if(!hintShown){ hintShown = true; $("#hint").style.opacity = 0; } }
 
-  const CHARGES = {check:{name:"Police spot check", s:0, c:300, lvl:0}, red:{name:"Running a red light", s:100, c:300, lvl:1}, reckless:{name:"Reckless driving", s:150, c:400, lvl:2}, ped:{name:"Hitting a pedestrian", s:500, c:1200, lvl:3}};
+  const CHARGES = {light:{name:"Defective headlight", s:200, c:500, lvl:1}, check:{name:"Police spot check", s:0, c:300, lvl:0}, red:{name:"Running a red light", s:100, c:300, lvl:1}, reckless:{name:"Reckless driving", s:150, c:400, lvl:2}, ped:{name:"Hitting a pedestrian", s:500, c:1200, lvl:3}};
   function offence(label, heat, charge = "reckless"){
     if(!cop.charge || CHARGES[charge].lvl > CHARGES[cop.charge].lvl) cop.charge = charge;
     offences++; sfx.whistle(); banner(label, true);
@@ -755,11 +801,13 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     const spot = cop.charge === "check" && surrender;
     if(!spot){ tickets++; store.set("tickets", tickets); }
     setTimeout(() => {
+      if(spot && headBroken && timeNow() !== "day"){ lightDeadline = gt + 120; $("#tkNum").textContent = tickets; $("#tkSay").textContent = "\"One a yuh headlight bruk, driver! Fix it inna two minutes or mi a come fi yuh.\"";
+        $("#tkFine").textContent = "Fix-it ticket · Get the headlight fixed at an auto shop within 2 minutes"; $("#tkDots").innerHTML = [0,1,2].map(i => `<span class="${i < tickets ? "" : "off"}">🎫</span>`).join(""); show("ticket"); return; }
       if(spot){ $("#tkNum").textContent = tickets; $("#tkSay").textContent = "\"Licence and registration... Everything in order. Drive safe, driver.\"";
         $("#tkFine").textContent = "Police spot check · No fine, yuh stop when dem tell yuh"; $("#tkDots").innerHTML = [0,1,2].map(i => `<span class="${i < tickets ? "" : "off"}">🎫</span>`).join(""); show("ticket"); return; }
       if(tickets >= 3){ renderOffers(); show("bribe"); }
       else {
-        const fine = Math.min(cash, FINE_NOW); cash -= fine; saveCash();
+        const fine = Math.min(cash, FINE_NOW); cash -= fine; saveCash(); roadFund += fine; store.set("roadFund", roadFund);
         $("#tkNum").textContent = tickets; $("#tkSay").textContent = surrender ? "\"Good, yuh stop fi mi. Mi a go easy pon yuh.\"" : TICKET_LINES[tickets-1];
         $("#tkFine").textContent = `Charge: ${CH.name} · Fine J$${fmt(FINE_NOW)}${surrender ? " (pulled over)" : " (after chase: higher)"}${fine < FINE_NOW ? " · took all yuh have" : ""}`;
         $("#tkDots").innerHTML = [0,1,2].map(i => `<span class="${i < tickets ? "" : "off"}">🎫</span>`).join("");
@@ -899,7 +947,8 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       const full = Math.ceil((1 - fuel)*V().tankCost*(1 + ups.tank*.3)/10)*10;
       opts.push({k:"fill", ic:"⛽", nm:"Fill up", ds:"Full tank", c:full, dis: fuel > .98});
       opts.push({k:"half", ic:"⛽", nm:"J$1,000 gas", ds:"Just a likkle top up", c:1000, dis: fuel > .98});
-      opts.push({k:"snack", ic:"🥟", nm:"Patty & cocoa bread", ds:"Driver happy, passengers tip more this shift", c:350, dis: shift.snack});
+      opts.push({k:"snack", ic:"🥟", nm:"Patty & cocoa bread", ds:"+30 energy · tips up this shift", c:350, dis: energy > 97});
+      opts.push({k:"jerk", ic:"🍗", nm:"Jerk chicken box", ds:"+60 energy · small repair · more passengers", c:900, dis: energy > 97});
       opts.push({k:"wash", ic:"🧽", nm:"Car wash", ds:"Clean ride, +10% fares this shift", c:600, dis: shift.wash});
     } else if(stKind === "dealer"){
       $("#stTitle").textContent = "🚗 Car & Bike Dealer"; $("#stSub").textContent = `${parish().name} · Driving: ${V().name}`;
@@ -915,6 +964,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       const rep = Math.ceil((V().hp - vehHP)*REPAIR_PER_HP/10)*10;
       opts.push({k:"repair", ic:"🔧", nm:"Full repair", ds:"Fix all damage", c:rep, dis: vehHP >= V().hp - .5});
       const half = Math.ceil((V().hp - vehHP)*.5*REPAIR_PER_HP/10)*10;
+      if(headBroken) opts.push({k:"light", ic:"💡", nm:"Fix headlight", ds: lightDeadline ? "Police want this fixed NOW" : "Needed for night driving", c:800});
       opts.push({k:"patch", ic:"🩹", nm:"Quick patch-up", ds:"Fix half the damage, cheaper", c:half, dis: vehHP >= V().hp - .5});
       UPS.forEach(u => { const lv = ups[u.id], max = u.cost.length, done = lv >= max;
         opts.push({k:"up_"+u.id, ic:u.ic, nm:u.nm, ds:u.ds, c: done ? 0 : u.cost[lv], dis: done, price: done ? "MAX" : null,
@@ -930,9 +980,11 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     cash -= o.c; saveCash(); if(o.c) sfx.cash();
     if(k === "fill") fuel = 1;
     if(k === "half") fuel = Math.min(1, fuel + 1000/(V().tankCost*(1 + ups.tank*.3)));
-    if(k === "snack") shift.snack = true;
+    if(k === "snack"){ shift.snack = true; eat(30, 0); }
+    if(k === "jerk"){ eat(60, .06); }
     if(k === "wash") shift.wash = true;
-    if(k === "repair") vehHP = V().hp;
+    if(k === "repair"){ vehHP = V().hp; if(headBroken){ headBroken = false; store.set("headBroken", false); lightDeadline = 0; } }
+    if(k === "light"){ headBroken = false; store.set("headBroken", false); lightDeadline = 0; }
     if(k === "patch") vehHP = Math.min(V().hp, vehHP + (V().hp - vehHP)*.5);
     if(k.startsWith("buy_")){ const v = k.slice(4); owned.push(v); store.set("owned", owned); saveVehicle(); vehicle = v; store.set("vehicle", vehicle); vehHP = V().hp; fuel = 1; banner(`New ${V().name}! ${VCLS() === "bus" ? "🚌" : "🚐"}`); }
     if(k.startsWith("sw_")){ saveVehicle(); vehicle = k.slice(3); store.set("vehicle", vehicle); vehHP = store.get("hp_"+vehicle, V().hp); fuel = store.get("fuel_"+vehicle, 1); }
@@ -988,7 +1040,9 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     if(turnOpt.kind === "enter"){
       const ws = (right ? 1 : -1)*dir;
       const rn = routeOf(turnOpt.k, ws);
-      road = {k: turnOpt.k, ws, name: rn !== "Main road" ? rn : streetName(turnOpt.k, ws), route: rn, dest: destLabelOf(turnOpt.k, ws), destPos: destPosOf(turnOpt.k, ws)}; spos = 2; sdir = 1;
+      const hw = rn !== "Main road";
+      road = {k: turnOpt.k, ws, name: hw ? rn : streetName(turnOpt.k, ws), route: rn, hw, len: hw ? 1150 : STREET_LEN, dest: destLabelOf(turnOpt.k, ws), destPos: destPosOf(turnOpt.k, ws)}; spos = 2; sdir = 1;
+      if(hw) setTimeout(() => toast(`🛣️ ${rn} to ${road.dest}: about a minute of open road. Watch di speed!`), 1400);
       passedLights.set(turnOpt.k + ":" + dir, true);
       banner(`${right ? "➡" : "⬅"} ${road.name}`); toast(`This road takes yuh to ${road.dest}`);
     } else {
@@ -1101,14 +1155,22 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       else if(r < .55) it = {type:"obs", kind:"bus", w:1.0, h:1.55, d:2.6, veh:true, coach: Math.random() < .3, route: ["21A","75","500","98","22"][Math.floor(Math.random()*5)]};
       else if(r < .83) it = {type:"traffic", kind:"bike", w:.45, h:1.1, d:1.0, veh:true, rs:8 + Math.random()*4, skin: randBiker()};
       else { const stl = ["sedan","sedan","probox","van","hatch","suv"][Math.floor(Math.random()*6)]; it = {type:"traffic", kind:"car", style: stl, w: SPEC[stl].w, h: SPEC[stl].h, d: SPEC[stl].d, veh:true, rs:8.5 + Math.random()*4, col: CAR_COLS[Math.floor(Math.random()*CAR_COLS.length)]}; }
+      if(!(it.type === "obs" && it.kind === "hole") && Math.random() < Math.min(.35, wear/150000)) it = {type:"obs", kind:"hole", w:.78, h:.05, d:.9, low:true};
       Object.assign(it, {lane:lanes[i], z:FAR, x:laneWX(lanes[i]), stopT:0});
       items.push(it); used.push(lanes[i]);
     }
+    if(!road && Math.random() < (VCLS() === "bus" ? .2 : .06) && !items.some(it => it.type === "busstop" && it.z > FAR - 70)){
+      const l = Math.random() < .5 ? 0 : 2;
+      if(!used.includes(l)){ items.push({type:"busstop", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .55), z: FAR + 4, d:1.6, n: 3 + Math.floor(Math.random()*(VCLS() === "bus" ? 8 : 3)),
+        cols: Array.from({length: 11}, () => [PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], PEOPLE_SKINS[Math.floor(Math.random()*4)], Math.random() < .5])}); used.push(l); }
+    }
+    if(!road && parish().env !== "city" && Math.random() < .045 && !items.some(it => it.type === "jelly" && it.z > FAR - 90)){
+      const l = Math.random() < .5 ? 0 : 2; if(!used.includes(l)){ items.push({type:"jelly", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .55), z: FAR + 3, d:1}); used.push(l); } }
     const waiting = items.filter(it => it.type === "pick").length;
     const edge = [0,2].filter(l => !used.includes(l));
-    if(freeSeats() > waiting && edge.length && Math.random() < (V().seats > 1 ? .55 : .4)){
+    if(!(road && road.hw) && freeSeats() > waiting && edge.length && Math.random() < (V().seats > 1 ? .55 : .4)*energyMul()){
       const l = edge[Math.floor(Math.random()*edge.length)];
-      items.push({type:"pick", kind:"pass", lane:l, x:laneWX(l), y:.4, z:FAR + 2, spin:0, look:{
+      items.push({type:"pick", kind:"pass", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .4), y:.4, z:FAR + 2, spin:0, call: ["One stop!","Pick me up!","Driver!","Taxi!","Mi a go town!","Hol' on deh!"][Math.floor(Math.random()*6)], look:{
         shirt: PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], skin: PEOPLE_SKINS[Math.floor(Math.random()*4)], dress: Math.random()<.5, hat: Math.random()<.35}});
       used.push(l);
     }
@@ -1127,14 +1189,21 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     "\"Next time mi a tek di bus!\"", "\"Yuh nuh know di road, bwoy?!\"", "\"Mi coulda walk reach faster!\"", "\"Driver, yuh a idiot or wha?!\""];
   const HAPPY = ["\"Bless up, driver!\"", "\"Yuh a di best taxi man!\"", "\"Respect! Keep di change.\"", "\"Wicked driving!\""];
   const pick = a => a[Math.floor(Math.random()*a.length)];
-  function pickUp(it){
+  const centrePos = k => k*PARISH_LEN + PARISH_LEN*.55;
+  function nextCentre(){ const k0 = Math.floor(pos/PARISH_LEN); let best = null; for(let k = k0 - 1; k <= k0 + 2; k++){ const z = relZ(centrePos(k)); if(z > 160 && (!best || z < best.z)) best = {k, z}; } return best; }
+  function pickUp(it, quiet){
     let d = 420 + Math.random()*520, dpos = pos + dir*d, P = PARISHES[parishAt(dpos)];
+    const isBus = VCLS() === "bus", nc = !road ? nextCentre() : null, toCentre = nc && Math.random() < (isBus ? .55 : .2);
     let dest = P.towns[Math.floor(Math.random()*P.towns.length)], troad = null, tspos = 0;
     const exp = 17*speedMul();
     if(road){
-      if(sdir > 0 && spos + 160 < STREET_LEN - 60){ troad = road; tspos = spos + 140 + Math.random()*(STREET_LEN - 60 - spos - 140); d = tspos - spos; dest = road.name; }
+      if(sdir > 0 && spos + 160 < roadLen() - 60){ troad = road; tspos = spos + 140 + Math.random()*(roadLen() - 60 - spos - 140); d = tspos - spos; dest = road.name; }
       else { d = spos + 300 + Math.random()*400; dpos = pos + dir*(d - spos); P = PARISHES[parishAt(dpos)]; dest = P.towns[Math.floor(Math.random()*P.towns.length)]; }
-    } else if(Math.random() < .45){
+    } else if(isBus && busRoute && busRoute.stops.length > 1 && Math.random() < .55){
+      const si = Math.min(busRoute.stops.length - 1, busRoute.idx + Math.floor(Math.random()*2)); dest = busRoute.stops[si]; d = 300 + (si - busRoute.idx + 1)*260 + Math.random()*120; dpos = pos + dir*d;
+    } else if(toCentre){
+      dpos = centrePos(nc.k); d = nc.z; P = PARISHES[parishAt(dpos)]; dest = `${P.towns[0]} Transport Centre`;
+    } else if(!isBus && Math.random() < .45){
       let k = Math.floor((pos - 260)/LIGHT_GAP) + (dir > 0 ? 0 : 1);
       for(let i=0;i<8;i++){ if(junctionZ(k) > 45) break; k += dir; }
       if(Math.random() < .35) k += dir;
@@ -1145,16 +1214,18 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     const limit = Math.round((d/(exp*.7) + (troad && !road ? 14 : 8))*(1.35 - .35*D()));
     const fare = Math.round((d*1.25 + 260 + (troad ? 150 : 0))*(shift.wash ? 1.1 : 1)/50)*50;
     const used = trips.map(t => t.color);
-    trips.push({dest, pos:dpos, road: troad, spos: tspos, sx: Math.random() < .5 ? -1 : 1, limit, t:limit, fare, look: it.look, cussed:false, missedWarn:false,
+    trips.push({dest, pos:dpos, road: troad, spos: tspos, sx: toCentre && !troad ? 1 : Math.random() < .5 ? -1 : 1, centre: !!toCentre, limit, t:limit, fare, look: it.look, cussed:false, missedWarn:false,
       color: tripColors.find(c => !used.includes(c)) || tripColors[0], face: ["🧑🏾","👩🏾","👨🏿","👵🏾","🧔🏾","👩🏽"][Math.floor(Math.random()*6)]});
+    if(quiet){ sfx.door(); const last = trips[trips.length - 1]; pops.push({x: W/2, y: H*.55, text: `+1 · ${last.dest}`, life: 1}); return; }
     sfx.horn(); curSpeed *= .5; banner("Passenger pick up!");
     toast(troad && !road ? `"Tek mi to ${dest}, off di main road! ${limit}s, J$${fmt(fare)}." Turn at di light` : `"Tek mi to ${dest}! ${limit} seconds, J$${fmt(fare)}." Follow di 📍`);
   }
   function dropOff(tr){
+    if(tr.centre){ tr.fare = Math.round(tr.fare*1.15/10)*10; }
     const left = tr.t, ratio = left/tr.limit;
     let pay = tr.fare, msg, stars, line;
     if(left >= 0){
-      const tip = ratio > .35 ? Math.round(tr.fare*.3*tipMul()*(shift.snack ? 1.15 : 1)/10)*10 : ratio > .15 ? Math.round(tr.fare*.1*tipMul()/10)*10 : 0;
+      const tip = ratio > .35 ? Math.round(tr.fare*.3*tipMul()*(energy > 60 ? 1.1 : 1)*(shift.snack ? 1.15 : 1)/10)*10 : ratio > .15 ? Math.round(tr.fare*.1*tipMul()/10)*10 : 0;
       pay += tip; shift.ontime++; track("ontime", 1);
       stars = ratio > .35 ? 5 : ratio > .15 ? 4 : 3; line = pick(HAPPY);
       msg = tip ? `+J$${fmt(pay)} (tip J$${fmt(tip)})` : `+J$${fmt(pay)}`;
@@ -1402,12 +1473,12 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     g.addColorStop(0,S.sky[0]); g.addColorStop(.55,S.sky[1]); g.addColorStop(.85,S.sky[2]); g.addColorStop(1,S.sky[3]);
     ctx.fillStyle = g; ctx.fillRect(0,0,W,horizon+1);
     const shift = -curve*W*.35 - p.x*5;
-    if(parish().time === "night"){
+    if(timeNow() === "night"){
       if(stars.length === 0) stars = Array.from({length:90}, () => ({x:Math.random(), y:Math.random()*.8, r:Math.random()*1.5+.4, tw:Math.random()*6}));
       for(const st of stars){ ctx.globalAlpha = .4 + .4*Math.sin(t*.002 + st.tw); ctx.fillStyle = "#fff"; ctx.fillRect(((st.x*W + shift*.3) % W + W) % W, st.y*horizon, st.r, st.r); }
       ctx.globalAlpha = 1;
     }
-    const night = parish().time === "night", sunset = parish().time === "sunset";
+    const night = timeNow() === "night", sunset = timeNow() === "sunset";
     const R0 = Math.min(W*(sunset ? .22 : .14), horizon*(sunset ? .4 : .26));
     const sx = W*(sunset ? .5 : .72) + shift, sy = horizon*(sunset ? .78 : .45);
     const sg = ctx.createRadialGradient(sx,sy,R0*.5,sx,sy,R0*3.4);
@@ -1438,7 +1509,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     }
   }
   function drawGround(){
-    const E = env(), night = parish().time === "night";
+    const E = env(), night = timeNow() === "night";
     const zBottom = CAM_H*F/(H-horizon) - CAM_D;
     ctx.fillStyle = E.grass[1]; ctx.fillRect(0,horizon,W,H-horizon);
     const gstep = 3;
@@ -1467,7 +1538,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         for(const side of [-1,1]){ const xi = side*(ROAD-.05), xo = side*(ROAD+.18 + idx*.08); quad(proj(xi,z0),proj(xo,z0),proj(xo,z1),proj(xi,z1), idx ? "#7A6A48" : "#8C7A55"); }
         ctx.globalAlpha = 1; });
     }
-    const fog = night ? "rgba(20,30,60," : parish().time === "sunset" ? "rgba(255,180,140," : "rgba(190,220,235,";
+    const fog = night ? "rgba(20,30,60," : timeNow() === "sunset" ? "rgba(255,180,140," : "rgba(190,220,235,";
     const fg = ctx.createLinearGradient(0,horizon,0,horizon+(playerY-horizon)*.3);
     fg.addColorStop(0,fog + ".85)"); fg.addColorStop(1,fog + "0)");
     ctx.fillStyle = fg; ctx.fillRect(0,horizon,W,(playerY-horizon)*.3);
@@ -1487,14 +1558,14 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
 
   function drawNight(t){
     const n = sky().dark; if(!n) return;
-    ctx.fillStyle = parish().time === "night" ? `rgba(4,8,28,${n})` : `rgba(80,30,60,${n})`;
+    ctx.fillStyle = timeNow() === "night" ? `rgba(4,8,28,${n})` : `rgba(80,30,60,${n})`;
     ctx.fillRect(0, horizon - 2, W, H - horizon + 2);
-    if(parish().time !== "night") return;
+    if(timeNow() !== "night") return;
     ctx.globalCompositeOperation = "lighter";
     // headlight beam
-    const a = proj(p.x, 0, .3), b1 = proj(p.x - 1.1, 16, 0), b2 = proj(p.x + 1.1, 16, 0);
+    const a = proj(p.x, 0, .3), b1 = proj(p.x - (headBroken ? .2 : 1.1), 16, 0), b2 = proj(p.x + 1.1, 16, 0);
     const hg = ctx.createLinearGradient(0, a.y, 0, b1.y);
-    hg.addColorStop(0,"rgba(255,240,190,.32)"); hg.addColorStop(1,"rgba(255,240,190,0)");
+    hg.addColorStop(0, headBroken ? `rgba(255,240,190,${Math.random() < .1 ? .04 : .14})` : "rgba(255,240,190,.32)"); hg.addColorStop(1,"rgba(255,240,190,0)");
     ctx.fillStyle = hg; ctx.beginPath(); ctx.moveTo(a.x - 8, a.y - 10); ctx.lineTo(b1.x, b1.y); ctx.lineTo(b2.x, b2.y); ctx.lineTo(a.x + 8, a.y - 10); ctx.closePath(); ctx.fill();
     for(const d of deco){
       if(d.z + CAM_D < .5 || d.z > 45) continue;
@@ -1770,6 +1841,22 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       const tw2 = ctx.measureText("🚕 " + opts.tag).width + 10; ctx.fillStyle = "rgba(18,32,43,.85)"; ctx.fillRect(tp.x - tw2/2, tp.y - win.w*.16, tw2, win.w*.17); ctx.fillStyle = opts.stripe || "#FFC72C"; ctx.fillText("🚕 " + opts.tag, tp.x, tp.y); }
     return f;
   }
+  function drawDamage(f, dm){
+    if(!f || dm < .2) return;
+    const W2 = f.nbr.x - f.nbl.x, H2 = f.nbl.y - f.ntl.y, P = (u, v) => onFront(f, u, v);
+    ctx.save(); ctx.lineCap = "round";
+    // scratches
+    ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = Math.max(1, W2*.006);
+    const n = Math.floor(dm*10); for(let i=0;i<n;i++){ const a = P(.1 + (i*.37 % .8), .12 + (i*.23 % .35)), b = P(.1 + (i*.37 % .8) + .12, .1 + (i*.23 % .35)); ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+    // dents and rust
+    ctx.fillStyle = "rgba(0,0,0,.28)"; for(let i=0;i<Math.floor(dm*5);i++){ const c = P(.18 + (i*.29 % .64), .2 + (i*.17 % .25)); ctx.beginPath(); ctx.ellipse(c.x, c.y, W2*.05, H2*.04, .4, 0, 7); ctx.fill(); }
+    if(dm > .45){ ctx.fillStyle = "rgba(140,70,30,.55)"; for(let i=0;i<4;i++){ const c = P(.08 + i*.25, .05); ctx.beginPath(); ctx.arc(c.x, c.y, W2*.025, 0, 7); ctx.fill(); } }
+    // cracked rear glass + dead tail light
+    if(dm > .5){ const c = P(.62, .78); ctx.strokeStyle = "rgba(230,240,255,.75)"; ctx.lineWidth = Math.max(1, W2*.004);
+      for(let k=0;k<6;k++){ const ang = k*1.05 + .3; ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(c.x + Math.cos(ang)*W2*.13, c.y + Math.sin(ang)*H2*.12); ctx.stroke(); }
+      const tl = P(0, .62), tr2 = P(.1, .4); ctx.fillStyle = "#3A1A1E"; ctx.fillRect(tl.x, tl.y, tr2.x - tl.x, tr2.y - tl.y); }
+    ctx.restore();
+  }
   function drawJutc(it){
     const x = laneWX(it.lane);
     if(true){ drawRearVehicle(x, it.z, it.coach ? "coach" : "city", it.coach ? "#F5F5F5" : "#FFD100", {chev: false, route: it.route || "21A", plate: it.plate || "PE 5767"}); return; }
@@ -1902,8 +1989,9 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       ctx.fillStyle = "#1A100A"; ctx.beginPath(); ctx.arc(b.x, top(.99), s*.11, Math.PI, 0); ctx.fill();
       if(L.hat){ ctx.fillStyle = C.gold; ctx.beginPath(); ctx.ellipse(b.x, top(1.03), s*.14, s*.07, 0, Math.PI, 0); ctx.fill(); }
       const bub = proj(it.x, it.z, 1.55);
-      ctx.fillStyle = "rgba(255,246,218,.95)"; ctx.beginPath(); ctx.arc(bub.x + s*.2, bub.y, s*.17, 0, 7); ctx.fill();
-      ctx.font = `${Math.round(s*.2)}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("🙋", bub.x + s*.2, bub.y + 1);
+      if(!it.boarding && s > 9){ const txt = it.call || "Taxi!", fs = Math.max(9, Math.min(15, s*.17)); ctx.font = `700 ${fs}px "Space Grotesk", sans-serif`; const tw = ctx.measureText(txt).width + 12, bx = bub.x - tw/2 + s*.15, by = bub.y - fs*1.4;
+        ctx.fillStyle = "rgba(255,246,218,.97)"; ctx.fillRect(bx, by, tw, fs + 8); ctx.beginPath(); ctx.moveTo(bx + 8, by + fs + 8); ctx.lineTo(bx + 4, by + fs + 15); ctx.lineTo(bx + 16, by + fs + 8); ctx.fill();
+        ctx.fillStyle = "#12202B"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, bx + tw/2, by + fs/2 + 4); }
     } else {
       const P = it.kind === "gas" ? {icon:"⛽", color:"#E63946"} : {icon:"🏍️", color:"#3DD68C"};
       const q = proj(it.x, it.z, .55 + Math.sin(t*.006)*.08), r = Math.max(3, q.s*(it.kind === "bike" ? .3 : .24));
@@ -2098,7 +2186,14 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     }
     g.restore();
   }
-  function drawShopVehicle(c, v){ drawVehicleSide(c.getContext("2d"), c.width, c.height, v, 0); }
+  function polishSide(c){
+    const g = c.getContext("2d"), w = c.width, h = c.height; g.save(); g.globalCompositeOperation = "source-atop";
+    const hi = g.createLinearGradient(0, 0, 0, h); hi.addColorStop(0, "rgba(255,255,255,.28)"); hi.addColorStop(.38, "rgba(255,255,255,.06)"); hi.addColorStop(.55, "rgba(0,0,0,0)"); hi.addColorStop(1, "rgba(0,0,0,.28)");
+    g.fillStyle = hi; g.fillRect(0, 0, w, h);
+    const sw = g.createLinearGradient(0, 0, w, h*.4); sw.addColorStop(.25, "rgba(255,255,255,0)"); sw.addColorStop(.32, "rgba(255,255,255,.22)"); sw.addColorStop(.36, "rgba(255,255,255,0)"); g.fillStyle = sw; g.fillRect(0, 0, w, h);
+    g.restore();
+  }
+  function drawShopVehicle(c, v){ drawVehicleSide(c.getContext("2d"), c.width, c.height, v, 0); polishSide(c); }
 
   /* ---------- Traffic lights ---------- */
   function drawCrossing(it){
@@ -2244,7 +2339,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     for(const lx of [-LANE/2, LANE/2]){ g.beginPath(); g.moveTo(px(lx,f1), hy); g.lineTo(px(lx,f0), y0 + h); g.stroke(); } g.setLineDash([]);
     list.sort((a,b) => a.z - b.z).forEach(v => { const zb = Math.max(0, -v.z), f = 1/(1 + zb*.22), y = hy + (y0 + h - hy)*f*.95;
       mirrorVehicle(g, v, px(v.x, f), y, h*.95*f, t); });
-    if(parish().time === "night"){ g.fillStyle = "rgba(4,8,28,.35)"; g.fillRect(x0, y0, w, h); }
+    if(timeNow() === "night"){ g.fillStyle = "rgba(4,8,28,.35)"; g.fillRect(x0, y0, w, h); }
     g.restore();
     g.lineWidth = 3; g.strokeStyle = "#12202B"; g.beginPath(); if(g.roundRect) g.roundRect(x0, y0, w, h, h*.28); else g.rect(x0, y0, w, h); g.stroke();
     g.strokeStyle = "rgba(255,255,255,.35)"; g.lineWidth = 1; g.beginPath(); g.moveTo(x0 + w*.12, y0 + 4); g.lineTo(x0 + w*.4, y0 + 4); g.stroke();
@@ -2283,7 +2378,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       trips.forEach(tr => { if(tr.road){ const jz = junctionZ(tr.road.k); if(jz > -BACK && jz < RANGE){ const y = toY(jz); ctx.fillStyle = tr.color; ctx.beginPath(); if(ctx.roundRect) ctx.roundRect(cx - 13, y - 11, 26, 22, 6); else ctx.rect(cx - 13, y - 11, 26, 22); ctx.fill();
         ctx.fillStyle = "#12202B"; ctx.font = "bold 16px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(tr.road.ws === dir ? "➡" : "⬅", cx, y + 1); if(jz > 0) dist(y, jz); } } });
     } else {
-      const zd = sdir*(STREET_LEN - spos), zj = sdir*(0 - spos); if(zd > -BACK && zd < RANGE) badge(toY(zd), "#1F7A45", "🏁", 13); if(zj > -BACK && zj < RANGE) badge(toY(zj), "#C8102E", "🛑", 13);
+      const zd = sdir*(roadLen() - spos), zj = sdir*(0 - spos); if(zd > -BACK && zd < RANGE) badge(toY(zd), "#1F7A45", "🏁", 13); if(zj > -BACK && zj < RANGE) badge(toY(zj), "#C8102E", "🛑", 13);
     }
     trips.forEach(tr => { const z = tripZ(tr); if(z === null || z < -BACK || z > RANGE) return; const y = toY(z);
       ctx.fillStyle = tr.color; ctx.beginPath(); ctx.moveTo(cx, y + 14); ctx.arc(cx, y - 2, 11, Math.PI*.8, Math.PI*.2); ctx.closePath(); ctx.fill(); ctx.strokeStyle = "#12202B"; ctx.lineWidth = 2; ctx.stroke();
@@ -2397,7 +2492,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   /* ---------- Side street ends ---------- */
   function drawStreetEnds(t){
     if(!road) return;
-    const zj = sdir*(0 - spos), zd = sdir*(STREET_LEN - spos);
+    const zj = sdir*(0 - spos), zd = sdir*(roadLen() - spos);
     if(zj > -1 && zj < FAR){
       const z0 = zj - 1.6, z1 = zj + 1.8; ctx.globalAlpha = fogA(z0);
       quad(proj(-60,z1),proj(60,z1),proj(60,Math.max(-.9,z0)),proj(-60,Math.max(-.9,z0)),"#3E434D");
@@ -2468,9 +2563,10 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     const blink = invuln > 0 && Math.floor(t/90) % 2 === 0;
     if(VCLS() !== "bike"){
       if(!blink){ ctx.save(); ctx.translate(0, -lift);
-        drawRearVehicle(p.x, -.5, STYLE_OF[vehicle] || "probox", V().col, {heads: trips.length, stripe: vehicle === "wagon" ? "#1F9D55" : null, band: vehicle === "bus" ? "#B9A88C" : null});
+        const fDmg = drawRearVehicle(p.x, -.5, STYLE_OF[vehicle] || "probox", V().col, {heads: trips.length, stripe: vehicle === "wagon" ? "#1F9D55" : null, band: vehicle === "bus" ? "#B9A88C" : null});
+        drawDamage(fDmg, 1 - vehHP/V().hp);
         ctx.restore(); }
-      if(vehHP < V().hp*.3 && Math.random() < .25) parts.push({x:sh.x, y:sh.y - s*1.2, vx:(Math.random()-.5)*30, vy:-50, g:-10, life:1, decay:.8, size:6+Math.random()*6, color:"rgba(90,90,100,.5)"});
+      if(vehHP < V().hp*.5 && Math.random() < (vehHP < V().hp*.3 ? .35 : .12)) parts.push({x:sh.x, y:sh.y - s*1.2, vx:(Math.random()-.5)*30, vy:-50, g:-10, life:1, decay:.8, size:6+Math.random()*6, color:"rgba(90,90,100,.5)"});
     } else {
       ctx.fillStyle = "rgba(0,0,0,.4)"; ctx.beginPath(); ctx.ellipse(sh.x, sh.y, s*.3*shrink, s*.08*shrink, 0, 0, 7); ctx.fill();
       if(!blink){
@@ -2514,7 +2610,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   let cut = null;
   function startCut(title, sub){
     if(cut) return;
-    cut = {t:0, dur:4.4, title, sub, time: parish().time, veh: vehicle, heads: trips.length};
+    cut = {t:0, dur:4.4, title, sub, time: timeNow(), veh: vehicle, heads: trips.length};
     document.body.classList.add("cutting"); setGas(false); setBrake(false);
     tone(180, .5, "sawtooth", .05, 2.2); setTimeout(() => tone(260, .6, "sawtooth", .04, 1.8), 350);
   }
@@ -2574,7 +2670,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       // hero vehicle: slides in, cruises, pulls ahead
       const e = Math.min(1, cut.t/.6), ease = 1 - Math.pow(1 - e, 3), vx = -W*.35 + ease*W*.83 + Math.max(0, cut.t - 1.6)*W*.25, vy = ry + rh*.82 + Math.sin(cut.t*38)*1.4;
       const size = Math.min(W*.46, 250);
-      if(!cut.hero){ cut.hero = document.createElement("canvas"); cut.hero.width = 480; cut.hero.height = 300; drawVehicleSide(cut.hero.getContext("2d"), 480, 300, cut.veh, cut.heads); }
+      if(!cut.hero){ cut.hero = document.createElement("canvas"); cut.hero.width = 480; cut.hero.height = 300; drawVehicleSide(cut.hero.getContext("2d"), 480, 300, cut.veh, cut.heads); polishSide(cut.hero); }
       ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 2.5; for(let k=0;k<8;k++){ const ly = vy - size*.08 - k*size*.055, len = 50 + (k*41) % 90; ctx.beginPath(); ctx.moveTo(vx - size*.55 - len, ly); ctx.lineTo(vx - size*.5, ly); ctx.stroke(); }
       ctx.fillStyle = "rgba(210,210,210,.3)"; for(let k=0;k<6;k++){ ctx.beginPath(); ctx.arc(vx - size*.5 - k*16 - (cut.t*320) % 16, vy - 6 - k*2.5, 5 + k*3, 0, 7); ctx.fill(); }
       const vh = size*300/480; ctx.drawImage(cut.hero, vx - size/2, vy - vh*.9, size, vh);
@@ -2618,7 +2714,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     if(state === "play"){
       gt += dt;
       const hpR = Math.max(0, vehHP/V().hp), dmgMul = hpR >= .6 ? 1 : .6 + .4*hpR/.6;
-      speed = 18*speedMul()*(1 + Math.min(.25, (shift.parishes-1)*.025))*dmgMul;
+      speed = 18*speedMul()*(1 + Math.min(.25, (shift.parishes-1)*.025))*dmgMul*(1 - .1*rain.k);
       if(hpR < .6 && !shift.slowWarn){ shift.slowWarn = true; toast("🔧 Yuh vehicle damaged, it running slow. Fix it at an auto shop"); } if(hpR >= .6) shift.slowWarn = false;
       if(braking){
         if(curSpeed > 0){ curSpeed = Math.max(0, curSpeed - 30*dt); brakeHold = 0; }
@@ -2631,7 +2727,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       dz = curSpeed*dt; dist += dz;
       if(road){
         spos += sdir*dz;
-        if(sdir > 0 && spos >= STREET_LEN - 3){ arriveFromRoad(); dz = 0; }
+        if(sdir > 0 && spos >= roadLen() - 3){ arriveFromRoad(); dz = 0; }
         if(sdir < 0 && spos <= 1.2){ spos = 1.2; if(curSpeed > 0){ curSpeed = 0; dz = 0; } }
         if(spos < 1.2) spos = 1.2;
       } else pos += dir*dz;
@@ -2737,7 +2833,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
           } else {
             vehHP -= ({bike:30, car:22, bus:18}[VCLS()]*(V().dmg || 1))*(.4 + .6*Math.abs(curSpeed)/speed); trips.forEach(tr => tr.vex = true);
             toast(it.type === "rival" ? `🚕 ${it.name}: "Yuh blind?! Watch where yuh going!"` : `${who}: "Wha di! Yuh cyaan drive?!"`);
-            offence(it.type === "rival" ? "Crashed a taxi!" : "Reckless driving!", 34);
+            offence(it.type === "rival" ? "Crashed a taxi!" : "Reckless driving!", 34); breakHeadlight();
           }
           if(vehHP <= 0){ vehHP = 0; endShift("wreck"); }
           continue;
@@ -2765,7 +2861,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
           if(it.kind === "hole"){
             if(p.y > .25) continue;
             if(invuln > 0 || Math.abs(curSpeed) < 1.5) continue;
-            it.hit = true; const dmg = 12*(1 - .35*ups.susp)*(V().dmg || 1)*(vehicle === "dirt" ? .6 : 1)*(.5 + .5*curSpeed/speed)*(.65 + .35*D());
+            it.hit = true; const dmg = 12*(1 - .35*ups.susp)*(V().dmg || 1)*(vehicle === "dirt" ? .6 : vehicle === "suv" ? .35 : 1)*(.5 + .5*curSpeed/speed)*(.65 + .35*D());
             vehHP -= dmg; sfx.pothole(); shake = 9; invuln = .5; curSpeed *= .7; banner("Pothole!", true);
             trips.forEach(tr => tr.t -= 1.5);
           } else {
@@ -2773,17 +2869,35 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
             it.hit = true; vehHP -= (VCLS() === "bike" ? 34 : 28)*(V().dmg || 1)*(.4 + .6*curSpeed/speed); sfx.crash(); shake = 14; flash = .35; invuln = 1.4; curSpeed *= .2;
             debris(it, 16); trips.forEach(tr => tr.vex = true);
             if(trips.length) setTimeout(() => toast(`${trips[0] ? trips[0].face : ""} "Yuh mad?! Fare cut!"`), 600);
-            offence("Reckless driving!", 38);
+            offence("Reckless driving!", 38); breakHeadlight();
           }
           if(vehHP <= 0){ vehHP = 0; endShift("wreck"); }
+          continue;
+        }
+        if(it.type === "jelly"){
+          if(!it.hinted && it.z < 30 && it.z > 0){ it.hinted = true; toast(`🥥 Jelly man on the ${it.lane === 0 ? "LEFT" : "RIGHT"}: stop beside him fi a cold jelly (J$150)`); }
+          if(!it.done && p.lane === it.lane && it.z < 2.4 && it.z > -1.2 && Math.abs(curSpeed) < 1){ it.done = true;
+            if(cash >= 150){ cash -= 150; saveCash(); eat(25, .04); toast("🥥 \"Cold jelly, driver!\" +25 energy, likkle fix-up"); } else toast("🥥 \"Come back when yuh have J$150, boss\""); }
+          continue;
+        }
+        if(it.type === "pick" || it.type === "busstop"){
+          if(it.type === "busstop" && it.z < -1.5 && !it.counted){ it.counted = true; if(busRoute && VCLS() === "bus") busRoute.idx = Math.min(busRoute.stops.length - 1, busRoute.idx + 1); }
+          if(!it.hinted && it.z < 30 && it.z > 0){ it.hinted = true; toast(it.type === "busstop" ? `🚏 Bus stop on the ${it.lane === 0 ? "LEFT" : "RIGHT"} with ${it.n} people. Pull in and stop` : `🙋 "${it.call}" Passenger on the ${it.lane === 0 ? "LEFT" : "RIGHT"}: pull over beside dem and stop`); }
+          if(it.boarding){
+            it.bt += dt;
+            if(it.type === "pick"){ it.x += (p.x - it.x)*Math.min(1, dt*2.5); if(it.bt > .8){ it.dead = true; pickUp(it); if(items.some(q => q.type === "rival" && q.lane === it.lane && q.z < 0 && q.z > -6)){ track("beat", 1); setTimeout(() => toast("Yuh beat di rival to di fare! 🏁"), 900); } } }
+            else if(it.bt > .45){ it.bt = 0; if(it.n > 0 && freeSeats() > 0){ it.n--; pickUp({look:{shirt: PEOPLE_COLS[Math.floor(Math.random()*PEOPLE_COLS.length)], skin: PEOPLE_SKINS[Math.floor(Math.random()*4)], dress: Math.random() < .5}}, true); } else { it.boarding = false; it.done = true; if(it.n > 0) toast(`Bus full! ${it.n} still waiting`); } }
+            continue;
+          }
+          if(!it.done && p.lane === it.lane && it.z < 2.6 && it.z > -1.4 && Math.abs(curSpeed) < 1 && freeSeats() > 0){ it.boarding = true; it.bt = 0; sfx.door(); if(it.type === "pick") toast(`"Thank yuh, driver!"`); }
           continue;
         }
         if(Math.abs(it.x - p.x) > .5 || Math.abs(it.z) > .5) continue;
         if(it.type === "pick"){ if(freeSeats() <= 0) continue; it.dead = true; pickUp(it);
           if(items.some(q => q.type === "rival" && q.lane === it.lane && q.z < 0 && q.z > -6)) { track("beat", 1); setTimeout(() => toast("Yuh beat di rival to di fare! 🏁"), 900); }
           continue; }
-        if(it.type === "coin"){ if(Math.abs(it.y - (.45 + p.y)) > .7) continue; it.dead = true; cash += 50; saveCash(); shift.earned += 50; sfx.coin();
-          const q = proj(it.x, 0, .5 + p.y); pops.push({x:q.x, y:q.y - 20, text:"+J$50", life:1}); }
+        if(it.type === "coin"){ if(Math.abs(it.y - (.45 + p.y)) > .7) continue; it.dead = true; const cv = coinVal(); cash += cv; saveCash(); shift.earned += cv; sfx.coin();
+          const q = proj(it.x, 0, .5 + p.y); pops.push({x:q.x, y:q.y - 20, text:"+J$" + coinVal(), life:1}); }
       }
       items = items.filter(it => !it.dead && (it.type === "rival" || it.type === "traffic" || it.z + (it.d||0) > -CAM_D + .2) && it.z < FAR + 14);
       if(state === "play"){
@@ -2833,7 +2947,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     drawSky(t); drawGround();
     if(state !== "menu") for(const L of lights) drawCrossing(L);
     deco.slice().sort((a,b) => b.z - a.z).forEach(drawDeco);
-    drawWelcomeSigns(t); drawStationSigns(t); drawJunctionSigns(t);
+    drawWelcomeSigns(t); drawStationSigns(t); drawJunctionSigns(t); drawTerminals(t);
     const scene = items.concat(state !== "menu" ? lights : [], state !== "menu" ? stations : []);
     if(state === "play" || state === "pause") trips.forEach(tr => { const z = tripZ(tr); if(z !== null && z > -1 && z < FAR) scene.push({type:"drop", z, tr}); });
     drawStreetEnds(t);
@@ -2851,6 +2965,8 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
           ctx.globalAlpha = 1; } }
       else if(it.type === "cross") drawCrosser(it, t);
       else if(it.type === "works") drawWorks(it, t);
+      else if(it.type === "busstop") drawBusStop(it, t);
+      else if(it.type === "jelly") drawJelly(it, t);
       else if(it.type === "rival"){ if(it.z > -1.4 && it.z < FAR){ ctx.globalAlpha = fogA(it.z); if(!it.style) it.style = ["probox","van","sedan"][Math.floor(Math.random()*3)];
           drawRearVehicle(it.x, it.z, it.style, it.body, {heads: 1 + (it.full ? 2 : 0), stripe: it.stripe, tag: it.name, plate: "PP " + (1000 + (it.name.length*731) % 8999)}); ctx.globalAlpha = 1; } }
       else if(it.type === "obs") drawJutc(it); else if(it.type === "light") drawSignal(it); else if(it.type === "station") drawStation(it);
@@ -2861,6 +2977,11 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     drawCop(t);
     updateRobbers(t, dt, dz); dist0 += dz*6;
     drawNight(t);
+    if(rain.k > .01){ ctx.fillStyle = `rgba(60,70,85,${.25*rain.k})`; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = `rgba(200,215,230,${.12*rain.k})`; ctx.fillRect(0, horizon, W, H - horizon);
+      ctx.strokeStyle = `rgba(210,225,240,${.45*rain.k})`; ctx.lineWidth = 1.2; ctx.beginPath();
+      const nDrops = Math.floor(160*rain.k), tt = t*.9;
+      for(let i=0;i<nDrops;i++){ const x = ((i*97.3 + tt*.2) % (W + 40)) - 20, y = ((i*53.7 + tt*1.3) % (H + 40)) - 20; ctx.moveTo(x, y); ctx.lineTo(x - 4, y + 16); } ctx.stroke(); }
     drawParticles(dt); drawPops(dt);
     ctx.restore();
     vignette();
@@ -2888,9 +3009,13 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     if(playing){
       $("#cash").textContent = fmt(cash); $("#kmh").innerHTML = curSpeed < -.1 ? `<span class="rev">R</span> ${Math.round(-curSpeed*4.4)}` : Math.round(curSpeed*4.4);
       $("#parishName").textContent = parish().name + (dir < 0 && !road ? " ↩" : "");
-      { const tw = parish().towns, ti = Math.min(tw.length - 1, Math.floor(levelDist/PARISH_LEN*tw.length)); $("#locName").textContent = road ? `${road.name}, off ${tw[ti]}` : tw[ti]; } $("#parishFill").style.width = Math.min(100, levelDist/PARISH_LEN*100) + "%";
+      { const tw = parish().towns, ti = Math.min(tw.length - 1, Math.floor(levelDist/PARISH_LEN*tw.length));
+        if(VCLS() === "bus" && (!busRoute || busRoute.parish !== parishAt(pos))) pickRoute();
+        const rt = VCLS() === "bus" && !road && busRoute ? ` · 🚌 ${busRoute.name} · next: ${busRoute.stops[Math.min(busRoute.idx, busRoute.stops.length - 1)]}` : "";
+        $("#locName").textContent = (road ? `${road.name} ➜ ${road.dest}` : tw[ti]) + rt + ` · 🕐 ${clockText()}` + (rain.on ? " · 🌧️" : "") + (lightDeadline ? ` · 💡 fix in ${Math.max(0, Math.ceil(lightDeadline - gt))}s` : ""); } $("#parishFill").style.width = Math.min(100, levelDist/PARISH_LEN*100) + "%";
       $("#hpFill").style.width = Math.max(0, vehHP/V().hp*100) + "%"; $("#hpRow").classList.toggle("low", vehHP < V().hp*.25);
       $("#fuelFill").style.width = Math.max(0, fuel*100) + "%"; $("#fuelRow").classList.toggle("low", fuel < .2);
+      $("#foodFill").style.width = Math.max(0, energy) + "%"; $("#foodRow").classList.toggle("low", energy < 25);
       $("#seats").textContent = `${VCLS() === "bus" ? "🚌" : VCLS() === "car" ? "🚗" : vehicle === "scooter" ? "🛵" : "🏍️"} ${trips.length}/${V().seats} seats`;
       hudT -= dt;
       if(hudT <= 0){ hudT = .15;
@@ -2984,8 +3109,8 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     }
     if(huDone || cop.active || Math.abs(curSpeed) > .5 || nearLight || recentStop || gt - huT0 < 90){ huStill = 0; return; }
     huStill += dt; if(huStill < 15) return; huStill = 0;
-    const night = parish().time === "night";
-    if(Math.random() > (night ? .35 : .08)) return;
+    const night = timeNow() === "night";
+    if(Math.random() > (night ? .35 : .08)*(RISK[parish().name] || 1)) return;
     huWarn = 6; sfx.horn();
     const side = p.lane === 0 ? -1 : p.lane === 2 ? 1 : (Math.random() < .5 ? -1 : 1);
     robbers = [0,1].map(k => ({k, side, x: side*(ROAD + .7), z: 5.5 + k*1.8, ph: k*2, walking:true}));
@@ -3067,6 +3192,48 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   const _endShift = endShift; endShift = function(r){ store.set("shifts", store.get("shifts", 0) + 1); _endShift(r); setTimeout(cloudSave, 300); };
 
   /* ---------- Men at work: one lane only, and it gets fixed after a while ---------- */
+  /* ---------- Game clock: day turns to night as you play ---------- */
+  let lastPhase = timeNow(), lastClockT = performance.now();
+  setInterval(() => {
+    const now = performance.now(), dts = Math.min(1, (now - lastClockT)/1000); lastClockT = now;
+    if(state === "play" && !cut){ clockMin += dts*1.5; if(Math.random() < .05) store.set("clock", clockMin); }
+    const ph = timeNow();
+    if(ph !== lastPhase && state === "play"){ const h = (clockMin/60) % 24;
+      toast(ph === "night" ? "🌙 Night fall. Headlights on, and watch out fi thieves" : ph === "sunset" ? (h > 12 ? "🌆 Evening coming in..." : "🌅 Sun a come up...") : "☀️ Morning! Busy roads ahead");
+      makeDeco && makeDeco(); }
+    lastPhase = ph;
+  }, 250);
+
+  /* ---------- World systems ---------- */
+  let sysT = performance.now(), lastCheckT = 0, rainT = 0;
+  setInterval(() => {
+    const now = performance.now(), dts = Math.min(1, (now - sysT)/1000); sysT = now;
+    if(state !== "play" || cut) return;
+    // energy drains slowly while driving
+    const e0 = energy; energy = Math.max(0, energy - dts*(Math.abs(curSpeed) > 1 ? .09 : .03));
+    if(e0 >= 20 && energy < 20) toast("🍗 Yuh hungry, driver! Fewer passengers stop fi a hungry driver. Get food at a gas station or a jelly man");
+    if(Math.random() < .05) store.set("energy", energy);
+    // road wear builds as you drive; fines pay for repair crews
+    wear += Math.abs(curSpeed)*dts; if(Math.random() < .02) store.set("wear", wear);
+    if(roadFund >= 1500 && !road && !items.some(it => it.type === "works" && it.z > 0)){
+      roadFund -= 1500; store.set("roadFund", roadFund); wear = Math.max(0, wear - 15000); store.set("wear", wear);
+      const lane = p.lane === 0 ? 2 : 0; items.push({type:"works", kind:"patch", lane, x: laneWX(lane), z: FAR - 4, d:2.4, fixAt: gt + 25, t0: gt, fixed:false, ph:0});
+      toast("🚧 Police fines at work: a crew is patching potholes ahead"); }
+    // rain: wetter parishes get more of it
+    rainT -= dts;
+    if(rainT <= 0){ rainT = 20; const pr = RAIN[parish().name] || .2;
+      if(!rain.on && Math.random() < pr*.4){ rain.on = true; rain.until = gt + 40 + Math.random()*80; toast(`🌧️ Rain a fall inna ${parish().name}! Road slippery, drive easy`); }
+      else if(rain.on && gt > rain.until){ rain.on = false; toast("🌤️ Rain gone. Road drying up"); } }
+    rain.k += ((rain.on ? 1 : 0) - rain.k)*Math.min(1, dts*.6);
+    // police spot checks: the richer you are, the more they stop you (and at night if your light is broken)
+    if(!cop.active && !road && Date.now() - lastCheckT > 45000){
+      const chance = Math.min(.02, cash/2000000) + (headBroken && timeNow() !== "day" ? .01 : 0);
+      if(Math.random() < chance*dts){ lastCheckT = Date.now(); offence("🚔 Police spot check!", 40, "check"); } }
+    // fix-it ticket deadline
+    if(lightDeadline && gt > lightDeadline){ lightDeadline = 0; if(headBroken && !cop.active) offence("Yuh never fix di headlight!", 70, "light"); }
+  }, 250);
+  function breakHeadlight(){ if(headBroken || Math.random() > .35) return; headBroken = true; store.set("headBroken", true); setTimeout(() => toast("💡 One headlight bruk! Fix it at an auto shop before night"), 900); }
+
   /* ---------- Live events sent from the admin page ---------- */
   let pendingRob = 0;
   async function pollEvents(){
@@ -3132,6 +3299,60 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   document.querySelectorAll("#menu h1 .c").forEach(el => el.addEventListener("click", () => {
     if(cloudOn()) return; if(Date.now() - plateT > 2000) plateTaps = 0; plateT = Date.now();
     if(++plateTaps >= 5){ plateTaps = 0; const on = !store.get("devLocal", false); store.set("devLocal", on); toast(on ? "🛠 Developer tools ON" : "Developer tools OFF"); } }));
+
+  function eat(e, rep){ energy = Math.min(100, energy + e); store.set("energy", energy); if(rep) vehHP = Math.min(V().hp, vehHP + V().hp*rep); sfx.coin && sfx.coin(); banner("Belly full! 😋"); }
+  function drawJelly(it, t){
+    if(it.z < -1 || it.z > FAR) return;
+    ctx.globalAlpha = fogA(Math.max(0, it.z));
+    const sd = it.x < 0 ? -1 : 1;
+    const cart = drawBox(it.x + sd*.25, it.z + .2, .7, .45, .5, "#8B5A2B", "#A0703A", "#6E4520");
+    for(let i=0;i<7;i++){ const c = proj(it.x + sd*.25 + ((i % 4) - 1.5)*.13, it.z + .3 + Math.floor(i/4)*.15, .5 + Math.floor(i/4)*.1), r = c.s*.075; ctx.fillStyle = i % 3 ? "#3E8E2E" : "#5BAA3A"; ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, 7); ctx.fill(); }
+    for(const wz of [it.z + .15, it.z + .65]){ const w = proj(it.x + sd*.25 - sd*.38, wz, .12); ctx.fillStyle = "#222"; ctx.beginPath(); ctx.arc(w.x, w.y, w.s*.1, 0, 7); ctx.fill(); }
+    const b = proj(it.x - sd*.15, it.z + .1, 0);
+    drawHuman(b.x, b.y, b.s*.95, {shirt:"#F2F2F2", pants:"#3A4A5A", skin: PEOPLE_SKINS[0], hat:true, hatCol:"#D9B36A", hairStyle:0, shoe:"#3A2A1E"}, {wave: !it.done, t});
+    const sg = proj(it.x + sd*.25, it.z, 1.15); if(sg.s > 10){ ctx.fillStyle = "#FFF6DA"; ctx.fillRect(sg.x - sg.s*.3, sg.y - sg.s*.1, sg.s*.6, sg.s*.18); ctx.fillStyle = "#1F7A45";
+      ctx.font = `700 ${Math.max(7, sg.s*.08)}px "Space Grotesk", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("🥥 JELLY $150", sg.x, sg.y, sg.s*.56); }
+    ctx.globalAlpha = 1;
+  }
+  function drawBusStop(it, t){
+    if(it.z < -1 || it.z > FAR) return;
+    ctx.globalAlpha = fogA(Math.max(0, it.z));
+    const sd = it.x < 0 ? -1 : 1, x0 = it.x, z0 = it.z;
+    // shelter: back wall, roof, posts, bench
+    const back = sd*(ROAD + 1.05);
+    quad(proj(back, z0, 0), proj(back, z0 + 1.6, 0), proj(back, z0 + 1.6, 1.25), proj(back, z0, 1.25), "rgba(120,170,200,.55)");
+    for(const zz of [z0, z0 + 1.6]){ const b = proj(sd*(ROAD + .35), zz, 0), tp = proj(sd*(ROAD + .35), zz, 1.35); ctx.strokeStyle = "#5A6170"; ctx.lineWidth = Math.max(1.5, b.s*.05); ctx.beginPath(); ctx.moveTo(b.x, b.y); ctx.lineTo(tp.x, tp.y); ctx.stroke(); }
+    quad(proj(sd*(ROAD + .25), z0 - .1, 1.35), proj(sd*(ROAD + 1.15), z0 - .1, 1.4), proj(sd*(ROAD + 1.15), z0 + 1.7, 1.4), proj(sd*(ROAD + .25), z0 + 1.7, 1.35), "#1F7A45");
+    quad(proj(sd*(ROAD + .7), z0 + .2, .42), proj(sd*(ROAD + 1), z0 + .2, .42), proj(sd*(ROAD + 1), z0 + 1.4, .42), proj(sd*(ROAD + .7), z0 + 1.4, .42), "#8B5A2B");
+    const sg = proj(sd*(ROAD + .3), z0 - .15, 1.75), ss = sg.s;
+    if(!it.name){ const tw2 = parish().towns; it.name = busRoute && VCLS() === "bus" ? busRoute.stops[Math.min(busRoute.idx, busRoute.stops.length - 1)] : tw2[Math.floor(Math.random()*tw2.length)]; }
+    if(ss > 9){ ctx.fillStyle = "#1F7A45"; ctx.fillRect(sg.x - ss*.42, sg.y - ss*.2, ss*.84, ss*.38); ctx.fillStyle = "#fff"; ctx.font = `700 ${Math.max(7, ss*.12)}px "Space Grotesk", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.fillText("🚏 BUS STOP", sg.x, sg.y - ss*.08, ss*.8); ctx.fillStyle = "#FFE38A"; ctx.fillText(it.name, sg.x, sg.y + ss*.08, ss*.8); }
+    // waiting crowd
+    for(let i=0;i<Math.min(it.n, 8);i++){ const pz = z0 + .2 + (i % 4)*.38, px = sd*(ROAD + .45 + Math.floor(i/4)*.28), b = proj(px, pz, 0), c = it.cols[i];
+      drawHuman(b.x, b.y, b.s*.95, {shirt:c[0], pants:"#1C2230", skin:c[1], dress:c[2], hairStyle: i % 4, hairCol: i % 4, shoe:"#1A1A1A"}, {wave: i === 0 && !it.done, t}); }
+    if(it.n > 0 && !it.done){ const tp = proj(x0, z0 + .5, 2.25); if(tp.s > 9){ const txt = it.n + " waiting", fs = Math.max(9, Math.min(15, tp.s*.17)); ctx.font = `700 ${fs}px "Space Grotesk", sans-serif`; const tw = ctx.measureText(txt).width + 12;
+      ctx.fillStyle = "rgba(255,199,44,.95)"; ctx.fillRect(tp.x - tw/2, tp.y - fs, tw, fs + 8); ctx.fillStyle = "#12202B"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, tp.x, tp.y - fs/2 + 4); } }
+    ctx.globalAlpha = 1;
+  }
+  // Transport centre in each parish (central drop-off)
+  function drawTerminals(t){
+    if(road || state === "menu") return;
+    const k0 = Math.floor(pos/PARISH_LEN);
+    for(let k = k0 - 1; k <= k0 + 1; k++){
+      const z = relZ(centrePos(k)); if(z < -2 || z > FAR) continue;
+      const sd = dir, x = sd*(ROAD + 2.6), P2 = PARISHES[parishAt(centrePos(k))];
+      ctx.globalAlpha = fogA(Math.max(0, z));
+      quad(proj(sd*(ROAD + .2), z - 2, 0), proj(sd*(ROAD + 5), z - 2, 0), proj(sd*(ROAD + 5), z + 5, 0), proj(sd*(ROAD + .2), z + 5, 0), "#9AA0A8");
+      for(let b2 = 0; b2 < 4; b2++){ const zz = z - 1.4 + b2*1.6; if(zz < -.8) continue; quad(proj(sd*(ROAD + .4), zz, 0), proj(sd*(ROAD + 2), zz, 0), proj(sd*(ROAD + 2), zz + .08, 0), proj(sd*(ROAD + .4), zz + .08, 0), "#F2C230"); }
+      const f = drawBox(x + sd*.6, z + .5, 3, 1.9, 3.5, "#E8E1D9", "#C9C2B3", "#B8B1A2");
+      const sign = frontRect(f, .04, .76, .96, .97, "#1F7A45");
+      if(sign.w > 30){ ctx.fillStyle = "#fff"; ctx.font = `${Math.max(8, Math.round(sign.h*.5))}px Bungee, Impact, sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(`${P2.towns[0].toUpperCase()} TRANSPORT CENTRE`, sign.x + sign.w/2, sign.y + sign.h/2 + 1, sign.w*.94); }
+      frontRect(f, .1, 0, .9, .6, "#2B3B4E");
+      const roof = proj(x + sd*.6, z + .2, 2.2); if(roof.s > 8 && z > 2){ ctx.fillStyle = "rgba(31,122,69,.95)"; ctx.font = `700 ${Math.max(9, roof.s*.16)}px "Space Grotesk", sans-serif`; ctx.textAlign = "center"; ctx.fillText("🚌 CENTRAL DROP-OFF", roof.x, roof.y); }
+      ctx.globalAlpha = 1;
+    }
+  }
 
   function spawnWorks(){
     if(road || items.some(it => it.type === "works" && it.z > FAR - 80)) return;
