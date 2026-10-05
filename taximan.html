@@ -117,9 +117,9 @@ body.cutting #wrap > *:not(canvas){opacity:0!important;pointer-events:none!impor
 .banner.go{animation:ban 1.6s ease-out}
 .banner.bad{color:#FF5D5D;text-shadow:3px 3px 0 var(--ink),6px 6px 0 #5A0F17}
 @keyframes ban{0%{opacity:0;transform:scale(.6)}15%{opacity:1;transform:scale(1.08)}25%{transform:scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(-20px)}}
-.toast{position:absolute;left:50%;top:19%;transform:translate(-50%,-20px);z-index:4;pointer-events:none;opacity:0;
+.toast{position:absolute;left:50%;top:auto;bottom:calc(252px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);z-index:4;pointer-events:none;opacity:0;font-size:13px!important;
   background:var(--cream);color:var(--ink);border-radius:14px;padding:8px 14px;font-weight:700;font-size:14px;box-shadow:4px 4px 0 var(--green);
-  max-width:90vw;text-align:center;transition:opacity .25s,transform .25s}
+  max-width:min(80vw,420px);text-align:center;transition:opacity .25s,transform .25s;background:rgba(255,246,218,.94)!important}
 .toast.on{opacity:1;transform:translate(-50%,0)}
 .hint{position:absolute;bottom:20%;left:0;right:0;text-align:center;font-weight:700;font-size:15px;line-height:1.5;z-index:2;pointer-events:none;
   transition:opacity .4s;text-shadow:0 2px 0 rgba(0,0,0,.6);opacity:0}
@@ -768,7 +768,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
   }
   function hideHint(){ if(!hintShown){ hintShown = true; $("#hint").style.opacity = 0; } }
 
-  const CHARGES = {light:{name:"Defective headlight", s:200, c:500, lvl:1}, check:{name:"Police spot check", s:0, c:300, lvl:0}, red:{name:"Running a red light", s:100, c:300, lvl:1}, reckless:{name:"Reckless driving", s:150, c:400, lvl:2}, ped:{name:"Hitting a pedestrian", s:500, c:1200, lvl:3}};
+  const CHARGES = {ignore:{name:"Driving past a police checkpoint", s:300, c:800, lvl:2}, light:{name:"Defective vehicle", s:200, c:500, lvl:1}, check:{name:"Police spot check", s:0, c:300, lvl:0}, red:{name:"Running a red light", s:100, c:300, lvl:1}, reckless:{name:"Reckless driving", s:150, c:400, lvl:2}, ped:{name:"Hitting a pedestrian", s:500, c:1200, lvl:3}};
   function offence(label, heat, charge = "reckless"){
     if(!cop.charge || CHARGES[charge].lvl > CHARGES[cop.charge].lvl) cop.charge = charge;
     offences++; sfx.whistle(); banner(label, true);
@@ -983,7 +983,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     if(k === "snack"){ shift.snack = true; eat(30, 0); }
     if(k === "jerk"){ eat(60, .06); }
     if(k === "wash") shift.wash = true;
-    if(k === "repair"){ vehHP = V().hp; if(headBroken){ headBroken = false; store.set("headBroken", false); lightDeadline = 0; } }
+    if(k === "repair"){ vehHP = V().hp; headBroken = false; store.set("headBroken", false); lightDeadline = 0; }
     if(k === "light"){ headBroken = false; store.set("headBroken", false); lightDeadline = 0; }
     if(k === "patch") vehHP = Math.min(V().hp, vehHP + (V().hp - vehHP)*.5);
     if(k.startsWith("buy_")){ const v = k.slice(4); owned.push(v); store.set("owned", owned); saveVehicle(); vehicle = v; store.set("vehicle", vehicle); vehHP = V().hp; fuel = 1; banner(`New ${V().name}! ${VCLS() === "bus" ? "🚌" : "🚐"}`); }
@@ -1211,14 +1211,56 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       troad = {k, ws, name: streetName(k, ws)}; tspos = 120 + Math.random()*460;
       d = junctionZ(k) + tspos; dest = troad.name;
     }
-    const limit = Math.round((d/(exp*.7) + (troad && !road ? 14 : 8))*(1.35 - .35*D()));
+    const vExp = 18*speedMul()*.72, stopsBefore = trips.filter(t2 => tripDistAlong(t2) < d).length;
+    const detour = trips.reduce((a, t2) => { const dd = tripDistAlong(t2); return a + (dd > d ? 0 : (tripZ(t2) !== null && tripZ(t2) < -2.4 ? dd*2 : 0)); }, 0);
+    const limit = Math.round(((d + detour)/vExp + stopsBefore*6 + (troad && !road ? 14 : 8))*(1.3 - .3*D()));
     const fare = Math.round((d*1.25 + 260 + (troad ? 150 : 0))*(shift.wash ? 1.1 : 1)/50)*50;
     const used = trips.map(t => t.color);
-    trips.push({dest, pos:dpos, road: troad, spos: tspos, sx: toCentre && !troad ? 1 : Math.random() < .5 ? -1 : 1, centre: !!toCentre, limit, t:limit, fare, look: it.look, cussed:false, missedWarn:false,
+    trips.push({dist: Math.max(50, d), dest, pos:dpos, road: troad, spos: tspos, sx: toCentre && !troad ? 1 : Math.random() < .5 ? -1 : 1, centre: !!toCentre, limit, t:limit, fare, look: it.look, cussed:false, missedWarn:false,
       color: tripColors.find(c => !used.includes(c)) || tripColors[0], face: ["🧑🏾","👩🏾","👨🏿","👵🏾","🧔🏾","👩🏽"][Math.floor(Math.random()*6)]});
     if(quiet){ sfx.door(); const last = trips[trips.length - 1]; pops.push({x: W/2, y: H*.55, text: `+1 · ${last.dest}`, life: 1}); return; }
     sfx.horn(); curSpeed *= .5; banner("Passenger pick up!");
     toast(troad && !road ? `"Tek mi to ${dest}, off di main road! ${limit}s, J$${fmt(fare)}." Turn at di light` : `"Tek mi to ${dest}! ${limit} seconds, J$${fmt(fare)}." Follow di 📍`);
+  }
+  // where a stop sits on the main road, plus any side-road detour (in + back out)
+  function stopPos(tr){
+    if(tr.road){ if(road && sameRoad(tr.road, road)) return {p: pos, extra: Math.abs(tr.spos - spos)}; return {p: lightPos(tr.road.k), extra: tr.spos*2}; }
+    return {p: tr.pos, extra: 0};
+  }
+  function tripDistAlong(tr){
+    const z = tripZ(tr);
+    if(z !== null) return z >= -2.4 ? Math.max(0, z) : -z + 70;
+    if(tr.road && !road){ const jz = junctionZ(tr.road.k); return (jz >= -.8 ? jz : -jz + 70) + tr.spos; }
+    return 400;
+  }
+  // best drop-off order: tries every order (up to 6 passengers) and picks the one with the least lateness, then the shortest drive
+  let planCache = {t: 0, plan: []};
+  function planOrder(){
+    if(performance.now() - planCache.t < 400 && planCache.n === trips.length) return planCache.plan;
+    const v = 18*speedMul()*.75, list = trips.slice();
+    const cost = order => { let at = pos, curDir = dir, time = 0, late = 0, dist = 0;
+      for(const tr of order){ const sp = stopPos(tr); let leg;
+        if(tr.road && road && sameRoad(tr.road, road)) leg = sp.extra;
+        else { const dd = (sp.p - at)*curDir; leg = Math.abs(sp.p - at) + sp.extra + (dd < -3 ? 70 : 0); if(Math.abs(sp.p - at) > 3) curDir = Math.sign(sp.p - at) || curDir; }
+        dist += leg; time += leg/v + 4; late += Math.max(0, time - tr.t); at = sp.p; }
+      return late*40 + dist; };
+    let best = null, bestC = Infinity;
+    if(list.length <= 6){
+      const perm = (arr, l = 0) => { if(l === arr.length){ const c = cost(arr); if(c < bestC){ bestC = c; best = arr.slice(); } return; }
+        for(let i = l; i < arr.length; i++){ [arr[l], arr[i]] = [arr[i], arr[l]]; perm(arr, l + 1); [arr[l], arr[i]] = [arr[i], arr[l]]; } };
+      perm(list);
+    } else best = list.sort((a,b) => (tripDistAlong(a) - tripDistAlong(b)) + (a.t - b.t)*.5*18);
+    planCache = {t: performance.now(), n: trips.length, plan: best || []};
+    return planCache.plan;
+  }
+  function etaOf(tr){ const v = 18*speedMul()*.75, plan = planOrder(); let at = pos, time = 0;
+    for(const t2 of plan){ const sp = stopPos(t2); time += (Math.abs(sp.p - at) + sp.extra)/v + 4; at = sp.p; if(t2 === tr) return time; } return null; }
+  function payProRata(tr, z){
+    const frac = Math.max(.3, Math.min(1, z !== null && tr.dist ? 1 - z/tr.dist : 1 - Math.max(0, tr.t)/tr.limit));
+    const pay = Math.round(tr.fare*frac*(tr.vexOff ? .8 : 1)/10)*10;
+    cash += pay; saveCash(); shift.earned += pay; shift.fares++; totalFares++; store.set("fares", totalFares); track("fares", 1); track("earn", pay);
+    sfx.cash(); sfx.door(); banner(`+J$${fmt(pay)} (part fare)`); toast(`${tr.face} "Tenk yuh!" Rode ${Math.round(frac*100)}% of di way · paid J$${fmt(pay)}`);
+    const q = proj(p.x, 0, 1.6); pops.push({x:q.x, y:q.y, text:"J$" + fmt(pay), life:1.2});
   }
   function dropOff(tr){
     if(tr.centre){ tr.fare = Math.round(tr.fare*1.15/10)*10; }
@@ -2752,7 +2794,14 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       for(const tr of trips.slice()){
         tr.t -= dt;
         const z = tripZ(tr), lane = laneFor(tr);
-        if(z !== null && Math.abs(z) < 2.4 && p.lane === lane && Math.abs(curSpeed) < 1.2){ trips.splice(trips.indexOf(tr), 1); dropOff(tr); continue; }
+        if(z !== null && z < 35 && z > 3 && !tr.shouted){ tr.shouted = true; toast(`${tr.face} "${["Bus stop!","One stop, driver!","Next stop, please!","Mi a come off up ahead!"][Math.floor(Math.random()*4)]}" Stop on the ${lane === 0 ? "LEFT" : "RIGHT"}`); sfx.horn && tone(880, .12, "square", .04); }
+        if(z !== null && Math.abs(z) < 2.4 && Math.abs(curSpeed) < 1.2 && (p.lane === lane || p.lane === 1)){ trips.splice(trips.indexOf(tr), 1); dropOff(tr); continue; }
+        // sometimes a passenger changes their mind and wants off early: stop anywhere and they pay for the distance they rode
+        if(!tr.wantOff && !tr.road && z !== null && z > 60 && tr.t > 0 && 1 - z/tr.dist > .25 && Math.random() < dt*.006){ tr.wantOff = gt; toast(`${tr.face} "Bus stop, driver! Mi come off yah!" Pull over and stop`); tone(880, .12, "square", .04); setTimeout(() => tone(880, .12, "square", .04), 160); }
+        if(tr.wantOff){
+          if(Math.abs(curSpeed) < 1 && p.lane !== 1){ trips.splice(trips.indexOf(tr), 1); payProRata(tr, z); continue; }
+          if(gt - tr.wantOff > 20 && !tr.vexOff){ tr.vexOff = true; toast(`${tr.face} "Yuh deaf?! Mi seh BUS STOP!"`); }
+        }
         if(z !== null && z < -4 && !tr.missedWarn){ tr.missedWarn = true; sfx.horn(); toast(`${tr.face} "Driver! Yuh pass mi stop! Back up or turn round!" ↩`); }
         if(z !== null && z > 0) tr.missedWarn = false;
         if(tr.t < 0 && !tr.cussed){ tr.cussed = true; toast(`${tr.face} ${pick(CUSS)}`); }
@@ -2874,6 +2923,12 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
           if(vehHP <= 0){ vehHP = 0; endShift("wreck"); }
           continue;
         }
+        if(it.type === "checkpoint"){
+          if(!it.hinted && it.z < 38 && it.z > 0){ it.hinted = true; toast(`👮🏾 Police checkpoint ahead on the ${it.lane === 0 ? "LEFT" : "RIGHT"}! Pull over beside di officer and stop`); sfx.whistle && sfx.whistle(); }
+          if(!it.done && p.lane === it.lane && it.z < 2.6 && it.z > -1.4 && Math.abs(curSpeed) < 1){ it.done = true; inspect(); }
+          if(!it.done && it.z < -1.6){ it.done = true; if(!cop.active) offence("Yuh drive past di police checkpoint!", 75, "ignore"); }
+          continue;
+        }
         if(it.type === "jelly"){
           if(!it.hinted && it.z < 30 && it.z > 0){ it.hinted = true; toast(`🥥 Jelly man on the ${it.lane === 0 ? "LEFT" : "RIGHT"}: stop beside him fi a cold jelly (J$150)`); }
           if(!it.done && p.lane === it.lane && it.z < 2.4 && it.z > -1.2 && Math.abs(curSpeed) < 1){ it.done = true;
@@ -2967,6 +3022,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
       else if(it.type === "works") drawWorks(it, t);
       else if(it.type === "busstop") drawBusStop(it, t);
       else if(it.type === "jelly") drawJelly(it, t);
+      else if(it.type === "checkpoint") drawCheckpoint(it, t);
       else if(it.type === "rival"){ if(it.z > -1.4 && it.z < FAR){ ctx.globalAlpha = fogA(it.z); if(!it.style) it.style = ["probox","van","sedan"][Math.floor(Math.random()*3)];
           drawRearVehicle(it.x, it.z, it.style, it.body, {heads: 1 + (it.full ? 2 : 0), stripe: it.stripe, tag: it.name, plate: "PP " + (1000 + (it.name.length*731) % 8999)}); ctx.globalAlpha = 1; } }
       else if(it.type === "obs") drawJutc(it); else if(it.type === "light") drawSignal(it); else if(it.type === "station") drawStation(it);
@@ -3034,7 +3090,9 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
           } else { short = "↩ main rd"; line = `<span class="arr">↩</span>${tr.dest} is off this road. Head back to di main road`; cls = " back"; }
           return {tr, z: z === null ? 9999 : Math.abs(z), short, line, cls, prio: (z !== null ? Math.abs(z) : tr.road && !road ? Math.abs(junctionZ(tr.road.k)) : 500)};
         });
-        $("#trips").innerHTML = info.slice(0,4).map(({tr, short}) => `<div class="trip ${tr.t < 0 ? "late" : ""}" style="box-shadow:3px 3px 0 ${tr.color}"><span class="face">${tr.face}</span><span class="dest">${tr.dest}</span>
+        const plan = planOrder(), ord = tr => { const i = plan.indexOf(tr); return i < 0 ? 99 : i; };
+        info.sort((a,b) => ord(a.tr) - ord(b.tr));
+        $("#trips").innerHTML = info.slice(0,4).map(({tr, short}, idx) => `<div class="trip ${tr.t < 0 ? "late" : ""}" style="box-shadow:3px 3px 0 ${tr.color}"><span class="face">${idx + 1}. ${tr.face}</span><span class="dest">${tr.dest}</span>
           <span class="meta"><span>${short}</span><span class="tm">⏱ ${tr.t >= 0 ? Math.ceil(tr.t) + "s" : "LATE"}</span><span>J$${fmt(tr.fare)}</span></span></div>`).join("") + (info.length > 4 ? `<div class="trip more">+${info.length - 4} more passengers</div>` : "");
         const nav = $("#nav");
         const gasNav = () => { if(road || fuel >= .35) return null; let best = null;
@@ -3050,8 +3108,10 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
         else if(turnQueue && nextJ && state === "play"){ nav.className = "nav on here"; nav.innerHTML = `<span class="arr">${turnQueue.side === "L" ? "⬅" : "➡"}</span>Turning ${turnQueue.side === "L" ? "LEFT" : "RIGHT"} at di junction in ${fmtD(nextJ.z)}`; }
         else if(turnOpt && state === "play" && !info.length){ nav.className = "nav on here"; nav.innerHTML = turnOpt.kind === "exit" ? `<span class="arr">↔</span>T-junction: ⬅ ${exitLabelOf(road.k, -road.ws)} · ${exitLabelOf(road.k, road.ws)} ➡` : `<span class="arr">↔</span>Junction: ⬅ ${destLabelOf(nextJ ? nextJ.k : turnOpt.k, -dir)} · ${destLabelOf(nextJ ? nextJ.k : turnOpt.k, dir)} ➡ (or go straight)`; }
         else if(info.length && state === "play"){
-          const n = info.slice().sort((a,b) => a.prio - b.prio)[0];
-          nav.className = "nav on" + n.cls; nav.innerHTML = n.line;
+          const n = info[0], eta = etaOf(n.tr), slack = eta === null ? null : n.tr.t - eta;
+          const timing = n.tr.t < 0 ? `<span style="color:#FF7B7B">· LATE</span>` : slack === null ? "" : slack > 8 ? `<span style="color:#7CF0A8">· ⏱ ${Math.ceil(n.tr.t)}s · on time</span>` : `<span style="color:#FFC72C">· ⏱ ${Math.ceil(n.tr.t)}s · hurry!</span>`;
+          const then = info[1] ? `<br><small style="opacity:.8;font-weight:600">then ${info[1].tr.dest}${info[2] ? ` · ${info[2].tr.dest}` : ""}${info.length > 3 ? ` +${info.length - 3}` : ""}</small>` : "";
+          nav.className = "nav on" + n.cls; nav.innerHTML = `${n.line} ${timing}${then}`;
           const want = n.tr.road && !road && n.cls === " here" ? (n.tr.road.ws === dir ? "R" : "L") : null;
           $("#turnL").classList.toggle("hint", want === "L"); $("#turnR").classList.toggle("hint", want === "R");
         } else nav.className = "nav";
@@ -3228,10 +3288,53 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     // police spot checks: the richer you are, the more they stop you (and at night if your light is broken)
     if(!cop.active && !road && Date.now() - lastCheckT > 45000){
       const chance = Math.min(.02, cash/2000000) + (headBroken && timeNow() !== "day" ? .01 : 0);
-      if(Math.random() < chance*dts){ lastCheckT = Date.now(); offence("🚔 Police spot check!", 40, "check"); } }
+      if(Math.random() < chance*dts){ lastCheckT = Date.now(); spawnCheckpoint(); } }
     // fix-it ticket deadline
-    if(lightDeadline && gt > lightDeadline){ lightDeadline = 0; if(headBroken && !cop.active) offence("Yuh never fix di headlight!", 70, "light"); }
+    if(lightDeadline && gt > lightDeadline){ lightDeadline = 0; if(defectsNow().length && !cop.active) offence("Yuh never fix yuh vehicle!", 70, "light"); }
   }, 250);
+  function spawnCheckpoint(){
+    if(road || items.some(it => it.type === "checkpoint" && !it.done)) return;
+    const l = Math.random() < .5 ? 0 : 2;
+    items.push({type:"checkpoint", lane:l, x:(l === 0 ? -1 : 1)*(ROAD + .5), z: FAR - 2, d:2.2, ph: Math.random()*6});
+  }
+  function defectsNow(){
+    const r = vehHP/V().hp, list = [];
+    if(headBroken) list.push("broken headlight");
+    if(VCLS() !== "bike" && r < .5) list.push("cracked windscreen");
+    if(r < .35) list.push("bad tyres");
+    return list;
+  }
+  function inspect(){
+    state = "pause"; setGas(false); setBrake(false); curSpeed = 0; sfx.whistle && sfx.whistle();
+    const def = defectsNow();
+    $("#tkNum").textContent = tickets; $("#tkDots").innerHTML = [0,1,2].map(i => `<span class="${i < tickets ? "" : "off"}">🎫</span>`).join("");
+    if(!def.length){
+      $("#tkSay").textContent = ["\"Licence and registration... Everything in order. Drive safe, driver.\"", "\"Tyres good, lights good. Gwaan, have a blessed day.\"", "\"Alright, all clear. Mind how yuh go.\""][Math.floor(Math.random()*3)];
+      $("#tkFine").textContent = "Police checkpoint · Vehicle passed inspection · No fine";
+    } else {
+      const fine = Math.min(cash, 200*def.length); cash -= fine; saveCash(); roadFund += fine; store.set("roadFund", roadFund);
+      lightDeadline = gt + 120;
+      $("#tkSay").textContent = `"Driver, yuh have ${def.join(" and ")}. Fix it inna two minutes or mi a come fi yuh."`;
+      $("#tkFine").textContent = `Fix-it ticket · J$${fmt(200*def.length)} fine · Get it repaired at an auto shop within 2 minutes`;
+    }
+    show("ticket");
+  }
+  function drawCheckpoint(it, t){
+    if(it.z < -1 || it.z > FAR) return;
+    ctx.globalAlpha = fogA(Math.max(0, it.z));
+    const sd = it.x < 0 ? -1 : 1;
+    const car = drawCarBody(sd*(ROAD + 1.25), it.z + .6, .84, 1.6, "#F5F7FA", {band:"#1E3A8A", plate:"POLICE"});
+    const lb = proj(sd*(ROAD + 1.25), it.z + 1.2, .95), on = Math.floor(t/180) % 2;
+    if(lb.s > 6){ ctx.fillStyle = on ? "#FF2D3D" : "#2D6BFF"; ctx.fillRect(lb.x - lb.s*.18, lb.y - lb.s*.05, lb.s*.16, lb.s*.07); ctx.fillStyle = on ? "#2D6BFF" : "#FF2D3D"; ctx.fillRect(lb.x + lb.s*.02, lb.y - lb.s*.05, lb.s*.16, lb.s*.07); }
+    for(let k=0;k<3;k++){ const cz = it.z - .6 + k*.5; if(cz < -.5) continue; const b = proj(sd*(ROAD - .05), cz, 0), tp = proj(sd*(ROAD - .05), cz, .45), w = b.s*.1;
+      ctx.fillStyle = "#FF6A00"; ctx.beginPath(); ctx.moveTo(b.x - w, b.y); ctx.lineTo(b.x + w, b.y); ctx.lineTo(tp.x, tp.y); ctx.closePath(); ctx.fill(); ctx.fillStyle = "#fff"; ctx.fillRect(b.x - w*.55, b.y - (b.y - tp.y)*.55, w*1.1, Math.max(1, (b.y - tp.y)*.14)); }
+    const ob = proj(it.x, it.z + .2, 0), wave = !it.done;
+    drawHuman(ob.x, ob.y, ob.s*.95, {shirt:"#1E3A8A", pants:"#12202B", skin: PEOPLE_SKINS[1], hat:true, hatCol:"#12202B", hairStyle:0, shoe:"#111"}, {wave, t});
+    if(wave){ const vb = proj(it.x, it.z + .2, 1.2); ctx.fillStyle = "#C3F53C"; ctx.fillRect(vb.x - vb.s*.09, vb.y - vb.s*.2, vb.s*.18, vb.s*.3); }
+    const sg = proj(sd*(ROAD + .2), it.z - 1.2, 1.3); if(sg.s > 9 && !it.done){ ctx.fillStyle = "#1E3A8A"; ctx.fillRect(sg.x - sg.s*.4, sg.y - sg.s*.14, sg.s*.8, sg.s*.3); ctx.fillStyle = "#fff";
+      ctx.font = `700 ${Math.max(7, sg.s*.12)}px "Space Grotesk", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("🚔 POLICE · STOP", sg.x, sg.y, sg.s*.76); }
+    ctx.globalAlpha = 1;
+  }
   function breakHeadlight(){ if(headBroken || Math.random() > .35) return; headBroken = true; store.set("headBroken", true); setTimeout(() => toast("💡 One headlight bruk! Fix it at an auto shop before night"), 900); }
 
   /* ---------- Live events sent from the admin page ---------- */
@@ -3241,7 +3344,7 @@ h2{font-family:Bungee,Impact,sans-serif;font-weight:400;margin:0;font-size:clamp
     let r; try{ r = await rpc("taxi_poll", {p_name: player.name, p_pin: player.pin}); }catch(e){ return; }
     if(!r || r.status !== "ok" || !r.events) return;
     r.events.forEach(ev => {
-      if(ev.kind === "police"){ if(state === "play") offence("🚔 Police spot check!", 45, "check"); }
+      if(ev.kind === "police"){ if(state === "play") spawnCheckpoint(); }
       else if(ev.kind === "thieves"){ pendingRob = Date.now() + 90000; }
       else if(ev.kind === "roadworks"){ if(state === "play"){ const kind = Math.random() < .5 ? "patch" : "dig", lane = p.lane === 0 ? 2 : 0; items.push({type:"works", kind, lane, x: laneWX(lane), z: FAR - 5, d: kind === "patch" ? 2.4 : 5, fixAt: gt + 40, t0: gt, fixed:false, ph:0}); } }
       else if(ev.kind === "gift"){ const amt = Math.max(0, Math.min(100000, +ev.amount || 0)); cash += amt; saveCash(); banner(`🎁 +J$${fmt(amt)}`); toast(ev.message ? `🎁 ${ev.message}` : "🎁 A gift from di taxi base!"); sfx.cash && sfx.cash(); }
