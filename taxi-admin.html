@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Taxi Man · Player Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#12202B;--bg:#F4F1EA;--card:#FFFFFF;--line:#E2DDD2;--muted:#6B7280;--gold:#FFC72C;--green:#1F9D55;--red:#C8102E;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#F1EEE6;--bg:#0F1720;--card:#16212C;--line:#25323F;--muted:#9AA6B2}}
+:root[data-theme="dark"]{--ink:#F1EEE6;--bg:#0F1720;--card:#16212C;--line:#25323F;--muted:#9AA6B2}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"Space Grotesk",system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:18px 16px 40px}
+h1{font-family:Bungee,Impact,sans-serif;font-weight:400;font-size:clamp(22px,5vw,32px);margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 18px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.stat b{display:block;font-family:Bungee,Impact,sans-serif;font-weight:400;font-size:22px;margin-top:4px}
+.stat span{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+input,select,button{font:inherit;font-size:15px;border-radius:10px;border:1px solid var(--line);padding:9px 12px;background:var(--card);color:var(--ink)}
+input,select,textarea{font-size:16px}   /* iOS Safari auto-zooms into fields smaller than 16px and stays zoomed after the keyboard closes */
+input[type=search]{flex:1;min-width:180px}
+button{cursor:pointer;font-weight:700}
+button.primary{background:var(--gold);color:#12202B;border-color:#D9A900}
+button.danger{color:var(--red)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.tablewrap{overflow-x:auto;border-radius:14px;border:1px solid var(--line);background:var(--card)}
+table{border-collapse:collapse;width:100%;min-width:1150px;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);cursor:pointer;user-select:none;position:sticky;top:0;background:var(--card)}
+tr:last-child td{border-bottom:none}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;background:#9AA6B2;vertical-align:1px}
+.dot.on{background:var(--green);box-shadow:0 0 0 3px rgba(31,157,85,.2)}
+.num{font-variant-numeric:tabular-nums}
+.actions button{padding:5px 9px;font-size:12.5px}
+.actions.send button{padding:5px 7px}
+#login{max-width:380px;margin:12vh auto 0;text-align:center}
+#login input{width:100%;margin:12px 0}
+.err{color:var(--red);min-height:20px;font-weight:700;font-size:14px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.hidden{display:none!important}
+.small{font-size:12px;color:var(--muted)}
+#prog{position:fixed;inset:0;background:rgba(18,32,43,.6);display:flex;align-items:flex-start;justify-content:center;padding:14px;overflow:auto;z-index:50}
+#prog.hidden{display:none}
+.progbox{background:var(--card);border-radius:16px;padding:16px;width:min(760px,100%);box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.progbox h2{margin:0;font-size:20px}
+.pgrow{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:6px 0}
+.pgrow small{color:var(--muted);font-weight:600}
+.pgf{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:6px 0;font-weight:700;font-size:14px}
+.pgf input,.pgf select{width:170px}
+.pgh{font-weight:800;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border-radius:999px;padding:6px 11px;font-size:13px;opacity:.55;background:#E9E5DA}
+.chip.on{background:var(--green);color:#fff;opacity:1;border-color:var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="login" class="card">
+    <h1>🚕 Player Monitor</h1>
+    <p class="sub">Jamaican Taxi Man · admin only</p>
+    <input id="pass" type="password" placeholder="Admin password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="go">
+    <button class="primary" id="goBtn" style="width:100%">Log in</button>
+    <p class="err" id="err"></p>
+    <p class="small" id="cfgNote"></p>
+  </section>
+
+  <section id="dash" class="hidden">
+    <div class="bar" style="justify-content:space-between">
+      <div><h1>🚕 Taxi Man Players</h1><p class="sub" id="updated">Loading...</p><p class="small">Live events reach a player within about 10 seconds while they're playing. Thieves wait until the player stops, and they can still drive off.</p></div>
+      <div class="bar"><button id="refresh">↻ Refresh</button><button id="logout">Log out</button></div>
+    </div>
+    <div class="stats">
+      <div class="card stat"><span>Players</span><b id="sPlayers">0</b></div>
+      <div class="card stat"><span>Online now</span><b id="sOnline">0</b></div>
+      <div class="card stat"><span>Played today</span><b id="sToday">0</b></div>
+      <div class="card stat"><span>Total fares</span><b id="sFares">0</b></div>
+      <div class="card stat"><span>Total play time</span><b id="sTime">0h</b></div>
+    </div>
+    <div class="bar">
+      <input type="search" id="q" placeholder="Search player name..." autocapitalize="off" autocorrect="off" spellcheck="false">
+      <select id="filter"><option value="all">All players</option><option value="online">Online now</option><option value="today">Played today</option><option value="week">Played this week</option></select>
+    </div>
+    <div class="tablewrap"><table>
+      <thead><tr>
+        <th data-k="name">Player</th><th data-k="last_seen">Last seen</th><th data-k="cash">Cash</th><th data-k="fares">Fares</th>
+        <th data-k="parishes">Parishes</th><th data-k="vehicle">Vehicle</th><th data-k="tickets">Tickets</th><th data-k="play_seconds">Play time</th>
+        <th data-k="shifts">Shifts</th><th data-k="device">Device</th><th data-k="created_at">Joined</th><th>Send live</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+</div>
+<div id="prog" class="hidden"><div class="progbox">
+  <div class="bar" style="justify-content:space-between"><h2 id="pgTitle">Progress</h2><button id="pgClose">✕ Close</button></div>
+  <div class="bar"><button id="pgTabPts">⏪ Restore points</button><button id="pgTabEdit">🧹 Edit progress</button><button class="danger" id="pgReset">🗑 Reset ALL progress</button></div>
+  <p class="small" id="pgMsg"></p>
+  <div id="pgBody"></div>
+</div></div>
+<script>
+(() => {
+  // Use the SAME Supabase URL and anon key as in taximan.html
+  const CLOUD = { url: "https://gtfqasmqbgxjfnwlvxjp.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd0ZnFhc21xYmd4amZud2x2eGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMzM3MDEsImV4cCI6MjEwMTYwOTcwMX0.oVaSjaCq6NBQ8svaUrMTXvQJlE0yZOshb9ZVT_VTOrE" };
+  const $ = s => document.querySelector(s);
+  const fmt = n => Math.round(n || 0).toLocaleString("en-US");
+  let pass = sessionStorage.getItem("tmAdminPass") || "", players = [], sortK = "last_seen", sortDir = -1, timer = null;
+  if(!CLOUD.url || !CLOUD.key) $("#cfgNote").textContent = "Setup needed: add your Supabase URL and anon key near the bottom of this file.";
+  async function rpc(fn, args){
+    const r = await fetch(CLOUD.url.replace(/\/$/, "") + "/rest/v1/rpc/" + fn, { method:"POST",
+      headers:{ "Content-Type":"application/json", apikey: CLOUD.key, Authorization: "Bearer " + CLOUD.key }, body: JSON.stringify(args) });
+    if(!r.ok) throw new Error("HTTP " + r.status); return r.json();
+  }
+  const ago = d => { const s = (Date.now() - new Date(d))/1000; if(s < 60) return "just now"; if(s < 3600) return Math.floor(s/60) + " min ago"; if(s < 86400) return Math.floor(s/3600) + " h ago"; return Math.floor(s/86400) + " d ago"; };
+  const isOnline = p => Date.now() - new Date(p.last_seen) < 2.5*60*1000;
+  const dur = s => { s = s || 0; const h = Math.floor(s/3600), m = Math.floor(s%3600/60); return h ? `${h}h ${m}m` : `${m}m`; };
+  const esc = t => String(t == null ? "" : t).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  async function load(){
+    try{
+      const r = await rpc("taxi_admin_list", {p_pass: pass});
+      if(r.status !== "ok"){ logout("Wrong password"); return; }
+      players = r.players || []; render(); $("#updated").textContent = "Updated " + new Date().toLocaleTimeString() + " · refreshes every 30 s";
+    }catch(e){ $("#updated").textContent = "Can't reach the server. Check your internet or Supabase setup."; }
+  }
+  function render(){
+    const now = Date.now(), day = 86400000;
+    $("#sPlayers").textContent = fmt(players.length);
+    $("#sOnline").textContent = fmt(players.filter(isOnline).length);
+    $("#sToday").textContent = fmt(players.filter(p => now - new Date(p.last_seen) < day).length);
+    $("#sFares").textContent = fmt(players.reduce((a,p) => a + (p.fares || 0), 0));
+    $("#sTime").textContent = dur(players.reduce((a,p) => a + (p.play_seconds || 0), 0));
+    const q = $("#q").value.trim().toLowerCase(), f = $("#filter").value;
+    let list = players.filter(p => !q || p.name.toLowerCase().includes(q));
+    if(f === "online") list = list.filter(isOnline);
+    if(f === "today") list = list.filter(p => now - new Date(p.last_seen) < day);
+    if(f === "week") list = list.filter(p => now - new Date(p.last_seen) < 7*day);
+    list.sort((a,b) => { let x = a[sortK], y = b[sortK]; if(sortK === "last_seen" || sortK === "created_at"){ x = +new Date(x); y = +new Date(y); }
+      if(typeof x === "string") return x.localeCompare(y)*sortDir; return ((x || 0) - (y || 0))*sortDir; });
+    $("#rows").innerHTML = list.length ? list.map(p => `<tr>
+      <td><span class="dot ${isOnline(p) ? "on" : ""}"></span><b>${esc(p.name)}</b>${p.is_dev ? ' <span title="Developer" style="background:#9B5DE5;color:#fff;border-radius:6px;padding:1px 6px;font-size:11px">🛠 DEV</span>' : ""}</td>
+      <td>${ago(p.last_seen)}</td><td class="num">J$${fmt(p.cash)}</td><td class="num">${fmt(p.fares)}</td><td class="num">${p.parishes || 0}/14</td>
+      <td>${esc(p.vehicle || "-")}</td><td class="num">${p.tickets || 0}/3</td><td class="num">${dur(p.play_seconds)}</td><td class="num">${fmt(p.shifts)}</td>
+      <td>${esc(p.device || "-")}</td><td>${new Date(p.created_at).toLocaleDateString()}</td>
+      <td class="actions send"><button data-a="send" data-k="police" data-n="${esc(p.name)}" title="Police spot check">🚓 Cops</button> <button data-a="send" data-k="thieves" data-n="${esc(p.name)}" title="Thieves walk up next time they stop">🦹 Thieves</button> <button data-a="send" data-k="roadworks" data-n="${esc(p.name)}" title="Road crew ahead">🚧 Works</button> <button data-a="send" data-k="gift" data-n="${esc(p.name)}" title="Send cash">🎁 Gift</button> <button data-a="send" data-k="message" data-n="${esc(p.name)}" title="Message on their screen">💬 Msg</button></td>
+      <td class="actions"><button data-a="prog" data-n="${esc(p.name)}">📂 Progress</button> <button data-a="dev" data-v="${p.is_dev ? 0 : 1}" data-n="${esc(p.name)}">${p.is_dev ? "Remove dev" : "Make dev"}</button> <button data-a="pin" data-n="${esc(p.name)}">Reset PIN</button> <button class="danger" data-a="del" data-n="${esc(p.name)}">Delete</button></td></tr>`).join("")
+      : `<tr><td colspan="13" class="empty">${players.length ? "No players match." : "No players yet. They appear here after signing in to the game."}</td></tr>`;
+  }
+  $("#rows").addEventListener("click", async e => {
+    const b = e.target.closest("button[data-a]"); if(!b) return; const name = b.dataset.n;
+    if(b.dataset.a === "prog"){ openProg(name); return; }
+    if(b.dataset.a === "pin"){ const pin = prompt(`New 4-digit PIN for ${name}:`); if(!pin) return; if(!/^\d{4}$/.test(pin)){ alert("PIN must be 4 numbers."); return; }
+      const r = await rpc("taxi_admin_reset_pin", {p_pass: pass, p_name: name, p_new_pin: pin}); alert(r.status === "ok" ? `PIN for ${name} changed.` : "Could not change PIN."); }
+    if(b.dataset.a === "send"){
+      const kind = b.dataset.k; let amount = 0, message = null;
+      if(kind === "gift"){ const v = prompt(`How much J$ to send ${name}? (up to 100,000)`, "5000"); if(!v) return; amount = Math.max(0, Math.min(100000, parseInt(v.replace(/[^0-9]/g, "")) || 0)); message = prompt("Add a note (optional):", "Bless up from di base!") || null; }
+      if(kind === "message"){ message = prompt(`Message to show ${name}:`, "Big up yuhself, driver!"); if(!message) return; }
+      try{ const r = await rpc("taxi_admin_send", {p_pass: pass, p_name: name, p_kind: kind, p_amount: amount, p_message: message});
+        const label = {police:"🚓 Cops", thieves:"🦹 Thieves", roadworks:"🚧 Road works", gift:"🎁 Gift", message:"💬 Message"}[kind];
+        if(r.status === "ok"){ b.textContent = "✓ Sent"; setTimeout(() => render(), 1500); }
+        else alert(r.status === "no_player" ? "Player not found." : "Could not send. Did you run the live events SQL update?"); }
+      catch(e){ alert("Can't reach the server."); }
+      return;
+    }
+    if(b.dataset.a === "dev"){ const on = b.dataset.v === "1"; if(!confirm(on ? `Give ${name} developer tools (full access)?` : `Remove developer tools from ${name}?`)) return;
+      const r = await rpc("taxi_admin_set_dev", {p_pass: pass, p_name: name, p_dev: on}); if(r.status === "ok") load(); else alert("Could not change. Did you run the dev update SQL?"); }
+    if(b.dataset.a === "del"){ if(!confirm(`Delete ${name} and all their progress? This cannot be undone.`)) return;
+      const r = await rpc("taxi_admin_delete", {p_pass: pass, p_name: name}); if(r.status === "ok") load(); }
+  });
+  document.querySelectorAll("th[data-k]").forEach(th => th.addEventListener("click", () => { const k = th.dataset.k; sortDir = sortK === k ? -sortDir : -1; sortK = k; render(); }));
+  $("#q").addEventListener("input", render); $("#filter").addEventListener("change", render);
+  $("#refresh").onclick = load;
+  function logout(msg){ sessionStorage.removeItem("tmAdminPass"); pass = ""; clearInterval(timer); $("#dash").classList.add("hidden"); $("#login").classList.remove("hidden"); $("#err").textContent = msg || ""; }
+  $("#logout").onclick = () => logout();
+  /* ---- Progress: see inside an account, restore an earlier moment, edit or remove progress, reset ---- */
+  const PARISHES = ["Kingston","St. Andrew","St. Thomas","Portland","St. Mary","St. Ann","Trelawny","St. James","Hanover","Westmoreland","St. Elizabeth","Manchester","Clarendon","St. Catherine"];
+  const VEHS = [["cub50","50cc Step-Through"],["scooter","Scooter 125"],["bike","Commuter 150"],["dirt","Trail Bike 200"],["streetbike","Street Naked 400"],["cruiser","Cruiser 650"],["sportbike","Sport Bike 600"],["saloon","Classic Saloon"],["hatch","Hatchback"],["wagon","Box Wagon"],["van","Family Van"],["suv","SUV"],["racer","Rally Racer"],["bus","Minibus"],["bigbus","Country Bus"]];
+  const UPSL = [["engine","⚙️ Engine tune",3],["tank","⛽ Bigger tank",2],["susp","🛞 Suspension",2],["sound","🔊 Sound system",2]];
+  let pg = {name: "", ed: null};
+  const pgMsg = t => { $("#pgMsg").textContent = t || ""; }, pgBody = h => { $("#pgBody").innerHTML = h; };
+  const pgFail = (r, e) => { pgMsg(e ? "Can't reach the server, or the progress SQL has not been run in Supabase yet (taximan-supabase-progress-update.sql)." : r && r.status === "denied" ? "Wrong admin password." : "That did not work (" + (r && r.status) + ")."); };
+  function openProg(name){ pg.name = name; $("#pgTitle").textContent = "📂 " + name; $("#prog").classList.remove("hidden"); pgPoints(); }
+  async function pgPoints(){
+    pgMsg("Loading restore points…"); pgBody("");
+    let r; try{ r = await rpc("taxi_admin_snapshots", {p_pass: pass, p_name: pg.name}); }catch(e){ return pgFail(null, e); } if(r.status !== "ok") return pgFail(r);
+    pgMsg(r.points.length ? "Pick a moment to go back to. Restoring keeps the current progress as a restore point too, so it can be undone. If the player has the game open it reloads by itself." : "No restore points yet. They are kept automatically while the player plays: before each new parish, before each new vehicle, and about every 10 minutes.");
+    pgBody(r.points.map(p => `<div class="pgrow"><div><b>${new Date(p.taken_at).toLocaleString()} · ${esc(p.reason)}</b><br><small>J$${fmt(p.cash)} · ${p.parishes || 0}/14 parishes · ${p.owned || 0} vehicle${p.owned === 1 ? "" : "s"} · ${fmt(p.fares)} fares · ${esc(p.vehicle || "-")}</small></div><button data-snap="${p.id}">Restore</button></div>`).join(""));
+  }
+  async function pgEdit(){
+    pgMsg("Loading…"); pgBody("");
+    let r; try{ r = await rpc("taxi_admin_get", {p_pass: pass, p_name: pg.name}); }catch(e){ return pgFail(null, e); } if(r.status !== "ok") return pgFail(r);
+    const d = r.data || {}, g = (k, def) => { try{ return d["taximan-" + k] === undefined ? def : JSON.parse(d["taximan-" + k]); }catch(e){ return def; } };
+    const ed = pg.ed = {rev: r.rev, data: d, visited: new Set(g("visited", [])), owned: new Set(g("owned", ["cub50"]))}, ups = g("ups", {}) || {}, cur = g("vehicle", "cub50");
+    const num = (id, label, val, max) => `<label class="pgf"><span>${label}</span><input id="${id}" type="number" inputmode="numeric" min="0"${max !== undefined ? ` max="${max}"` : ""} value="${Math.round(+val || 0)}"></label>`;
+    pgMsg("Tap a parish or vehicle to turn it off or on, change the numbers, then Save. A restore point is kept first.");
+    pgBody(`<div class="pgh">Money and stats</div>` + num("pgCash", "Cash (J$)", g("cash", 0)) + num("pgFares", "Fares completed", g("fares", 0)) + num("pgTix", "Tickets (0-3)", g("tickets", 0), 3) + num("pgLoan", "Payment plan owed", g("loan", 0)) + num("pgOwe", "Owed to bredrin", g("owe", 0)) +
+      `<div class="pgh" id="pgPh">Parishes explored (${ed.visited.size}/14)</div><div class="chips">${PARISHES.map((n, i) => `<button type="button" class="chip ${ed.visited.has(i) ? "on" : ""}" data-p="${i}">${esc(n)}</button>`).join("")}</div>` +
+      `<div class="pgh">Vehicles owned</div><div class="chips">${VEHS.map(([id, n]) => `<button type="button" class="chip ${ed.owned.has(id) ? "on" : ""}" data-v="${id}">${esc(n)}</button>`).join("")}</div>` +
+      `<label class="pgf" style="margin-top:12px"><span>Driving</span><select id="pgVeh">${VEHS.map(([id, n]) => `<option value="${id}" ${id === cur ? "selected" : ""}>${esc(n)}</option>`).join("")}</select></label>` +
+      `<div class="pgh">Upgrades</div>` + UPSL.map(([id, n, max]) => `<label class="pgf"><span>${n}</span><select id="pgUp_${id}">${Array.from({length: max + 1}, (_, k) => `<option value="${k}" ${k === (+ups[id] || 0) ? "selected" : ""}>Level ${k}</option>`).join("")}</select></label>`).join("") +
+      `<div class="bar" style="margin-top:14px"><button class="primary" id="pgSave">💾 Save changes</button></div>`);
+  }
+  async function pgSave(){
+    const ed = pg.ed; if(!ed) return;
+    const d = Object.assign({}, ed.data), set = (k, v) => { d["taximan-" + k] = JSON.stringify(v); }, n = id => Math.max(0, Math.round(+$("#" + id).value || 0));
+    const cashV = n("pgCash"), faresV = n("pgFares"), tix = Math.min(3, n("pgTix")), loanV = n("pgLoan"), oweV = n("pgOwe");
+    const visitedArr = [...ed.visited].sort((a, b) => a - b), ownedArr = [...ed.owned]; if(!ownedArr.includes("cub50")) ownedArr.unshift("cub50");
+    let veh = $("#pgVeh").value; if(!ownedArr.includes(veh)) veh = ownedArr[0];
+    const ups = {}; UPSL.forEach(([id, , max]) => { ups[id] = Math.min(max, n("pgUp_" + id)); });
+    set("cash", cashV); set("fares", faresV); set("tickets", tix); set("loan", loanV); set("owe", oweV); set("visited", visitedArr); set("owned", ownedArr); set("vehicle", veh); set("ups", ups);
+    Object.keys(d).forEach(k => { const m = /^taximan-(hp|fuel)_(.+)$/.exec(k); if(m && !ownedArr.includes(m[2])) delete d[k]; });
+    const summ = {cash: cashV, fares: faresV, parishes: visitedArr.length, vehicle: (VEHS.find(v => v[0] === veh) || [0, veh])[1], owned: ownedArr.length, tickets: tix};
+    let r; try{ r = await rpc("taxi_admin_set", {p_pass: pass, p_name: pg.name, p_data: d, p_summary: summ}); }catch(e){ return pgFail(null, e); } if(r.status !== "ok") return pgFail(r);
+    pgMsg("✅ Saved. If the player has the game open it reloads with the new progress by itself."); load();
+  }
+  $("#pgClose").onclick = () => $("#prog").classList.add("hidden");
+  $("#pgTabPts").onclick = pgPoints; $("#pgTabEdit").onclick = pgEdit;
+  $("#pgReset").onclick = async () => { if(!confirm(`Reset ALL of ${pg.name}'s progress back to the start? A restore point is kept, so you can undo it.`)) return;
+    let r; try{ r = await rpc("taxi_admin_reset", {p_pass: pass, p_name: pg.name}); }catch(e){ return pgFail(null, e); } if(r.status !== "ok") return pgFail(r); pgMsg("🗑 Reset. Use Restore points to undo it."); load(); pgPoints(); };
+  $("#pgBody").addEventListener("click", async e => {
+    const sn = e.target.closest("[data-snap]");
+    if(sn){ if(!confirm(`Restore ${pg.name} to this point? Their current progress is kept as a restore point first.`)) return;
+      let r; try{ r = await rpc("taxi_admin_restore", {p_pass: pass, p_name: pg.name, p_id: +sn.dataset.snap}); }catch(e2){ return pgFail(null, e2); } if(r.status !== "ok") return pgFail(r); pgMsg("✅ Restored. If the player has the game open it reloads by itself."); load(); pgPoints(); return; }
+    const c = e.target.closest(".chip"); if(c && pg.ed){ const isP = c.dataset.p !== undefined, set = isP ? pg.ed.visited : pg.ed.owned, key = isP ? +c.dataset.p : c.dataset.v;
+      if(set.has(key)) set.delete(key); else set.add(key); c.classList.toggle("on", set.has(key)); if(isP) $("#pgPh").textContent = `Parishes explored (${pg.ed.visited.size}/14)`; return; }
+    if(e.target.id === "pgSave") pgSave();
+  });
+  (function(){ const vp = document.querySelector('meta[name=viewport]'), base = vp.content;
+    addEventListener("focusout", e => { if(!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName)) return;
+      setTimeout(() => { if(window.visualViewport && visualViewport.scale > 1.01){ vp.content = base + ", maximum-scale=1"; setTimeout(() => { vp.content = base; scrollTo(0, 0); }, 150); } else scrollTo(0, 0); }, 80); }); })();
+  async function login(){
+    pass = ($("#pass").value || pass).trim(); if(!pass){ $("#err").textContent = "Enter the admin password."; return; }
+    if(!CLOUD.url || !CLOUD.key){ $("#err").textContent = "Add your Supabase URL and anon key to this file first."; return; }
+    $("#err").textContent = "Checking...";
+    try{ const r = await rpc("taxi_admin_list", {p_pass: pass});
+      if(r.status !== "ok"){ $("#err").textContent = "Wrong password."; pass = ""; return; }
+      sessionStorage.setItem("tmAdminPass", pass); $("#err").textContent = ""; $("#login").classList.add("hidden"); $("#dash").classList.remove("hidden");
+      players = r.players || []; render(); $("#updated").textContent = "Updated " + new Date().toLocaleTimeString() + " · refreshes every 30 s";
+      clearInterval(timer); timer = setInterval(load, 30000);
+    }catch(e){ $("#err").textContent = "Can't reach the server. Check your Supabase URL and key."; }
+  }
+  $("#goBtn").onclick = login; $("#pass").addEventListener("keydown", e => { if(e.key === "Enter") login(); });
+  if(pass) login();
+})();
+</script>
+</body>
+</html>
